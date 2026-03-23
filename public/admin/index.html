@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - EasyRevise</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .admin-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1.5rem 0; border-bottom: 1px solid var(--border); margin-bottom: 2rem;
+        }
+        .admin-header h1 { font-size: 1.75rem; margin-bottom: 0; }
+        .admin-badge {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 0.35rem 1rem; border-radius: 20px; font-size: 0.75rem; color: #fff;
+            font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .view { display: none; }
+        .view.active { display: block; animation: fadeIn 0.4s ease; }
+        .exam-table { width: 100%; border-collapse: separate; border-spacing: 0 0.75rem; }
+        .exam-table th {
+            text-align: left; padding: 0.5rem 1rem; color: var(--text-muted);
+            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .exam-row {
+            background: var(--bg-card); border-radius: 16px; cursor: pointer;
+            transition: var(--transition); box-shadow: var(--shadow-sm);
+        }
+        .exam-row:hover { background: var(--primary-light); box-shadow: var(--shadow-md); }
+        .exam-row td { padding: 1.25rem 1rem; color: var(--text-main); }
+        .exam-row td:first-child { border-radius: 16px 0 0 16px; }
+        .exam-row td:last-child { border-radius: 0 16px 16px 0; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label {
+            display: block; margin-bottom: 0.5rem; font-weight: 600;
+            color: var(--text-main); font-size: 0.9rem;
+        }
+        .form-input, .form-select, .form-textarea {
+            width: 100%; padding: 0.85rem 1rem; background: var(--bg-input);
+            border: 1px solid var(--border); border-radius: 12px;
+            color: var(--text-main); font-size: 1rem; font-family: inherit;
+            transition: var(--transition);
+        }
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none; border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+        .form-textarea { min-height: 120px; resize: vertical; }
+        .section-card {
+            padding: 1.5rem; margin-bottom: 1rem; border-radius: 16px;
+            border: 1px solid var(--border); background: var(--bg-card);
+            transition: var(--transition); box-shadow: var(--shadow-sm);
+        }
+        .section-card:hover { border-color: var(--primary); box-shadow: var(--shadow-md); }
+        .section-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 1rem;
+        }
+        .section-type-badge {
+            padding: 0.2rem 0.8rem; border-radius: 8px; font-size: 0.7rem;
+            font-weight: 700; text-transform: uppercase;
+        }
+        .type-mc { background: #eef2ff; color: #4f46e5; }
+        .type-reading { background: #f0fdf4; color: #16a34a; }
+        .type-writing { background: #fdf2f8; color: #db2777; }
+        .type-essay { background: #fffbeb; color: #d97706; }
+        .question-item {
+            padding: 1rem 1.25rem; margin-bottom: 0.5rem; border-radius: 12px;
+            background: var(--bg-body); border: 1px solid transparent;
+            display: flex; justify-content: space-between; align-items: center;
+            transition: var(--transition);
+        }
+        .question-item:hover { border-color: var(--border); background: var(--bg-card); }
+        .q-num {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: #eef2ff; color: var(--primary);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.85rem; margin-right: 1rem; flex-shrink: 0;
+        }
+        .q-text { flex: 1; font-size: 0.95rem; color: var(--text-main); }
+        .q-correct {
+            padding: 0.2rem 0.6rem; background: #f0fdf4;
+            color: #16a34a; border-radius: 6px; font-size: 0.75rem; font-weight: 700;
+            margin-left: 0.5rem;
+        }
+        .action-bar { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 2rem; }
+        .btn-sm { padding: 0.5rem 1rem; font-size: 0.85rem; border-radius: 10px; }
+        .btn-danger { background: #fef2f2; color: #dc2626; }
+        .btn-danger:hover { background: #fee2e2; }
+        .btn-success { background: #f0fdf4; color: #16a34a; }
+        .btn-success:hover { background: #dcfce7; }
+        .btn-outline {
+            background: transparent; border: 1px solid var(--border); color: var(--text-main);
+        }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-ghost { background: var(--bg-input); color: var(--text-secondary); }
+        .btn-ghost:hover { background: var(--border); color: var(--text-main); }
+        .btn-info { background: #eff6ff; color: #2563eb; }
+        .btn-info:hover { background: #dbeafe; }
+        .option-row {
+            display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;
+        }
+        .option-row .form-input { flex: 1; }
+        .option-radio {
+            width: 20px; height: 20px; accent-color: var(--primary); cursor: pointer;
+        }
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(4px);
+            display: none; align-items: center; justify-content: center; z-index: 1000;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            width: 90%; max-width: 700px; max-height: 85vh; overflow-y: auto;
+            padding: 2.5rem; border-radius: 24px;
+        }
+        .breadcrumb {
+            display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem;
+            font-size: 0.85rem; color: var(--text-muted);
+        }
+        .breadcrumb a { color: var(--primary); text-decoration: none; cursor: pointer; }
+        .breadcrumb a:hover { text-decoration: underline; }
+        .breadcrumb span { color: var(--text-muted); }
+        .empty-state { text-align: center; padding: 4rem 2rem; color: var(--text-muted); }
+        .empty-state .emoji { font-size: 3rem; margin-bottom: 1rem; }
+        #importFileInput { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container" style="max-width: 1100px;">
+        <!-- Header -->
+        <div class="admin-header">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <a href="/" style="color: var(--text-muted); text-decoration: none; font-size: 1.25rem;">← Về trang chủ</a>
+                <h1>Admin Panel</h1>
+                <span class="admin-badge">Quản trị viên</span>
+            </div>
+        </div>
+
+        <!-- VIEW: Exam List -->
+        <div id="viewExamList" class="view active">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+                <h2 style="font-size: 1.5rem; font-weight: 700;">Quản lý Đề Thi</h2>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                    <button class="btn btn-sm btn-info" onclick="triggerImport()">Import đề JSON</button>
+                    <input type="file" id="importFileInput" accept=".json" onchange="handleImportFile(event)">
+                    <button class="btn btn-primary" onclick="showCreateExamModal()">+ Tạo đề mới</button>
+                </div>
+            </div>
+            <div id="examListContainer">
+                <div class="empty-state">
+                    <div class="emoji">📚</div>
+                    <p>Đang tải danh sách đề...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW: Exam Editor (sections + questions) -->
+        <div id="viewExamEditor" class="view">
+            <div class="breadcrumb">
+                <a onclick="showView('viewExamList')">Danh sách đề</a>
+                <span>›</span>
+                <span id="breadcrumbExamTitle">Đề thi</span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
+                <div>
+                    <h2 id="editorExamTitle" style="font-size: 1.5rem; font-weight: 700;">Tên đề</h2>
+                    <p id="editorExamMeta" style="color: var(--text-muted); font-size: 0.9rem;">Chi tiết</p>
+                </div>
+                <div class="action-bar" style="margin-bottom: 0;">
+                    <button class="btn btn-sm btn-info" onclick="exportCurrentExam()">Export JSON</button>
+                    <button class="btn btn-sm btn-outline" onclick="showEditExamMetaModal()">Sửa thông tin đề</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteCurrentExam()">Xóa đề</button>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h3 style="font-size: 1.15rem; font-weight: 600;">Các phần (Sections)</h3>
+                <button class="btn btn-sm btn-success" onclick="showAddSectionModal()">+ Thêm phần</button>
+            </div>
+            <div id="sectionListContainer"></div>
+        </div>
+
+        <!-- VIEW: Section Editor (questions list) -->
+        <div id="viewSectionEditor" class="view">
+            <div class="breadcrumb">
+                <a onclick="showView('viewExamList')">Danh sách đề</a>
+                <span>›</span>
+                <a id="breadcrumbExamLink" onclick="openExamEditor(currentExamId)">Đề thi</a>
+                <span>›</span>
+                <span id="breadcrumbSectionTitle">Phần</span>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
+                <div>
+                    <h2 id="sectionEditorTitle" style="font-size: 1.5rem; font-weight: 700;">Phần</h2>
+                    <p id="sectionEditorInstruction" style="color: var(--text-muted); font-size: 0.9rem;"></p>
+                </div>
+                <div class="action-bar" style="margin-bottom: 0;">
+                    <button class="btn btn-sm btn-outline" onclick="showEditSectionModal()">Sửa phần</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteCurrentSection()">Xóa phần</button>
+                </div>
+            </div>
+
+            <div id="passageEditorBox" style="display: none; margin-bottom: 2rem;">
+                <label style="font-weight: 600; color: var(--text-main); margin-bottom: 0.5rem; display: block;">Đoạn văn (Passage):</label>
+                <div id="passagePreview" style="padding: 1rem; background: #fffbeb; border: 1px solid #fef08a; border-radius: 12px; color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7; max-height: 200px; overflow-y: auto;"></div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h3 style="font-size: 1.15rem; font-weight: 600;">Câu hỏi (<span id="questionCountLabel">0</span>)</h3>
+                <button class="btn btn-sm btn-success" onclick="showAddQuestionModal()">+ Thêm câu hỏi</button>
+            </div>
+            <div id="questionListContainer"></div>
+        </div>
+    </div>
+
+    <!-- MODAL: Create/Edit Exam -->
+    <div id="modalExam" class="modal-overlay">
+        <div class="glass-panel modal-content">
+            <h3 id="modalExamTitle" style="font-size: 1.25rem; font-weight: 700; margin-bottom: 2rem;">Tạo đề mới</h3>
+            <div class="form-group">
+                <label>Tên đề thi</label>
+                <input id="inputExamTitle" class="form-input" placeholder="VD: Đề Cương Giữa Kỳ II - Anh 9">
+            </div>
+            <div class="form-group">
+                <label>Môn học</label>
+                <input id="inputExamSubject" class="form-input" placeholder="VD: Tiếng Anh 9">
+            </div>
+            <div class="form-group">
+                <label>Năm học</label>
+                <input id="inputExamYear" class="form-input" placeholder="VD: 2025-2026">
+            </div>
+            <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                <button class="btn btn-ghost" onclick="closeModal('modalExam')">Hủy</button>
+                <button id="btnSaveExam" class="btn btn-primary" onclick="saveExam()">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Add/Edit Section -->
+    <div id="modalSection" class="modal-overlay">
+        <div class="glass-panel modal-content">
+            <h3 id="modalSectionTitle" style="font-size: 1.25rem; font-weight: 700; margin-bottom: 2rem;">Thêm phần mới</h3>
+            <div class="form-group">
+                <label>Tiêu đề phần</label>
+                <input id="inputSectionName" class="form-input" placeholder="VD: I. LANGUAGE FOCUS">
+            </div>
+            <div class="form-group">
+                <label>Loại</label>
+                <select id="inputSectionType" class="form-select">
+                    <option value="multiple-choice">Trắc nghiệm (Multiple Choice)</option>
+                    <option value="reading">Đọc hiểu (Reading)</option>
+                    <option value="writing-choice">Chọn câu đồng nghĩa (Writing Choice)</option>
+                    <option value="writing-essay">Viết luận (Essay)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Hướng dẫn (Instruction)</label>
+                <textarea id="inputSectionInstruction" class="form-textarea" placeholder="VD: Choose the correct answer A, B, C or D..."></textarea>
+            </div>
+            <div id="passageFieldGroup" class="form-group" style="display: none;">
+                <label>Đoạn văn (Passage) — chỉ dùng cho phần Reading</label>
+                <textarea id="inputSectionPassage" class="form-textarea" style="min-height: 200px;" placeholder="Dán đoạn văn ở đây..."></textarea>
+            </div>
+            <div id="essayFieldGroup" style="display: none;">
+                <div class="form-group">
+                    <label>Đề bài (Prompt)</label>
+                    <textarea id="inputEssayPrompt" class="form-textarea" placeholder="VD: Write a paragraph about..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Ngữ cảnh (Context)</label>
+                    <textarea id="inputEssayContext" class="form-textarea" placeholder="Đoạn văn mở đầu..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Gợi ý (Cues) — mỗi dòng 1 gợi ý</label>
+                    <textarea id="inputEssayCues" class="form-textarea" placeholder="1. Firstly, I / spend time / read...&#10;2. My mum / buy / me..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Mẫu đáp án (Sample Answer)</label>
+                    <textarea id="inputEssaySample" class="form-textarea" style="min-height: 200px;" placeholder="Đoạn văn mẫu..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Giải thích</label>
+                    <textarea id="inputEssayExplanation" class="form-textarea" placeholder="Phân tích bài mẫu..."></textarea>
+                </div>
+            </div>
+            <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                <button class="btn btn-ghost" onclick="closeModal('modalSection')">Hủy</button>
+                <button id="btnSaveSection" class="btn btn-primary" onclick="saveSection()">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Add/Edit Question -->
+    <div id="modalQuestion" class="modal-overlay">
+        <div class="glass-panel modal-content">
+            <h3 id="modalQuestionTitle" style="font-size: 1.25rem; font-weight: 700; margin-bottom: 2rem;">Thêm câu hỏi</h3>
+            <div class="form-group">
+                <label>Nội dung câu hỏi</label>
+                <textarea id="inputQuestionText" class="form-textarea" placeholder="VD: He looked so funny; we couldn't help _______ at him."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Đáp án (chọn radio = đáp án đúng)</label>
+                <div class="option-row">
+                    <input type="radio" name="correctOpt" value="0" class="option-radio" checked>
+                    <span style="font-weight:700; width:20px;">A.</span>
+                    <input id="inputOptA" class="form-input" placeholder="Đáp án A">
+                </div>
+                <div class="option-row">
+                    <input type="radio" name="correctOpt" value="1" class="option-radio">
+                    <span style="font-weight:700; width:20px;">B.</span>
+                    <input id="inputOptB" class="form-input" placeholder="Đáp án B">
+                </div>
+                <div class="option-row">
+                    <input type="radio" name="correctOpt" value="2" class="option-radio">
+                    <span style="font-weight:700; width:20px;">C.</span>
+                    <input id="inputOptC" class="form-input" placeholder="Đáp án C">
+                </div>
+                <div class="option-row">
+                    <input type="radio" name="correctOpt" value="3" class="option-radio">
+                    <span style="font-weight:700; width:20px;">D.</span>
+                    <input id="inputOptD" class="form-input" placeholder="Đáp án D">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Giải thích (Explanation)</label>
+                <textarea id="inputExplanation" class="form-textarea" placeholder="Giải thích tại sao đáp án đó đúng..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Mở rộng kiến thức (Expansion)</label>
+                <textarea id="inputExpansion" class="form-textarea" placeholder="Kiến thức bổ sung, ví dụ thêm..."></textarea>
+            </div>
+            <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                <button class="btn btn-ghost" onclick="closeModal('modalQuestion')">Hủy</button>
+                <button id="btnSaveQuestion" class="btn btn-primary" onclick="saveQuestion()">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ========================
+    // State
+    // ========================
+    let currentExamId = null;
+    let currentSectionId = null;
+    let currentExamData = null;
+    let editingQuestionId = null; // null = creating new
+    let editingSectionId = null;
+    let editingExamId = null;
+
+    // ========================
+    // Navigation
+    // ========================
+    function showView(viewId) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+    }
+
+    function openModal(modalId) {
+        document.getElementById(modalId).classList.add('active');
+    }
+
+    // ========================
+    // API Helper
+    // ========================
+    async function api(url, method = 'GET', body = null) {
+        const opts = { method, headers: { 'Content-Type': 'application/json' } };
+        if (body) opts.body = JSON.stringify(body);
+        const res = await fetch(url, opts);
+        return res.json();
+    }
+
+    // ========================
+    // Exam List
+    // ========================
+    async function loadExamList() {
+        const exams = await api('/api/exams');
+        const container = document.getElementById('examListContainer');
+
+        if (!exams.length) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="emoji">📝</div>
+                    <p>Chưa có đề thi nào. Bấm <strong>"+ Tạo đề mới"</strong> để bắt đầu!</p>
+                </div>`;
+            return;
+        }
+
+        container.innerHTML = `
+            <table class="exam-table">
+                <thead>
+                    <tr>
+                        <th>Tên đề</th>
+                        <th>Môn</th>
+                        <th>Năm</th>
+                        <th>Câu hỏi</th>
+                        <th>Cập nhật</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${exams.map(e => `
+                        <tr class="exam-row" onclick="openExamEditor('${e.id}')">
+                            <td style="font-weight: 600;">${e.title}</td>
+                            <td>${e.subject}</td>
+                            <td>${e.year}</td>
+                            <td>${e.totalQuestions} câu, ${e.sectionCount} phần</td>
+                            <td style="color: var(--text-muted); font-size: 0.85rem;">${new Date(e.updatedAt).toLocaleDateString('vi-VN')}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>`;
+    }
+
+    // ========================
+    // Exam Editor
+    // ========================
+    async function openExamEditor(examId) {
+        currentExamId = examId;
+        const exam = await api(`/api/exams/${examId}`);
+        currentExamData = exam;
+
+        document.getElementById('breadcrumbExamTitle').textContent = exam.title;
+        document.getElementById('editorExamTitle').textContent = exam.title;
+        document.getElementById('editorExamMeta').textContent = `${exam.subject} — ${exam.year} — ${countQuestions(exam)} câu hỏi`;
+
+        renderSections(exam);
+        showView('viewExamEditor');
+    }
+
+    function countQuestions(exam) {
+        let c = 0;
+        exam.sections.forEach(s => { c += s.type === 'writing-essay' ? 1 : (s.questions || []).length; });
+        return c;
+    }
+
+    function getTypeBadge(type) {
+        const map = {
+            'multiple-choice': ['Trắc nghiệm', 'type-mc'],
+            'reading': ['Đọc hiểu', 'type-reading'],
+            'writing-choice': ['Chọn câu', 'type-writing'],
+            'writing-essay': ['Viết luận', 'type-essay'],
+        };
+        const [label, cls] = map[type] || ['Khác', 'type-mc'];
+        return `<span class="section-type-badge ${cls}">${label}</span>`;
+    }
+
+    function renderSections(exam) {
+        const container = document.getElementById('sectionListContainer');
+        if (!exam.sections.length) {
+            container.innerHTML = `<div class="empty-state"><div class="emoji">📂</div><p>Chưa có phần nào. Bấm <strong>"+ Thêm phần"</strong>.</p></div>`;
+            return;
+        }
+
+        container.innerHTML = exam.sections.map((s, i) => {
+            const qCount = s.type === 'writing-essay' ? '1 bài luận' : `${(s.questions || []).length} câu`;
+            return `
+                <div class="section-card" onclick="openSectionEditor('${s.id}')" style="cursor: pointer;">
+                    <div class="section-header">
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            ${getTypeBadge(s.type)}
+                            <strong style="font-size: 1.05rem;">${s.title}</strong>
+                        </div>
+                        <span style="color: var(--text-muted); font-size: 0.85rem;">${qCount}</span>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">${s.instruction || ''}</p>
+                </div>`;
+        }).join('');
+    }
+
+    // ========================
+    // Section Editor
+    // ========================
+    function openSectionEditor(sectionId) {
+        currentSectionId = sectionId;
+        const section = currentExamData.sections.find(s => s.id === sectionId);
+        if (!section) return;
+
+        document.getElementById('breadcrumbExamLink').textContent = currentExamData.title;
+        document.getElementById('breadcrumbSectionTitle').textContent = section.title;
+        document.getElementById('sectionEditorTitle').textContent = section.title;
+        document.getElementById('sectionEditorInstruction').textContent = section.instruction || '';
+
+        // Passage
+        const passageBox = document.getElementById('passageEditorBox');
+        if (section.passage) {
+            passageBox.style.display = 'block';
+            document.getElementById('passagePreview').textContent = section.passage;
+        } else {
+            passageBox.style.display = 'none';
+        }
+
+        // Questions
+        const container = document.getElementById('questionListContainer');
+        const addBtn = document.querySelector('[onclick="showAddQuestionModal()"]');
+
+        if (section.type === 'writing-essay') {
+            addBtn.style.display = 'none';
+            document.getElementById('questionCountLabel').textContent = 'Bài luận';
+            container.innerHTML = `
+                <div class="glass-panel" style="padding: 2rem;">
+                    <p style="white-space: pre-line; color: var(--text-muted); line-height: 1.8;">${section.sampleAnswer || 'Chưa có mẫu đáp án.'}</p>
+                </div>`;
+        } else {
+            addBtn.style.display = '';
+            const questions = section.questions || [];
+            document.getElementById('questionCountLabel').textContent = questions.length;
+
+            if (!questions.length) {
+                container.innerHTML = `<div class="empty-state"><div class="emoji">❓</div><p>Chưa có câu hỏi. Bấm <strong>"+ Thêm câu hỏi"</strong>.</p></div>`;
+            } else {
+                container.innerHTML = questions.map((q, i) => {
+                    const correctLabel = String.fromCharCode(65 + q.correctAnswer);
+                    return `
+                        <div class="question-item">
+                            <div style="display: flex; align-items: center; flex: 1; overflow: hidden;">
+                                <div class="q-num">${i + 1}</div>
+                                <div class="q-text" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${q.question}</div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span class="q-correct">${correctLabel}</span>
+                                <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation(); editQuestion('${q.id}')">Sửa</button>
+                                <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteQuestion('${q.id}')">Xóa</button>
+                            </div>
+                        </div>`;
+                }).join('');
+            }
+        }
+
+        showView('viewSectionEditor');
+    }
+
+    // ========================
+    // CRUD: Exam
+    // ========================
+    function showCreateExamModal() {
+        editingExamId = null;
+        document.getElementById('modalExamTitle').textContent = 'Tạo đề mới';
+        document.getElementById('inputExamTitle').value = '';
+        document.getElementById('inputExamSubject').value = '';
+        document.getElementById('inputExamYear').value = '';
+        openModal('modalExam');
+    }
+
+    function showEditExamMetaModal() {
+        editingExamId = currentExamId;
+        document.getElementById('modalExamTitle').textContent = 'Sửa thông tin đề';
+        document.getElementById('inputExamTitle').value = currentExamData.title;
+        document.getElementById('inputExamSubject').value = currentExamData.subject;
+        document.getElementById('inputExamYear').value = currentExamData.year;
+        openModal('modalExam');
+    }
+
+    async function saveExam() {
+        const body = {
+            title: document.getElementById('inputExamTitle').value,
+            subject: document.getElementById('inputExamSubject').value,
+            year: document.getElementById('inputExamYear').value,
+        };
+
+        if (editingExamId) {
+            await api(`/api/exams/${editingExamId}`, 'PUT', body);
+        } else {
+            await api('/api/exams', 'POST', body);
+        }
+
+        closeModal('modalExam');
+        loadExamList();
+        if (editingExamId) openExamEditor(editingExamId);
+    }
+
+    async function deleteCurrentExam() {
+        if (!confirm('Bạn chắc chắn muốn xóa đề thi này? Tất cả câu hỏi sẽ bị mất.')) return;
+        await api(`/api/exams/${currentExamId}`, 'DELETE');
+        showView('viewExamList');
+        loadExamList();
+    }
+
+    // ========================
+    // CRUD: Section
+    // ========================
+    function showAddSectionModal() {
+        editingSectionId = null;
+        document.getElementById('modalSectionTitle').textContent = 'Thêm phần mới';
+        document.getElementById('inputSectionName').value = '';
+        document.getElementById('inputSectionType').value = 'multiple-choice';
+        document.getElementById('inputSectionInstruction').value = '';
+        document.getElementById('inputSectionPassage').value = '';
+        document.getElementById('inputEssayPrompt').value = '';
+        document.getElementById('inputEssayContext').value = '';
+        document.getElementById('inputEssayCues').value = '';
+        document.getElementById('inputEssaySample').value = '';
+        document.getElementById('inputEssayExplanation').value = '';
+        toggleSectionTypeFields();
+        openModal('modalSection');
+    }
+
+    function showEditSectionModal() {
+        editingSectionId = currentSectionId;
+        const section = currentExamData.sections.find(s => s.id === currentSectionId);
+        document.getElementById('modalSectionTitle').textContent = 'Sửa phần';
+        document.getElementById('inputSectionName').value = section.title;
+        document.getElementById('inputSectionType').value = section.type;
+        document.getElementById('inputSectionInstruction').value = section.instruction || '';
+        document.getElementById('inputSectionPassage').value = section.passage || '';
+        document.getElementById('inputEssayPrompt').value = section.prompt || '';
+        document.getElementById('inputEssayContext').value = section.context || '';
+        document.getElementById('inputEssayCues').value = (section.cues || []).join('\n');
+        document.getElementById('inputEssaySample').value = section.sampleAnswer || '';
+        document.getElementById('inputEssayExplanation').value = section.explanation || '';
+        toggleSectionTypeFields();
+        openModal('modalSection');
+    }
+
+    document.getElementById('inputSectionType').addEventListener('change', toggleSectionTypeFields);
+
+    function toggleSectionTypeFields() {
+        const type = document.getElementById('inputSectionType').value;
+        document.getElementById('passageFieldGroup').style.display = type === 'reading' ? 'block' : 'none';
+        document.getElementById('essayFieldGroup').style.display = type === 'writing-essay' ? 'block' : 'none';
+    }
+
+    async function saveSection() {
+        const type = document.getElementById('inputSectionType').value;
+        const body = {
+            title: document.getElementById('inputSectionName').value,
+            type: type,
+            instruction: document.getElementById('inputSectionInstruction').value,
+        };
+
+        if (type === 'reading') {
+            body.passage = document.getElementById('inputSectionPassage').value;
+        }
+        if (type === 'writing-essay') {
+            body.prompt = document.getElementById('inputEssayPrompt').value;
+            body.context = document.getElementById('inputEssayContext').value;
+            body.cues = document.getElementById('inputEssayCues').value.split('\n').filter(c => c.trim());
+            body.sampleAnswer = document.getElementById('inputEssaySample').value;
+            body.explanation = document.getElementById('inputEssayExplanation').value;
+        }
+
+        if (editingSectionId) {
+            await api(`/api/exams/${currentExamId}/sections/${editingSectionId}`, 'PUT', body);
+        } else {
+            await api(`/api/exams/${currentExamId}/sections`, 'POST', body);
+        }
+
+        closeModal('modalSection');
+        await openExamEditor(currentExamId);
+    }
+
+    async function deleteCurrentSection() {
+        if (!confirm('Xóa phần này? Tất cả câu hỏi trong phần sẽ bị mất.')) return;
+        await api(`/api/exams/${currentExamId}/sections/${currentSectionId}`, 'DELETE');
+        await openExamEditor(currentExamId);
+    }
+
+    // ========================
+    // CRUD: Question
+    // ========================
+    function showAddQuestionModal() {
+        editingQuestionId = null;
+        document.getElementById('modalQuestionTitle').textContent = 'Thêm câu hỏi';
+        document.getElementById('inputQuestionText').value = '';
+        document.getElementById('inputOptA').value = '';
+        document.getElementById('inputOptB').value = '';
+        document.getElementById('inputOptC').value = '';
+        document.getElementById('inputOptD').value = '';
+        document.getElementById('inputExplanation').value = '';
+        document.getElementById('inputExpansion').value = '';
+        document.querySelector('input[name="correctOpt"][value="0"]').checked = true;
+        openModal('modalQuestion');
+    }
+
+    function editQuestion(qId) {
+        editingQuestionId = qId;
+        const section = currentExamData.sections.find(s => s.id === currentSectionId);
+        const q = section.questions.find(q => String(q.id) === String(qId));
+        if (!q) return;
+
+        document.getElementById('modalQuestionTitle').textContent = 'Sửa câu hỏi';
+        document.getElementById('inputQuestionText').value = q.question;
+        document.getElementById('inputOptA').value = q.options[0] || '';
+        document.getElementById('inputOptB').value = q.options[1] || '';
+        document.getElementById('inputOptC').value = q.options[2] || '';
+        document.getElementById('inputOptD').value = q.options[3] || '';
+        document.getElementById('inputExplanation').value = q.explanation || '';
+        document.getElementById('inputExpansion').value = q.expansion || '';
+        const radio = document.querySelector(`input[name="correctOpt"][value="${q.correctAnswer}"]`);
+        if (radio) radio.checked = true;
+        openModal('modalQuestion');
+    }
+
+    async function saveQuestion() {
+        const correctAnswer = parseInt(document.querySelector('input[name="correctOpt"]:checked').value);
+        const body = {
+            question: document.getElementById('inputQuestionText').value,
+            options: [
+                document.getElementById('inputOptA').value,
+                document.getElementById('inputOptB').value,
+                document.getElementById('inputOptC').value,
+                document.getElementById('inputOptD').value,
+            ],
+            correctAnswer: correctAnswer,
+            explanation: document.getElementById('inputExplanation').value,
+            expansion: document.getElementById('inputExpansion').value,
+        };
+
+        if (editingQuestionId) {
+            await api(`/api/exams/${currentExamId}/sections/${currentSectionId}/questions/${editingQuestionId}`, 'PUT', body);
+        } else {
+            await api(`/api/exams/${currentExamId}/sections/${currentSectionId}/questions`, 'POST', body);
+        }
+
+        closeModal('modalQuestion');
+        // Refresh data
+        currentExamData = await api(`/api/exams/${currentExamId}`);
+        openSectionEditor(currentSectionId);
+    }
+
+    async function deleteQuestion(qId) {
+        if (!confirm('Xóa câu hỏi này?')) return;
+        await api(`/api/exams/${currentExamId}/sections/${currentSectionId}/questions/${qId}`, 'DELETE');
+        currentExamData = await api(`/api/exams/${currentExamId}`);
+        openSectionEditor(currentSectionId);
+    }
+
+    // ========================
+    // Export / Import
+    // ========================
+    function exportCurrentExam() {
+        window.open(`/api/exams/${currentExamId}/export`, '_blank');
+    }
+
+    function triggerImport() {
+        document.getElementById('importFileInput').click();
+    }
+
+    async function handleImportFile(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        try {
+            const text = await file.text();
+            const data = JSON.parse(text);
+            const result = await api('/api/exams/import', 'POST', data);
+            if (result.error) {
+                alert('Import thất bại: ' + result.error);
+            } else {
+                alert('Import thành công: ' + result.title);
+                loadExamList();
+            }
+        } catch (err) {
+            alert('File không hợp lệ: ' + err.message);
+        }
+        event.target.value = ''; // Reset file input
+    }
+
+    // ========================
+    // Init
+    // ========================
+    loadExamList();
+    </script>
+</body>
+</html>

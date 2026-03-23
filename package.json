@@ -1,0 +1,15 @@
+{
+  "name": "easyrevise",
+  "version": "1.0.0",
+  "description": "Hệ thống ôn tập tiếng Anh với trang Admin quản lý đề thi",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "seed": "node seed.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "uuid": "^9.0.0"
+  }
+}
