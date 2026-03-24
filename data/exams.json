@@ -897,10 +897,400 @@
           ],
           "sampleAnswer": "Ninh Thuan is a province in central Viet Nam. It has recently become a popular destination for tourists.\n\nSea lovers can swim in the sunny white-sand beaches in Vinh Hy Bay. Those who enjoy nature can visit Nam Cuong sandhill, which is especially beautiful at dawn or sunset. Ninh Thuan is also popular with the unique culture and art of its Cham minority ethnic group. You can attend one of their many festivals during the year. Ninh Thuan offers visitors a wide range of homestays and hotels. There are so many choices that it is up to you.",
           "explanation": "Đoạn văn giới thiệu du lịch Ninh Thuận với các điểm: bãi biển (Vịnh Hy), thiên nhiên (đồi cát Nam Cương), văn hóa Chăm, lễ hội, và chỗ ở. Sử dụng thì hiện tại đơn vì mô tả sự thật/thông tin chung."
+        },
+        {
+          "id": "23d23e20-4d0d-46c5-bb79-e2d97ee25c0e",
+          "title": "Phần mới",
+          "instruction": "",
+          "type": "free-form",
+          "passage": null,
+          "questions": [],
+          "prompt": null,
+          "context": null,
+          "cues": [],
+          "sampleAnswer": null,
+          "explanation": null,
+          "showInstruction": false,
+          "showCues": false
         }
       ],
       "createdAt": "2026-03-23T11:42:15.249Z",
-      "updatedAt": "2026-03-23T12:05:27.666Z"
+      "updatedAt": "2026-03-24T05:48:41.660Z",
+      "accessCodes": [
+        {
+          "code": "QETXT9",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "Y8MAWT",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "J6UK6M",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "OFJH7U",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "AN3520",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "GD5JWB",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "5UG9FV",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "TKQIO1",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "R4GTZ5",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "MQF5G5",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "VRNJ0E",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "XHAKY5",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "YFC96B",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "HTLHBG",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "1Z70YZ",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "1CX503",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "AGLZD2",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "C3BKQM",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "64335A",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "ESA19J",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "5L746C",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "KFHLNR",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "15RP7D",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "L6SH7E",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "V1STRT",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "3GO9WK",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "HUGNG9",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "3HWFJ5",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "F82UY9",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "9CI3IN",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "ZG9CIB",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "AS2TGD",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "TCR0CU",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "S31VR7",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "K2XOGE",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "FFO3NZ",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "7MAEI3",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "551W72",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "RBLQ4H",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "ZZ5K6L",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "UHLBK6",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "UTXKM7",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "OGVOJK",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "190MI1",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "22O09V",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "OO6HER",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "CASDTU",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "WRCGP3",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "LYXPYN",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "MACYEY",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "DCCMTC",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "BX1T2J",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "BWVI68",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "O9V2OO",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "ZAH73F",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "HCG80G",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "A4AZ9P",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "S4OT6G",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "7U0J1P",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "UJMULI",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "EO909H",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        },
+        {
+          "code": "PZXION",
+          "type": "reusable",
+          "usedBy": [],
+          "createdAt": "2026-03-24T05:47:56.060Z"
+        }
+      ],
+      "requireCode": false
     }
   ]
 }

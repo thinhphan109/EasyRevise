@@ -6,6 +6,8 @@ const { v4: uuidv4 } = require('uuid');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DATA_FILE = path.join(__dirname, 'data', 'exams.json');
+const USERS_FILE = path.join(__dirname, 'data', 'users.json');
+const SUBJECTS_FILE = path.join(__dirname, 'data', 'subjects.json');
 
 // Middleware
 app.use(express.json({ limit: '10mb' }));
@@ -16,345 +18,78 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ========================
 function readData() {
     try {
-        if (!fs.existsSync(DATA_FILE)) {
-            fs.writeFileSync(DATA_FILE, JSON.stringify({ exams: [] }, null, 2));
-        }
-        const raw = fs.readFileSync(DATA_FILE, 'utf-8');
-        return JSON.parse(raw);
-    } catch (err) {
-        console.error('Error reading data:', err);
-        return { exams: [] };
-    }
+        if (!fs.existsSync(DATA_FILE)) fs.writeFileSync(DATA_FILE, JSON.stringify({ exams: [] }, null, 2));
+        return JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+    } catch (err) { return { exams: [] }; }
 }
 
-function writeData(data) {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
+function writeData(data) { fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8'); }
+
+function readUsers() {
+    try {
+        if (!fs.existsSync(USERS_FILE)) fs.writeFileSync(USERS_FILE, JSON.stringify({ users: [] }, null, 2));
+        return JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
+    } catch (err) { return { users: [] }; }
 }
 
-// ========================
-// API Routes - Exams
-// ========================
+function writeUsers(data) { fs.writeFileSync(USERS_FILE, JSON.stringify(data, null, 2), 'utf-8'); }
 
-// GET all exams (summary only, no questions)
-app.get('/api/exams', (req, res) => {
-    const data = readData();
-    const summaries = data.exams.map(exam => ({
-        id: exam.id,
-        title: exam.title,
-        subject: exam.subject,
-        year: exam.year,
-        createdAt: exam.createdAt,
-        updatedAt: exam.updatedAt,
-        totalQuestions: countQuestions(exam),
-        totalEssays: exam.sections.filter(s => s.type === 'writing-essay').length,
-        sectionCount: exam.sections.length
-    }));
-    res.json(summaries);
-});
+function readSubjects() {
+    try {
+        if (!fs.existsSync(SUBJECTS_FILE)) fs.writeFileSync(SUBJECTS_FILE, JSON.stringify({ subjects: [] }, null, 2));
+        return JSON.parse(fs.readFileSync(SUBJECTS_FILE, 'utf-8'));
+    } catch (err) { return { subjects: [] }; }
+}
 
-// GET single exam (full data with questions)
-app.get('/api/exams/:id', (req, res) => {
-    const data = readData();
-    const exam = data.exams.find(e => e.id === req.params.id);
-    if (!exam) return res.status(404).json({ error: 'Exam not found' });
-    res.json(exam);
-});
+function writeSubjects(data) { fs.writeFileSync(SUBJECTS_FILE, JSON.stringify(data, null, 2), 'utf-8'); }
 
-// POST create new exam
-app.post('/api/exams', (req, res) => {
-    const data = readData();
-    const newExam = {
-        id: uuidv4(),
-        title: req.body.title || 'Đề mới',
-        subject: req.body.subject || 'Tiếng Anh',
-        year: req.body.year || new Date().getFullYear().toString(),
-        sections: req.body.sections || [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-    };
-    data.exams.push(newExam);
-    writeData(data);
-    res.status(201).json(newExam);
-});
+function simpleHash(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) { hash = ((hash << 5) - hash) + str.charCodeAt(i); hash |= 0; }
+    return 'h' + Math.abs(hash).toString(36) + str.length;
+}
 
-// PUT update exam metadata
-app.put('/api/exams/:id', (req, res) => {
-    const data = readData();
-    const index = data.exams.findIndex(e => e.id === req.params.id);
-    if (index === -1) return res.status(404).json({ error: 'Exam not found' });
+function generateToken(userId) {
+    return Buffer.from(`${userId}:${Date.now()}:${Math.random().toString(36).slice(2)}`).toString('base64');
+}
 
-    data.exams[index] = {
-        ...data.exams[index],
-        title: req.body.title ?? data.exams[index].title,
-        subject: req.body.subject ?? data.exams[index].subject,
-        year: req.body.year ?? data.exams[index].year,
-        sections: req.body.sections ?? data.exams[index].sections,
-        updatedAt: new Date().toISOString()
-    };
-    writeData(data);
-    res.json(data.exams[index]);
-});
-
-// DELETE exam
-app.delete('/api/exams/:id', (req, res) => {
-    const data = readData();
-    const index = data.exams.findIndex(e => e.id === req.params.id);
-    if (index === -1) return res.status(404).json({ error: 'Exam not found' });
-    data.exams.splice(index, 1);
-    writeData(data);
-    res.json({ success: true });
-});
-
-// ========================
-// API Routes - Sections
-// ========================
-
-// POST add section to exam
-app.post('/api/exams/:id/sections', (req, res) => {
-    const data = readData();
-    const exam = data.exams.find(e => e.id === req.params.id);
-    if (!exam) return res.status(404).json({ error: 'Exam not found' });
-
-    const newSection = {
-        id: req.body.id || uuidv4(),
-        title: req.body.title || 'Phần mới',
-        instruction: req.body.instruction || '',
-        type: req.body.type || 'multiple-choice',
-        passage: req.body.passage || null,
-        questions: req.body.questions || [],
-        // For essay type
-        prompt: req.body.prompt || null,
-        context: req.body.context || null,
-        cues: req.body.cues || [],
-        sampleAnswer: req.body.sampleAnswer || null,
-        explanation: req.body.explanation || null
-    };
-
-    exam.sections.push(newSection);
-    exam.updatedAt = new Date().toISOString();
-    writeData(data);
-    res.status(201).json(newSection);
-});
-
-// PUT update section
-app.put('/api/exams/:examId/sections/:sectionId', (req, res) => {
-    const data = readData();
-    const exam = data.exams.find(e => e.id === req.params.examId);
-    if (!exam) return res.status(404).json({ error: 'Exam not found' });
-
-    const sIndex = exam.sections.findIndex(s => s.id === req.params.sectionId);
-    if (sIndex === -1) return res.status(404).json({ error: 'Section not found' });
-
-    exam.sections[sIndex] = { ...exam.sections[sIndex], ...req.body };
-    exam.updatedAt = new Date().toISOString();
-    writeData(data);
-    res.json(exam.sections[sIndex]);
-});
-
-// DELETE section
-app.delete('/api/exams/:examId/sections/:sectionId', (req, res) => {
-    const data = readData();
-    const exam = data.exams.find(e => e.id === req.params.examId);
-    if (!exam) return res.status(404).json({ error: 'Exam not found' });
-
-    exam.sections = exam.sections.filter(s => s.id !== req.params.sectionId);
-    exam.updatedAt = new Date().toISOString();
-    writeData(data);
-    res.json({ success: true });
-});
-
-// ========================
-// API Routes - Questions
-// ========================
-
-// POST add question to a section
-app.post('/api/exams/:examId/sections/:sectionId/questions', (req, res) => {
-    const data = readData();
-    const exam = data.exams.find(e => e.id === req.params.examId);
-    if (!exam) return res.status(404).json({ error: 'Exam not found' });
-
-    const section = exam.sections.find(s => s.id === req.params.sectionId);
-    if (!section) return res.status(404).json({ error: 'Section not found' });
-
-    const newQ = {
-        id: req.body.id || Date.now(),
-        question: req.body.question || '',
-        options: req.body.options || ['', '', '', ''],
-        correctAnswer: req.body.correctAnswer ?? 0,
-        explanation: req.body.explanation || '',
-        expansion: req.body.expansion || ''
-    };
-
-    section.questions.push(newQ);
-    exam.updatedAt = new Date().toISOString();
-    writeData(data);
-    res.status(201).json(newQ);
-});
-
-// PUT update question
-app.put('/api/exams/:examId/sections/:sectionId/questions/:questionId', (req, res) => {
-    const data = readData();
-    const exam = data.exams.find(e => e.id === req.params.examId);
-    if (!exam) return res.status(404).json({ error: 'Exam not found' });
-
-    const section = exam.sections.find(s => s.id === req.params.sectionId);
-    if (!section) return res.status(404).json({ error: 'Section not found' });
-
-    const qIndex = section.questions.findIndex(q => String(q.id) === String(req.params.questionId));
-    if (qIndex === -1) return res.status(404).json({ error: 'Question not found' });
-
-    section.questions[qIndex] = { ...section.questions[qIndex], ...req.body };
-    exam.updatedAt = new Date().toISOString();
-    writeData(data);
-    res.json(section.questions[qIndex]);
-});
-
-// DELETE question
-app.delete('/api/exams/:examId/sections/:sectionId/questions/:questionId', (req, res) => {
-    const data = readData();
-    const exam = data.exams.find(e => e.id === req.params.examId);
-    if (!exam) return res.status(404).json({ error: 'Exam not found' });
-
-    const section = exam.sections.find(s => s.id === req.params.sectionId);
-    if (!section) return res.status(404).json({ error: 'Section not found' });
-
-    section.questions = section.questions.filter(q => String(q.id) !== String(req.params.questionId));
-    exam.updatedAt = new Date().toISOString();
-    writeData(data);
-    res.json({ success: true });
-});
-
-// ========================
-// Helper
-// ========================
 function countQuestions(exam) {
     let count = 0;
     exam.sections.forEach(s => {
         if (s.type === 'writing-essay') count += 1;
+        else if (s.type === 'free-form') count += (s.questions || []).length;
         else count += (s.questions || []).length;
     });
     return count;
 }
 
 // ========================
-// Export / Import
+// Auth Middleware
 // ========================
-
-// GET export exam as JSON
-app.get('/api/exams/:id/export', (req, res) => {
-    const data = readData();
-    const exam = data.exams.find(e => e.id === req.params.id);
-    if (!exam) return res.status(404).json({ error: 'Exam not found' });
-
-    const exportData = {
-        _format: 'easyrevise-exam-v1',
-        _exportedAt: new Date().toISOString(),
-        exam: {
-            title: exam.title,
-            subject: exam.subject,
-            year: exam.year,
-            sections: exam.sections
-        }
-    };
-
-    res.setHeader('Content-Type', 'application/json');
-    const safeName = exam.title.replace(/[^a-zA-Z0-9 ]/g, '_').trim() || 'exam';
-    res.setHeader('Content-Disposition', `attachment; filename="${safeName}.json"; filename*=UTF-8''${encodeURIComponent(exam.title)}.json`);
-    res.json(exportData);
-});
-
-// POST import exam from JSON
-app.post('/api/exams/import', (req, res) => {
-    const data = readData();
-    const importData = req.body;
-
-    // Validate format
-    if (!importData._format || importData._format !== 'easyrevise-exam-v1') {
-        return res.status(400).json({ error: 'Invalid import format. Must be easyrevise-exam-v1.' });
-    }
-
-    if (!importData.exam || !importData.exam.sections) {
-        return res.status(400).json({ error: 'Missing exam data or sections.' });
-    }
-
-    const now = new Date().toISOString();
-    const newExam = {
-        id: uuidv4(),
-        title: importData.exam.title || 'Đề import',
-        subject: importData.exam.subject || 'Tiếng Anh',
-        year: importData.exam.year || '',
-        sections: importData.exam.sections.map(s => ({
-            ...s,
-            id: s.id || uuidv4()
-        })),
-        createdAt: now,
-        updatedAt: now
-    };
-
-    data.exams.push(newExam);
-    writeData(data);
-    res.status(201).json(newExam);
-});
-
-// GET export all exams
-app.get('/api/export-all', (req, res) => {
-    const data = readData();
-    res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Content-Disposition', 'attachment; filename="easyrevise-backup.json"');
-    res.json({ _format: 'easyrevise-backup-v1', _exportedAt: new Date().toISOString(), exams: data.exams });
-});
-
-// ========================
-// User Auth System
-// ========================
-const USERS_FILE = path.join(__dirname, 'data', 'users.json');
-
-function readUsers() {
-    try {
-        if (!fs.existsSync(USERS_FILE)) {
-            fs.writeFileSync(USERS_FILE, JSON.stringify({ users: [] }, null, 2));
-        }
-        return JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
-    } catch (err) {
-        return { users: [] };
-    }
-}
-
-function writeUsers(data) {
-    fs.writeFileSync(USERS_FILE, JSON.stringify(data, null, 2), 'utf-8');
-}
-
-// Simple hash (not crypto-grade, suitable for this app)
-function simpleHash(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-        const chr = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + chr;
-        hash |= 0;
-    }
-    return 'h' + Math.abs(hash).toString(36) + str.length;
-}
-
-// Simple token
-function generateToken(userId) {
-    return Buffer.from(`${userId}:${Date.now()}:${Math.random().toString(36).slice(2)}`).toString('base64');
-}
-
-// Auth middleware
 function authMiddleware(req, res, next) {
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'Chưa đăng nhập' });
-    }
+    if (!authHeader || !authHeader.startsWith('Bearer ')) return res.status(401).json({ error: 'Chưa đăng nhập' });
     const token = authHeader.split(' ')[1];
-    const usersData = readUsers();
-    const user = usersData.users.find(u => u.token === token);
+    const user = readUsers().users.find(u => u.token === token);
     if (!user) return res.status(401).json({ error: 'Token không hợp lệ' });
     req.user = user;
     next();
 }
 
-// POST register
+function adminOnly(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) return res.status(401).json({ error: 'Chưa đăng nhập' });
+    const token = authHeader.split(' ')[1];
+    const user = readUsers().users.find(u => u.token === token);
+    if (!user) return res.status(401).json({ error: 'Token không hợp lệ' });
+    if (user.role !== 'admin') return res.status(403).json({ error: 'Không có quyền admin' });
+    req.user = user;
+    next();
+}
+
+// ========================
+// Auth Routes
+// ========================
 app.post('/api/auth/register', (req, res) => {
     const { username, password, displayName } = req.body;
     if (!username || !password) return res.status(400).json({ error: 'Thiếu tên đăng nhập hoặc mật khẩu' });
@@ -362,84 +97,67 @@ app.post('/api/auth/register', (req, res) => {
     if (password.length < 4) return res.status(400).json({ error: 'Mật khẩu phải từ 4 ký tự' });
 
     const usersData = readUsers();
-    if (usersData.users.find(u => u.username === username)) {
-        return res.status(400).json({ error: 'Tên đăng nhập đã tồn tại' });
-    }
+    if (usersData.users.find(u => u.username === username)) return res.status(400).json({ error: 'Tên đăng nhập đã tồn tại' });
 
     const token = generateToken(uuidv4());
     const newUser = {
-        id: uuidv4(),
-        username,
-        passwordHash: simpleHash(password),
+        id: uuidv4(), username, passwordHash: simpleHash(password),
         displayName: displayName || username,
-        role: usersData.users.length === 0 ? 'admin' : 'student', // First user = admin
-        token,
-        history: [],
-        createdAt: new Date().toISOString()
+        role: usersData.users.length === 0 ? 'admin' : 'student',
+        token, history: [], createdAt: new Date().toISOString()
     };
-
     usersData.users.push(newUser);
     writeUsers(usersData);
-
-    res.status(201).json({
-        id: newUser.id,
-        username: newUser.username,
-        displayName: newUser.displayName,
-        role: newUser.role,
-        token
-    });
+    res.status(201).json({ id: newUser.id, username: newUser.username, displayName: newUser.displayName, role: newUser.role, token });
 });
 
-// POST login
 app.post('/api/auth/login', (req, res) => {
     const { username, password } = req.body;
     const usersData = readUsers();
     const user = usersData.users.find(u => u.username === username);
-
-    if (!user || user.passwordHash !== simpleHash(password)) {
-        return res.status(401).json({ error: 'Sai tên đăng nhập hoặc mật khẩu' });
-    }
-
-    // Refresh token
+    if (!user || user.passwordHash !== simpleHash(password)) return res.status(401).json({ error: 'Sai tên đăng nhập hoặc mật khẩu' });
     user.token = generateToken(user.id);
     writeUsers(usersData);
-
-    res.json({
-        id: user.id,
-        username: user.username,
-        displayName: user.displayName,
-        role: user.role,
-        token: user.token
-    });
+    res.json({ id: user.id, username: user.username, displayName: user.displayName, role: user.role, token: user.token });
 });
 
-// GET current user
 app.get('/api/auth/me', authMiddleware, (req, res) => {
-    res.json({
-        id: req.user.id,
-        username: req.user.username,
-        displayName: req.user.displayName,
-        role: req.user.role
-    });
+    res.json({ id: req.user.id, username: req.user.username, displayName: req.user.displayName, role: req.user.role });
 });
 
-// GET all users (admin only)
-app.get('/api/users', authMiddleware, (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Không có quyền' });
+// ========================
+// User Management (Admin)
+// ========================
+app.get('/api/users', adminOnly, (req, res) => {
     const usersData = readUsers();
     res.json(usersData.users.map(u => ({
-        id: u.id,
-        username: u.username,
-        displayName: u.displayName,
-        role: u.role,
-        historyCount: (u.history || []).length,
-        createdAt: u.createdAt
+        id: u.id, username: u.username, displayName: u.displayName,
+        role: u.role, historyCount: (u.history || []).length, createdAt: u.createdAt
     })));
 });
 
-// DELETE user (admin only)
-app.delete('/api/users/:id', authMiddleware, (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Không có quyền' });
+app.put('/api/users/:id', adminOnly, (req, res) => {
+    const usersData = readUsers();
+    const user = usersData.users.find(u => u.id === req.params.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (req.body.role) user.role = req.body.role;
+    if (req.body.displayName) user.displayName = req.body.displayName;
+    writeUsers(usersData);
+    res.json({ success: true });
+});
+
+app.put('/api/users/:id/reset-password', adminOnly, (req, res) => {
+    const usersData = readUsers();
+    const user = usersData.users.find(u => u.id === req.params.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    const newPassword = req.body.password || '1234';
+    user.passwordHash = simpleHash(newPassword);
+    user.token = generateToken(user.id); // invalidate old sessions
+    writeUsers(usersData);
+    res.json({ success: true, newPassword });
+});
+
+app.delete('/api/users/:id', adminOnly, (req, res) => {
     const usersData = readUsers();
     usersData.users = usersData.users.filter(u => u.id !== req.params.id);
     writeUsers(usersData);
@@ -447,42 +165,345 @@ app.delete('/api/users/:id', authMiddleware, (req, res) => {
 });
 
 // ========================
+// Subjects (Admin)
+// ========================
+app.get('/api/subjects', (req, res) => { res.json(readSubjects().subjects); });
+
+app.post('/api/subjects', adminOnly, (req, res) => {
+    const data = readSubjects();
+    const subject = { id: uuidv4(), name: req.body.name || '', icon: req.body.icon || '📚' };
+    data.subjects.push(subject);
+    writeSubjects(data);
+    res.status(201).json(subject);
+});
+
+app.put('/api/subjects/:id', adminOnly, (req, res) => {
+    const data = readSubjects();
+    const s = data.subjects.find(s => s.id === req.params.id);
+    if (!s) return res.status(404).json({ error: 'Subject not found' });
+    if (req.body.name) s.name = req.body.name;
+    if (req.body.icon) s.icon = req.body.icon;
+    writeSubjects(data);
+    res.json(s);
+});
+
+app.delete('/api/subjects/:id', adminOnly, (req, res) => {
+    const data = readSubjects();
+    data.subjects = data.subjects.filter(s => s.id !== req.params.id);
+    writeSubjects(data);
+    res.json({ success: true });
+});
+
+// ========================
+// Exam CRUD
+// ========================
+app.get('/api/exams', (req, res) => {
+    const data = readData();
+    res.json(data.exams.map(exam => ({
+        id: exam.id, title: exam.title, subject: exam.subject, year: exam.year,
+        createdAt: exam.createdAt, updatedAt: exam.updatedAt,
+        totalQuestions: countQuestions(exam),
+        totalEssays: exam.sections.filter(s => s.type === 'writing-essay').length,
+        sectionCount: exam.sections.length,
+        requireCode: exam.requireCode || false
+    })));
+});
+
+app.get('/api/exams/:id', (req, res) => {
+    const data = readData();
+    const exam = data.exams.find(e => e.id === req.params.id);
+    if (!exam) return res.status(404).json({ error: 'Exam not found' });
+
+    // If exam requires code, check if user has access
+    if (exam.requireCode) {
+        const codeHeader = req.headers['x-access-code'];
+        const authHeader = req.headers.authorization;
+        let isAdmin = false;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            const user = readUsers().users.find(u => u.token === authHeader.split(' ')[1]);
+            if (user && user.role === 'admin') isAdmin = true;
+        }
+        if (!isAdmin && codeHeader) {
+            const code = exam.accessCodes?.find(c => c.code === codeHeader);
+            if (!code) return res.status(403).json({ error: 'Mã kích hoạt không đúng', requireCode: true });
+        } else if (!isAdmin && !codeHeader) {
+            // Return limited data
+            return res.json({
+                id: exam.id, title: exam.title, subject: exam.subject, year: exam.year,
+                requireCode: true, sections: [], totalQuestions: countQuestions(exam)
+            });
+        }
+    }
+    res.json(exam);
+});
+
+app.post('/api/exams', adminOnly, (req, res) => {
+    const data = readData();
+    const newExam = {
+        id: uuidv4(), title: req.body.title || 'Đề mới',
+        subject: req.body.subject || 'Tiếng Anh', year: req.body.year || new Date().getFullYear().toString(),
+        sections: req.body.sections || [], requireCode: false, accessCodes: [],
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
+    };
+    data.exams.push(newExam);
+    writeData(data);
+    res.status(201).json(newExam);
+});
+
+app.put('/api/exams/:id', adminOnly, (req, res) => {
+    const data = readData();
+    const index = data.exams.findIndex(e => e.id === req.params.id);
+    if (index === -1) return res.status(404).json({ error: 'Exam not found' });
+    data.exams[index] = {
+        ...data.exams[index],
+        title: req.body.title ?? data.exams[index].title,
+        subject: req.body.subject ?? data.exams[index].subject,
+        year: req.body.year ?? data.exams[index].year,
+        sections: req.body.sections ?? data.exams[index].sections,
+        requireCode: req.body.requireCode ?? data.exams[index].requireCode,
+        accessCodes: req.body.accessCodes ?? data.exams[index].accessCodes,
+        updatedAt: new Date().toISOString()
+    };
+    writeData(data);
+    res.json(data.exams[index]);
+});
+
+app.delete('/api/exams/:id', adminOnly, (req, res) => {
+    const data = readData();
+    data.exams = data.exams.filter(e => e.id !== req.params.id);
+    writeData(data);
+    res.json({ success: true });
+});
+
+// ========================
+// Section CRUD (Admin)
+// ========================
+app.post('/api/exams/:id/sections', adminOnly, (req, res) => {
+    const data = readData();
+    const exam = data.exams.find(e => e.id === req.params.id);
+    if (!exam) return res.status(404).json({ error: 'Exam not found' });
+    const newSection = {
+        id: req.body.id || uuidv4(), title: req.body.title || 'Phần mới',
+        instruction: req.body.instruction || '', type: req.body.type || 'multiple-choice',
+        passage: req.body.passage || null, questions: req.body.questions || [],
+        prompt: req.body.prompt || null, context: req.body.context || null,
+        cues: req.body.cues || [], sampleAnswer: req.body.sampleAnswer || null,
+        explanation: req.body.explanation || null,
+        showInstruction: req.body.showInstruction ?? true, showCues: req.body.showCues ?? true
+    };
+    exam.sections.push(newSection);
+    exam.updatedAt = new Date().toISOString();
+    writeData(data);
+    res.status(201).json(newSection);
+});
+
+app.put('/api/exams/:examId/sections/:sectionId', adminOnly, (req, res) => {
+    const data = readData();
+    const exam = data.exams.find(e => e.id === req.params.examId);
+    if (!exam) return res.status(404).json({ error: 'Exam not found' });
+    const sIndex = exam.sections.findIndex(s => s.id === req.params.sectionId);
+    if (sIndex === -1) return res.status(404).json({ error: 'Section not found' });
+    exam.sections[sIndex] = { ...exam.sections[sIndex], ...req.body };
+    exam.updatedAt = new Date().toISOString();
+    writeData(data);
+    res.json(exam.sections[sIndex]);
+});
+
+app.delete('/api/exams/:examId/sections/:sectionId', adminOnly, (req, res) => {
+    const data = readData();
+    const exam = data.exams.find(e => e.id === req.params.examId);
+    if (!exam) return res.status(404).json({ error: 'Exam not found' });
+    exam.sections = exam.sections.filter(s => s.id !== req.params.sectionId);
+    exam.updatedAt = new Date().toISOString();
+    writeData(data);
+    res.json({ success: true });
+});
+
+// ========================
+// Question CRUD (Admin)
+// ========================
+app.post('/api/exams/:examId/sections/:sectionId/questions', adminOnly, (req, res) => {
+    const data = readData();
+    const exam = data.exams.find(e => e.id === req.params.examId);
+    if (!exam) return res.status(404).json({ error: 'Exam not found' });
+    const section = exam.sections.find(s => s.id === req.params.sectionId);
+    if (!section) return res.status(404).json({ error: 'Section not found' });
+    const newQ = {
+        id: req.body.id || Date.now(), question: req.body.question || '',
+        options: req.body.options || ['', '', '', ''], correctAnswer: req.body.correctAnswer ?? 0,
+        explanation: req.body.explanation || '', expansion: req.body.expansion || '',
+        answer: req.body.answer || '', image: req.body.image || null
+    };
+    section.questions.push(newQ);
+    exam.updatedAt = new Date().toISOString();
+    writeData(data);
+    res.status(201).json(newQ);
+});
+
+app.put('/api/exams/:examId/sections/:sectionId/questions/:questionId', adminOnly, (req, res) => {
+    const data = readData();
+    const exam = data.exams.find(e => e.id === req.params.examId);
+    if (!exam) return res.status(404).json({ error: 'Exam not found' });
+    const section = exam.sections.find(s => s.id === req.params.sectionId);
+    if (!section) return res.status(404).json({ error: 'Section not found' });
+    const qIndex = section.questions.findIndex(q => String(q.id) === String(req.params.questionId));
+    if (qIndex === -1) return res.status(404).json({ error: 'Question not found' });
+    section.questions[qIndex] = { ...section.questions[qIndex], ...req.body };
+    exam.updatedAt = new Date().toISOString();
+    writeData(data);
+    res.json(section.questions[qIndex]);
+});
+
+app.delete('/api/exams/:examId/sections/:sectionId/questions/:questionId', adminOnly, (req, res) => {
+    const data = readData();
+    const exam = data.exams.find(e => e.id === req.params.examId);
+    if (!exam) return res.status(404).json({ error: 'Exam not found' });
+    const section = exam.sections.find(s => s.id === req.params.sectionId);
+    if (!section) return res.status(404).json({ error: 'Section not found' });
+    section.questions = section.questions.filter(q => String(q.id) !== String(req.params.questionId));
+    exam.updatedAt = new Date().toISOString();
+    writeData(data);
+    res.json({ success: true });
+});
+
+// ========================
+// Access Codes (Admin)
+// ========================
+app.post('/api/exams/:id/codes', adminOnly, (req, res) => {
+    const data = readData();
+    const exam = data.exams.find(e => e.id === req.params.id);
+    if (!exam) return res.status(404).json({ error: 'Exam not found' });
+    if (!exam.accessCodes) exam.accessCodes = [];
+
+    const count = parseInt(req.body.count) || 1;
+    const type = req.body.type || 'reusable'; // 'reusable' | 'single-use'
+    const newCodes = [];
+    for (let i = 0; i < count; i++) {
+        const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+        newCodes.push({ code, type, usedBy: [], createdAt: new Date().toISOString() });
+    }
+    exam.accessCodes.push(...newCodes);
+    exam.requireCode = true;
+    writeData(data);
+    res.status(201).json(newCodes);
+});
+
+app.delete('/api/exams/:id/codes/:code', adminOnly, (req, res) => {
+    const data = readData();
+    const exam = data.exams.find(e => e.id === req.params.id);
+    if (!exam) return res.status(404).json({ error: 'Exam not found' });
+    exam.accessCodes = (exam.accessCodes || []).filter(c => c.code !== req.params.code);
+    writeData(data);
+    res.json({ success: true });
+});
+
+app.post('/api/exams/:id/verify-code', (req, res) => {
+    const data = readData();
+    const exam = data.exams.find(e => e.id === req.params.id);
+    if (!exam) return res.status(404).json({ error: 'Exam not found' });
+    const inputCode = (req.body.code || '').toUpperCase().trim();
+    const codeObj = (exam.accessCodes || []).find(c => c.code === inputCode);
+    if (!codeObj) return res.status(403).json({ error: 'Mã kích hoạt không đúng' });
+    if (codeObj.type === 'single-use' && codeObj.usedBy.length > 0) {
+        return res.status(403).json({ error: 'Mã này đã được sử dụng' });
+    }
+    // Mark as used
+    const userId = req.body.userId || 'anonymous';
+    if (!codeObj.usedBy.includes(userId)) codeObj.usedBy.push(userId);
+    writeData(data);
+    res.json({ success: true, code: inputCode });
+});
+
+// ========================
+// Export / Import
+// ========================
+app.get('/api/exams/:id/export', adminOnly, (req, res) => {
+    const data = readData();
+    const exam = data.exams.find(e => e.id === req.params.id);
+    if (!exam) return res.status(404).json({ error: 'Exam not found' });
+    const exportData = {
+        _format: 'easyrevise-exam-v1', _exportedAt: new Date().toISOString(),
+        exam: { title: exam.title, subject: exam.subject, year: exam.year, sections: exam.sections }
+    };
+    res.setHeader('Content-Type', 'application/json');
+    const safeName = exam.title.replace(/[^a-zA-Z0-9 ]/g, '_').trim() || 'exam';
+    res.setHeader('Content-Disposition', `attachment; filename="${safeName}.json"; filename*=UTF-8''${encodeURIComponent(exam.title)}.json`);
+    res.json(exportData);
+});
+
+app.post('/api/exams/import', adminOnly, (req, res) => {
+    const data = readData();
+    const importData = req.body;
+    if (!importData._format || importData._format !== 'easyrevise-exam-v1') return res.status(400).json({ error: 'Invalid format' });
+    if (!importData.exam || !importData.exam.sections) return res.status(400).json({ error: 'Missing exam data' });
+    const now = new Date().toISOString();
+    const newExam = {
+        id: uuidv4(), title: importData.exam.title || 'Đề import',
+        subject: importData.exam.subject || 'Tiếng Anh', year: importData.exam.year || '',
+        sections: importData.exam.sections.map(s => ({ ...s, id: s.id || uuidv4() })),
+        requireCode: false, accessCodes: [], createdAt: now, updatedAt: now
+    };
+    data.exams.push(newExam);
+    writeData(data);
+    res.status(201).json(newExam);
+});
+
+app.get('/api/export-all', adminOnly, (req, res) => {
+    const data = readData();
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', 'attachment; filename="easyrevise-backup.json"');
+    res.json({ _format: 'easyrevise-backup-v1', _exportedAt: new Date().toISOString(), exams: data.exams });
+});
+
+// ========================
+// Image Upload
+// ========================
+const multer = require('multer');
+const uploadsDir = path.join(__dirname, 'public', 'uploads');
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, uploadsDir),
+    filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname);
+        cb(null, `${Date.now()}-${Math.random().toString(36).slice(2, 6)}${ext}`);
+    }
+});
+const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 }, fileFilter: (req, file, cb) => {
+    if (/^image\/(jpeg|png|gif|webp|svg\+xml)$/.test(file.mimetype)) cb(null, true);
+    else cb(new Error('Only image files allowed'));
+}});
+
+app.post('/api/upload', adminOnly, upload.single('image'), (req, res) => {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+    res.json({ url: `/uploads/${req.file.filename}` });
+});
+
+// ========================
 // Exam History
 // ========================
-
-// POST save history
 app.post('/api/history', authMiddleware, (req, res) => {
     const usersData = readUsers();
     const user = usersData.users.find(u => u.id === req.user.id);
     if (!user) return res.status(404).json({ error: 'User not found' });
-
     if (!user.history) user.history = [];
-    user.history.unshift({
-        ...req.body,
-        id: uuidv4(),
-        savedAt: new Date().toISOString()
-    });
-
-    // Keep max 100 history items
+    user.history.unshift({ ...req.body, id: uuidv4(), savedAt: new Date().toISOString() });
     if (user.history.length > 100) user.history = user.history.slice(0, 100);
     writeUsers(usersData);
     res.status(201).json({ success: true });
 });
 
-// GET history
 app.get('/api/history', authMiddleware, (req, res) => {
-    const usersData = readUsers();
-    const user = usersData.users.find(u => u.id === req.user.id);
+    const user = readUsers().users.find(u => u.id === req.user.id);
     res.json(user?.history || []);
 });
 
 // ========================
-// SPA fallback - serve HTML pages
+// SPA fallback
 // ========================
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'index.html')));
 app.get('/admin/*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'index.html')));
 
-// Start
 app.listen(PORT, () => {
     console.log(`\n  🚀 EasyRevise Server running at http://localhost:${PORT}`);
     console.log(`  📝 Student:  http://localhost:${PORT}/`);

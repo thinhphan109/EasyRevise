@@ -109,6 +109,18 @@
         </section>
     </div>
 
+    <!-- Code Entry Modal -->
+    <div id="codeModal" class="auth-modal">
+        <div class="glass-panel auth-box" style="max-width:380px;">
+            <h3 style="font-weight:700;margin-bottom:0.5rem;">🔒 Đề thi yêu cầu mã</h3>
+            <p id="codeExamTitle" style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1.5rem;"></p>
+            <div id="codeError" class="auth-error"></div>
+            <input id="codeInput" class="auth-input" placeholder="Nhập mã kích hoạt" style="text-transform:uppercase;font-family:monospace;font-size:1.1rem;text-align:center;letter-spacing:3px;">
+            <button class="btn btn-primary" style="width:100%;" onclick="submitCode()">Mở khóa</button>
+            <button style="width:100%;margin-top:0.75rem;padding:0.5rem;background:none;border:none;color:var(--text-muted);font-size:0.85rem;cursor:pointer;" onclick="document.getElementById('codeModal').classList.remove('active')">Hủy</button>
+        </div>
+    </div>
+
     <!-- Auth Modal -->
     <div id="authModal" class="auth-modal">
         <div class="glass-panel auth-box">
@@ -327,9 +339,13 @@
                     return;
                 }
 
-                container.innerHTML = exams.map(exam => `
-                    <div class="glass-panel exam-card" onclick="window.location.href='exam.html?id=${exam.id}'">
-                        <h3>${exam.title}</h3>
+                container.innerHTML = exams.map(exam => {
+                    const unlocked = JSON.parse(localStorage.getItem('easyrevise_unlocked') || '{}');
+                    const isLocked = exam.requireCode && !unlocked[exam.id];
+                    const clickAction = isLocked ? `openCodeModal('${exam.id}', '${exam.title.replace(/'/g, "\\'")}')`  : `window.location.href='exam.html?id=${exam.id}'`;
+                    return `
+                    <div class="glass-panel exam-card" onclick="${clickAction}">
+                        <h3>${isLocked ? '🔒 ' : ''}${exam.title}</h3>
                         <div class="meta">
                             <span>📝 ${exam.totalQuestions} câu</span>
                             <span>📂 ${exam.sectionCount} phần</span>
@@ -338,9 +354,9 @@
                         <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">
                             ${exam.subject} — ${exam.year}
                         </p>
-                        <span class="btn btn-primary" style="pointer-events: none;">Bắt đầu ôn tập →</span>
-                    </div>
-                `).join('');
+                        <span class="btn btn-primary" style="pointer-events: none;">${isLocked ? '🔑 Nhập mã để mở' : 'Bắt đầu ôn tập →'}</span>
+                    </div>`;
+                }).join('');
             } catch (err) {
                 console.error(err);
             }
@@ -416,6 +432,37 @@
                 }).join('');
             }
         }
+
+        // Code entry modal
+        let _pendingCodeExamId = null;
+        function openCodeModal(examId, title) {
+            _pendingCodeExamId = examId;
+            document.getElementById('codeExamTitle').textContent = title;
+            document.getElementById('codeInput').value = '';
+            document.getElementById('codeError').style.display = 'none';
+            document.getElementById('codeModal').classList.add('active');
+            setTimeout(() => document.getElementById('codeInput').focus(), 100);
+        }
+        async function submitCode() {
+            const code = document.getElementById('codeInput').value.trim();
+            if (!code) return;
+            try {
+                const userId = currentUser?.id || 'anonymous';
+                const res = await fetch(`/api/exams/${_pendingCodeExamId}/verify-code`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, userId })
+                });
+                const data = await res.json();
+                if (data.error) { document.getElementById('codeError').textContent = data.error; document.getElementById('codeError').style.display = 'block'; return; }
+                // Save unlocked state
+                const unlocked = JSON.parse(localStorage.getItem('easyrevise_unlocked') || '{}');
+                unlocked[_pendingCodeExamId] = data.code;
+                localStorage.setItem('easyrevise_unlocked', JSON.stringify(unlocked));
+                document.getElementById('codeModal').classList.remove('active');
+                window.location.href = `exam.html?id=${_pendingCodeExamId}`;
+            } catch { document.getElementById('codeError').textContent = 'Lỗi kết nối'; document.getElementById('codeError').style.display = 'block'; }
+        }
+        document.getElementById('codeInput')?.addEventListener('keydown', e => { if (e.key === 'Enter') submitCode(); });
     </script>
 </body>
 </html>

@@ -3,10 +3,10 @@
     {
       "id": "f57f790f-b615-4a2f-bb6f-4d8042312e05",
       "username": "admin",
-      "passwordHash": "h2boonx10",
+      "passwordHash": "h1j67nz5",
       "displayName": "admin",
       "role": "admin",
-      "token": "NmI0OTgyZTItOGJiYy00YmRlLWE0YjktOTk1ZTRhZjkxZDczOjE3NzQyNjcyNjc4Mzc6ZnJ2NzlkaDBudGE=",
+      "token": "ZjU3Zjc5MGYtYjYxNS00YTJmLWJiNmYtNGQ4MDQyMzEyZTA1OjE3NzQzMzEzNzQ4NDg6NXY1bW5ia3d5dWQ=",
       "history": [
         {
           "examId": "bada400e-ad01-4f0c-9bfa-edc9cc8ea287",
@@ -408,6 +408,16 @@
         }
       ],
       "createdAt": "2026-03-23T12:01:07.837Z"
+    },
+    {
+      "id": "940b4e62-60c9-41f0-994d-0e24a23d5277",
+      "username": "thinh123@@",
+      "passwordHash": "h2boonx10",
+      "displayName": "admin",
+      "role": "student",
+      "token": "MzA1NzM0ZjUtNjEwNC00ZmRjLWIxNjItODg1YjY2ZTFjOWNmOjE3NzQzMzEyMTMzMDA6aTQ2ZG00MDN6bg==",
+      "history": [],
+      "createdAt": "2026-03-24T05:46:53.300Z"
     }
   ]
 }
