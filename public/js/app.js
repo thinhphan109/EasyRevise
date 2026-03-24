@@ -8,7 +8,7 @@ class ExamApp {
         this.totalQuestions = 0;
         this.questionsList = [];
         this.examId = null;
-        this.startTime = Date.now();
+        this.startTime = parseInt(localStorage.getItem(`easyrevise_startTime_${new URLSearchParams(window.location.search).get('id')}`)) || Date.now();
         this.visitedQuestions = new Set();
         this.flaggedQuestions = new Set();
         this.isMobile = window.innerWidth <= 768;
@@ -50,11 +50,31 @@ class ExamApp {
         }
 
         try {
-            const res = await fetch(`/api/exams/${this.examId}`);
+            const headers = {};
+            const unlocked = JSON.parse(localStorage.getItem('easyrevise_unlocked') || '{}');
+            if (unlocked[this.examId]) headers['x-access-code'] = unlocked[this.examId];
+            const token = localStorage.getItem('easyrevise_token');
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+            const res = await fetch(`/api/exams/${this.examId}`, { headers });
             if (!res.ok) throw new Error('Exam not found');
             this.examData = await res.json();
         } catch (err) {
             alert('Không tìm thấy đề thi!');
+            window.location.href = '/';
+            return;
+        }
+
+        // If exam returned no sections (code issue), redirect
+        if (!this.examData.sections || this.examData.sections.length === 0) {
+            if (this.examData.requireCode) {
+                // Clear stale unlock data
+                const unlocked = JSON.parse(localStorage.getItem('easyrevise_unlocked') || '{}');
+                delete unlocked[this.examId];
+                localStorage.setItem('easyrevise_unlocked', JSON.stringify(unlocked));
+                alert('Mã kích hoạt không hợp lệ hoặc đã hết hạn. Vui lòng nhập lại.');
+            } else {
+                alert('Đề thi chưa có câu hỏi!');
+            }
             window.location.href = '/';
             return;
         }
@@ -85,6 +105,9 @@ class ExamApp {
 
         // Save as in-progress
         this.saveInProgress();
+
+        // Save startTime
+        localStorage.setItem(`easyrevise_startTime_${this.examId}`, this.startTime);
 
         this.buildQuestionGrid();
         this.attachEventListeners();
@@ -138,11 +161,37 @@ class ExamApp {
     }
 
     startTimer() {
-        setInterval(() => {
+        this.timeLimit = this.examData.timeLimit ? this.examData.timeLimit * 60 : 0; // seconds
+        this.timerInterval = setInterval(() => {
             const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
-            const min = String(Math.floor(elapsed / 60)).padStart(2, '0');
-            const sec = String(elapsed % 60).padStart(2, '0');
-            this.countdown.textContent = `${min}:${sec}`;
+            if (this.timeLimit > 0) {
+                const remaining = Math.max(0, this.timeLimit - elapsed);
+                const min = String(Math.floor(remaining / 60)).padStart(2, '0');
+                const sec = String(remaining % 60).padStart(2, '0');
+                this.countdown.textContent = `${min}:${sec}`;
+                // Warning colors & animations
+                if (remaining <= 60) {
+                    this.countdown.style.background = '#dc2626';
+                    this.countdown.classList.remove('timer-warning');
+                    this.countdown.classList.add('timer-danger');
+                } else if (remaining <= 300) {
+                    this.countdown.style.background = '#f59e0b';
+                    this.countdown.classList.add('timer-warning');
+                    this.countdown.classList.remove('timer-danger');
+                } else {
+                    this.countdown.classList.remove('timer-warning', 'timer-danger');
+                }
+                // Auto-submit
+                if (remaining <= 0) {
+                    clearInterval(this.timerInterval);
+                    alert('⏰ Hết giờ! Bài sẽ được tự động nộp.');
+                    this.submitExam(true);
+                }
+            } else {
+                const min = String(Math.floor(elapsed / 60)).padStart(2, '0');
+                const sec = String(elapsed % 60).padStart(2, '0');
+                this.countdown.textContent = `${min}:${sec}`;
+            }
         }, 1000);
     }
 
@@ -181,6 +230,17 @@ class ExamApp {
                 }
             }
         };
+
+        // Save progress on tab close / refresh
+        this.intentionalExit = false;
+        window.addEventListener('beforeunload', (e) => {
+            this.saveProgress();
+            this.saveInProgress();
+            if (!this.intentionalExit) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
     }
 
     renderQuestion() {
@@ -242,6 +302,10 @@ class ExamApp {
             this.passageContainer.innerHTML = question.passage.replace(/\n/g, '<br>');
         }
         this.questionText.textContent = question.question;
+
+        // Render question media (image/video, with optional hint mode)
+        this.renderQuestionMedia(question);
+
         this.optionGrid.style.display = 'flex';
         this.optionGrid.innerHTML = '';
 
@@ -266,6 +330,10 @@ class ExamApp {
     renderEssay(question) {
         this.instruction.textContent = question.instruction || '';
         this.questionText.textContent = question.prompt || '';
+
+        // Render question media
+        this.renderQuestionMedia(question);
+
         this.essayArea.style.display = 'block';
         this.essayInput.value = this.userAnswers[question.id] || '';
         this.cuesList.innerHTML = '';
@@ -275,6 +343,64 @@ class ExamApp {
             this.cuesList.appendChild(li);
         });
     }
+
+    renderQuestionMedia(question) {
+        const imgContainer = document.getElementById('questionImageContainer');
+        const hintContainer = document.getElementById('questionHintContainer');
+        if (!imgContainer || !hintContainer) return;
+
+        // Reset
+        imgContainer.innerHTML = ''; imgContainer.style.display = 'none';
+        hintContainer.innerHTML = ''; hintContainer.style.display = 'none';
+
+        const hasImage = !!question.image;
+        const hasVideo = !!question.video;
+        if (!hasImage && !hasVideo) return;
+
+        let mediaHtml = '';
+        if (hasImage) {
+            mediaHtml += `<img src="${question.image}" alt="" style="max-width:350px;width:100%;border-radius:12px;cursor:zoom-in;" onclick="this.classList.toggle('img-zoomed');if(this.classList.contains('img-zoomed')){this.style.position='fixed';this.style.top='0';this.style.left='0';this.style.width='100vw';this.style.height='100vh';this.style.objectFit='contain';this.style.background='rgba(0,0,0,0.85)';this.style.zIndex='9999';this.style.borderRadius='0';this.style.cursor='zoom-out';this.style.maxWidth='none';}else{this.style='max-width:350px;width:100%;border-radius:12px;cursor:zoom-in;';}">`;
+        }
+        if (hasVideo) {
+            mediaHtml += this.buildVideoHtml(question.video);
+        }
+
+        if (question.mediaAsHint) {
+            // Hint mode: hidden behind button
+            hintContainer.style.display = 'block';
+            hintContainer.innerHTML = `
+                <button class="btn btn-sm" onclick="this.nextElementSibling.style.display='block';this.style.display='none';" 
+                    style="background:#fef3c7;color:#92400e;border:1px solid #fde68a;padding:0.4rem 1rem;border-radius:8px;cursor:pointer;font-size:0.85rem;">
+                    💡 Xem gợi ý
+                </button>
+                <div style="display:none;margin-top:0.5rem;">${mediaHtml}</div>`;
+        } else {
+            // Direct display
+            imgContainer.style.display = 'block';
+            imgContainer.innerHTML = mediaHtml;
+        }
+    }
+
+    buildVideoHtml(url) {
+        if (!url) return '';
+        // YouTube
+        const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+        if (ytMatch) {
+            return `<div style="position:relative;padding-bottom:56.25%;height:0;border-radius:12px;overflow:hidden;margin-top:0.5rem;">
+                <iframe src="https://www.youtube.com/embed/${ytMatch[1]}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allowfullscreen></iframe>
+            </div>`;
+        }
+        // Google Drive
+        const driveMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+        if (driveMatch) {
+            return `<div style="position:relative;padding-bottom:56.25%;height:0;border-radius:12px;overflow:hidden;margin-top:0.5rem;">
+                <iframe src="https://drive.google.com/file/d/${driveMatch[1]}/preview" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allowfullscreen></iframe>
+            </div>`;
+        }
+        // Direct video (mp4 etc)
+        return `<video controls style="max-width:100%;border-radius:12px;margin-top:0.5rem;" preload="metadata"><source src="${url}"></video>`;
+    }
+
 
     navigate(direction) {
         const nextIndex = this.currentQuestionIndex + direction;
@@ -304,19 +430,77 @@ class ExamApp {
     }
 
     exitExam() {
-        if (Object.keys(this.userAnswers).length > 0) {
-            if (!confirm('Bài làm sẽ được lưu lại. Bạn có thể quay lại tiếp tục bất kỳ lúc nào.\n\nThoát ra?')) return;
-        }
+        this.showExitModal();
+    }
+
+    showExitModal() {
+        // Remove old modal if exists
+        document.getElementById('exitModal')?.remove();
+        const answeredCount = Object.keys(this.userAnswers).length;
+        const unlocked = JSON.parse(localStorage.getItem('easyrevise_unlocked') || '{}');
+        const hasCode = !!unlocked[this.examId];
+        const modal = document.createElement('div');
+        modal.id = 'exitModal';
+        modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:10000;display:flex;align-items:center;justify-content:center;';
+        modal.innerHTML = `<div style="background:white;border-radius:16px;padding:2rem;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+            <h3 style="font-size:1.15rem;font-weight:700;margin-bottom:0.75rem;">⚠️ Thoát bài thi?</h3>
+            <p style="color:#64748b;font-size:0.9rem;line-height:1.5;margin-bottom:0.5rem;">Bạn đã trả lời <strong>${answeredCount}/${this.totalQuestions}</strong> câu.</p>
+            ${hasCode ? '<p style="color:#92400e;font-size:0.82rem;background:#fef3c7;padding:0.5rem 0.75rem;border-radius:8px;margin-bottom:0.75rem;">🔑 Mã kích hoạt sẽ được giữ lại. Bạn có thể quay lại làm tiếp.</p>' : ''}
+            <div style="display:flex;flex-direction:column;gap:0.5rem;margin-top:1rem;">
+                <button onclick="window._examApp.exitKeepProgress()" style="padding:0.6rem 1rem;border-radius:10px;border:none;background:#3b82f6;color:white;font-weight:600;cursor:pointer;font-size:0.9rem;">💾 Thoát & lưu tiến độ</button>
+                <button onclick="window._examApp.exitDiscardProgress()" style="padding:0.6rem 1rem;border-radius:10px;border:1px solid #e2e8f0;background:white;color:#dc2626;font-weight:600;cursor:pointer;font-size:0.9rem;">🗑️ Thoát & xoá tiến độ</button>
+                <button onclick="document.getElementById('exitModal').remove()" style="padding:0.5rem 1rem;border-radius:10px;border:none;background:#f1f5f9;color:#475569;font-weight:500;cursor:pointer;font-size:0.85rem;">← Tiếp tục làm bài</button>
+            </div>
+        </div>`;
+        document.body.appendChild(modal);
+    }
+
+    exitKeepProgress() {
+        this.intentionalExit = true;
         this.saveProgress();
+        this.saveInProgress();
+        document.getElementById('exitModal')?.remove();
         window.location.href = '/';
     }
 
-    submitExam() {
-        const answeredCount = Object.keys(this.userAnswers).length;
-        if (answeredCount < this.totalQuestions) {
-            const unanswered = this.totalQuestions - answeredCount;
-            if (!confirm(`Bạn còn ${unanswered} câu chưa trả lời. Vẫn muốn nộp bài?`)) return;
+    exitDiscardProgress() {
+        this.intentionalExit = true;
+        const unlocked = JSON.parse(localStorage.getItem('easyrevise_unlocked') || '{}');
+        const code = unlocked[this.examId];
+        if (code) this.cancelCodeUsage(code);
+        localStorage.removeItem(`easyrevise_progress_${this.examId}`);
+        localStorage.removeItem(`easyrevise_flags_${this.examId}`);
+        localStorage.removeItem(`easyrevise_startTime_${this.examId}`);
+        const inProgress = JSON.parse(localStorage.getItem('easyrevise_in_progress') || '{}');
+        delete inProgress[this.examId];
+        localStorage.setItem('easyrevise_in_progress', JSON.stringify(inProgress));
+        const unlocked2 = JSON.parse(localStorage.getItem('easyrevise_unlocked') || '{}');
+        delete unlocked2[this.examId];
+        localStorage.setItem('easyrevise_unlocked', JSON.stringify(unlocked2));
+        document.getElementById('exitModal')?.remove();
+        window.location.href = '/';
+    }
+
+    async cancelCodeUsage(code) {
+        try {
+            const userId = JSON.parse(localStorage.getItem('easyrevise_user') || '{}').id || 'anonymous';
+            await fetch(`/api/exams/${this.examId}/cancel-code`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code, userId })
+            });
+        } catch (e) { /* silent */ }
+    }
+
+    submitExam(auto = false) {
+        if (!auto) {
+            const answeredCount = Object.keys(this.userAnswers).length;
+            if (answeredCount < this.totalQuestions) {
+                const unanswered = this.totalQuestions - answeredCount;
+                if (!confirm(`Bạn còn ${unanswered} câu chưa trả lời. Vẫn muốn nộp bài?`)) return;
+            }
         }
+        this.intentionalExit = true;
+        if (this.timerInterval) clearInterval(this.timerInterval);
 
         let correct = 0, incorrect = 0, skipped = 0;
         const results = this.questionsList.map(q => {
@@ -335,15 +519,27 @@ class ExamApp {
         const summary = {
             examId: this.examId, score: ((correct / mcTotal) * 10).toFixed(1),
             correct, incorrect, skipped, total: mcTotal, results,
-            examTitle: this.examData.title, timestamp: new Date().toLocaleString('vi-VN'), timeSpent: elapsed
+            examTitle: this.examData.title, timestamp: new Date().toLocaleString('vi-VN'), timeSpent: elapsed,
+            autoSubmitted: auto
         };
 
         this.saveToHistory(summary);
         sessionStorage.setItem('easyrevise_final_result', JSON.stringify(summary));
 
+        // Save result by code if applicable
+        const unlocked = JSON.parse(localStorage.getItem('easyrevise_unlocked') || '{}');
+        const code = unlocked[this.examId];
+        if (code) {
+            fetch(`/api/exams/${this.examId}/code-result`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code, result: summary })
+            }).catch(() => {});
+        }
+
         // Remove in-progress
         localStorage.removeItem(`easyrevise_progress_${this.examId}`);
         localStorage.removeItem(`easyrevise_flags_${this.examId}`);
+        localStorage.removeItem(`easyrevise_startTime_${this.examId}`);
         const inProgress = JSON.parse(localStorage.getItem('easyrevise_in_progress') || '{}');
         delete inProgress[this.examId];
         localStorage.setItem('easyrevise_in_progress', JSON.stringify(inProgress));

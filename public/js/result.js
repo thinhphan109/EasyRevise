@@ -27,7 +27,12 @@ class ResultApp {
             this.results = JSON.parse(savedResult);
 
             // Fetch full exam data from API
-            const res = await fetch(`/api/exams/${this.results.examId}`);
+            const headers = {};
+            const unlocked = JSON.parse(localStorage.getItem('easyrevise_unlocked') || '{}');
+            if (unlocked[this.results.examId]) headers['x-access-code'] = unlocked[this.results.examId];
+            const token = localStorage.getItem('easyrevise_token');
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+            const res = await fetch(`/api/exams/${this.results.examId}`, { headers });
             if (!res.ok) throw new Error('Exam not found');
             this.examData = await res.json();
 
@@ -71,7 +76,22 @@ class ResultApp {
 
         // Update retake link
         const retakeBtn = document.getElementById('retakeBtn');
-        if (retakeBtn) retakeBtn.href = `exam.html?id=${this.results.examId}`;
+        if (retakeBtn) {
+            if (this.examData.requireCode) {
+                retakeBtn.textContent = '🔑 Nhập mã để làm lại';
+                retakeBtn.href = '#';
+                retakeBtn.onclick = (e) => {
+                    e.preventDefault();
+                    // Clear old unlock so they must re-enter code
+                    const unlocked = JSON.parse(localStorage.getItem('easyrevise_unlocked') || '{}');
+                    delete unlocked[this.results.examId];
+                    localStorage.setItem('easyrevise_unlocked', JSON.stringify(unlocked));
+                    window.location.href = '/';
+                };
+            } else {
+                retakeBtn.href = `exam.html?id=${this.results.examId}`;
+            }
+        }
     }
 
     renderReviewItems() {
@@ -120,6 +140,24 @@ class ResultApp {
                     </div>`;
             }
 
+            // Build media HTML for question
+            let questionMediaHtml = '';
+            if (q.image) {
+                questionMediaHtml += `<div style="margin:0.75rem 0;"><img src="${q.image}" alt="" style="max-width:100%;border-radius:12px;cursor:zoom-in;" onclick="this.classList.toggle('img-zoomed');if(this.classList.contains('img-zoomed')){this.style.position='fixed';this.style.top='0';this.style.left='0';this.style.width='100vw';this.style.height='100vh';this.style.objectFit='contain';this.style.background='rgba(0,0,0,0.85)';this.style.zIndex='9999';this.style.borderRadius='0';this.style.cursor='zoom-out';this.style.maxWidth='none';}else{this.style='max-width:100%;border-radius:12px;cursor:zoom-in;';}"></div>`;
+            }
+            if (q.video) {
+                questionMediaHtml += this.buildVideoHtml(q.video);
+            }
+
+            // Build media HTML for explanation
+            let explMediaHtml = '';
+            if (q.explanationImage) {
+                explMediaHtml += `<div style="margin:0.75rem 0;"><img src="${q.explanationImage}" alt="" style="max-width:100%;border-radius:12px;cursor:zoom-in;" onclick="this.classList.toggle('img-zoomed');if(this.classList.contains('img-zoomed')){this.style.position='fixed';this.style.top='0';this.style.left='0';this.style.width='100vw';this.style.height='100vh';this.style.objectFit='contain';this.style.background='rgba(0,0,0,0.85)';this.style.zIndex='9999';this.style.borderRadius='0';this.style.cursor='zoom-out';this.style.maxWidth='none';}else{this.style='max-width:100%;border-radius:12px;cursor:zoom-in;';}"></div>`;
+            }
+            if (q.explanationVideo) {
+                explMediaHtml += this.buildVideoHtml(q.explanationVideo);
+            }
+
             reviewItem.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
                     <div style="font-size: 0.8rem; color: var(--primary); font-weight: 700; text-transform: uppercase;">
@@ -130,12 +168,14 @@ class ResultApp {
                 <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1.25rem; color: var(--text-main); line-height: 1.5;">
                     ${q.isEssay ? q.prompt : q.question}
                 </p>
+                ${questionMediaHtml}
                 ${responseRow}
                 ${q.explanation ? `
                 <div class="explanation-box">
                     <div class="explanation-title">📝 Giải đáp & Phân tích</div>
                     <p style="color: var(--text-main); font-size: 0.95rem; line-height: 1.6;">${q.explanation}</p>
-                </div>` : ''}
+                    ${explMediaHtml}
+                </div>` : (explMediaHtml ? `<div class="explanation-box"><div class="explanation-title">📝 Media giải đáp</div>${explMediaHtml}</div>` : '')}
                 ${q.expansion ? `
                 <div class="expansion-box">
                     <div class="expansion-title">💡 Mở rộng kiến thức</div>
@@ -144,6 +184,23 @@ class ResultApp {
 
             this.reviewContainer.appendChild(reviewItem);
         });
+    }
+
+    buildVideoHtml(url) {
+        if (!url) return '';
+        const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+        if (ytMatch) {
+            return `<div style="position:relative;padding-bottom:56.25%;height:0;border-radius:12px;overflow:hidden;margin-top:0.5rem;">
+                <iframe src="https://www.youtube.com/embed/${ytMatch[1]}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allowfullscreen></iframe>
+            </div>`;
+        }
+        const driveMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
+        if (driveMatch) {
+            return `<div style="position:relative;padding-bottom:56.25%;height:0;border-radius:12px;overflow:hidden;margin-top:0.5rem;">
+                <iframe src="https://drive.google.com/file/d/${driveMatch[1]}/preview" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allowfullscreen></iframe>
+            </div>`;
+        }
+        return `<video controls style="max-width:100%;border-radius:12px;margin-top:0.5rem;" preload="metadata"><source src="${url}"></video>`;
     }
 }
 

@@ -2,5 +2,6 @@
   "adminPin": "123456",
   "pinSessionHours": 3,
   "siteName": "EasyRevise",
-  "siteDescription": "Hệ thống ôn tập đề cương thông minh"
+  "siteDescription": "Hệ thống ôn tập đề cương thông minh",
+  "codeExpireHours": 1
 }

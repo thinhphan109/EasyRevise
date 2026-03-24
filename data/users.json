@@ -3,11 +3,456 @@
     {
       "id": "f57f790f-b615-4a2f-bb6f-4d8042312e05",
       "username": "admin",
-      "passwordHash": "h1j67nz5",
+      "passwordHash": "h2boonx10",
       "displayName": "admin",
       "role": "admin",
-      "token": "ZjU3Zjc5MGYtYjYxNS00YTJmLWJiNmYtNGQ4MDQyMzEyZTA1OjE3NzQzMzMwNzQ4NTc6ODR6NGM4ZnBhanE=",
+      "token": "ZjU3Zjc5MGYtYjYxNS00YTJmLWJiNmYtNGQ4MDQyMzEyZTA1OjE3NzQzNDkzNjQ2NjU6amJldDIwbmM0ZG0=",
       "history": [
+        {
+          "examId": "59bb686c-f50c-41c5-afb6-fa81fd6bd0b4",
+          "score": "0.0",
+          "correct": 0,
+          "incorrect": 0,
+          "skipped": 70,
+          "total": 70,
+          "results": [
+            {
+              "id": 1,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 2,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 3,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 4,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 5,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 6,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 7,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 8,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 9,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 10,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 11,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 12,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 13,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 14,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 15,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 16,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 17,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 18,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 19,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 20,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 21,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 22,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 23,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 24,
+              "isCorrect": false,
+              "correctAnswer": 3,
+              "isEssay": false
+            },
+            {
+              "id": 25,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 26,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 27,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 28,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 29,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 30,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 31,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 32,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 33,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 34,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 35,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 36,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 37,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 38,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 39,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 40,
+              "isCorrect": false,
+              "correctAnswer": 3,
+              "isEssay": false
+            },
+            {
+              "id": 41,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 42,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 43,
+              "isCorrect": false,
+              "correctAnswer": 3,
+              "isEssay": false
+            },
+            {
+              "id": 44,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 45,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 46,
+              "isCorrect": false,
+              "correctAnswer": 3,
+              "isEssay": false
+            },
+            {
+              "id": 47,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 48,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 49,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 50,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": "c9d387f3-082f-4bdc-a42e-fb8a0b8be736",
+              "isCorrect": null,
+              "isEssay": true
+            },
+            {
+              "id": 201,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 202,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 203,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 204,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 205,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 206,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 207,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 208,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 209,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 210,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 211,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 212,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 213,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 214,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 215,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 216,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 217,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 218,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 219,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 220,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": "315c3f9e-4f3f-4079-bed2-2401a286fef5",
+              "isCorrect": null,
+              "isEssay": true
+            }
+          ],
+          "examTitle": "[GĐTC 2026] SIÊU TẬP ĐỀ TỔNG ÔN CHUYÊN & HSG - TUẦN 1",
+          "timestamp": "13:54:09 24/3/2026",
+          "timeSpent": 5,
+          "id": "695cb192-18de-42bc-8607-07ade825854c",
+          "savedAt": "2026-03-24T06:54:42.520Z"
+        },
         {
           "examId": "bada400e-ad01-4f0c-9bfa-edc9cc8ea287",
           "score": "0.2",
@@ -408,16 +853,6 @@
         }
       ],
       "createdAt": "2026-03-23T12:01:07.837Z"
-    },
-    {
-      "id": "940b4e62-60c9-41f0-994d-0e24a23d5277",
-      "username": "thinh123@@",
-      "passwordHash": "h2boonx10",
-      "displayName": "admin",
-      "role": "student",
-      "token": "MzA1NzM0ZjUtNjEwNC00ZmRjLWIxNjItODg1YjY2ZTFjOWNmOjE3NzQzMzEyMTMzMDA6aTQ2ZG00MDN6bg==",
-      "history": [],
-      "createdAt": "2026-03-24T05:46:53.300Z"
     }
   ]
 }

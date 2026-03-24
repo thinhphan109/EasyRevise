@@ -152,6 +152,11 @@ app.put('/api/users/:id', adminOnly, (req, res) => {
     if (!user) return res.status(404).json({ error: 'User not found' });
     if (req.body.role) user.role = req.body.role;
     if (req.body.displayName) user.displayName = req.body.displayName;
+    if (req.body.username) {
+        const dup = usersData.users.find(u => u.username === req.body.username && u.id !== req.params.id);
+        if (dup) return res.status(400).json({ error: 'Tên đăng nhập đã tồn tại' });
+        user.username = req.body.username;
+    }
     writeUsers(usersData);
     res.json({ success: true });
 });
@@ -253,6 +258,7 @@ app.post('/api/exams', adminOnly, (req, res) => {
         id: uuidv4(), title: req.body.title || 'Đề mới',
         subject: req.body.subject || 'Tiếng Anh', year: req.body.year || new Date().getFullYear().toString(),
         sections: req.body.sections || [], requireCode: false, accessCodes: [],
+        timeLimit: req.body.timeLimit || 0,
         createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
     };
     data.exams.push(newExam);
@@ -272,6 +278,7 @@ app.put('/api/exams/:id', adminOnly, (req, res) => {
         sections: req.body.sections ?? data.exams[index].sections,
         requireCode: req.body.requireCode ?? data.exams[index].requireCode,
         accessCodes: req.body.accessCodes ?? data.exams[index].accessCodes,
+        timeLimit: req.body.timeLimit ?? data.exams[index].timeLimit ?? 0,
         updatedAt: new Date().toISOString()
     };
     writeData(data);
@@ -342,7 +349,10 @@ app.post('/api/exams/:examId/sections/:sectionId/questions', adminOnly, (req, re
         id: req.body.id || Date.now(), question: req.body.question || '',
         options: req.body.options || ['', '', '', ''], correctAnswer: req.body.correctAnswer ?? 0,
         explanation: req.body.explanation || '', expansion: req.body.expansion || '',
-        answer: req.body.answer || '', image: req.body.image || null
+        answer: req.body.answer || '', image: req.body.image || null,
+        video: req.body.video || null, mediaAsHint: !!req.body.mediaAsHint,
+        explanationImage: req.body.explanationImage || null,
+        explanationVideo: req.body.explanationVideo || null
     };
     section.questions.push(newQ);
     exam.updatedAt = new Date().toISOString();
@@ -386,11 +396,11 @@ app.post('/api/exams/:id/codes', adminOnly, (req, res) => {
     if (!exam.accessCodes) exam.accessCodes = [];
 
     const count = parseInt(req.body.count) || 1;
-    const type = req.body.type || 'reusable'; // 'reusable' | 'single-use'
+    const maxUses = parseInt(req.body.maxUses) || 1;
     const newCodes = [];
     for (let i = 0; i < count; i++) {
         const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-        newCodes.push({ code, type, usedBy: [], createdAt: new Date().toISOString() });
+        newCodes.push({ code, maxUses, usedBy: [], createdAt: new Date().toISOString() });
     }
     exam.accessCodes.push(...newCodes);
     exam.requireCode = true;
@@ -414,14 +424,87 @@ app.post('/api/exams/:id/verify-code', (req, res) => {
     const inputCode = (req.body.code || '').toUpperCase().trim();
     const codeObj = (exam.accessCodes || []).find(c => c.code === inputCode);
     if (!codeObj) return res.status(403).json({ error: 'Mã kích hoạt không đúng' });
-    if (codeObj.type === 'single-use' && codeObj.usedBy.length > 0) {
-        return res.status(403).json({ error: 'Mã này đã được sử dụng' });
+
+    // Auto-expire: remove incomplete usages older than 24 hours
+    const settings = readSettings();
+    const expireMs = (settings.codeExpireHours || 24) * 60 * 60 * 1000;
+    codeObj.usedBy = codeObj.usedBy.filter(u => {
+        if (!u.completed && (Date.now() - new Date(u.usedAt).getTime()) > expireMs) return false;
+        return true;
+    });
+    const completedUses = codeObj.usedBy.filter(u => u.completed).length;
+    if (completedUses >= codeObj.maxUses) {
+        return res.status(403).json({ error: 'Mã này đã dùng hết ' + codeObj.maxUses + ' lần' });
     }
-    // Mark as used
+
     const userId = req.body.userId || 'anonymous';
-    if (!codeObj.usedBy.includes(userId)) codeObj.usedBy.push(userId);
+    const displayName = req.body.displayName || userId;
+    codeObj.usedBy.push({ userId, displayName, usedAt: new Date().toISOString(), completed: false, score: null });
     writeData(data);
     res.json({ success: true, code: inputCode });
+});
+
+app.post('/api/exams/:id/cancel-code', (req, res) => {
+    const data = readData();
+    const exam = data.exams.find(e => e.id === req.params.id);
+    if (!exam) return res.json({ success: true });
+    const inputCode = (req.body.code || '').toUpperCase().trim();
+    const userId = req.body.userId || 'anonymous';
+    const codeObj = (exam.accessCodes || []).find(c => c.code === inputCode);
+    if (!codeObj) return res.json({ success: true });
+    const idx = codeObj.usedBy.findIndex(u => u.userId === userId && !u.completed);
+    if (idx !== -1) codeObj.usedBy.splice(idx, 1);
+    writeData(data);
+    res.json({ success: true });
+});
+
+// ========================
+// Code-Based Result Save/Retrieve
+// ========================
+app.post('/api/exams/:examId/code-result', (req, res) => {
+    const { code, result } = req.body;
+    if (!code || !result) return res.status(400).json({ error: 'Missing code or result' });
+    const data = readData();
+    const exam = data.exams.find(e => e.id === req.params.examId);
+    if (!exam) return res.status(404).json({ error: 'Exam not found' });
+    const codeObj = (exam.accessCodes || []).find(c => c.code === code.toUpperCase().trim());
+    if (!codeObj) return res.status(403).json({ error: 'Mã không hợp lệ' });
+
+    const usage = [...codeObj.usedBy].reverse().find(u => !u.completed);
+    if (usage) {
+        usage.completed = true;
+        usage.completedAt = new Date().toISOString();
+        usage.score = result.score;
+        usage.result = result;
+    }
+    codeObj.result = { ...result, savedAt: new Date().toISOString() };
+    writeData(data);
+    res.json({ success: true });
+});
+
+app.post('/api/review-by-code', (req, res) => {
+    const code = (req.body.code || '').toUpperCase().trim();
+    if (!code) return res.status(400).json({ error: 'Thiếu mã' });
+    const data = readData();
+    for (const exam of data.exams) {
+        const codeObj = (exam.accessCodes || []).find(c => c.code === code);
+        if (codeObj) {
+            const completed = codeObj.usedBy.filter(u => u.completed && u.result);
+            if (completed.length) {
+                const results = completed.map(u => ({
+                    displayName: u.displayName || u.userId || 'Ẩn danh',
+                    completedAt: u.completedAt,
+                    score: u.score,
+                    result: u.result
+                }));
+                return res.json({ examId: exam.id, examTitle: exam.title, code, results, count: results.length });
+            }
+            if (codeObj.result) {
+                return res.json({ examId: exam.id, examTitle: exam.title, code, results: [{ displayName: 'Ẩn danh', result: codeObj.result, score: codeObj.result.score }], count: 1 });
+            }
+        }
+    }
+    res.status(404).json({ error: 'Không tìm thấy kết quả với mã này' });
 });
 
 // ========================
@@ -433,25 +516,24 @@ app.get('/api/exams/:id/export', adminOnly, (req, res) => {
     if (!exam) return res.status(404).json({ error: 'Exam not found' });
     const exportData = {
         _format: 'easyrevise-exam-v1', _exportedAt: new Date().toISOString(),
-        exam: { title: exam.title, subject: exam.subject, year: exam.year, sections: exam.sections }
+        title: exam.title, subject: exam.subject, year: exam.year, sections: exam.sections
     };
     res.setHeader('Content-Type', 'application/json');
-    const safeName = exam.title.replace(/[^a-zA-Z0-9 ]/g, '_').trim() || 'exam';
-    res.setHeader('Content-Disposition', `attachment; filename="${safeName}.json"; filename*=UTF-8''${encodeURIComponent(exam.title)}.json`);
+    res.setHeader('Content-Disposition', `attachment; filename="${exam.title.replace(/[^a-zA-Z0-9]/g, '_')}.json"`);
     res.json(exportData);
 });
 
 app.post('/api/exams/import', adminOnly, (req, res) => {
     const data = readData();
     const importData = req.body;
-    if (!importData._format || importData._format !== 'easyrevise-exam-v1') return res.status(400).json({ error: 'Invalid format' });
-    if (!importData.exam || !importData.exam.sections) return res.status(400).json({ error: 'Missing exam data' });
-    const now = new Date().toISOString();
+    if (!importData || (!importData.sections && !importData.title)) {
+        return res.status(400).json({ error: 'Invalid format' });
+    }
     const newExam = {
-        id: uuidv4(), title: importData.exam.title || 'Đề import',
-        subject: importData.exam.subject || 'Tiếng Anh', year: importData.exam.year || '',
-        sections: importData.exam.sections.map(s => ({ ...s, id: s.id || uuidv4() })),
-        requireCode: false, accessCodes: [], createdAt: now, updatedAt: now
+        id: uuidv4(), title: importData.title || 'Đề nhập',
+        subject: importData.subject || 'Tiếng Anh', year: importData.year || new Date().getFullYear().toString(),
+        sections: importData.sections || [], requireCode: false, accessCodes: [],
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
     };
     data.exams.push(newExam);
     writeData(data);
@@ -497,26 +579,27 @@ app.post('/api/history', authMiddleware, (req, res) => {
     const user = usersData.users.find(u => u.id === req.user.id);
     if (!user) return res.status(404).json({ error: 'User not found' });
     if (!user.history) user.history = [];
-    user.history.unshift({ ...req.body, id: uuidv4(), savedAt: new Date().toISOString() });
+    user.history.unshift(req.body);
     if (user.history.length > 100) user.history = user.history.slice(0, 100);
     writeUsers(usersData);
-    res.status(201).json({ success: true });
+    res.json({ success: true });
 });
 
 app.get('/api/history', authMiddleware, (req, res) => {
-    const user = readUsers().users.find(u => u.id === req.user.id);
-    res.json(user?.history || []);
+    const usersData = readUsers();
+    const user = usersData.users.find(u => u.id === req.user.id);
+    if (!user) return res.json([]);
+    res.json(user.history || []);
 });
 
 // ========================
-// Admin PIN Verify
+// Admin PIN Verification
 // ========================
-app.post('/api/admin/verify-pin', authMiddleware, (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Không có quyền admin' });
+app.post('/api/admin/verify-pin', (req, res) => {
     const settings = readSettings();
-    const pin = (req.body.pin || '').trim();
-    if (pin !== settings.adminPin) return res.status(403).json({ error: 'PIN không đúng' });
-    res.json({ success: true, sessionHours: settings.pinSessionHours });
+    const pin = req.body.pin;
+    if (pin === settings.adminPin) res.json({ success: true, sessionHours: settings.pinSessionHours });
+    else res.status(403).json({ error: 'PIN không đúng' });
 });
 
 // ========================
@@ -528,6 +611,7 @@ app.put('/api/settings', adminOnly, (req, res) => {
     const settings = readSettings();
     if (req.body.adminPin !== undefined) settings.adminPin = req.body.adminPin;
     if (req.body.pinSessionHours !== undefined) settings.pinSessionHours = parseInt(req.body.pinSessionHours) || 3;
+    if (req.body.codeExpireHours !== undefined) settings.codeExpireHours = parseInt(req.body.codeExpireHours) || 24;
     if (req.body.siteName !== undefined) settings.siteName = req.body.siteName;
     if (req.body.siteDescription !== undefined) settings.siteDescription = req.body.siteDescription;
     writeSettings(settings);
@@ -536,37 +620,49 @@ app.put('/api/settings', adminOnly, (req, res) => {
 
 app.get('/api/settings/public', (req, res) => {
     const s = readSettings();
-    res.json({ siteName: s.siteName, siteDescription: s.siteDescription });
+    res.json({ siteName: s.siteName, siteDescription: s.siteDescription, codeExpireHours: s.codeExpireHours || 24 });
 });
 
 // ========================
-// Code-Based Result Save/Retrieve
+// Release stuck code (Admin)
 // ========================
-app.post('/api/exams/:examId/code-result', (req, res) => {
-    const { code, result } = req.body;
-    if (!code || !result) return res.status(400).json({ error: 'Missing code or result' });
+app.post('/api/exams/:id/release-code', adminOnly, (req, res) => {
     const data = readData();
-    const exam = data.exams.find(e => e.id === req.params.examId);
+    const exam = data.exams.find(e => e.id === req.params.id);
     if (!exam) return res.status(404).json({ error: 'Exam not found' });
-    const codeObj = (exam.accessCodes || []).find(c => c.code === code.toUpperCase().trim());
-    if (!codeObj) return res.status(403).json({ error: 'Mã không hợp lệ' });
-    if (!codeObj.result) codeObj.result = null;
-    codeObj.result = { ...result, savedAt: new Date().toISOString() };
+    const inputCode = (req.body.code || '').toUpperCase().trim();
+    const codeObj = (exam.accessCodes || []).find(c => c.code === inputCode);
+    if (!codeObj) return res.status(404).json({ error: 'Code not found' });
+    // Remove all incomplete usages
+    const before = codeObj.usedBy.length;
+    codeObj.usedBy = codeObj.usedBy.filter(u => u.completed);
+    const removed = before - codeObj.usedBy.length;
     writeData(data);
-    res.json({ success: true });
+    res.json({ success: true, released: removed });
 });
 
-app.post('/api/review-by-code', (req, res) => {
-    const code = (req.body.code || '').toUpperCase().trim();
-    if (!code) return res.status(400).json({ error: 'Thiếu mã' });
+// ========================
+// Code Logs (Admin)
+// ========================
+app.get('/api/code-logs', adminOnly, (req, res) => {
     const data = readData();
+    const logs = [];
     for (const exam of data.exams) {
-        const codeObj = (exam.accessCodes || []).find(c => c.code === code);
-        if (codeObj && codeObj.result) {
-            return res.json({ examId: exam.id, examTitle: exam.title, code: code, result: codeObj.result });
+        for (const code of (exam.accessCodes || [])) {
+            for (const usage of (code.usedBy || [])) {
+                logs.push({
+                    examId: exam.id, examTitle: exam.title,
+                    code: code.code, maxUses: code.maxUses || 1,
+                    userId: usage.userId, displayName: usage.displayName,
+                    usedAt: usage.usedAt, completed: usage.completed,
+                    completedAt: usage.completedAt || null,
+                    score: usage.score
+                });
+            }
         }
     }
-    res.status(404).json({ error: 'Không tìm thấy kết quả với mã này' });
+    logs.sort((a, b) => new Date(b.usedAt) - new Date(a.usedAt));
+    res.json(logs);
 });
 
 // ========================

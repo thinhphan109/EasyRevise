@@ -110,6 +110,7 @@
                 <div class="tab-item active" onclick="switchTab('exams')">📝 Đề thi</div>
                 <div class="tab-item" onclick="switchTab('users')">👥 Tài khoản</div>
                 <div class="tab-item" onclick="switchTab('subjects')">📚 Môn học</div>
+                <div class="tab-item" onclick="switchTab('codeLogs')">📊 Mã kích hoạt</div>
                 <div class="tab-item" onclick="switchTab('settings')">⚙️ Cài đặt</div>
             </div>
 
@@ -134,6 +135,7 @@
             <div id="tabUsers" class="view">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;">
                     <h2 style="font-size:1.5rem;font-weight:700;">Quản lý Tài khoản</h2>
+                    <button class="btn btn-primary" onclick="showCreateUserModal()">+ Tạo tài khoản</button>
                 </div>
                 <div id="userListContainer"></div>
             </div>
@@ -145,6 +147,12 @@
                     <button class="btn btn-primary btn-sm" onclick="showAddSubjectModal()">+ Thêm môn</button>
                 </div>
                 <div id="subjectListContainer"></div>
+            </div>
+
+            <!-- TAB: Code Logs -->
+            <div id="tabCodeLogs" class="view">
+                <h2 style="font-size:1.5rem;font-weight:700;margin-bottom:2rem;">📊 Lịch sử sử dụng mã</h2>
+                <div id="codeLogsContainer" style="max-height:600px;overflow-y:auto;"><div class="empty-state"><div class="emoji">⏳</div><p>Đang tải...</p></div></div>
             </div>
 
             <!-- TAB: Settings -->
@@ -160,6 +168,11 @@
                         <label>Thời gian lưu PIN (giờ)</label>
                         <input id="settingsPinHours" class="form-input" type="number" min="1" max="72" placeholder="3" style="max-width:120px;">
                         <p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">Sau thời gian này admin cần nhập lại PIN</p>
+                    </div>
+                    <div class="form-group">
+                        <label>Hết hạn mã kích hoạt (giờ)</label>
+                        <input id="settingsCodeExpire" class="form-input" type="number" min="1" max="720" placeholder="24" style="max-width:120px;">
+                        <p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">Mã "đang làm" quá số giờ này sẽ tự giải phóng</p>
                     </div>
                 </div>
                 <div class="glass-panel" style="padding:2rem;margin-bottom:1.5rem;">
@@ -186,6 +199,7 @@
             <div class="form-group"><label>Tên đề thi</label><input id="inputExamTitle" class="form-input" placeholder="VD: Đề Cương Giữa Kỳ II"></div>
             <div class="form-group"><label>Môn học</label><select id="inputExamSubject" class="form-select"></select></div>
             <div class="form-group"><label>Năm học</label><input id="inputExamYear" class="form-input" placeholder="VD: 2025-2026"></div>
+            <div class="form-group"><label>Thời gian làm bài (phút)</label><input id="inputExamTimeLimit" class="form-input" type="number" min="0" max="300" placeholder="0 = không giới hạn" style="max-width:200px;"><p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">Đặt 0 hoặc bỏ trống = không giới hạn. Hết giờ sẽ tự động nộp bài.</p></div>
             <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:2rem;">
                 <button class="btn btn-ghost" onclick="closeModal('modalExam')">Hủy</button>
                 <button class="btn btn-primary" onclick="saveExam()">Lưu</button>
@@ -247,11 +261,34 @@
             <div class="form-group"><label>Mở rộng kiến thức</label><textarea id="inputExpansion" class="form-textarea"></textarea></div>
             <div class="form-group"><label>Hình ảnh câu hỏi</label>
                 <div style="display:flex;gap:0.5rem;align-items:center;">
-                    <input type="file" id="questionImageInput" accept="image/*" onchange="uploadQuestionImage(event)" style="flex:1;">
+                    <input type="file" id="questionImageInput" accept="image/*" onchange="uploadQuestionImage(event)" style="display:none;">
+                    <button type="button" class="btn btn-sm btn-outline" onclick="document.getElementById('questionImageInput').click()" style="padding:0.35rem 0.85rem;font-size:0.82rem;">📷 Chọn ảnh</button>
                     <span id="questionImagePreview" style="font-size:0.8rem;color:var(--text-muted);"></span>
                 </div>
                 <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">💡 Hoặc nhấn <kbd style="padding:0.1rem 0.4rem;background:#e2e8f0;border-radius:4px;font-size:0.7rem;">Ctrl+V</kbd> để dán ảnh từ clipboard</p>
                 <img id="questionImageImg" style="display:none;max-width:200px;margin-top:0.5rem;border-radius:8px;">
+            </div>
+            <div class="form-group"><label>Video câu hỏi (URL YouTube/MP4)</label>
+                <input id="inputQuestionVideo" class="form-input" placeholder="https://youtube.com/watch?v=... hoặc link .mp4">
+                <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Video hiện khi làm bài (hoặc dạng gợi ý)</p>
+            </div>
+            <div class="form-group" style="display:flex;align-items:center;gap:0.75rem;">
+                <label style="margin:0;cursor:pointer;">
+                    <input type="checkbox" id="toggleMediaAsHint"> Ẩn ảnh/video câu hỏi dạng "💡 Gợi ý"
+                </label>
+                <p style="font-size:0.72rem;color:var(--text-muted);margin:0;">Bấm nút mới hiện khi làm bài</p>
+            </div>
+            <hr style="border:none;border-top:1px dashed var(--border);margin:0.5rem 0 1rem;">
+            <div class="form-group"><label>Ảnh giải đáp (chỉ hiện ở kết quả)</label>
+                <div style="display:flex;gap:0.5rem;align-items:center;">
+                    <input type="file" id="explanationImageInput" accept="image/*" onchange="uploadExplanationImage(event)" style="display:none;">
+                    <button type="button" class="btn btn-sm btn-outline" onclick="document.getElementById('explanationImageInput').click()" style="padding:0.35rem 0.85rem;font-size:0.82rem;">📷 Chọn ảnh</button>
+                    <span id="explanationImagePreview" style="font-size:0.8rem;color:var(--text-muted);"></span>
+                </div>
+                <img id="explanationImageImg" style="display:none;max-width:200px;margin-top:0.5rem;border-radius:8px;">
+            </div>
+            <div class="form-group"><label>Video giải đáp (chỉ hiện ở kết quả)</label>
+                <input id="inputExplanationVideo" class="form-input" placeholder="https://youtube.com/watch?v=... hoặc link .mp4">
             </div>
             <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:2rem;">
                 <button class="btn btn-ghost" onclick="closeModal('modalQuestion')">Hủy</button>
@@ -268,6 +305,21 @@
             <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:2rem;">
                 <button class="btn btn-ghost" onclick="closeModal('modalSubject')">Hủy</button>
                 <button class="btn btn-primary" onclick="saveSubject()">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalUser" class="modal-overlay">
+        <div class="glass-panel modal-content" style="max-width:420px;">
+            <h3 id="modalUserTitle" style="font-size:1.25rem;font-weight:700;margin-bottom:2rem;">Tạo tài khoản</h3>
+            <div id="userModalError" class="auth-error" style="display:none;margin-bottom:1rem;background:#fef2f2;color:#dc2626;padding:0.5rem 0.75rem;border-radius:8px;font-size:0.85rem;"></div>
+            <div class="form-group"><label>Tên hiển thị</label><input id="inputUserDisplayName" class="form-input" placeholder="VD: Nguyễn Văn A"></div>
+            <div class="form-group"><label>Tên đăng nhập</label><input id="inputUserUsername" class="form-input" placeholder="VD: nguyenvana" autocomplete="off"></div>
+            <div class="form-group" id="userPasswordGroup"><label>Mật khẩu</label><input id="inputUserPassword" class="form-input" type="password" placeholder="Tối thiểu 4 ký tự" autocomplete="new-password"></div>
+            <div class="form-group"><label>Vai trò</label><select id="inputUserRole" class="form-select"><option value="student">Student</option><option value="admin">Admin</option></select></div>
+            <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:2rem;">
+                <button class="btn btn-ghost" onclick="closeModal('modalUser')">Hủy</button>
+                <button class="btn btn-primary" onclick="saveUser()">Lưu</button>
             </div>
         </div>
     </div>
