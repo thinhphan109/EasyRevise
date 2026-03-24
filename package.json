@@ -9,7 +9,9 @@
     "seed": "node seed.js"
   },
   "dependencies": {
+    "dotenv": "^17.3.1",
     "express": "^4.18.2",
+    "mongoose": "^9.3.2",
     "multer": "^2.1.1",
     "uuid": "^9.0.0"
   }
