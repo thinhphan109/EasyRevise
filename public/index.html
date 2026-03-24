@@ -79,10 +79,10 @@
                 <p class="subtitle" style="margin-bottom: 0;">Hệ thống ôn tập đề cương Tiếng Anh thông minh</p>
             </div>
             <div class="user-bar">
+                <button class="btn" style="background:#fffbeb;color:#92400e;font-size:0.85rem;padding:0.4rem 0.8rem;" onclick="openReviewByCodeModal()">📋 Xem lại bằng mã</button>
                 <div id="authArea">
                     <button class="btn" style="background: var(--primary-light); color: var(--primary); font-size: 0.9rem;" onclick="openAuthModal()">Đăng nhập</button>
                 </div>
-                <a href="/admin" class="btn" style="background: var(--bg-input); color: var(--text-muted); font-size: 0.85rem;">Admin</a>
             </div>
         </header>
 
@@ -229,8 +229,11 @@
             const area = document.getElementById('authArea');
             if (currentUser) {
                 const initial = (currentUser.displayName || currentUser.username).charAt(0).toUpperCase();
+                const isAdmin = currentUser.role === 'admin';
+                const adminBtn = isAdmin ? `<a href="javascript:void(0)" onclick="goAdmin()" class="btn" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:0.8rem;padding:0.4rem 0.8rem;border-radius:10px;">⚙️ Admin</a>` : '';
                 area.innerHTML = `
                     <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        ${adminBtn}
                         <div class="user-avatar">${initial}</div>
                         <div>
                             <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-main);">${currentUser.displayName}</div>
@@ -240,6 +243,27 @@
             } else {
                 area.innerHTML = `<button class="btn" style="background: var(--primary-light); color: var(--primary); font-size: 0.9rem;" onclick="openAuthModal()">Đăng nhập</button>`;
             }
+        }
+
+        // Admin PIN access
+        function goAdmin() {
+            const session = JSON.parse(localStorage.getItem('easyrevise_admin_pin_session') || '{}');
+            if (session.expiry && Date.now() < session.expiry) { window.location.href = '/admin'; return; }
+            document.getElementById('pinModal').classList.add('active');
+            document.getElementById('pinInput').value = '';
+            document.getElementById('pinError').style.display = 'none';
+            setTimeout(() => document.getElementById('pinInput').focus(), 100);
+        }
+        function submitPin() {
+            const pin = document.getElementById('pinInput').value.trim();
+            if (pin.length !== 6 || !/^\d{6}$/.test(pin)) { document.getElementById('pinError').textContent = 'PIN phải là 6 chữ số'; document.getElementById('pinError').style.display = 'block'; return; }
+            fetch('/api/admin/verify-pin', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('easyrevise_token')}` }, body: JSON.stringify({ pin }) })
+                .then(r => r.json()).then(data => {
+                    if (data.error) { document.getElementById('pinError').textContent = data.error; document.getElementById('pinError').style.display = 'block'; return; }
+                    localStorage.setItem('easyrevise_admin_pin_session', JSON.stringify({ expiry: Date.now() + 3 * 60 * 60 * 1000 }));
+                    document.getElementById('pinModal').classList.remove('active');
+                    window.location.href = '/admin';
+                }).catch(() => { document.getElementById('pinError').textContent = 'Lỗi kết nối'; document.getElementById('pinError').style.display = 'block'; });
         }
 
         // Load history
@@ -463,6 +487,57 @@
             } catch { document.getElementById('codeError').textContent = 'Lỗi kết nối'; document.getElementById('codeError').style.display = 'block'; }
         }
         document.getElementById('codeInput')?.addEventListener('keydown', e => { if (e.key === 'Enter') submitCode(); });
+        document.getElementById('pinInput')?.addEventListener('keydown', e => { if (e.key === 'Enter') submitPin(); });
     </script>
+
+    <!-- PIN Modal -->
+    <div id="pinModal" class="auth-modal">
+        <div class="glass-panel auth-box" style="max-width:360px;text-align:center;">
+            <div style="font-size:2.5rem;margin-bottom:0.75rem;">🔐</div>
+            <h3 style="font-weight:700;margin-bottom:0.5rem;">Nhập PIN Admin</h3>
+            <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1.5rem;">Nhập mã PIN 6 số để truy cập Admin Panel</p>
+            <div id="pinError" class="auth-error"></div>
+            <input id="pinInput" class="auth-input" type="password" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="● ● ● ● ● ●" style="text-align:center;font-size:1.5rem;letter-spacing:8px;font-family:monospace;">
+            <button class="btn btn-primary" style="width:100%;" onclick="submitPin()">Xác nhận</button>
+            <button style="width:100%;margin-top:0.75rem;padding:0.5rem;background:none;border:none;color:var(--text-muted);font-size:0.85rem;cursor:pointer;" onclick="document.getElementById('pinModal').classList.remove('active')">Hủy</button>
+        </div>
+    </div>
+
+    <!-- Review by Code Modal -->
+    <div id="reviewCodeModal" class="auth-modal">
+        <div class="glass-panel auth-box" style="max-width:380px;text-align:center;">
+            <div style="font-size:2.5rem;margin-bottom:0.75rem;">📋</div>
+            <h3 style="font-weight:700;margin-bottom:0.5rem;">Xem lại bài làm</h3>
+            <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1.5rem;">Nhập mã kích hoạt để xem lại kết quả</p>
+            <div id="reviewCodeError" class="auth-error"></div>
+            <input id="reviewCodeInput" class="auth-input" placeholder="Nhập mã kích hoạt" style="text-transform:uppercase;font-family:monospace;font-size:1.1rem;text-align:center;letter-spacing:3px;">
+            <button class="btn btn-primary" style="width:100%;" onclick="submitReviewCode()">Xem kết quả</button>
+            <button style="width:100%;margin-top:0.75rem;padding:0.5rem;background:none;border:none;color:var(--text-muted);font-size:0.85rem;cursor:pointer;" onclick="document.getElementById('reviewCodeModal').classList.remove('active')">Hủy</button>
+        </div>
+    </div>
+
+    <script>
+    function openReviewByCodeModal() {
+        document.getElementById('reviewCodeModal').classList.add('active');
+        document.getElementById('reviewCodeInput').value = '';
+        document.getElementById('reviewCodeError').style.display = 'none';
+        setTimeout(() => document.getElementById('reviewCodeInput').focus(), 100);
+    }
+    async function submitReviewCode() {
+        const code = document.getElementById('reviewCodeInput').value.trim();
+        if (!code) return;
+        try {
+            const res = await fetch('/api/review-by-code', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code }) });
+            const data = await res.json();
+            if (data.error) { document.getElementById('reviewCodeError').textContent = data.error; document.getElementById('reviewCodeError').style.display = 'block'; return; }
+            sessionStorage.setItem('easyrevise_final_result', JSON.stringify(data.result));
+            document.getElementById('reviewCodeModal').classList.remove('active');
+            window.location.href = 'result.html';
+        } catch { document.getElementById('reviewCodeError').textContent = 'Lỗi kết nối'; document.getElementById('reviewCodeError').style.display = 'block'; }
+    }
+    document.getElementById('reviewCodeInput')?.addEventListener('keydown', e => { if (e.key === 'Enter') submitReviewCode(); });
+    </script>
+
 </body>
 </html>
+

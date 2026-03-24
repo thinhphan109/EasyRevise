@@ -1,7 +1,7 @@
 // ========================
 // State
 // ========================
-let adminToken = localStorage.getItem('easyrevise_admin_token');
+let adminToken = localStorage.getItem('easyrevise_token');
 let adminUser = null;
 let currentExamId = null, currentSectionId = null, currentExamData = null;
 let editingQuestionId = null, editingSectionId = null, editingExamId = null;
@@ -40,13 +40,14 @@ async function adminLogin() {
         if (data.error) { document.getElementById('loginError').textContent = data.error; document.getElementById('loginError').style.display = 'block'; return; }
         if (data.role !== 'admin') { document.getElementById('loginError').textContent = 'Tài khoản không phải admin'; document.getElementById('loginError').style.display = 'block'; return; }
         adminToken = data.token;
-        localStorage.setItem('easyrevise_admin_token', adminToken);
+        localStorage.setItem('easyrevise_token', adminToken);
+        localStorage.setItem('easyrevise_user', JSON.stringify({ id: data.id, username: data.username, displayName: data.displayName, role: data.role }));
         adminUser = data;
         checkAdminAuth();
     } catch { document.getElementById('loginError').textContent = 'Lỗi kết nối'; document.getElementById('loginError').style.display = 'block'; }
 }
 
-function adminLogout() { localStorage.removeItem('easyrevise_admin_token'); adminToken = null; showLoginGate(); }
+function adminLogout() { localStorage.removeItem('easyrevise_token'); localStorage.removeItem('easyrevise_user'); adminToken = null; showLoginGate(); }
 
 // ========================
 // API Helper
@@ -62,13 +63,13 @@ async function api(url, method = 'GET', body = null) {
 // Tabs
 // ========================
 function switchTab(tab) {
-    document.querySelectorAll('.tab-item').forEach((t, i) => { t.classList.toggle('active', ['exams', 'users', 'subjects'][i] === tab); });
-    document.getElementById('tabExams').classList.toggle('active', tab === 'exams');
-    document.getElementById('tabUsers').classList.toggle('active', tab === 'users');
-    document.getElementById('tabSubjects').classList.toggle('active', tab === 'subjects');
+    const tabs = ['exams', 'users', 'subjects', 'settings'];
+    document.querySelectorAll('.tab-item').forEach((t, i) => { t.classList.toggle('active', tabs[i] === tab); });
+    tabs.forEach(t => { const el = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)); if (el) el.classList.toggle('active', t === tab); });
     if (tab === 'exams') { showView('viewExamList'); loadExamList(); }
     if (tab === 'users') loadUsers();
     if (tab === 'subjects') loadSubjects();
+    if (tab === 'settings') loadSettings();
 }
 
 function showView(viewId) {
@@ -392,6 +393,30 @@ async function handleImportFile(event) {
     const file = event.target.files[0]; if (!file) return;
     try { const text = await file.text(); const data = JSON.parse(text); const r = await api('/api/exams/import','POST',data); if(r.error)alert('Lỗi: '+r.error);else{alert('Import OK: '+r.title);loadExamList();} } catch(e){alert('File lỗi: '+e.message);}
     event.target.value = '';
+}
+
+// ========================
+// Settings
+// ========================
+async function loadSettings() {
+    const s = await api('/api/settings');
+    document.getElementById('settingsPin').value = s.adminPin || '';
+    document.getElementById('settingsPinHours').value = s.pinSessionHours || 3;
+    document.getElementById('settingsSiteName').value = s.siteName || '';
+    document.getElementById('settingsSiteDesc').value = s.siteDescription || '';
+}
+
+async function saveSettings() {
+    const data = {
+        adminPin: document.getElementById('settingsPin').value.trim(),
+        pinSessionHours: parseInt(document.getElementById('settingsPinHours').value) || 3,
+        siteName: document.getElementById('settingsSiteName').value.trim(),
+        siteDescription: document.getElementById('settingsSiteDesc').value.trim()
+    };
+    if (data.adminPin.length !== 6 || !/^\d{6}$/.test(data.adminPin)) { alert('PIN phải là 6 chữ số'); return; }
+    await api('/api/settings', 'PUT', data);
+    const msg = document.getElementById('settingsSaveStatus');
+    msg.style.display = 'inline'; setTimeout(() => { msg.style.display = 'none'; }, 2000);
 }
 
 // ========================

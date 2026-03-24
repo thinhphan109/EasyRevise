@@ -110,6 +110,7 @@
                 <div class="tab-item active" onclick="switchTab('exams')">📝 Đề thi</div>
                 <div class="tab-item" onclick="switchTab('users')">👥 Tài khoản</div>
                 <div class="tab-item" onclick="switchTab('subjects')">📚 Môn học</div>
+                <div class="tab-item" onclick="switchTab('settings')">⚙️ Cài đặt</div>
             </div>
 
             <!-- TAB: Exams -->
@@ -144,6 +145,36 @@
                     <button class="btn btn-primary btn-sm" onclick="showAddSubjectModal()">+ Thêm môn</button>
                 </div>
                 <div id="subjectListContainer"></div>
+            </div>
+
+            <!-- TAB: Settings -->
+            <div id="tabSettings" class="view">
+                <h2 style="font-size:1.5rem;font-weight:700;margin-bottom:2rem;">⚙️ Cài đặt hệ thống</h2>
+                <div class="glass-panel" style="padding:2rem;margin-bottom:1.5rem;">
+                    <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;">🔐 Bảo mật Admin</h3>
+                    <div class="form-group">
+                        <label>PIN Admin (6 số)</label>
+                        <input id="settingsPin" class="form-input" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="123456" style="max-width:200px;font-family:monospace;letter-spacing:4px;">
+                    </div>
+                    <div class="form-group">
+                        <label>Thời gian lưu PIN (giờ)</label>
+                        <input id="settingsPinHours" class="form-input" type="number" min="1" max="72" placeholder="3" style="max-width:120px;">
+                        <p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">Sau thời gian này admin cần nhập lại PIN</p>
+                    </div>
+                </div>
+                <div class="glass-panel" style="padding:2rem;margin-bottom:1.5rem;">
+                    <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;">🌐 Trang chủ</h3>
+                    <div class="form-group">
+                        <label>Tên hệ thống</label>
+                        <input id="settingsSiteName" class="form-input" placeholder="EasyRevise" style="max-width:300px;">
+                    </div>
+                    <div class="form-group">
+                        <label>Mô tả</label>
+                        <input id="settingsSiteDesc" class="form-input" placeholder="Hệ thống ôn tập...">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="saveSettings()">💾 Lưu cài đặt</button>
+                <span id="settingsSaveStatus" style="margin-left:1rem;font-size:0.85rem;color:var(--success);display:none;">✅ Đã lưu!</span>
             </div>
         </div>
     </div>
