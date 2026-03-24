@@ -456,8 +456,12 @@ app.get('/api/history', authMiddleware, async (req, res) => {
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'index.html')));
 app.get('/admin/*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'index.html')));
 
-app.listen(PORT, () => {
-    console.log(`\n  🚀 EasyRevise Server running at http://localhost:${PORT}`);
-    console.log(`  📝 Student:  http://localhost:${PORT}/`);
-    console.log(`  ⚙️  Admin:    http://localhost:${PORT}/admin\n`);
-});
+if (!process.env.VERCEL) {
+    app.listen(PORT, () => {
+        console.log(`\n  🚀 EasyRevise Server running at http://localhost:${PORT}`);
+        console.log(`  📝 Student:  http://localhost:${PORT}/`);
+        console.log(`  ⚙️  Admin:    http://localhost:${PORT}/admin\n`);
+    });
+}
+
+module.exports = app;
