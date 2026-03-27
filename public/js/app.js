@@ -1,5 +1,50 @@
 // EasyRevise - Exam Engine with Navigator + Auth + History
 
+// Shared markdown renderer (tables, bold, italic, inline images, headings)
+function renderMarkdown(text) {
+    if (!text) return '';
+    function inlineFmt(str) {
+        return str
+            .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, url) =>
+                `<img src="${url}" alt="${alt}" style="max-width:100%;max-height:380px;border-radius:10px;display:block;margin:0.5rem auto;object-fit:contain;">`)
+            .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.+?)\*/g, '<em>$1</em>')
+            .replace(/`(.+?)`/g, '<code style="background:rgba(0,0,0,0.1);padding:0.1rem 0.3rem;border-radius:4px;font-size:0.85em;">$1</code>');
+    }
+    const lines = text.split('\n');
+    let html = '';
+    let i = 0;
+    while (i < lines.length) {
+        const line = lines[i];
+        const trimmed = line.trim();
+        if (trimmed.startsWith('|') && i + 1 < lines.length && /^\|[\s\-:|]+\|$/.test(lines[i + 1].trim())) {
+            const headers = trimmed.split('|').slice(1, -1).map(c => c.trim());
+            let t = `<div style="overflow-x:auto;margin:0.65rem 0;"><table style="border-collapse:collapse;width:100%;font-size:0.9rem;">`;
+            t += `<thead><tr>` + headers.map(c =>
+                `<th style="border:1px solid #cbd5e1;padding:0.35rem 0.75rem;background:rgba(99,102,241,0.08);font-weight:700;text-align:center;">${inlineFmt(c)}</th>`
+            ).join('') + `</tr></thead><tbody>`;
+            i += 2;
+            while (i < lines.length && lines[i].trim().startsWith('|')) {
+                const cells = lines[i].trim().split('|').slice(1, -1).map(c => c.trim());
+                t += `<tr>` + cells.map(c =>
+                    `<td style="border:1px solid #cbd5e1;padding:0.35rem 0.75rem;text-align:center;">${inlineFmt(c)}</td>`
+                ).join('') + `</tr>`;
+                i++;
+            }
+            t += `</tbody></table></div>`;
+            html += t;
+            continue;
+        }
+        if (trimmed.startsWith('### ')) html += `<div style="font-weight:700;margin:0.5rem 0 0.15rem;">${inlineFmt(trimmed.slice(4))}</div>`;
+        else if (trimmed.startsWith('## ')) html += `<div style="font-weight:800;font-size:1.05rem;margin:0.6rem 0 0.2rem;">${inlineFmt(trimmed.slice(3))}</div>`;
+        else if (trimmed === '') html += '<div style="height:0.4rem;"></div>';
+        else html += `<div style="line-height:1.8;">${inlineFmt(trimmed)}</div>`;
+        i++;
+    }
+    return html;
+}
+
 class ExamApp {
     constructor() {
         this.examData = null;
@@ -397,13 +442,13 @@ class ExamApp {
 
     renderMultipleChoice(question) {
         const instr = question.instruction || '';
-        this.instruction.textContent = instr;
+        this.instruction.innerHTML = instr ? renderMarkdown(instr) : '';
         this.instruction.style.display = instr ? '' : 'none';
         if (question.passage) {
             this.passageContainer.style.display = 'block';
-            this.passageContainer.innerHTML = question.passage.replace(/\n/g, '<br>');
+            this.passageContainer.innerHTML = renderMarkdown(question.passage);
         }
-        this.questionText.textContent = question.question;
+        this.questionText.innerHTML = renderMarkdown(question.question);
 
         // Render question media (image/video, with optional hint mode)
         this.renderQuestionMedia(question);
