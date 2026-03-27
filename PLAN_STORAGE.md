@@ -113,6 +113,39 @@ npm install googleapis
 
 ---
 
+## 📌 Lưu ý Migration (2026-03-27)
+
+Hiện tại ảnh upload qua hàm `uploadSingleImage(file)` trong `admin.js` → gọi `POST /api/upload` → lưu vào `public/uploads/`.
+
+**Khi migrate sang Drive**, cần cập nhật các nơi sau trong `admin.js`:
+
+| Hàm | Upload vào | Ghi chú |
+|---|---|---|
+| `addQuestionImage(file)` | `questionImages[]` | Ảnh câu hỏi |
+| `addExplanationImage(file)` | `explanationImages[]` | Ảnh giải thích (vừa thêm Ctrl+V + toolbar 📷) |
+| `uploadOptionImage(idx, file)` | `optionImages[idx]` | Ảnh từng đáp án A/B/C/D |
+| `uploadImageFile(file)` | `questionImageUrl` (legacy) | Ảnh đơn cũ |
+
+Tất cả đều gọi qua `uploadSingleImage(file)` → **chỉ cần sửa 1 hàm này** khi switch sang Drive.
+
+```js
+// Cần sửa từ:
+async function uploadSingleImage(file) {
+    const formData = new FormData(); formData.append('image', file);
+    const res = await fetch('/api/upload', ...);
+    return data.url;
+}
+
+// Thành: (gọi /api/media/upload thay vì /api/upload)
+async function uploadSingleImage(file) {
+    const formData = new FormData(); formData.append('image', file);
+    const res = await fetch('/api/media/upload', ...);
+    return data.url; // Drive streaming URL
+}
+```
+
+---
+
 ## ✅ Danh sách Task
 
 ---
