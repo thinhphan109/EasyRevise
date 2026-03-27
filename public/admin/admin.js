@@ -202,17 +202,20 @@ function openModal(id) {
     // TN4: inject LaTeX toolbar for question textareas
     if (id === 'modalQuestion' || id === 'modalSection') {
         setTimeout(() => {
-            // Explanation textareas — 📷 button uploads to explanationImages[]
+            // Explanation textareas — 📷 inserts inline image ![](url) at cursor
             ['inputExplanation', 'inputExpansion'].forEach(tid => {
                 if (document.getElementById(tid))
-                    injectLatexToolbar(tid, (file) => addExplanationImage(file));
+                    injectLatexToolbar(tid, async (file) => {
+                        const url = await uploadSingleImage(file);
+                        if (url) insertInlineImage(document.getElementById(tid), url);
+                    });
             });
-            // Question / section textareas — 📷 button uploads to questionImages[]
+            // Question textareas — 📷 adds to questionImages[]
             ['inputQuestion', 'inputQuestionText'].forEach(tid => {
                 if (document.getElementById(tid))
                     injectLatexToolbar(tid, (file) => addQuestionImage(file));
             });
-            // Section textareas — no image upload (section-level images not yet implemented)
+            // Section textareas — no image upload
             ['inputEssaySample', 'inputEssayPrompt', 'inputSectionPassage', 'inputSectionInstruction'].forEach(tid => {
                 if (document.getElementById(tid)) injectLatexToolbar(tid, null);
             });
@@ -648,11 +651,11 @@ document.addEventListener('paste', async (e) => {
             if (!file) break;
             const focusedId = document.activeElement?.id || '';
             if (focusedId === 'inputExplanation' || focusedId === 'inputExpansion') {
-                // Paste → explanation images
+                // Paste → insert inline image markdown at cursor position
                 const url = await uploadSingleImage(file);
-                if (url) { explanationImages.push(url); renderExplanationImagePreviews(); }
+                if (url) insertInlineImage(document.getElementById(focusedId), url);
             } else if (focusedId === 'inputQuestion' || focusedId === 'inputQuestionText') {
-                // Paste → question images
+                // Paste → question images array
                 const url = await uploadSingleImage(file);
                 if (url) { questionImages.push(url); renderMultiImagePreviews(); }
             } else {
@@ -663,6 +666,17 @@ document.addEventListener('paste', async (e) => {
         }
     }
 });
+
+// Insert image markdown ![](url) at cursor position in textarea
+function insertInlineImage(ta, url) {
+    if (!ta) return;
+    const start = ta.selectionStart;
+    const end = ta.selectionEnd;
+    const imgMd = `\n![](${url})\n`;
+    ta.value = ta.value.substring(0, start) + imgMd + ta.value.substring(end);
+    ta.setSelectionRange(start + imgMd.length, start + imgMd.length);
+    ta.focus();
+}
 
 async function uploadExplanationImage(event) {
     const file = event.target.files[0]; if (!file) return;
