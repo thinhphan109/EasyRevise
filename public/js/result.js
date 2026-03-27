@@ -457,9 +457,9 @@ class ResultApp {
                     </div>
                     ${statusBadge}
                 </div>
-                <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1.25rem; color: var(--text-main); line-height: 1.5;">
-                    ${q.isEssay ? (q.prompt || '') : (q.isFreeForm ? (q.instruction || '') : (q.question || ''))}
-                </p>
+                <div style="font-size: 1.05rem; font-weight: 600; margin-bottom: 1.25rem; color: var(--text-main); line-height: 1.5;" class="katex-render">
+                    ${renderMarkdown(q.isEssay ? (q.prompt || '') : (q.isFreeForm ? (q.instruction || '') : (q.question || '')))}
+                </div>
                 ${questionMediaHtml}
                 ${responseRow}
                 ${q.explanation && q.showExplanation !== false ? `
