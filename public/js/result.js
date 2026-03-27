@@ -237,6 +237,10 @@ class ResultApp {
                 // Helper: build explanation media HTML for a sub-part
                 const buildPartExplHtml = (p) => {
                     let h = '';
+                    // BUG-FIX: render explanation TEXT from sub-part (was missing before)
+                    if (p.explanation) {
+                        h += `<div style="margin-top:0.5rem;padding:0.5rem 0.75rem;background:rgba(99,102,241,0.06);border-left:3px solid rgba(99,102,241,0.35);border-radius:0 8px 8px 0;font-size:0.85rem;color:var(--text-main);line-height:1.6;" class="katex-render">${p.explanation}</div>`;
+                    }
                     const imgs = [];
                     if (p.explanationImages && p.explanationImages.length > 0) imgs.push(...p.explanationImages);
                     else if (p.explanationImage) imgs.push(p.explanationImage);
