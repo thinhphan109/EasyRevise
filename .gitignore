@@ -4,3 +4,21 @@ node_modules/
 .DS_Store
 Thumbs.db
 .agents/
+
+# Data — chứa dữ liệu học sinh, không commit
+data/exams.json
+data/users.json
+data/subjects.json
+data/settings.json
+data/backups/
+
+# Uploads — file media học sinh
+public/uploads/
+
+# Service account key — tuyệt đối không commit
+service-account.json
+*.key.json
+
+# Temp/test
+_test_env.js
+*.zip
