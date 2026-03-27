@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,87 +9,646 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
     <style>
-        .admin-header { display:flex;justify-content:space-between;align-items:center;padding:1.5rem 0;border-bottom:1px solid var(--border);margin-bottom:0; }
-        .admin-header h1 { font-size:1.75rem;margin-bottom:0; }
-        .admin-badge { background:linear-gradient(135deg,var(--primary),var(--secondary));padding:0.35rem 1rem;border-radius:20px;font-size:0.75rem;color:#fff;font-weight:700;text-transform:uppercase;letter-spacing:1px; }
-        .tab-bar { display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:2rem; }
-        .tab-item { padding:0.85rem 1.5rem;font-weight:600;font-size:0.9rem;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s; }
-        .tab-item:hover { color:var(--text-main); }
-        .tab-item.active { color:var(--primary);border-bottom-color:var(--primary); }
-        .view { display:none; } .view.active { display:block;animation:fadeIn 0.4s ease; }
-        .exam-table { width:100%;border-collapse:separate;border-spacing:0 0.75rem; }
-        .exam-table th { text-align:left;padding:0.5rem 1rem;color:var(--text-muted);font-size:0.75rem;text-transform:uppercase;letter-spacing:1px; }
-        .exam-row { background:var(--bg-card);border-radius:16px;cursor:pointer;transition:var(--transition);box-shadow:var(--shadow-sm); }
-        .exam-row:hover { background:var(--primary-light);box-shadow:var(--shadow-md); }
-        .exam-row td { padding:1.25rem 1rem;color:var(--text-main); }
-        .exam-row td:first-child { border-radius:16px 0 0 16px; } .exam-row td:last-child { border-radius:0 16px 16px 0; }
-        .form-group { margin-bottom:1.5rem; }
-        .form-group label { display:block;margin-bottom:0.5rem;font-weight:600;color:var(--text-main);font-size:0.9rem; }
-        .form-input,.form-select,.form-textarea { width:100%;padding:0.85rem 1rem;background:var(--bg-input);border:1px solid var(--border);border-radius:12px;color:var(--text-main);font-size:1rem;font-family:inherit;transition:var(--transition); }
-        .form-input:focus,.form-select:focus,.form-textarea:focus { outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(99,102,241,0.1); }
-        .form-textarea { min-height:120px;resize:vertical; }
-        .section-card { padding:1.5rem;margin-bottom:1rem;border-radius:16px;border:1px solid var(--border);background:var(--bg-card);transition:var(--transition);box-shadow:var(--shadow-sm); }
-        .section-card:hover { border-color:var(--primary);box-shadow:var(--shadow-md); }
-        .section-header { display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem; }
-        .section-type-badge { padding:0.2rem 0.8rem;border-radius:8px;font-size:0.7rem;font-weight:700;text-transform:uppercase; }
-        .type-mc { background:#eef2ff;color:#4f46e5; } .type-reading { background:#f0fdf4;color:#16a34a; }
-        .type-writing { background:#fdf2f8;color:#db2777; } .type-essay { background:#fffbeb;color:#d97706; }
-        .type-freeform { background:#f0f9ff;color:#0284c7; }
-        .question-item { padding:1rem 1.25rem;margin-bottom:0.5rem;border-radius:12px;background:var(--bg-body);border:1px solid transparent;display:flex;justify-content:space-between;align-items:center;transition:var(--transition); }
-        .question-item:hover { border-color:var(--border);background:var(--bg-card); }
-        .q-num { width:32px;height:32px;border-radius:8px;background:#eef2ff;color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;margin-right:1rem;flex-shrink:0; }
-        .q-text { flex:1;font-size:0.95rem;color:var(--text-main); }
-        .q-correct { padding:0.2rem 0.6rem;background:#f0fdf4;color:#16a34a;border-radius:6px;font-size:0.75rem;font-weight:700;margin-left:0.5rem; }
-        .action-bar { display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:2rem; }
-        .btn-sm { padding:0.5rem 1rem;font-size:0.85rem;border-radius:10px; }
-        .btn-danger { background:#fef2f2;color:#dc2626; } .btn-danger:hover { background:#fee2e2; }
-        .btn-success { background:#f0fdf4;color:#16a34a; } .btn-success:hover { background:#dcfce7; }
-        .btn-outline { background:transparent;border:1px solid var(--border);color:var(--text-main); }
-        .btn-outline:hover { border-color:var(--primary);color:var(--primary); }
-        .btn-ghost { background:var(--bg-input);color:var(--text-secondary); } .btn-ghost:hover { background:var(--border);color:var(--text-main); }
-        .btn-info { background:#eff6ff;color:#2563eb; } .btn-info:hover { background:#dbeafe; }
-        .option-row { display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem; }
-        .option-row .form-input { flex:1; }
-        .option-radio { width:20px;height:20px;accent-color:var(--primary);cursor:pointer; }
-        .modal-overlay { position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:1000; }
-        .modal-overlay.active { display:flex; }
-        .modal-content { width:90%;max-width:700px;max-height:85vh;overflow-y:auto;padding:2.5rem;border-radius:24px; }
-        .breadcrumb { display:flex;align-items:center;gap:0.5rem;margin-bottom:1.5rem;font-size:0.85rem;color:var(--text-muted); }
-        .breadcrumb a { color:var(--primary);text-decoration:none;cursor:pointer; } .breadcrumb a:hover { text-decoration:underline; }
-        .empty-state { text-align:center;padding:4rem 2rem;color:var(--text-muted); }
-        .empty-state .emoji { font-size:3rem;margin-bottom:1rem; }
-        #importFileInput { display:none; }
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 0;
+        }
+
+        .admin-header h1 {
+            font-size: 1.75rem;
+            margin-bottom: 0;
+        }
+
+        .admin-badge {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 0.35rem 1rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: #fff;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .tab-bar {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 2rem;
+        }
+
+        .tab-item {
+            padding: 0.85rem 1.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+
+        .tab-item:hover {
+            color: var(--text-main);
+        }
+
+        .tab-item.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .exam-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 0.75rem;
+        }
+
+        .exam-table th {
+            text-align: left;
+            padding: 0.5rem 1rem;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .exam-row {
+            background: var(--bg-card);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .exam-row:hover {
+            background: var(--primary-light);
+            box-shadow: var(--shadow-md);
+        }
+
+        .exam-row td {
+            padding: 1.25rem 1rem;
+            color: var(--text-main);
+        }
+
+        .exam-row td:first-child {
+            border-radius: 16px 0 0 16px;
+        }
+
+        .exam-row td:last-child {
+            border-radius: 0 16px 16px 0;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 0.9rem;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: var(--transition);
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .section-card {
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .section-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .section-type-badge {
+            padding: 0.2rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .type-mc {
+            background: #eef2ff;
+            color: #4f46e5;
+        }
+
+        .type-reading {
+            background: #f0fdf4;
+            color: #16a34a;
+        }
+
+        .type-writing {
+            background: #fdf2f8;
+            color: #db2777;
+        }
+
+        .type-essay {
+            background: #fffbeb;
+            color: #d97706;
+        }
+
+        .type-freeform {
+            background: #f0f9ff;
+            color: #0284c7;
+        }
+
+        .type-fillin {
+            background: #fdf4ff;
+            color: #9333ea;
+        }
+
+        .question-item {
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.5rem;
+            border-radius: 12px;
+            background: var(--bg-body);
+            border: 1px solid transparent;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        .question-item:hover {
+            border-color: var(--border);
+            background: var(--bg-card);
+        }
+
+        .q-num {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: #eef2ff;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        .q-text {
+            flex: 1;
+            font-size: 0.95rem;
+            color: var(--text-main);
+        }
+
+        .q-correct {
+            padding: 0.2rem 0.6rem;
+            background: #f0fdf4;
+            color: #16a34a;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-left: 0.5rem;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            border-radius: 10px;
+        }
+
+        .btn-danger {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .btn-danger:hover {
+            background: #fee2e2;
+        }
+
+        .btn-success {
+            background: #f0fdf4;
+            color: #16a34a;
+        }
+
+        .btn-success:hover {
+            background: #dcfce7;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-ghost {
+            background: var(--bg-input);
+            color: var(--text-secondary);
+        }
+
+        .btn-ghost:hover {
+            background: var(--border);
+            color: var(--text-main);
+        }
+
+        .btn-info {
+            background: #eff6ff;
+            color: #2563eb;
+        }
+
+        .btn-info:hover {
+            background: #dbeafe;
+        }
+
+        .option-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .option-row .form-input {
+            flex: 1;
+        }
+
+        .option-radio {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            width: 90%;
+            max-width: 700px;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 2.5rem;
+            border-radius: 24px;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .breadcrumb a {
+            color: var(--primary);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+        }
+
+        .empty-state .emoji {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        #importFileInput {
+            display: none;
+        }
+
         /* User table */
-        .user-row td { padding:1rem; }
-        .role-badge { padding:0.2rem 0.6rem;border-radius:6px;font-size:0.7rem;font-weight:700;text-transform:uppercase; }
-        .role-admin { background:#fef2f2;color:#dc2626; } .role-student { background:#eef2ff;color:#4f46e5; }
+        .user-row td {
+            padding: 1rem;
+        }
+
+        .role-badge {
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .role-admin {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .role-student {
+            background: #eef2ff;
+            color: #4f46e5;
+        }
+
         /* Login gate */
-        .login-gate { max-width:400px;margin:10vh auto;text-align:center; }
-        .login-gate h2 { margin-bottom:1.5rem; }
+        .login-gate {
+            max-width: 400px;
+            margin: 10vh auto;
+            text-align: center;
+        }
+
+        .login-gate h2 {
+            margin-bottom: 1.5rem;
+        }
+
         /* Subject */
-        .subject-item { display:flex;align-items:center;justify-content:space-between;padding:0.85rem 1.25rem;border-radius:12px;background:var(--bg-card);border:1px solid var(--border);margin-bottom:0.5rem; }
+        .subject-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.85rem 1.25rem;
+            border-radius: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            margin-bottom: 0.5rem;
+        }
+
         /* Toggle */
-        .toggle-row { display:flex;align-items:center;justify-content:space-between;padding:0.75rem 0; }
-        .toggle-switch { position:relative;width:44px;height:24px; }
-        .toggle-switch input { opacity:0;width:0;height:0; }
-        .toggle-slider { position:absolute;cursor:pointer;inset:0;background:#cbd5e1;border-radius:12px;transition:0.3s; }
-        .toggle-slider:before { content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:white;border-radius:50%;transition:0.3s; }
-        .toggle-switch input:checked + .toggle-slider { background:var(--primary); }
-        .toggle-switch input:checked + .toggle-slider:before { transform:translateX(20px); }
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background: #cbd5e1;
+            border-radius: 12px;
+            transition: 0.3s;
+        }
+
+        .toggle-slider:before {
+            content: '';
+            position: absolute;
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        .toggle-switch input:checked+.toggle-slider {
+            background: var(--primary);
+        }
+
+        .toggle-switch input:checked+.toggle-slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Notification Bell */
+        .notif-btn {
+            position: relative;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.5rem 0.75rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            line-height: 1;
+            transition: var(--transition);
+        }
+
+        .notif-btn:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .notif-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #dc2626;
+            color: #fff;
+            border-radius: 10px;
+            min-width: 18px;
+            height: 18px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            border: 2px solid var(--bg-body);
+        }
+
+        .notif-panel {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 340px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            z-index: 500;
+            display: none;
+            overflow: hidden;
+        }
+
+        .notif-panel.open {
+            display: block;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .notif-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .notif-item {
+            padding: 0.85rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .notif-item:hover {
+            background: var(--bg-input);
+        }
+
+        .notif-item:last-child {
+            border-bottom: none;
+        }
+
+        .notif-item.unread {
+            background: var(--primary-light);
+        }
+
+        .notif-empty {
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        @keyframes bell-ring {
+
+            0%,
+            100% {
+                transform: rotate(0)
+            }
+
+            20% {
+                transform: rotate(-15deg)
+            }
+
+            40% {
+                transform: rotate(15deg)
+            }
+
+            60% {
+                transform: rotate(-10deg)
+            }
+
+            80% {
+                transform: rotate(10deg)
+            }
+        }
+
+        .bell-ring {
+            animation: bell-ring 0.5s ease;
+        }
     </style>
 </head>
+
 <body>
     <div class="container" style="max-width:1100px;">
         <!-- Login Gate -->
         <div id="loginGate" class="login-gate" style="display:none;">
             <div class="glass-panel" style="padding:2.5rem;">
                 <h2>🔐 Đăng nhập Admin</h2>
-                <div id="loginError" style="color:var(--error);font-size:0.85rem;margin-bottom:1rem;display:none;"></div>
+                <div id="loginError" style="color:var(--error);font-size:0.85rem;margin-bottom:1rem;display:none;">
+                </div>
                 <input id="adminUsername" class="form-input" placeholder="Tên đăng nhập" style="margin-bottom:1rem;">
-                <input id="adminPassword" class="form-input" type="password" placeholder="Mật khẩu" style="margin-bottom:1.5rem;">
+                <input id="adminPassword" class="form-input" type="password" placeholder="Mật khẩu"
+                    style="margin-bottom:1.5rem;">
                 <button class="btn btn-primary" style="width:100%;" onclick="adminLogin()">Đăng nhập</button>
-                <a href="/" style="display:block;margin-top:1rem;color:var(--text-muted);font-size:0.85rem;">← Về trang chủ</a>
+                <a href="/" style="display:block;margin-top:1rem;color:var(--text-muted);font-size:0.85rem;">← Về trang
+                    chủ</a>
+            </div>
+        </div>
+
+        <!-- PIN Re-entry Modal -->
+        <div id="adminPinModal" class="modal-overlay" style="display:none;">
+            <div class="glass-panel modal-content" style="max-width:360px;text-align:center;">
+                <div style="font-size:2.5rem;margin-bottom:1rem;">🔐</div>
+                <h3 style="font-size:1.2rem;font-weight:700;margin-bottom:0.5rem;">Nhập PIN Admin</h3>
+                <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1.5rem;">Phiên PIN đã hết hạn. Vui
+                    lòng nhập lại PIN để tiếp tục.</p>
+                <div id="adminPinError" style="color:var(--error);font-size:0.85rem;margin-bottom:1rem;display:none;">
+                </div>
+                <input id="adminPinInput" class="form-input" type="password" maxlength="6" inputmode="numeric"
+                    pattern="[0-9]*" placeholder="Nhập PIN 6 số"
+                    style="text-align:center;font-size:1.5rem;letter-spacing:8px;font-family:monospace;margin-bottom:1.5rem;">
+                <button class="btn btn-primary" style="width:100%;" onclick="submitAdminPin()">Xác nhận</button>
+                <a href="/" style="display:block;margin-top:1rem;color:var(--text-muted);font-size:0.85rem;">← Về trang
+                    chủ</a>
             </div>
         </div>
 
@@ -102,6 +662,23 @@
                 </div>
                 <div style="display:flex;align-items:center;gap:0.75rem;">
                     <span id="adminName" style="font-size:0.85rem;color:var(--text-muted);"></span>
+                    <!-- Notification Bell -->
+                    <div style="position:relative;">
+                        <button id="notifBellBtn" class="notif-btn" onclick="NotificationManager.togglePanel()"
+                            title="Thông báo">
+                            🔔<span id="notifBadge" class="notif-badge" style="display:none;">0</span>
+                        </button>
+                        <div id="notifPanel" class="notif-panel">
+                            <div class="notif-panel-header">
+                                <span style="font-weight:700;font-size:0.9rem;">🔔 Thông báo</span>
+                                <button class="btn btn-sm btn-ghost" onclick="NotificationManager.markAllRead()"
+                                    style="font-size:0.75rem;padding:0.2rem 0.5rem;">Đọc tất cả</button>
+                            </div>
+                            <div id="notifList">
+                                <div class="notif-empty">Chưa có thông báo</div>
+                            </div>
+                        </div>
+                    </div>
                     <button class="btn btn-sm btn-ghost" onclick="adminLogout()">Đăng xuất</button>
                 </div>
             </div>
@@ -111,13 +688,19 @@
                 <div class="tab-item" onclick="switchTab('users')">👥 Tài khoản</div>
                 <div class="tab-item" onclick="switchTab('subjects')">📚 Môn học</div>
                 <div class="tab-item" onclick="switchTab('codeLogs')">📊 Mã kích hoạt</div>
+                <div class="tab-item" onclick="switchTab('submissions')">📋 Bài nộp</div>
                 <div class="tab-item" onclick="switchTab('settings')">⚙️ Cài đặt</div>
+                <div class="tab-item" onclick="switchTab('help')" style="color:#0369a1;">📖 Hướng dẫn</div>
+                <div class="tab-item" onclick="switchTab('aiGen')"
+                    style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border-radius:8px;margin-left:auto;padding:0.6rem 1.2rem;">
+                    🤖 AI Tạo Đề</div>
             </div>
 
             <!-- TAB: Exams -->
             <div id="tabExams" class="view active">
                 <div id="viewExamList" class="view active">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;">
+                    <div
+                        style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;">
                         <h2 style="font-size:1.5rem;font-weight:700;">Quản lý Đề Thi</h2>
                         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
                             <button class="btn btn-sm btn-info" onclick="triggerImport()">Import JSON</button>
@@ -125,7 +708,12 @@
                             <button class="btn btn-primary" onclick="showCreateExamModal()">+ Tạo đề mới</button>
                         </div>
                     </div>
-                    <div id="examListContainer"><div class="empty-state"><div class="emoji">⏳</div><p>Đang tải...</p></div></div>
+                    <div id="examListContainer">
+                        <div class="empty-state">
+                            <div class="emoji">⏳</div>
+                            <p>Đang tải...</p>
+                        </div>
+                    </div>
                 </div>
                 <div id="viewExamEditor" class="view"></div>
                 <div id="viewSectionEditor" class="view"></div>
@@ -152,7 +740,157 @@
             <!-- TAB: Code Logs -->
             <div id="tabCodeLogs" class="view">
                 <h2 style="font-size:1.5rem;font-weight:700;margin-bottom:2rem;">📊 Lịch sử sử dụng mã</h2>
-                <div id="codeLogsContainer" style="max-height:600px;overflow-y:auto;"><div class="empty-state"><div class="emoji">⏳</div><p>Đang tải...</p></div></div>
+                <div id="codeLogsContainer" style="max-height:600px;overflow-y:auto;">
+                    <div class="empty-state">
+                        <div class="emoji">⏳</div>
+                        <p>Đang tải...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Submissions -->
+            <div id="tabSubmissions" class="view">
+                <style>
+                    .submission-card {
+                        background: var(--bg-card);
+                        border: 1px solid var(--border);
+                        border-radius: 16px;
+                        padding: 1.5rem;
+                        margin-bottom: 1.25rem;
+                        box-shadow: var(--shadow-sm);
+                    }
+
+                    .submission-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: flex-start;
+                        flex-wrap: wrap;
+                        gap: 0.5rem;
+                        margin-bottom: 1rem;
+                        padding-bottom: 0.75rem;
+                        border-bottom: 1px solid var(--border);
+                    }
+
+                    .submission-name {
+                        font-weight: 700;
+                        font-size: 1rem;
+                    }
+
+                    .submission-meta {
+                        font-size: 0.8rem;
+                        color: var(--text-muted);
+                    }
+
+                    .essay-review-box {
+                        background: var(--bg-body);
+                        border: 1px solid var(--border);
+                        border-radius: 12px;
+                        padding: 1.25rem;
+                        margin-top: 0.75rem;
+                    }
+
+                    .essay-review-box h4 {
+                        font-size: 0.85rem;
+                        font-weight: 700;
+                        color: var(--text-muted);
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                        margin-bottom: 0.75rem;
+                    }
+
+                    .essay-student-text {
+                        background: white;
+                        border: 1px solid var(--border);
+                        border-radius: 8px;
+                        padding: 0.85rem;
+                        font-size: 0.9rem;
+                        line-height: 1.6;
+                        color: var(--text-main);
+                        min-height: 80px;
+                        white-space: pre-wrap;
+                        word-break: break-word;
+                    }
+
+                    .essay-attach-grid {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 0.5rem;
+                        margin-top: 0.5rem;
+                    }
+
+                    .essay-attach-grid img {
+                        width: 100px;
+                        height: 80px;
+                        object-fit: cover;
+                        border-radius: 8px;
+                        border: 1px solid var(--border);
+                        cursor: zoom-in;
+                    }
+
+                    .essay-attach-grid img:hover {
+                        opacity: 0.85;
+                    }
+
+                    .grade-badge {
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 0.3rem;
+                        padding: 0.25rem 0.75rem;
+                        border-radius: 20px;
+                        font-size: 0.8rem;
+                        font-weight: 700;
+                    }
+
+                    .grade-ai {
+                        background: #eef2ff;
+                        color: #4f46e5;
+                    }
+
+                    .grade-teacher {
+                        background: #f0fdf4;
+                        color: #16a34a;
+                    }
+
+                    .grade-pending {
+                        background: #fef9c3;
+                        color: #92400e;
+                    }
+
+                    .review-actions {
+                        display: flex;
+                        gap: 0.5rem;
+                        flex-wrap: wrap;
+                        align-items: center;
+                        margin-top: 0.75rem;
+                    }
+
+                    .sub-filter-bar {
+                        display: flex;
+                        align-items: center;
+                        gap: 1rem;
+                        margin-bottom: 1.5rem;
+                        flex-wrap: wrap;
+                    }
+                </style>
+                <div
+                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+                    <h2 style="font-size:1.5rem;font-weight:700;">📋 Bài nộp Tự luận</h2>
+                    <button class="btn btn-sm btn-ghost" onclick="loadSubmissions()">🔄 Tải lại</button>
+                </div>
+                <div class="sub-filter-bar">
+                    <label style="font-weight:600;font-size:0.9rem;">Lọc theo đề:</label>
+                    <select id="submissionsExamFilter" class="form-select" style="max-width:320px;"
+                        onchange="loadSubmissions()">
+                        <option value="">— Tất cả đề —</option>
+                    </select>
+                    <span id="submissionsCount" style="font-size:0.85rem;color:var(--text-muted);"></span>
+                </div>
+                <div id="submissionsContainer">
+                    <div class="empty-state">
+                        <div class="emoji">📭</div>
+                        <p>Chưa có bài nộp tự luận</p>
+                    </div>
+                </div>
             </div>
 
             <!-- TAB: Settings -->
@@ -162,32 +900,744 @@
                     <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;">🔐 Bảo mật Admin</h3>
                     <div class="form-group">
                         <label>PIN Admin (6 số)</label>
-                        <input id="settingsPin" class="form-input" maxlength="6" inputmode="numeric" pattern="[0-9]*" placeholder="123456" style="max-width:200px;font-family:monospace;letter-spacing:4px;">
+                        <input id="settingsPin" class="form-input" maxlength="6" inputmode="numeric" pattern="[0-9]*"
+                            placeholder="123456" style="max-width:200px;font-family:monospace;letter-spacing:4px;">
                     </div>
                     <div class="form-group">
                         <label>Thời gian lưu PIN (giờ)</label>
-                        <input id="settingsPinHours" class="form-input" type="number" min="1" max="72" placeholder="3" style="max-width:120px;">
-                        <p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">Sau thời gian này admin cần nhập lại PIN</p>
+                        <input id="settingsPinHours" class="form-input" type="number" min="1" max="72" placeholder="3"
+                            style="max-width:120px;">
+                        <p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">Sau thời gian này admin
+                            cần nhập lại PIN</p>
                     </div>
                     <div class="form-group">
                         <label>Hết hạn mã kích hoạt (giờ)</label>
-                        <input id="settingsCodeExpire" class="form-input" type="number" min="1" max="720" placeholder="24" style="max-width:120px;">
-                        <p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">Mã "đang làm" quá số giờ này sẽ tự giải phóng</p>
+                        <input id="settingsCodeExpire" class="form-input" type="number" min="1" max="720"
+                            placeholder="24" style="max-width:120px;">
+                        <p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">Mã "đang làm" quá số giờ
+                            này sẽ tự giải phóng</p>
                     </div>
                 </div>
                 <div class="glass-panel" style="padding:2rem;margin-bottom:1.5rem;">
                     <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;">🌐 Trang chủ</h3>
                     <div class="form-group">
                         <label>Tên hệ thống</label>
-                        <input id="settingsSiteName" class="form-input" placeholder="EasyRevise" style="max-width:300px;">
+                        <input id="settingsSiteName" class="form-input" placeholder="EasyRevise"
+                            style="max-width:300px;">
                     </div>
                     <div class="form-group">
                         <label>Mô tả</label>
                         <input id="settingsSiteDesc" class="form-input" placeholder="Hệ thống ôn tập...">
                     </div>
                 </div>
+                <div class="glass-panel" style="padding:2rem;margin-bottom:1.5rem;">
+                    <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:0.5rem;">🤖 Cấu hình Model AI</h3>
+                    <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1.5rem;">Chọn model riêng cho từng
+                        tính năng. Để trống = dùng model mặc định từ <code>.env</code>.</p>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.25rem;">
+                        <div class="form-group" style="margin:0;">
+                            <label>🚀 Tạo đề thi (mặc định tab AI Tạo Đề)</label>
+                            <select id="settingsGenerateModel" class="form-input" style="max-width:100%;">
+                                <option value="">Dùng model .env (mặc định)</option>
+                                <optgroup label="── Claude ──">
+                                    <option value="claude-sonnet-4.6">claude-sonnet-4.6 ⭐ Khuyến nghị</option>
+                                    <option value="claude-sonnet-4">claude-sonnet-4</option>
+                                    <option value="claude-opus-4.6">claude-opus-4.6 💪 Mạnh nhất</option>
+                                    <option value="claude-haiku-4.5">claude-haiku-4.5 ⚡ Nhanh/Rẻ</option>
+                                </optgroup>
+                                <optgroup label="── GPT ──">
+                                    <option value="gpt-4.1">gpt-4.1</option>
+                                    <option value="gpt-4o">gpt-4o</option>
+                                    <option value="gpt-5-mini">gpt-5-mini ⚡ Nhanh/Rẻ</option>
+                                    <option value="gpt-5.2">gpt-5.2</option>
+                                </optgroup>
+                                <optgroup label="── Gemini ──">
+                                    <option value="gemini-3-flash">gemini-3-flash</option>
+                                    <option value="gemini-3.1-pro">gemini-3.1-pro</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <label>✍️ Chấm điểm tự luận (Essay &amp; Free-form)</label>
+                            <select id="settingsGradeModel" class="form-input" style="max-width:100%;">
+                                <option value="">Dùng model .env (mặc định)</option>
+                                <optgroup label="── Claude ──">
+                                    <option value="claude-sonnet-4.6">claude-sonnet-4.6 ⭐ Khuyến nghị</option>
+                                    <option value="claude-sonnet-4">claude-sonnet-4</option>
+                                    <option value="claude-opus-4.6">claude-opus-4.6 💪 Mạnh nhất</option>
+                                    <option value="claude-haiku-4.5">claude-haiku-4.5 ⚡ Nhanh/Rẻ</option>
+                                </optgroup>
+                                <optgroup label="── GPT ──">
+                                    <option value="gpt-4.1">gpt-4.1</option>
+                                    <option value="gpt-4o">gpt-4o</option>
+                                    <option value="gpt-5-mini">gpt-5-mini ⚡ Nhanh/Rẻ</option>
+                                    <option value="gpt-5.2">gpt-5.2</option>
+                                </optgroup>
+                                <optgroup label="── Gemini ──">
+                                    <option value="gemini-3-flash">gemini-3-flash</option>
+                                    <option value="gemini-3.1-pro">gemini-3.1-pro</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <label>🔍 Đọc ảnh OCR (Paste ảnh → điền form)</label>
+                            <select id="settingsOcrModel" class="form-input" style="max-width:100%;">
+                                <option value="">Dùng model .env (mặc định)</option>
+                                <optgroup label="── Claude ──">
+                                    <option value="claude-sonnet-4.6">claude-sonnet-4.6 ⭐ Khuyến nghị</option>
+                                    <option value="claude-sonnet-4">claude-sonnet-4</option>
+                                    <option value="claude-opus-4.6">claude-opus-4.6 💪 Mạnh nhất</option>
+                                    <option value="claude-haiku-4.5">claude-haiku-4.5 ⚡ Nhanh/Rẻ</option>
+                                </optgroup>
+                                <optgroup label="── GPT ──">
+                                    <option value="gpt-4.1">gpt-4.1</option>
+                                    <option value="gpt-4o">gpt-4o</option>
+                                    <option value="gpt-5-mini">gpt-5-mini ⚡ Nhanh/Rẻ</option>
+                                    <option value="gpt-5.2">gpt-5.2</option>
+                                </optgroup>
+                                <optgroup label="── Gemini ──">
+                                    <option value="gemini-3-flash">gemini-3-flash</option>
+                                    <option value="gemini-3.1-pro">gemini-3.1-pro</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+                </div>
                 <button class="btn btn-primary" onclick="saveSettings()">💾 Lưu cài đặt</button>
-                <span id="settingsSaveStatus" style="margin-left:1rem;font-size:0.85rem;color:var(--success);display:none;">✅ Đã lưu!</span>
+                <span id="settingsSaveStatus"
+                    style="margin-left:1rem;font-size:0.85rem;color:var(--success);display:none;">✅ Đã lưu!</span>
+            </div>
+
+            <!-- TAB: Help -->
+            <div id="tabHelp" class="view">
+                <style>
+                    @media print {
+
+                        .tab-bar,
+                        .admin-header button,
+                        #notifBellBtn {
+                            display: none !important;
+                        }
+
+                        #tabHelp {
+                            display: block !important;
+                        }
+
+                        .help-section-body {
+                            display: block !important;
+                            max-height: none !important;
+                        }
+
+                        .help-chevron {
+                            display: none !important;
+                        }
+                    }
+
+                    .help-section {
+                        border: 1px solid var(--border);
+                        border-radius: 16px;
+                        margin-bottom: 1rem;
+                        overflow: hidden;
+                        background: var(--bg-card);
+                        box-shadow: var(--shadow-sm);
+                        transition: box-shadow 0.2s;
+                    }
+
+                    .help-section:hover {
+                        box-shadow: var(--shadow-md);
+                    }
+
+                    .help-section-header {
+                        display: flex;
+                        align-items: center;
+                        gap: 0.75rem;
+                        padding: 1.1rem 1.5rem;
+                        cursor: pointer;
+                        user-select: none;
+                        background: var(--bg-card);
+                        transition: background 0.15s;
+                    }
+
+                    .help-section-header:hover {
+                        background: var(--primary-light, #eef2ff);
+                    }
+
+                    .help-section-header .help-icon {
+                        font-size: 1.4rem;
+                        width: 36px;
+                        flex-shrink: 0;
+                        text-align: center;
+                    }
+
+                    .help-section-header .help-title {
+                        flex: 1;
+                        font-size: 1rem;
+                        font-weight: 700;
+                        color: var(--text-main);
+                    }
+
+                    .help-chevron {
+                        font-size: 0.75rem;
+                        color: var(--text-muted);
+                        transition: transform 0.25s;
+                    }
+
+                    .help-section.open .help-chevron {
+                        transform: rotate(90deg);
+                    }
+
+                    .help-section-body {
+                        display: none;
+                        padding: 0 1.5rem 1.5rem;
+                        border-top: 1px solid var(--border);
+                        animation: fadeIn 0.2s ease;
+                    }
+
+                    .help-section.open .help-section-body {
+                        display: block;
+                    }
+
+                    .help-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin: 1rem 0;
+                        font-size: 0.88rem;
+                    }
+
+                    .help-table th {
+                        padding: 0.6rem 0.75rem;
+                        text-align: left;
+                        font-size: 0.72rem;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                        color: var(--text-muted);
+                        border-bottom: 2px solid var(--border);
+                        white-space: nowrap;
+                    }
+
+                    .help-table td {
+                        padding: 0.65rem 0.75rem;
+                        border-bottom: 1px solid var(--border);
+                        color: var(--text-main);
+                        vertical-align: top;
+                    }
+
+                    .help-table tr:last-child td {
+                        border-bottom: none;
+                    }
+
+                    .help-table tr:hover td {
+                        background: var(--bg-body);
+                    }
+
+                    .help-badge {
+                        display: inline-block;
+                        padding: 0.15rem 0.6rem;
+                        border-radius: 6px;
+                        font-size: 0.7rem;
+                        font-weight: 700;
+                        text-transform: uppercase;
+                        white-space: nowrap;
+                    }
+
+                    .h-step {
+                        display: flex;
+                        gap: 0.75rem;
+                        align-items: flex-start;
+                        padding: 0.6rem 0;
+                        border-bottom: 1px dashed var(--border);
+                    }
+
+                    .h-step:last-child {
+                        border-bottom: none;
+                    }
+
+                    .h-step-num {
+                        width: 26px;
+                        height: 26px;
+                        border-radius: 50%;
+                        background: var(--primary);
+                        color: white;
+                        font-size: 0.75rem;
+                        font-weight: 700;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        flex-shrink: 0;
+                        margin-top: 1px;
+                    }
+
+                    .h-note {
+                        background: #fffbeb;
+                        border-left: 3px solid #f59e0b;
+                        border-radius: 0 8px 8px 0;
+                        padding: 0.6rem 0.9rem;
+                        font-size: 0.85rem;
+                        margin-top: 0.75rem;
+                        color: #78350f;
+                    }
+
+                    .h-tip {
+                        background: #f0fdf4;
+                        border-left: 3px solid #22c55e;
+                        border-radius: 0 8px 8px 0;
+                        padding: 0.6rem 0.9rem;
+                        font-size: 0.85rem;
+                        margin-top: 0.75rem;
+                        color: #14532d;
+                    }
+
+                    .help-section-body p,
+                    .help-section-body li {
+                        font-size: 0.9rem;
+                        line-height: 1.7;
+                        color: var(--text-secondary, #475569);
+                    }
+
+                    .help-section-body ul {
+                        padding-left: 1.25rem;
+                        margin: 0.5rem 0;
+                    }
+
+                    .help-section-body li {
+                        margin-bottom: 0.3rem;
+                    }
+
+                    .help-section-body h4 {
+                        font-size: 0.9rem;
+                        font-weight: 700;
+                        color: var(--text-main);
+                        margin: 1.25rem 0 0.5rem;
+                    }
+                </style>
+
+                <div
+                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;">
+                    <div>
+                        <h2 style="font-size:1.5rem;font-weight:700;margin-bottom:0.25rem;">📖 Hướng dẫn sử dụng
+                            EasyRevise Admin</h2>
+                        <p style="color:var(--text-muted);font-size:0.85rem;">Tài liệu đầy đủ cho giáo viên — click từng
+                            mục để xem chi tiết</p>
+                    </div>
+                    <button class="btn btn-sm btn-outline" onclick="window.print()"
+                        style="display:flex;align-items:center;gap:0.4rem;">🖨️ In tài liệu</button>
+                </div>
+
+                <!-- Section 1: Question Types -->
+                <div class="help-section open" onclick="this.classList.toggle('open')">
+                    <div class="help-section-header">
+                        <span class="help-icon">❓</span>
+                        <span class="help-title">1. Các loại câu hỏi (5 loại)</span>
+                        <span class="help-chevron">▶</span>
+                    </div>
+                    <div class="help-section-body" onclick="event.stopPropagation()">
+                        <p style="margin-top:1rem;">EasyRevise hỗ trợ 5 loại section câu hỏi, mỗi loại có cách chấm và
+                            hiển thị khác nhau:</p>
+                        <table class="help-table">
+                            <thead>
+                                <tr>
+                                    <th>Loại</th>
+                                    <th>Tên hiển thị</th>
+                                    <th>Đặc điểm</th>
+                                    <th>Chấm điểm</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="help-badge"
+                                            style="background:#eef2ff;color:#4f46e5;">multiple-choice</span></td>
+                                    <td><strong>Trắc nghiệm</strong></td>
+                                    <td>4 đáp án A/B/C/D, chọn 1</td>
+                                    <td>✅ Tự động (ngay lập tức)</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="help-badge"
+                                            style="background:#f0fdf4;color:#16a34a;">reading</span></td>
+                                    <td><strong>Đọc hiểu</strong></td>
+                                    <td>Có đoạn văn (passage) kèm câu hỏi trắc nghiệm</td>
+                                    <td>✅ Tự động (ngay lập tức)</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="help-badge"
+                                            style="background:#fdf4ff;color:#9333ea;">fill-in-blank</span></td>
+                                    <td><strong>Điền vào chỗ trống</strong></td>
+                                    <td>Câu có ___ , học sinh điền text/số vào từng ô</td>
+                                    <td>✅ Tự động so sánh (text/số nguyên/số thập phân)</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="help-badge"
+                                            style="background:#fffbeb;color:#d97706;">writing-essay</span></td>
+                                    <td><strong>Viết luận</strong></td>
+                                    <td>Học sinh viết bài tự do, có thể kèm ảnh/PDF</td>
+                                    <td>🤖 AI chấm sau khi nộp (~30-60 giây)</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="help-badge"
+                                            style="background:#f0f9ff;color:#0284c7;">free-form</span></td>
+                                    <td><strong>Tự luận nhiều phần</strong></td>
+                                    <td>Nhiều phần a, b, c — mỗi phần một câu trả lời</td>
+                                    <td>🤖 AI chấm sau khi nộp (~30-60 giây)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="h-note">⚠️ <strong>Writing Essay</strong> và <strong>Free-form</strong> cần API Key
+                            AI được cấu hình trong Settings mới tự chấm được. Nếu không có API Key, giáo viên phải chấm
+                            tay trong tab <em>Bài nộp</em>.</div>
+                    </div>
+                </div>
+
+                <!-- Section 2: AI Generate -->
+                <div class="help-section" onclick="this.classList.toggle('open')">
+                    <div class="help-section-header">
+                        <span class="help-icon">🤖</span>
+                        <span class="help-title">2. Tạo đề bằng AI</span>
+                        <span class="help-chevron">▶</span>
+                    </div>
+                    <div class="help-section-body" onclick="event.stopPropagation()">
+                        <h4>Quy trình tạo đề bằng AI:</h4>
+                        <div class="h-step">
+                            <div class="h-step-num">1</div>
+                            <div>Vào tab <strong>🤖 AI Tạo Đề</strong> → chọn môn học, SDK, và model AI phù hợp</div>
+                        </div>
+                        <div class="h-step">
+                            <div class="h-step-num">2</div>
+                            <div>Upload file đề thi gốc: <strong>PDF</strong> (kể cả scan), <strong>ảnh
+                                    JPG/PNG</strong>, hoặc <strong>DOCX</strong> — hỗ trợ đến 10 file cùng lúc</div>
+                        </div>
+                        <div class="h-step">
+                            <div class="h-step-num">3</div>
+                            <div>Bấm <strong>🚀 Tạo đề bằng AI</strong> → đợi AI xử lý (thường 30-90 giây tùy độ dài đề)
+                            </div>
+                        </div>
+                        <div class="h-step">
+                            <div class="h-step-num">4</div>
+                            <div>AI trả về danh sách câu hỏi → <strong>xem preview</strong>, chỉnh sửa từng câu nếu cần
+                            </div>
+                        </div>
+                        <div class="h-step">
+                            <div class="h-step-num">5</div>
+                            <div>Chọn đề thi để import vào → bấm <strong>Import vào đề</strong></div>
+                        </div>
+
+                        <h4>So sánh model AI:</h4>
+                        <table class="help-table">
+                            <thead>
+                                <tr>
+                                    <th>Model</th>
+                                    <th>Tốc độ</th>
+                                    <th>Chính xác</th>
+                                    <th>Dùng khi nào</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>claude-haiku-4.5 / gpt-5-mini</td>
+                                    <td>⚡ Rất nhanh</td>
+                                    <td>Trung bình</td>
+                                    <td>Đề đơn giản, trắc nghiệm thuần</td>
+                                </tr>
+                                <tr>
+                                    <td>claude-sonnet-4.6 / gpt-4o</td>
+                                    <td>🏃 Nhanh</td>
+                                    <td>Tốt ⭐</td>
+                                    <td>Hầu hết các loại đề — khuyến nghị</td>
+                                </tr>
+                                <tr>
+                                    <td>claude-opus-4.6 / gpt-4.1</td>
+                                    <td>🐢 Chậm hơn</td>
+                                    <td>Rất tốt 💪</td>
+                                    <td>Đề khó, toán nâng cao, cần giải thích sâu</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="h-tip">💡 <strong>Mẹo:</strong> Với PDF scan hoặc PDF có hình vẽ, AI sẽ tự chuyển
+                            từng trang thành ảnh để đọc — không cần làm gì thêm. Lên đến 5 trang đầu được xử lý.</div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Access Codes -->
+                <div class="help-section" onclick="this.classList.toggle('open')">
+                    <div class="help-section-header">
+                        <span class="help-icon">🔑</span>
+                        <span class="help-title">3. Mã kích hoạt (Access Codes)</span>
+                        <span class="help-chevron">▶</span>
+                    </div>
+                    <div class="help-section-body" onclick="event.stopPropagation()">
+                        <h4>Cách tạo và phát mã:</h4>
+                        <div class="h-step">
+                            <div class="h-step-num">1</div>
+                            <div>Vào đề thi → bấm <strong>🔑 Mã kích hoạt</strong></div>
+                        </div>
+                        <div class="h-step">
+                            <div class="h-step-num">2</div>
+                            <div>Chọn số lượng mã và số lần dùng/mã → bấm <strong>Tạo mã</strong></div>
+                        </div>
+                        <div class="h-step">
+                            <div class="h-step-num">3</div>
+                            <div>Click vào mã để copy → gửi cho học sinh qua Zalo/Messenger/email</div>
+                        </div>
+                        <div class="h-step">
+                            <div class="h-step-num">4</div>
+                            <div>Học sinh nhập mã trên trang chủ → làm bài → nộp → xem kết quả</div>
+                        </div>
+
+                        <h4>Xem kết quả theo mã:</h4>
+                        <ul>
+                            <li>Tab <strong>📊 Mã kích hoạt</strong> → click vào nhóm mã để xem danh sách học sinh đã
+                                làm</li>
+                            <li>Số liệu: Trạng thái hoàn thành, điểm số từng học sinh</li>
+                            <li>Mã hiển thị ⏳ khi có học sinh đang làm dở — bấm <strong>🔓 Giải phóng</strong> nếu muốn
+                                reset</li>
+                        </ul>
+                        <div class="h-note">⚠️ Mã <strong>"đang làm"</strong> quá số giờ giới hạn (mặc định 24h) sẽ tự
+                            giải phóng — cấu hình trong <em>⚙️ Cài đặt → Hết hạn mã</em>.</div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Essay Submissions -->
+                <div class="help-section" onclick="this.classList.toggle('open')">
+                    <div class="help-section-header">
+                        <span class="help-icon">✍️</span>
+                        <span class="help-title">4. Bài nộp tự luận (AI Grading)</span>
+                        <span class="help-chevron">▶</span>
+                    </div>
+                    <div class="help-section-body" onclick="event.stopPropagation()">
+                        <h4>Luồng AI tự chấm bài:</h4>
+                        <div class="h-step">
+                            <div class="h-step-num">1</div>
+                            <div>Học sinh hoàn thành đề có bài tự luận (Writing Essay hoặc Free-form) → bấm Nộp bài
+                            </div>
+                        </div>
+                        <div class="h-step">
+                            <div class="h-step-num">2</div>
+                            <div>Server tự động gọi AI chấm bài trong nền <strong>(~30-60 giây)</strong> — học sinh thấy
+                                "đang chấm..."</div>
+                        </div>
+                        <div class="h-step">
+                            <div class="h-step-num">3</div>
+                            <div>AI trả về: <strong>điểm</strong> + <strong>nhận xét chi tiết</strong> + <strong>phân
+                                    tích theo ý</strong></div>
+                        </div>
+                        <div class="h-step">
+                            <div class="h-step-num">4</div>
+                            <div>Học sinh xem điểm và feedback ngay trên trang kết quả</div>
+                        </div>
+
+                        <h4>Giáo viên override điểm:</h4>
+                        <div class="h-step">
+                            <div class="h-step-num">1</div>
+                            <div>Vào tab <strong>📋 Bài nộp</strong> → lọc theo đề thi</div>
+                        </div>
+                        <div class="h-step">
+                            <div class="h-step-num">2</div>
+                            <div>Xem bài làm của học sinh, điểm AI, feedback AI</div>
+                        </div>
+                        <div class="h-step">
+                            <div class="h-step-num">3</div>
+                            <div>Nhập điểm GV + nhận xét → bấm <strong>💾 Lưu điểm GV</strong></div>
+                        </div>
+                        <div class="h-step">
+                            <div class="h-step-num">4</div>
+                            <div>Học sinh sẽ thấy điểm GV thay thế điểm AI, kèm nhận xét của GV ở trang kết quả</div>
+                        </div>
+                        <div class="h-tip">💡 Bấm <strong>🤖 Chấm lại AI</strong> bất cứ lúc nào để yêu cầu AI chấm lại
+                            (hữu ích nếu muốn đổi model AI).</div>
+                    </div>
+                </div>
+
+                <!-- Section 5: Settings -->
+                <div class="help-section" onclick="this.classList.toggle('open')">
+                    <div class="help-section-header">
+                        <span class="help-icon">⚙️</span>
+                        <span class="help-title">5. Cài đặt hệ thống</span>
+                        <span class="help-chevron">▶</span>
+                    </div>
+                    <div class="help-section-body" onclick="event.stopPropagation()">
+                        <table class="help-table">
+                            <thead>
+                                <tr>
+                                    <th>Cài đặt</th>
+                                    <th>Mô tả</th>
+                                    <th>Gợi ý</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>PIN Admin</strong></td>
+                                    <td>Mã 6 chữ số, yêu cầu nhập khi phiên làm việc hết hạn</td>
+                                    <td>⚠️ Ghi nhớ cẩn thận, mất PIN không đăng nhập được Admin</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Thời gian lưu PIN</strong></td>
+                                    <td>Sau bao nhiêu giờ phải nhập PIN lại</td>
+                                    <td>Mặc định 3h — tăng lên 8-24h nếu muốn tiện hơn</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Hết hạn mã kích hoạt</strong></td>
+                                    <td>Mã "đang làm" quá X giờ sẽ tự giải phóng</td>
+                                    <td>Mặc định 24h — phù hợp cho thi 1 ngày</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Model Tạo đề</strong></td>
+                                    <td>Model AI mặc định cho tab AI Tạo Đề</td>
+                                    <td>claude-sonnet-4.6 ⭐ khuyến nghị</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Model Chấm bài</strong></td>
+                                    <td>Model AI chấm bài tự luận tự động sau khi học sinh nộp</td>
+                                    <td>claude-sonnet-4.6 hoặc cao hơn để chấm chuẩn hơn</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Model OCR</strong></td>
+                                    <td>Model AI đọc ảnh → fill vào form (Ctrl+V ảnh trong cửa sổ thêm câu hỏi)</td>
+                                    <td>claude-haiku-4.5 đủ nhanh và tiết kiệm</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="h-note">⚠️ API Key AI được cấu hình trong file <code>.env</code> trên server — không
+                            hiển thị trong giao diện. Liên hệ quản trị viên nếu cần cập nhật.</div>
+                    </div>
+                </div>
+
+                <div style="text-align:center;margin-top:2rem;padding:1rem;color:var(--text-muted);font-size:0.8rem;">
+                    EasyRevise Admin Guide — Cập nhật: Tháng 3/2026 · <a href="#" onclick="window.print();return false;"
+                        style="color:var(--primary);">🖨️ In tài liệu</a>
+                </div>
+            </div>
+
+            <!-- TAB: AI Generator -->
+            <div id="tabAiGen" class="view">
+                <h2 style="font-size:1.5rem;font-weight:700;margin-bottom:0.5rem;">🤖 AI Tạo Đề Thi</h2>
+                <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:2rem;">Upload file PDF, ảnh chụp đề,
+                    hoặc DOCX — AI sẽ tự động trích xuất câu hỏi, giải đáp và tạo đề thi.</p>
+
+                <div class="glass-panel" style="padding:2rem;margin-bottom:1.5rem;">
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+                        <div class="form-group" style="margin:0;">
+                            <label>Loại môn học</label>
+                            <select id="aiSubjectType" class="form-select">
+                                <option value="auto">🔍 Tự phát hiện</option>
+                                <option value="english">🇬🇧 Tiếng Anh</option>
+                                <option value="math">📐 Toán học</option>
+                                <option value="physics">⚡ Vật lý</option>
+                                <option value="chemistry">🧪 Hóa học</option>
+                                <option value="biology">🧬 Sinh học</option>
+                                <option value="history">📜 Lịch sử</option>
+                                <option value="geography">🌍 Địa lý</option>
+                                <option value="literature">📖 Ngữ văn</option>
+                                <option value="it">💻 Tin học</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <label>SDK</label>
+                            <select id="aiSdkType" class="form-select">
+                                <option value="anthropic">🔶 Anthropic</option>
+                                <option value="openai">🟢 OpenAI</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <label>Model</label>
+                            <select id="aiModel" class="form-select">
+                                <optgroup label="Claude">
+                                    <option value="claude-sonnet-4.6" selected>claude-sonnet-4.6</option>
+                                    <option value="claude-sonnet-4">claude-sonnet-4</option>
+                                    <option value="claude-opus-4.6">claude-opus-4.6</option>
+                                    <option value="claude-haiku-4.5">claude-haiku-4.5</option>
+                                </optgroup>
+                                <optgroup label="GPT">
+                                    <option value="gpt-4.1">gpt-4.1</option>
+                                    <option value="gpt-4o">gpt-4o</option>
+                                    <option value="gpt-5-mini">gpt-5-mini</option>
+                                    <option value="gpt-5.1-codex">gpt-5.1-codex</option>
+                                    <option value="gpt-5.1-codex-max">gpt-5.1-codex-max</option>
+                                    <option value="gpt-5.1-codex-mini">gpt-5.1-codex-mini</option>
+                                    <option value="gpt-5.2">gpt-5.2</option>
+                                    <option value="gpt-5.2-codex">gpt-5.2-codex</option>
+                                    <option value="gpt-5.3-codex">gpt-5.3-codex</option>
+                                    <option value="gpt-5.4">gpt-5.4</option>
+                                </optgroup>
+                                <optgroup label="Gemini">
+                                    <option value="gemini-3-flash">gemini-3-flash</option>
+                                    <option value="gemini-3.1-pro">gemini-3.1-pro</option>
+                                </optgroup>
+                                <optgroup label="Grok">
+                                    <option value="grok-code-fast">grok-code-fast</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <label>Năm học</label>
+                            <input id="aiYear" class="form-input" placeholder="2025-2026">
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+                        <div class="form-group" style="margin:0;">
+                            <label>Tên đề (tùy chọn)</label>
+                            <input id="aiTitle" class="form-input" placeholder="AI sẽ tự đặt nếu bỏ trống">
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <label>Tên môn (tùy chọn)</label>
+                            <input id="aiSubject" class="form-input" placeholder="AI sẽ tự đặt nếu bỏ trống">
+                        </div>
+                    </div>
+
+                    <!-- Drop zone -->
+                    <div id="aiDropZone"
+                        style="border:2px dashed var(--border);border-radius:16px;padding:3rem 2rem;text-align:center;cursor:pointer;transition:all 0.3s;background:var(--bg-input);"
+                        onclick="document.getElementById('aiFileInput').click()">
+                        <div style="font-size:3rem;margin-bottom:1rem;">📄</div>
+                        <p style="font-weight:600;color:var(--text-main);margin-bottom:0.5rem;">Kéo thả file vào đây
+                            hoặc click để chọn</p>
+                        <p style="font-size:0.82rem;color:var(--text-muted);">Hỗ trợ: PDF, JPG, PNG, DOCX — Tối đa 10
+                            file, 20MB/file</p>
+                        <input type="file" id="aiFileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.docx"
+                            style="display:none;" onchange="handleAIFiles(this.files)">
+                    </div>
+                    <div id="aiFileList" style="margin-top:1rem;"></div>
+
+                    <div style="display:flex;gap:1rem;margin-top:1.5rem;align-items:center;">
+                        <button id="aiGenerateBtn" class="btn btn-primary" onclick="generateWithAI()"
+                            style="padding:0.75rem 2rem;font-size:1rem;">🚀 Tạo đề bằng AI</button>
+                        <span id="aiStatus" style="font-size:0.85rem;color:var(--text-muted);"></span>
+                    </div>
+                </div>
+
+                <!-- Loading state -->
+                <div id="aiLoading" style="display:none;text-align:center;padding:3rem;">
+                    <div style="font-size:3rem;animation:pulse-warning 1.5s infinite;">🤖</div>
+                    <p style="font-weight:600;margin-top:1rem;color:var(--text-main);">AI đang phân tích đề thi...</p>
+                    <p style="font-size:0.85rem;color:var(--text-muted);">Quá trình có thể mất 30-90 giây tùy độ dài đề
+                    </p>
+                    <div
+                        style="margin-top:1.5rem;height:4px;background:var(--bg-input);border-radius:4px;overflow:hidden;max-width:300px;margin-left:auto;margin-right:auto;">
+                        <div
+                            style="height:100%;background:linear-gradient(90deg,var(--primary),var(--secondary));border-radius:4px;animation:shimmer 1.5s infinite;width:100%;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview result -->
+                <div id="aiPreview" style="display:none;">
+                    <div
+                        style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
+                        <h3 style="font-size:1.2rem;font-weight:700;">📋 Xem trước kết quả</h3>
+                        <div style="display:flex;gap:0.5rem;">
+                            <button class="btn btn-sm btn-success" onclick="importAIResult()">✅ Import vào hệ
+                                thống</button>
+                            <button class="btn btn-sm btn-outline" onclick="regenerateAI()">🔄 Tạo lại</button>
+                            <button class="btn btn-sm btn-ghost" onclick="downloadAIJSON()">💾 Tải JSON</button>
+                        </div>
+                    </div>
+                    <div id="aiPreviewContent"></div>
+                </div>
+
+                <!-- Error state -->
+                <div id="aiError" style="display:none;" class="glass-panel"
+                    style="padding:2rem;border:1px solid #fecaca;background:#fef2f2;">
+                    <p style="color:#dc2626;font-weight:600;">❌ <span id="aiErrorMsg"></span></p>
+                    <pre id="aiErrorDetail"
+                        style="margin-top:1rem;font-size:0.8rem;max-height:200px;overflow:auto;background:#fff;padding:1rem;border-radius:8px;display:none;"></pre>
+                </div>
             </div>
         </div>
     </div>
@@ -196,10 +1646,34 @@
     <div id="modalExam" class="modal-overlay">
         <div class="glass-panel modal-content">
             <h3 id="modalExamTitle" style="font-size:1.25rem;font-weight:700;margin-bottom:2rem;">Tạo đề mới</h3>
-            <div class="form-group"><label>Tên đề thi</label><input id="inputExamTitle" class="form-input" placeholder="VD: Đề Cương Giữa Kỳ II"></div>
-            <div class="form-group"><label>Môn học</label><select id="inputExamSubject" class="form-select"></select></div>
-            <div class="form-group"><label>Năm học</label><input id="inputExamYear" class="form-input" placeholder="VD: 2025-2026"></div>
-            <div class="form-group"><label>Thời gian làm bài (phút)</label><input id="inputExamTimeLimit" class="form-input" type="number" min="0" max="300" placeholder="0 = không giới hạn" style="max-width:200px;"><p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">Đặt 0 hoặc bỏ trống = không giới hạn. Hết giờ sẽ tự động nộp bài.</p></div>
+            <div class="form-group"><label>Tên đề thi</label><input id="inputExamTitle" class="form-input"
+                    placeholder="VD: Đề Cương Giữa Kỳ II"></div>
+            <div class="form-group"><label>Môn học</label><select id="inputExamSubject" class="form-select"></select>
+            </div>
+            <div class="form-group"><label>Năm học</label><input id="inputExamYear" class="form-input"
+                    placeholder="VD: 2025-2026"></div>
+            <div class="form-group"><label>Thời gian làm bài (phút)</label><input id="inputExamTimeLimit"
+                    class="form-input" type="number" min="0" max="300" placeholder="0 = không giới hạn"
+                    style="max-width:200px;">
+                <p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">Đặt 0 hoặc bỏ trống = không giới
+                    hạn. Hết giờ sẽ tự động nộp bài.</p>
+            </div>
+            <div class="form-group">
+                <label style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;">
+                    <input type="checkbox" id="checkAutoGrade"
+                        style="width:18px;height:18px;accent-color:var(--primary);cursor:pointer;" checked>
+                    <span>🤖 Chấm bài tự động bằng AI (essay &amp; tự luận)</span>
+                </label>
+                <p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.4rem;padding-left:1.75rem;">Bật = AI tự
+                    chấm ngay sau khi học sinh nộp bài. Tắt = chỉ chấm thủ công.</p>
+            </div>
+            <div class="form-group">
+                <label>🤖 Giới hạn "Tại sao tôi sai?" (AI Explain)</label>
+                <input id="inputAiExplainLimit" class="form-input" type="number" min="-1"
+                    placeholder="-1 = vô hạn, 0 = tắt" style="max-width:200px;">
+                <p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">-1 = vô hạn, 0 = tắt hoàn toàn,
+                    N = N lần/học sinh</p>
+            </div>
             <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:2rem;">
                 <button class="btn btn-ghost" onclick="closeModal('modalExam')">Hủy</button>
                 <button class="btn btn-primary" onclick="saveExam()">Lưu</button>
@@ -210,7 +1684,8 @@
     <div id="modalSection" class="modal-overlay">
         <div class="glass-panel modal-content">
             <h3 id="modalSectionTitle" style="font-size:1.25rem;font-weight:700;margin-bottom:2rem;">Thêm phần mới</h3>
-            <div class="form-group"><label>Tiêu đề phần</label><input id="inputSectionName" class="form-input" placeholder="VD: I. LANGUAGE FOCUS"></div>
+            <div class="form-group"><label>Tiêu đề phần</label><input id="inputSectionName" class="form-input"
+                    placeholder="VD: I. LANGUAGE FOCUS"></div>
             <div class="form-group"><label>Loại</label>
                 <select id="inputSectionType" class="form-select">
                     <option value="multiple-choice">Trắc nghiệm (Multiple Choice)</option>
@@ -218,22 +1693,39 @@
                     <option value="writing-choice">Chọn câu đồng nghĩa</option>
                     <option value="writing-essay">Viết luận (Essay)</option>
                     <option value="free-form">Tự luận (Free-form)</option>
+                    <option value="fill-in-blank">Điền khiết (Fill-in-blank)</option>
                 </select>
             </div>
-            <div class="form-group"><label>Hướng dẫn (Instruction)</label><textarea id="inputSectionInstruction" class="form-textarea" placeholder="VD: Choose the correct answer..."></textarea></div>
+            <div class="form-group"><label>Hướng dẫn (Instruction)</label><textarea id="inputSectionInstruction"
+                    class="form-textarea" placeholder="VD: Choose the correct answer..."></textarea></div>
             <div id="passageFieldGroup" class="form-group" style="display:none;">
-                <label>Đoạn văn (Passage)</label><textarea id="inputSectionPassage" class="form-textarea" style="min-height:200px;" placeholder="Dán đoạn văn..."></textarea>
+                <label>Đoạn văn (Passage)</label><textarea id="inputSectionPassage" class="form-textarea"
+                    style="min-height:200px;" placeholder="Dán đoạn văn..."></textarea>
             </div>
             <div id="essayFieldGroup" style="display:none;">
-                <div class="form-group"><label>Đề bài (Prompt)</label><textarea id="inputEssayPrompt" class="form-textarea"></textarea></div>
-                <div class="form-group"><label>Ngữ cảnh</label><textarea id="inputEssayContext" class="form-textarea"></textarea></div>
-                <div class="form-group"><label>Gợi ý (Cues) — mỗi dòng 1</label><textarea id="inputEssayCues" class="form-textarea"></textarea></div>
-                <div class="form-group"><label>Mẫu đáp án</label><textarea id="inputEssaySample" class="form-textarea" style="min-height:200px;"></textarea></div>
-                <div class="form-group"><label>Giải thích</label><textarea id="inputEssayExplanation" class="form-textarea"></textarea></div>
+                <div class="form-group"><label>Đề bài (Prompt)</label><textarea id="inputEssayPrompt"
+                        class="form-textarea"></textarea></div>
+                <div class="form-group"><label>Ngữ cảnh</label><textarea id="inputEssayContext"
+                        class="form-textarea"></textarea></div>
+                <div class="form-group"><label>Gợi ý (Cues) — mỗi dòng 1</label><textarea id="inputEssayCues"
+                        class="form-textarea"></textarea></div>
+                <div class="form-group"><label>Mẫu đáp án</label><textarea id="inputEssaySample" class="form-textarea"
+                        style="min-height:200px;"></textarea></div>
+                <div class="form-group"><label>Giải thích</label><textarea id="inputEssayExplanation"
+                        class="form-textarea"></textarea></div>
             </div>
             <div id="freeformFieldGroup" style="display:none;">
-                <div class="toggle-row"><span style="font-weight:600;">Hiện Hướng dẫn (Instruction)</span><label class="toggle-switch"><input type="checkbox" id="toggleInstruction" checked><span class="toggle-slider"></span></label></div>
-                <div class="toggle-row"><span style="font-weight:600;">Hiện Gợi ý (Cues)</span><label class="toggle-switch"><input type="checkbox" id="toggleCues"><span class="toggle-slider"></span></label></div>
+                <div class="toggle-row"><span style="font-weight:600;">Hiện Hướng dẫn (Instruction)</span><label
+                        class="toggle-switch"><input type="checkbox" id="toggleInstruction" checked><span
+                            class="toggle-slider"></span></label></div>
+                <div class="toggle-row"><span style="font-weight:600;">Hiện Gợi ý (Cues)</span><label
+                        class="toggle-switch"><input type="checkbox" id="toggleCues"><span
+                            class="toggle-slider"></span></label></div>
+                <div class="form-group" style="margin-top:1rem;">
+                    <label>🎬 Video giải đáp section (hiện ở kết quả, bên dưới tất cả bài làm)</label>
+                    <input id="inputFreeformExplVideo" class="form-input"
+                        placeholder="https://youtube.com/watch?v=... hoặc link .mp4">
+                </div>
             </div>
             <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:2rem;">
                 <button class="btn btn-ghost" onclick="closeModal('modalSection')">Hủy</button>
@@ -245,32 +1737,156 @@
     <div id="modalQuestion" class="modal-overlay">
         <div class="glass-panel modal-content">
             <h3 id="modalQuestionTitle" style="font-size:1.25rem;font-weight:700;margin-bottom:2rem;">Thêm câu hỏi</h3>
-            <div class="form-group"><label>Nội dung câu hỏi</label><textarea id="inputQuestionText" class="form-textarea"></textarea></div>
+            <div class="form-group"><label>Nội dung câu hỏi</label><textarea id="inputQuestionText"
+                    class="form-textarea"></textarea></div>
             <div id="mcOptionsGroup">
                 <div class="form-group"><label>Đáp án (radio = đúng)</label>
-                    <div class="option-row"><input type="radio" name="correctOpt" value="0" class="option-radio" checked><span style="font-weight:700;width:20px;">A.</span><input id="inputOptA" class="form-input" placeholder="Đáp án A"></div>
-                    <div class="option-row"><input type="radio" name="correctOpt" value="1" class="option-radio"><span style="font-weight:700;width:20px;">B.</span><input id="inputOptB" class="form-input" placeholder="Đáp án B"></div>
-                    <div class="option-row"><input type="radio" name="correctOpt" value="2" class="option-radio"><span style="font-weight:700;width:20px;">C.</span><input id="inputOptC" class="form-input" placeholder="Đáp án C"></div>
-                    <div class="option-row"><input type="radio" name="correctOpt" value="3" class="option-radio"><span style="font-weight:700;width:20px;">D.</span><input id="inputOptD" class="form-input" placeholder="Đáp án D"></div>
+                    <div class="option-row"><input type="radio" name="correctOpt" value="0" class="option-radio"
+                            checked><span style="font-weight:700;width:20px;">A.</span><input id="inputOptA"
+                            class="form-input" placeholder="Đáp án A">
+                        <label class="btn btn-sm btn-ghost"
+                            style="padding:0.3rem 0.5rem;font-size:0.75rem;cursor:pointer;white-space:nowrap;"
+                            title="Ảnh cho đáp án A">📷<input type="file" accept="image/*" style="display:none"
+                                onchange="uploadOptionImage(0,this.files[0]);this.value=''"></label>
+                        <div id="optionImgPreviewA" style="display:flex;align-items:center;"></div>
+                    </div>
+                    <div class="option-row"><input type="radio" name="correctOpt" value="1" class="option-radio"><span
+                            style="font-weight:700;width:20px;">B.</span><input id="inputOptB" class="form-input"
+                            placeholder="Đáp án B">
+                        <label class="btn btn-sm btn-ghost"
+                            style="padding:0.3rem 0.5rem;font-size:0.75rem;cursor:pointer;white-space:nowrap;"
+                            title="Ảnh cho đáp án B">📷<input type="file" accept="image/*" style="display:none"
+                                onchange="uploadOptionImage(1,this.files[0]);this.value=''"></label>
+                        <div id="optionImgPreviewB" style="display:flex;align-items:center;"></div>
+                    </div>
+                    <div class="option-row"><input type="radio" name="correctOpt" value="2" class="option-radio"><span
+                            style="font-weight:700;width:20px;">C.</span><input id="inputOptC" class="form-input"
+                            placeholder="Đáp án C">
+                        <label class="btn btn-sm btn-ghost"
+                            style="padding:0.3rem 0.5rem;font-size:0.75rem;cursor:pointer;white-space:nowrap;"
+                            title="Ảnh cho đáp án C">📷<input type="file" accept="image/*" style="display:none"
+                                onchange="uploadOptionImage(2,this.files[0]);this.value=''"></label>
+                        <div id="optionImgPreviewC" style="display:flex;align-items:center;"></div>
+                    </div>
+                    <div class="option-row"><input type="radio" name="correctOpt" value="3" class="option-radio"><span
+                            style="font-weight:700;width:20px;">D.</span><input id="inputOptD" class="form-input"
+                            placeholder="Đáp án D">
+                        <label class="btn btn-sm btn-ghost"
+                            style="padding:0.3rem 0.5rem;font-size:0.75rem;cursor:pointer;white-space:nowrap;"
+                            title="Ảnh cho đáp án D">📷<input type="file" accept="image/*" style="display:none"
+                                onchange="uploadOptionImage(3,this.files[0]);this.value=''"></label>
+                        <div id="optionImgPreviewD" style="display:flex;align-items:center;"></div>
+                    </div>
                 </div>
             </div>
             <div id="freeformAnswerGroup" style="display:none;">
-                <div class="form-group"><label>Đáp án</label><textarea id="inputFreeformAnswer" class="form-textarea" placeholder="Đáp án chi tiết..."></textarea></div>
+                <div class="form-group"><label>Đáp án</label><textarea id="inputFreeformAnswer" class="form-textarea"
+                        placeholder="Đáp án chi tiết..."></textarea></div>
             </div>
-            <div class="form-group"><label>Giải thích</label><textarea id="inputExplanation" class="form-textarea"></textarea></div>
-            <div class="form-group"><label>Mở rộng kiến thức</label><textarea id="inputExpansion" class="form-textarea"></textarea></div>
+            <!-- Fill-in-blank Group -->
+            <div id="fillBlankGroup" style="display:none;">
+                <div class="form-group">
+                    <label>Câu hỏi (dùng <code
+                            style="background:#eef2ff;padding:0.1rem 0.3rem;border-radius:4px;">___</code> cho ô
+                        trống)</label>
+                    <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem;">VD: "She ___ to school."
+                        hoặc "x + y = ___"</p>
+                </div>
+                <div class="form-group">
+                    <label style="display:flex;align-items:center;gap:0.5rem;">
+                        Đáp án cho các ô trống
+                        <button type="button" class="btn btn-sm btn-outline" onclick="addBlankAnswer()"
+                            style="padding:0.15rem 0.5rem;font-size:0.75rem;">+ Thêm ô</button>
+                    </label>
+                    <div id="blankAnswerList"></div>
+                    <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.5rem;">Thứ tự ô tương ứng với số
+                        ___ trong câu hỏi</p>
+                </div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.35rem;">
+                <label style="font-size:0.9rem;font-weight:600;margin:0;">Giải thích</label>
+                <label
+                    style="display:flex;align-items:center;gap:0.4rem;font-size:0.8rem;color:var(--text-muted);cursor:pointer;">
+                    <input type="checkbox" id="toggleShowExplanation" checked style="accent-color:var(--primary);"> Hiện
+                    ở kết quả
+                </label>
+            </div>
+            <div class="form-group"><textarea id="inputExplanation" class="form-textarea"></textarea></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.35rem;">
+                <label style="font-size:0.9rem;font-weight:600;margin:0;">Mở rộng kiến thức</label>
+                <label
+                    style="display:flex;align-items:center;gap:0.4rem;font-size:0.8rem;color:var(--text-muted);cursor:pointer;">
+                    <input type="checkbox" id="toggleShowExpansion" checked style="accent-color:var(--primary);"> Hiện ở
+                    kết quả
+                </label>
+            </div>
+            <div class="form-group"><textarea id="inputExpansion" class="form-textarea"></textarea></div>
+
+            <!-- OCR Zone -->
+            <div
+                style="border:1px dashed var(--border);border-radius:14px;padding:1.25rem;margin-bottom:1.5rem;background:var(--bg-input);">
+                <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;flex-wrap:wrap;">
+                    <span style="font-weight:700;font-size:0.88rem;">🔍 AI đọc ảnh → Text</span>
+                    <select id="ocrTargetField" class="form-select"
+                        style="flex:1;min-width:140px;padding:0.4rem 0.75rem;font-size:0.82rem;">
+                        <option value="inputQuestionText">→ Câu hỏi</option>
+                        <option value="inputOptA">→ Đáp án A</option>
+                        <option value="inputOptB">→ Đáp án B</option>
+                        <option value="inputOptC">→ Đáp án C</option>
+                        <option value="inputOptD">→ Đáp án D</option>
+                        <option value="inputExplanation">→ Giải thích</option>
+                        <option value="inputExpansion">→ Mở rộng</option>
+                        <option value="inputFreeformAnswer">→ Đáp án (tự luận)</option>
+                    </select>
+                    <span id="ocrStatus" style="font-size:0.78rem;color:var(--text-muted);"></span>
+                </div>
+                <div id="ocrDropZone"
+                    style="border:2px dashed var(--border);border-radius:10px;padding:1rem;text-align:center;cursor:pointer;transition:all 0.2s;min-height:60px;display:flex;align-items:center;justify-content:center;gap:0.5rem;font-size:0.82rem;color:var(--text-muted);"
+                    onclick="document.getElementById('ocrFileInput').click()"
+                    ondragover="event.preventDefault();this.style.borderColor='var(--primary)'"
+                    ondragleave="this.style.borderColor='var(--border)'"
+                    ondrop="event.preventDefault();this.style.borderColor='var(--border)';pasteImageForOCR(event.dataTransfer.files[0])">
+                    📋 Kéo thả hoặc click để chọn ảnh (hỗ trợ Ctrl+V)
+                </div>
+                <input type="file" id="ocrFileInput" accept="image/*" style="display:none;"
+                    onchange="pasteImageForOCR(this.files[0]);this.value=''">
+                <img id="ocrPreviewImg"
+                    style="display:none;max-width:100%;max-height:120px;border-radius:8px;margin-top:0.5rem;object-fit:contain;">
+            </div>
+
             <div class="form-group"><label>Hình ảnh câu hỏi</label>
-                <div style="display:flex;gap:0.5rem;align-items:center;">
-                    <input type="file" id="questionImageInput" accept="image/*" onchange="uploadQuestionImage(event)" style="display:none;">
-                    <button type="button" class="btn btn-sm btn-outline" onclick="document.getElementById('questionImageInput').click()" style="padding:0.35rem 0.85rem;font-size:0.82rem;">📷 Chọn ảnh</button>
+                <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap;">
+                    <input type="file" id="questionImageInput" accept="image/*" onchange="uploadQuestionImage(event)"
+                        style="display:none;">
+                    <button type="button" class="btn btn-sm btn-outline"
+                        onclick="document.getElementById('questionImageInput').click()"
+                        style="padding:0.35rem 0.85rem;font-size:0.82rem;">📷 Ảnh chính</button>
                     <span id="questionImagePreview" style="font-size:0.8rem;color:var(--text-muted);"></span>
                 </div>
-                <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">💡 Hoặc nhấn <kbd style="padding:0.1rem 0.4rem;background:#e2e8f0;border-radius:4px;font-size:0.7rem;">Ctrl+V</kbd> để dán ảnh từ clipboard</p>
                 <img id="questionImageImg" style="display:none;max-width:200px;margin-top:0.5rem;border-radius:8px;">
+                <!-- Multi-image for question -->
+                <div
+                    style="margin-top:0.75rem;padding:0.75rem;background:var(--bg-body);border:1px dashed var(--border);border-radius:10px;">
+                    <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+                        <span style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);">🖼️ Nhiều ảnh câu
+                            hỏi</span>
+                        <label class="btn btn-sm btn-outline"
+                            style="padding:0.2rem 0.6rem;font-size:0.75rem;cursor:pointer;">+ Thêm ảnh
+                            <input type="file" accept="image/*" multiple style="display:none"
+                                onchange="Array.from(this.files).forEach(f=>addQuestionImage(f));this.value=''">
+                        </label>
+                    </div>
+                    <div id="multiImageList" style="display:flex;flex-wrap:wrap;gap:0.25rem;min-height:24px;"><span
+                            style="color:var(--text-muted);font-size:0.8rem;">Chưa có ảnh</span></div>
+                </div>
+                <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">💡 Dùng khu vực AI đọc ảnh phía
+                    trên để Ctrl+V<br>Hoặc nhấn nút để chọn ảnh câu hỏi</p>
             </div>
             <div class="form-group"><label>Video câu hỏi (URL YouTube/MP4)</label>
-                <input id="inputQuestionVideo" class="form-input" placeholder="https://youtube.com/watch?v=... hoặc link .mp4">
-                <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Video hiện khi làm bài (hoặc dạng gợi ý)</p>
+                <input id="inputQuestionVideo" class="form-input"
+                    placeholder="https://youtube.com/watch?v=... hoặc link .mp4">
+                <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Video hiện khi làm bài (hoặc
+                    dạng gợi ý)</p>
             </div>
             <div class="form-group" style="display:flex;align-items:center;gap:0.75rem;">
                 <label style="margin:0;cursor:pointer;">
@@ -281,14 +1897,34 @@
             <hr style="border:none;border-top:1px dashed var(--border);margin:0.5rem 0 1rem;">
             <div class="form-group"><label>Ảnh giải đáp (chỉ hiện ở kết quả)</label>
                 <div style="display:flex;gap:0.5rem;align-items:center;">
-                    <input type="file" id="explanationImageInput" accept="image/*" onchange="uploadExplanationImage(event)" style="display:none;">
-                    <button type="button" class="btn btn-sm btn-outline" onclick="document.getElementById('explanationImageInput').click()" style="padding:0.35rem 0.85rem;font-size:0.82rem;">📷 Chọn ảnh</button>
+                    <input type="file" id="explanationImageInput" accept="image/*"
+                        onchange="uploadExplanationImage(event)" style="display:none;">
+                    <button type="button" class="btn btn-sm btn-outline"
+                        onclick="document.getElementById('explanationImageInput').click()"
+                        style="padding:0.35rem 0.85rem;font-size:0.82rem;">📷 Ảnh chính</button>
                     <span id="explanationImagePreview" style="font-size:0.8rem;color:var(--text-muted);"></span>
                 </div>
                 <img id="explanationImageImg" style="display:none;max-width:200px;margin-top:0.5rem;border-radius:8px;">
+                <!-- Multi-image for explanation -->
+                <div
+                    style="margin-top:0.75rem;padding:0.75rem;background:var(--bg-body);border:1px dashed var(--border);border-radius:10px;">
+                    <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+                        <span style="font-size:0.8rem;font-weight:600;color:var(--text-secondary);">🖼️ Nhiều ảnh giải
+                            thích</span>
+                        <label class="btn btn-sm btn-outline"
+                            style="padding:0.2rem 0.6rem;font-size:0.75rem;cursor:pointer;">+ Thêm ảnh
+                            <input type="file" accept="image/*" multiple style="display:none"
+                                onchange="Array.from(this.files).forEach(f=>addExplanationImage(f));this.value=''">
+                        </label>
+                    </div>
+                    <div id="explanationMultiImageList"
+                        style="display:flex;flex-wrap:wrap;gap:0.25rem;min-height:24px;"><span
+                            style="color:var(--text-muted);font-size:0.8rem;">Chưa có ảnh</span></div>
+                </div>
             </div>
             <div class="form-group"><label>Video giải đáp (chỉ hiện ở kết quả)</label>
-                <input id="inputExplanationVideo" class="form-input" placeholder="https://youtube.com/watch?v=... hoặc link .mp4">
+                <input id="inputExplanationVideo" class="form-input"
+                    placeholder="https://youtube.com/watch?v=... hoặc link .mp4">
             </div>
             <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:2rem;">
                 <button class="btn btn-ghost" onclick="closeModal('modalQuestion')">Hủy</button>
@@ -300,8 +1936,10 @@
     <div id="modalSubject" class="modal-overlay">
         <div class="glass-panel modal-content" style="max-width:400px;">
             <h3 style="font-size:1.25rem;font-weight:700;margin-bottom:2rem;">Thêm môn học</h3>
-            <div class="form-group"><label>Tên môn</label><input id="inputSubjectName" class="form-input" placeholder="VD: Tiếng Anh 9"></div>
-            <div class="form-group"><label>Icon</label><input id="inputSubjectIcon" class="form-input" placeholder="📚" value="📚" style="max-width:100px;"></div>
+            <div class="form-group"><label>Tên môn</label><input id="inputSubjectName" class="form-input"
+                    placeholder="VD: Tiếng Anh 9"></div>
+            <div class="form-group"><label>Icon</label><input id="inputSubjectIcon" class="form-input" placeholder="📚"
+                    value="📚" style="max-width:100px;"></div>
             <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:2rem;">
                 <button class="btn btn-ghost" onclick="closeModal('modalSubject')">Hủy</button>
                 <button class="btn btn-primary" onclick="saveSubject()">Lưu</button>
@@ -312,11 +1950,20 @@
     <div id="modalUser" class="modal-overlay">
         <div class="glass-panel modal-content" style="max-width:420px;">
             <h3 id="modalUserTitle" style="font-size:1.25rem;font-weight:700;margin-bottom:2rem;">Tạo tài khoản</h3>
-            <div id="userModalError" class="auth-error" style="display:none;margin-bottom:1rem;background:#fef2f2;color:#dc2626;padding:0.5rem 0.75rem;border-radius:8px;font-size:0.85rem;"></div>
-            <div class="form-group"><label>Tên hiển thị</label><input id="inputUserDisplayName" class="form-input" placeholder="VD: Nguyễn Văn A"></div>
-            <div class="form-group"><label>Tên đăng nhập</label><input id="inputUserUsername" class="form-input" placeholder="VD: nguyenvana" autocomplete="off"></div>
-            <div class="form-group" id="userPasswordGroup"><label>Mật khẩu</label><input id="inputUserPassword" class="form-input" type="password" placeholder="Tối thiểu 4 ký tự" autocomplete="new-password"></div>
-            <div class="form-group"><label>Vai trò</label><select id="inputUserRole" class="form-select"><option value="student">Student</option><option value="admin">Admin</option></select></div>
+            <div id="userModalError" class="auth-error"
+                style="display:none;margin-bottom:1rem;background:#fef2f2;color:#dc2626;padding:0.5rem 0.75rem;border-radius:8px;font-size:0.85rem;">
+            </div>
+            <div class="form-group"><label>Tên hiển thị</label><input id="inputUserDisplayName" class="form-input"
+                    placeholder="VD: Nguyễn Văn A"></div>
+            <div class="form-group"><label>Tên đăng nhập</label><input id="inputUserUsername" class="form-input"
+                    placeholder="VD: nguyenvana" autocomplete="off"></div>
+            <div class="form-group" id="userPasswordGroup"><label>Mật khẩu</label><input id="inputUserPassword"
+                    class="form-input" type="password" placeholder="Tối thiểu 4 ký tự" autocomplete="new-password">
+            </div>
+            <div class="form-group"><label>Vai trò</label><select id="inputUserRole" class="form-select">
+                    <option value="student">Student</option>
+                    <option value="admin">Admin</option>
+                </select></div>
             <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:2rem;">
                 <button class="btn btn-ghost" onclick="closeModal('modalUser')">Hủy</button>
                 <button class="btn btn-primary" onclick="saveUser()">Lưu</button>
@@ -326,4 +1973,5 @@
 
     <script src="/admin/admin.js"></script>
 </body>
+
 </html>
