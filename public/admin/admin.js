@@ -202,8 +202,19 @@ function openModal(id) {
     // TN4: inject LaTeX toolbar for question textareas
     if (id === 'modalQuestion' || id === 'modalSection') {
         setTimeout(() => {
-            ['inputQuestion', 'inputExplanation', 'inputExpansion', 'inputEssaySample', 'inputEssayPrompt', 'inputSectionPassage', 'inputSectionInstruction'].forEach(tid => {
-                if (document.getElementById(tid)) injectLatexToolbar(tid);
+            // Explanation textareas — 📷 button uploads to explanationImages[]
+            ['inputExplanation', 'inputExpansion'].forEach(tid => {
+                if (document.getElementById(tid))
+                    injectLatexToolbar(tid, (file) => addExplanationImage(file));
+            });
+            // Question / section textareas — 📷 button uploads to questionImages[]
+            ['inputQuestion', 'inputQuestionText'].forEach(tid => {
+                if (document.getElementById(tid))
+                    injectLatexToolbar(tid, (file) => addQuestionImage(file));
+            });
+            // Section textareas — no image upload (section-level images not yet implemented)
+            ['inputEssaySample', 'inputEssayPrompt', 'inputSectionPassage', 'inputSectionInstruction'].forEach(tid => {
+                if (document.getElementById(tid)) injectLatexToolbar(tid, null);
             });
         }, 50);
     }
@@ -625,7 +636,7 @@ async function uploadQuestionImage(event) {
     await uploadImageFile(file);
 }
 
-// Ctrl+V paste image support → routes to OCR zone
+// Ctrl+V paste image support — routes by focused element
 document.addEventListener('paste', async (e) => {
     if (!document.getElementById('modalQuestion').classList.contains('active')) return;
     const items = e.clipboardData?.items;
@@ -634,7 +645,20 @@ document.addEventListener('paste', async (e) => {
         if (item.type.startsWith('image/')) {
             e.preventDefault();
             const file = item.getAsFile();
-            if (file) await pasteImageForOCR(file);
+            if (!file) break;
+            const focusedId = document.activeElement?.id || '';
+            if (focusedId === 'inputExplanation' || focusedId === 'inputExpansion') {
+                // Paste → explanation images
+                const url = await uploadSingleImage(file);
+                if (url) { explanationImages.push(url); renderExplanationImagePreviews(); }
+            } else if (focusedId === 'inputQuestion' || focusedId === 'inputQuestionText') {
+                // Paste → question images
+                const url = await uploadSingleImage(file);
+                if (url) { questionImages.push(url); renderMultiImagePreviews(); }
+            } else {
+                // Default: OCR
+                await pasteImageForOCR(file);
+            }
             break;
         }
     }
@@ -846,7 +870,7 @@ function downloadQRCode(code) {
 // ========================
 // TN4: LaTeX Toolbar
 // ========================
-function injectLatexToolbar(textareaId) {
+function injectLatexToolbar(textareaId, imageUploadCallback) {
     const ta = document.getElementById(textareaId);
     if (!ta || ta.dataset.latexToolbar) return;
     ta.dataset.latexToolbar = '1';
@@ -882,6 +906,30 @@ function injectLatexToolbar(textareaId) {
         btn.onclick = () => insertLatex(ta, t.insert, t.cursor || 0, t.inline, t.block);
         bar.appendChild(btn);
     });
+
+    // 📷 Image button — only if upload callback provided
+    if (imageUploadCallback) {
+        const imgInput = document.createElement('input');
+        imgInput.type = 'file';
+        imgInput.accept = 'image/*';
+        imgInput.multiple = true;
+        imgInput.style.display = 'none';
+        imgInput.addEventListener('change', async () => {
+            for (const file of imgInput.files) { await imageUploadCallback(file); }
+            imgInput.value = '';
+        });
+        bar.appendChild(imgInput);
+
+        const imgBtn = document.createElement('button');
+        imgBtn.type = 'button';
+        imgBtn.textContent = '📷 Ảnh';
+        imgBtn.title = 'Chèn ảnh vào ô giải thích (hỗ trợ nhiều ảnh, Ctrl+V)';
+        imgBtn.style.cssText = 'padding:2px 8px;font-size:0.78rem;border:1px solid #10b981;border-radius:5px;background:rgba(16,185,129,0.08);color:#10b981;cursor:pointer;transition:all 0.12s;font-weight:600;';
+        imgBtn.onmouseenter = () => { imgBtn.style.background = 'rgba(16,185,129,0.18)'; };
+        imgBtn.onmouseleave = () => { imgBtn.style.background = 'rgba(16,185,129,0.08)'; };
+        imgBtn.onclick = () => imgInput.click();
+        bar.appendChild(imgBtn);
+    }
 
     // Label
     const lbl = document.createElement('span');
