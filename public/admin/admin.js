@@ -852,18 +852,18 @@ function injectLatexToolbar(textareaId) {
     ta.dataset.latexToolbar = '1';
 
     const tokens = [
-        { label: '∑', insert: '\\sum_{i=1}^{n} ' },
+        { label: '∑', insert: '$\\sum_{i=1}^{n} $', cursor: -1 },
         { label: 'x²', insert: '^{2}' },
         { label: 'xₙ', insert: '_{n}' },
-        { label: '√', insert: '\\sqrt{}', cursor: -1 },
-        { label: '∫', insert: '\\int_{a}^{b} ' },
-        { label: 'a/b', insert: '\\frac{}{}', cursor: -2 },
-        { label: 'π', insert: '\\pi' },
-        { label: '≤', insert: '\\leq ' },
-        { label: '≥', insert: '\\geq ' },
-        { label: '≠', insert: '\\neq ' },
-        { label: '∞', insert: '\\infty' },
-        { label: '±', insert: '\\pm ' },
+        { label: '√', insert: '$\\sqrt{}$', cursor: -2 },
+        { label: '∫', insert: '$\\int_{a}^{b} $', cursor: -1 },
+        { label: 'a/b', insert: '$\\frac{}{}$', cursor: -3 },
+        { label: 'π', insert: '$\\pi$' },
+        { label: '≤', insert: ' $\\leq$ ' },
+        { label: '≥', insert: ' $\\geq$ ' },
+        { label: '≠', insert: ' $\\neq$ ' },
+        { label: '∞', insert: '$\\infty$' },
+        { label: '±', insert: ' $\\pm$ ' },
         { label: '$…$', insert: '$$', cursor: -1, surround: true, inline: true },
         { label: '$$…$$', insert: '$$$$', cursor: -2, surround: true, block: true },
     ];
