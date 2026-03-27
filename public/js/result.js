@@ -201,6 +201,22 @@ class ResultApp {
                 statusBadge = '<span class="status-badge" style="background: rgba(99,102,241,0.2); color: #818cf8;">✍️ Phần Viết</span>';
             } else if (q.isFreeForm) {
                 statusBadge = '<span class="status-badge" style="background: rgba(168,85,247,0.15); color: #a855f7;">✏️ Tự Luận</span>';
+            } else if (q.isFillBlank) {
+                // BUG-1 FIX: Fill-blank badge uses per-blank correctness, not correctAnswer comparison
+                const blanksForBadge = q.blanks || [];
+                const ansMapForBadge = resultEntry?.userAnswer || {};
+                const fillAllCorrect = blanksForBadge.length > 0 && blanksForBadge.every((b, i) => {
+                    const uv = ((ansMapForBadge[i] !== undefined ? ansMapForBadge[i] : '') + '').trim();
+                    return checkBlankMatch(uv, String(b.answer || '').trim(), b.type);
+                });
+                const fillAnyAnswered = blanksForBadge.some((_, i) => (ansMapForBadge[i] + '').trim() !== '');
+                if (!fillAnyAnswered) {
+                    statusBadge = '<span class="status-badge" style="background: rgba(245,158,11,0.2); color: #fbbf24;">⚠️ Bỏ Qua</span>';
+                } else if (fillAllCorrect) {
+                    statusBadge = '<span class="status-badge badge-correct">✅ Chính Xác</span>';
+                } else {
+                    statusBadge = '<span class="status-badge badge-incorrect">❌ Chưa Đúng</span>';
+                }
             } else if (userAnsId === undefined) {
                 statusBadge = '<span class="status-badge" style="background: rgba(245,158,11,0.2); color: #fbbf24;">⚠️ Bỏ Qua</span>';
             } else if (userAnsId === q.correctAnswer) {
@@ -395,7 +411,7 @@ class ResultApp {
                 ${q.explanation && q.showExplanation !== false ? `
                 <div class="explanation-box">
                     <div class="explanation-title">📝 Giải đáp & Phân tích</div>
-                    <p style="color: var(--text-main); font-size: 0.95rem; line-height: 1.6;">${q.explanation}</p>
+                    <p style="color: var(--text-main); font-size: 0.95rem; line-height: 1.6;" class="katex-render">${q.explanation}</p>
                     ${explMediaHtml}
                 </div>` : (explMediaHtml && q.showExplanation !== false ? `<div class="explanation-box"><div class="explanation-title">📝 Media giải đáp</div>${explMediaHtml}</div>` : '')}
                 ${q.expansion && q.showExpansion !== false ? `
