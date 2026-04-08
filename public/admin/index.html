@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 
 <head>
@@ -803,6 +803,7 @@
                 <div class="tab-item" onclick="switchTab('questionBank')" style="color:#059669;">📚 Ngân hàng</div>
                 <div class="tab-item" onclick="switchTab('settings')">⚙️ Cài đặt</div>
                 <div class="tab-item" onclick="switchTab('help')" style="color:#0369a1;">📖 Hướng dẫn</div>
+                <div class="tab-item" onclick="switchTab('media')" style="color:#0891b2;">📁 Kho Media</div>
                 <div class="tab-item" onclick="switchTab('aiGen')"
                     style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border-radius:8px;margin-left:auto;padding:0.6rem 1.2rem;">
                     🤖 AI Tạo Đề</div>
@@ -1156,6 +1157,47 @@
                 <button class="btn btn-primary" onclick="saveSettings()">💾 Lưu cài đặt</button>
                 <span id="settingsSaveStatus"
                     style="margin-left:1rem;font-size:0.85rem;color:var(--success);display:none;">✅ Đã lưu!</span>
+            </div>
+
+            <!-- TAB: Media Library -->
+            <div id="tabMedia" class="view">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.75rem;">
+                    <h2 style="font-size:1.4rem;font-weight:700;display:flex;align-items:center;gap:0.5rem;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.5"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg> Kho Media</h2>
+                    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+                        <div id="mediaQuotaBar"></div>
+                        <button class="btn btn-sm btn-primary" onclick="createMediaFolder()">+ Thư mục</button>
+                    </div>
+                </div>
+                <!-- Upload zone -->
+                <div class="glass-panel" style="padding:1.25rem;margin-bottom:1.5rem;">
+                    <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;margin-bottom:0.75rem;">
+                        <label class="btn btn-sm btn-outline" style="cursor:pointer;">
+                            🖼️ Ảnh
+                            <input type="file" accept="image/*" multiple style="display:none;" onchange="uploadMediaFiles(this)">
+                        </label>
+                        <label class="btn btn-sm btn-outline" style="cursor:pointer;">
+                            🎬 Video
+                            <input type="file" accept="video/*" style="display:none;" onchange="uploadMediaFiles(this)">
+                        </label>
+                        <label class="btn btn-sm btn-outline" style="cursor:pointer;">
+                            📄 Tài liệu
+                            <input type="file" accept=".pdf,.doc,.docx,.pptx,.ppt,.xlsx,.xls" multiple style="display:none;" onchange="uploadMediaFiles(this)">
+                        </label>
+                        <button class="btn btn-sm btn-ghost" onclick="scanMediaPending()" title="Quét thư mục Drive pending">🔍 Quét pending</button>
+                        <span id="mediaUploadStatus" style="font-size:0.82rem;"></span>
+                    </div>
+                    <div id="mediaDropZone" style="border:2px dashed var(--border);border-radius:12px;padding:1.5rem;text-align:center;cursor:pointer;transition:all 0.2s;font-size:0.82rem;color:var(--text-muted);background:var(--bg-input);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.4;margin-bottom:0.3rem;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <div>Kéo thả file vào đây để upload</div>
+                    </div>
+                </div>
+                <!-- File grid -->
+                <div id="mediaGridContainer">
+                    <div class="empty-state">
+                        <div class="emoji">📂</div>
+                        <p>Nhấn nút upload hoặc kéo thả file để bắt đầu</p>
+                    </div>
+                </div>
             </div>
 
             <!-- TAB: Help -->
@@ -2029,6 +2071,7 @@
                             <input type="file" accept="image/*" multiple style="display:none"
                                 onchange="Array.from(this.files).forEach(f=>addQuestionImage(f));this.value=''">
                         </label>
+                        <button type="button" class="btn btn-sm btn-info" style="padding:0.2rem 0.6rem;font-size:0.75rem;" onclick="openMediaPicker('question-images')">📁 Chọn từ kho</button>
                     </div>
                     <div id="multiImageList" style="display:flex;flex-wrap:wrap;gap:0.25rem;min-height:24px;"><span
                             style="color:var(--text-muted);font-size:0.8rem;">Chưa có ảnh</span></div>
@@ -2037,10 +2080,22 @@
                     trên để Ctrl+V<br>Hoặc nhấn nút để chọn ảnh câu hỏi</p>
             </div>
             <div class="form-group"><label>Video câu hỏi (URL YouTube/MP4)</label>
-                <input id="inputQuestionVideo" class="form-input"
-                    placeholder="https://youtube.com/watch?v=... hoặc link .mp4">
+                <div style="display:flex;gap:0.5rem;align-items:center;">
+                    <input id="inputQuestionVideo" class="form-input" style="flex:1;"
+                        placeholder="https://youtube.com/watch?v=... hoặc link .mp4">
+                    <button type="button" class="btn btn-sm btn-info" style="padding:0.35rem 0.6rem;font-size:0.78rem;white-space:nowrap;" onclick="openMediaPicker('video')">📁 Kho</button>
+                </div>
                 <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Video hiện khi làm bài (hoặc
                     dạng gợi ý)</p>
+            </div>
+            <div class="form-group"><label>📎 Tài liệu đính kèm (PDF/DOCX)</label>
+                <div style="display:flex;gap:0.5rem;align-items:center;">
+                    <input id="inputQuestionAttachment" class="form-input" style="flex:1;"
+                        placeholder="URL tài liệu (PDF, DOCX)" readonly>
+                    <button type="button" class="btn btn-sm btn-info" style="padding:0.35rem 0.6rem;font-size:0.78rem;white-space:nowrap;" onclick="openMediaPicker('attachment')">📁 Kho</button>
+                    <button type="button" class="btn btn-sm btn-ghost" style="padding:0.35rem 0.5rem;font-size:0.78rem;" onclick="document.getElementById('inputQuestionAttachment').value=''" title="Xóa">✕</button>
+                </div>
+                <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Tài liệu hiện cho HS xem khi làm bài (chọn từ Kho Media)</p>
             </div>
             <div class="form-group" style="display:flex;align-items:center;gap:0.75rem;">
                 <label style="margin:0;cursor:pointer;">
@@ -2144,6 +2199,8 @@
     <script src="/admin/js/ai-gen.js"></script>
     <script src="/admin/js/ai-gen-edit.js"></script>
     <script src="/admin/js/question-bank.js"></script>
+    <!-- 3b. Media Library module -->
+    <script src="/admin/js/media-library.js"></script>
     <!-- 4. Entry point: auth, tabs, init (must be last) -->
     <script src="/admin/js/admin-main.js"></script>
 </body>
