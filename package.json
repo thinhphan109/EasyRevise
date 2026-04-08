@@ -1,0 +1,30 @@
+{
+  "name": "easyrevise",
+  "version": "1.0.0",
+  "description": "Hệ thống ôn tập với trang Admin quản lý đề thi tích hợp AI cho toàn hệ thống - Built by thinhme.tech",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "jest --verbose --forceExit",
+    "seed": "node seed.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.80.0",
+    "dotenv": "^17.3.1",
+    "express": "^4.18.2",
+    "googleapis": "^171.4.0",
+    "helmet": "^8.1.0",
+    "mammoth": "^1.12.0",
+    "mongoose": "^9.3.2",
+    "multer": "^2.1.1",
+    "openai": "^6.32.0",
+    "pdf-parse": "^2.4.5",
+    "pdf-to-png-converter": "^3.14.0",
+    "sharp": "^0.34.5",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "jest": "^30.3.0"
+  }
+}

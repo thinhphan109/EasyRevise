@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyRevise - Ôn Tập Đề Cương </title>
+    <meta name="description"
+        content="Hệ thống ôn tập hiệu quả với đề cương chi tiết, chấm điểm tự động và lời giải mở rộng.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false})"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+
+    <style>
+        .user-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .auth-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .auth-modal.active {
+            display: flex;
+        }
+
+        .auth-box {
+            width: 90%;
+            max-width: 420px;
+            padding: 2.5rem;
+            border-radius: 24px;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 1rem;
+            color: var(--text-main);
+            font-family: inherit;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+
+        .auth-input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .auth-error {
+            color: var(--error);
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .tab-switch {
+            display: flex;
+            background: var(--bg-input);
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-switch button {
+            flex: 1;
+            padding: 0.6rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            background: transparent;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .tab-switch button.active {
+            background: white;
+            color: var(--text-main);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* History */
+        .history-item {
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .history-item:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .history-score {
+            font-size: 1.5rem;
+            font-weight: 800;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .inprogress-card {
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+            border-radius: 14px;
+            border: 2px solid #f59e0b;
+            background: #fffbeb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .inprogress-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: #d97706;
+        }
+
+        .inprogress-badge {
+            padding: 0.2rem 0.6rem;
+            background: #fef3c7;
+            color: #92400e;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border-radius: 6px;
+            text-transform: uppercase;
+        }
+
+        /* Skeleton loading */
+        .skeleton-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.75rem;
+            min-height: 180px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skeleton-line {
+            height: 14px;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        .skeleton-line.w60 {
+            width: 60%;
+        }
+
+        .skeleton-line.w80 {
+            width: 80%;
+            height: 18px;
+            margin-bottom: 1rem;
+        }
+
+        .skeleton-line.w40 {
+            width: 40%;
+        }
+
+        .skeleton-line.w50 {
+            width: 50%;
+            height: 12px;
+        }
+
+        .skeleton-btn {
+            width: 130px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            margin-top: 1rem;
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* History enhanced */
+        .history-item {
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .history-item:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+            transform: translateY(-1px);
+        }
+
+        .history-score {
+            font-size: 1.5rem;
+            font-weight: 800;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .score-label {
+            font-size: 0.65rem;
+            font-weight: 600;
+            padding: 0.12rem 0.4rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h1>EasyRevise</h1>
+                <p class="subtitle" style="margin-bottom: 0;">Hệ thống ôn tập đề cương Tiếng Anh thông minh</p>
+            </div>
+            <div class="user-bar">
+                <button id="qrScanBtn" class="btn"
+                    style="background:#eff6ff;color:#1d4ed8;font-size:0.85rem;padding:0.4rem 0.8rem;"
+                    onclick="openQRScanner()">📷 Quét QR</button>
+                <button class="btn" style="background:#fffbeb;color:#92400e;font-size:0.85rem;padding:0.4rem 0.8rem;"
+                    onclick="openReviewByCodeModal()">📋 Xem lại bằng mã</button>
+                <div id="authArea">
+                    <button class="btn"
+                        style="background: var(--primary-light); color: var(--primary); font-size: 0.9rem;"
+                        onclick="openAuthModal()">Đăng nhập</button>
+                </div>
+            </div>
+        </header>
+
+        <section style="margin-top: 2rem;">
+            <h2 style="font-size: 1.5rem; margin-bottom: 1.5rem; color: var(--text-main); font-weight: 700;">Chọn đề ôn
+                tập</h2>
+            <div id="examList" class="exam-grid">
+                <div class="skeleton-card">
+                    <div class="skeleton-line w80"></div>
+                    <div class="skeleton-line w60"></div>
+                    <div class="skeleton-line w50"></div>
+                    <div class="skeleton-btn"></div>
+                </div>
+                <div class="skeleton-card">
+                    <div class="skeleton-line w80"></div>
+                    <div class="skeleton-line w60"></div>
+                    <div class="skeleton-line w50"></div>
+                    <div class="skeleton-btn"></div>
+                </div>
+                <div class="skeleton-card">
+                    <div class="skeleton-line w80"></div>
+                    <div class="skeleton-line w60"></div>
+                    <div class="skeleton-line w50"></div>
+                    <div class="skeleton-btn"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- In-Progress Section -->
+        <section id="inProgressSection" style="margin-top: 2.5rem; display: none;">
+            <h2 style="font-size: 1.3rem; margin-bottom: 1rem; color: #92400e; font-weight: 700;">📌 Bài đang làm dở
+            </h2>
+            <div id="inProgressList"></div>
+        </section>
+
+        <!-- History Section -->
+        <section id="historySection" style="margin-top: 2.5rem; display: none;">
+            <h2 style="font-size: 1.3rem; margin-bottom: 1rem; color: var(--text-main); font-weight: 700;">Lịch sử làm
+                bài</h2>
+            <div id="historyList"></div>
+        </section>
+    </div>
+
+    <!-- Code Entry Modal -->
+    <div id="codeModal" class="auth-modal">
+        <div class="glass-panel auth-box" style="max-width:380px;">
+            <h3 style="font-weight:700;margin-bottom:0.5rem;">🔒 Đề thi yêu cầu mã</h3>
+            <p id="codeExamTitle" style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1.5rem;"></p>
+            <div id="codeError" class="auth-error"></div>
+            <input id="codeInput" class="auth-input" placeholder="Nhập mã kích hoạt"
+                style="text-transform:uppercase;font-family:monospace;font-size:1.1rem;text-align:center;letter-spacing:3px;"
+                onkeydown="if(event.key==='Enter'){event.preventDefault();submitCode();}">
+            <button class="btn btn-primary" style="width:100%;" onclick="submitCode()">Mở khóa</button>
+            <button
+                style="width:100%;margin-top:0.75rem;padding:0.5rem;background:none;border:none;color:var(--text-muted);font-size:0.85rem;cursor:pointer;"
+                onclick="document.getElementById('codeModal').classList.remove('active')">Hủy</button>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="authModal" class="auth-modal">
+        <div class="glass-panel auth-box">
+            <div class="tab-switch">
+                <button id="tabLogin" class="active" onclick="switchTab('login')">Đăng nhập</button>
+                <button id="tabRegister" onclick="switchTab('register')">Đăng ký</button>
+            </div>
+
+            <div id="authError" class="auth-error"></div>
+
+            <div id="loginForm">
+                <input id="loginUsername" class="auth-input" placeholder="Tên đăng nhập" autocomplete="username"
+                    onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('loginPassword').focus();}">
+                <input id="loginPassword" class="auth-input" type="password" placeholder="Mật khẩu"
+                    autocomplete="current-password"
+                    onkeydown="if(event.key==='Enter'){event.preventDefault();doLogin();}">
+                <button class="btn btn-primary" style="width: 100%;" onclick="doLogin()">Đăng nhập</button>
+            </div>
+
+            <div id="registerForm" style="display: none;">
+                <input id="regDisplayName" class="auth-input" placeholder="Tên hiển thị"
+                    onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('regUsername').focus();}">
+                <input id="regUsername" class="auth-input" placeholder="Tên đăng nhập (≥3 ký tự)"
+                    autocomplete="username"
+                    onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('regPassword').focus();}">
+                <input id="regPassword" class="auth-input" type="password" placeholder="Mật khẩu (≥4 ký tự)"
+                    autocomplete="new-password"
+                    onkeydown="if(event.key==='Enter'){event.preventDefault();doRegister();}">
+                <button class="btn btn-primary" style="width: 100%;" onclick="doRegister()">Tạo tài khoản</button>
+            </div>
+
+            <button
+                style="width: 100%; margin-top: 1rem; padding: 0.5rem; background: none; border: none; color: var(--text-muted); font-size: 0.85rem; cursor: pointer;"
+                onclick="closeAuthModal()">Đóng</button>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        // Auth
+        function openAuthModal() { document.getElementById('authModal').classList.add('active'); }
+        function closeAuthModal() { document.getElementById('authModal').classList.remove('active'); }
+
+        function switchTab(tab) {
+            document.getElementById('authError').style.display = 'none';
+            if (tab === 'login') {
+                document.getElementById('loginForm').style.display = 'block';
+                document.getElementById('registerForm').style.display = 'none';
+                document.getElementById('tabLogin').classList.add('active');
+                document.getElementById('tabRegister').classList.remove('active');
+            } else {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('registerForm').style.display = 'block';
+                document.getElementById('tabLogin').classList.remove('active');
+                document.getElementById('tabRegister').classList.add('active');
+            }
+        }
+
+        function showAuthError(msg) {
+            const el = document.getElementById('authError');
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+
+        async function doLogin() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+                if (data.error) return showAuthError(data.error);
+                localStorage.setItem('easyrevise_token', data.token);
+                localStorage.setItem('easyrevise_user', JSON.stringify(data));
+                currentUser = data;
+                closeAuthModal();
+                updateAuthUI();
+                loadHistory();
+            } catch (err) { showAuthError('Lỗi kết nối'); }
+        }
+
+        async function doRegister() {
+            const displayName = document.getElementById('regDisplayName').value;
+            const username = document.getElementById('regUsername').value;
+            const password = document.getElementById('regPassword').value;
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, displayName })
+                });
+                const data = await res.json();
+                if (data.error) return showAuthError(data.error);
+                localStorage.setItem('easyrevise_token', data.token);
+                localStorage.setItem('easyrevise_user', JSON.stringify(data));
+                currentUser = data;
+                closeAuthModal();
+                updateAuthUI();
+                loadHistory();
+            } catch (err) { showAuthError('Lỗi kết nối'); }
+        }
+
+        function logout() {
+            localStorage.removeItem('easyrevise_token');
+            localStorage.removeItem('easyrevise_user');
+            currentUser = null;
+            updateAuthUI();
+            document.getElementById('historySection').style.display = 'none';
+        }
+
+        function updateAuthUI() {
+            const area = document.getElementById('authArea');
+            if (currentUser) {
+                const initial = (currentUser.displayName || currentUser.username).charAt(0).toUpperCase();
+                const isAdmin = currentUser.role === 'admin';
+                const adminBtn = isAdmin ? `<a href="javascript:void(0)" onclick="goAdmin()" class="btn" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:0.8rem;padding:0.4rem 0.8rem;border-radius:10px;">⚙️ Admin</a>` : '';
+                area.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        ${adminBtn}
+                        <div class="user-avatar">${initial}</div>
+                        <div>
+                            <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-main);">${currentUser.displayName}</div>
+                            <button style="background: none; border: none; color: var(--text-muted); font-size: 0.75rem; cursor: pointer; padding: 0;" onclick="logout()">Đăng xuất</button>
+                        </div>
+                    </div>`;
+            } else {
+                area.innerHTML = `<button class="btn" style="background: var(--primary-light); color: var(--primary); font-size: 0.9rem;" onclick="openAuthModal()">Đăng nhập</button>`;
+            }
+        }
+
+        // Admin PIN access
+        function goAdmin() {
+            const session = JSON.parse(localStorage.getItem('easyrevise_admin_pin_session') || '{}');
+            if (session.expiry && Date.now() < session.expiry) { window.location.href = '/admin'; return; }
+            document.getElementById('pinModal').classList.add('active');
+            document.getElementById('pinInput').value = '';
+            document.getElementById('pinError').style.display = 'none';
+            setTimeout(() => document.getElementById('pinInput').focus(), 100);
+        }
+        function submitPin() {
+            const pin = document.getElementById('pinInput').value.trim();
+            if (pin.length !== 6 || !/^\d{6}$/.test(pin)) { document.getElementById('pinError').textContent = 'PIN phải là 6 chữ số'; document.getElementById('pinError').style.display = 'block'; return; }
+            fetch('/api/admin/verify-pin', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('easyrevise_token')}` }, body: JSON.stringify({ pin }) })
+                .then(r => r.json()).then(data => {
+                    if (data.error) { document.getElementById('pinError').textContent = data.error; document.getElementById('pinError').style.display = 'block'; return; }
+                    localStorage.setItem('easyrevise_admin_pin_session', JSON.stringify({ expiry: Date.now() + 3 * 60 * 60 * 1000 }));
+                    document.getElementById('pinModal').classList.remove('active');
+                    window.location.href = '/admin';
+                }).catch(() => { document.getElementById('pinError').textContent = 'Lỗi kết nối'; document.getElementById('pinError').style.display = 'block'; });
+        }
+
+        // Load history
+        async function loadHistory() {
+            const token = localStorage.getItem('easyrevise_token');
+            if (!token) return;
+
+            try {
+                const res = await fetch('/api/history', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) return;
+                const history = await res.json();
+
+                const section = document.getElementById('historySection');
+                const container = document.getElementById('historyList');
+
+                // Also check local history
+                const localHistory = JSON.parse(localStorage.getItem('easyrevise_history') || '[]');
+                const allHistory = history.length > 0 ? history : localHistory;
+                _serverHistory = allHistory;
+
+                if (!allHistory.length) {
+                    section.style.display = 'none';
+                    return;
+                }
+
+                section.style.display = 'block';
+                container.innerHTML = allHistory.slice(0, 10).map((h, i) => {
+                    const score = parseFloat(h.score);
+                    const color = score >= 8 ? 'var(--success)' : score >= 5 ? '#d97706' : 'var(--error)';
+                    const label = score >= 8 ? '<span class="score-label" style="background:#dcfce7;color:#16a34a;">Xuất sắc</span>' : score >= 5 ? '<span class="score-label" style="background:#fef3c7;color:#92400e;">Khá</span>' : '<span class="score-label" style="background:#fee2e2;color:#dc2626;">Cần cố gắng</span>';
+                    const timeMin = Math.floor((h.timeSpent || 0) / 60);
+                    const autoTag = h.autoSubmitted ? ' · <span style="color:#f59e0b;font-size:0.72rem;">⏰ Hết giờ</span>' : '';
+                    return `
+                        <div class="history-item" onclick="reviewResult(${i}, 'server')">
+                            <div>
+                                <div style="font-weight: 600; color: var(--text-main);">${h.examTitle || 'Đề thi'}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">
+                                    ${h.timestamp || ''} · ${h.correct}/${h.total} đúng · ${timeMin} phút${autoTag}
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <div style="text-align:center;">
+                                    <div class="history-score" style="color: ${color};">${h.score}</div>
+                                    ${label}
+                                </div>
+                                <span style="font-size: 0.75rem; color: var(--primary);">Xem lại →</span>
+                            </div>
+                        </div>`;
+                }).join('');
+            } catch (err) {
+                // Fallback to local
+                const localHistory = JSON.parse(localStorage.getItem('easyrevise_history') || '[]');
+                if (localHistory.length) {
+                    document.getElementById('historySection').style.display = 'block';
+                    document.getElementById('historyList').innerHTML = localHistory.slice(0, 10).map(h => {
+                        const score = parseFloat(h.score);
+                        const color = score >= 8 ? 'var(--success)' : score >= 5 ? '#d97706' : 'var(--error)';
+                        return `
+                            <div class="history-item">
+                                <div>
+                                    <div style="font-weight: 600;">${h.examTitle || 'Đề thi'}</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted);">${h.timestamp || ''} · ${h.correct}/${h.total} đúng</div>
+                                </div>
+                                <div class="history-score" style="color: ${color};">${h.score}</div>
+                            </div>`;
+                    }).join('');
+                }
+            }
+        }
+
+        let _serverHistory = [];
+
+        // Review a past result
+        function reviewResult(index, source) {
+            let history;
+            if (source === 'server') {
+                history = _serverHistory;
+            } else {
+                history = JSON.parse(localStorage.getItem('easyrevise_history') || '[]');
+            }
+            const item = history[index];
+            if (!item) return;
+            sessionStorage.setItem('easyrevise_final_result', JSON.stringify(item));
+            window.location.href = 'result.html';
+        }
+
+        // Load exams
+        async function loadExams() {
+            try {
+                const res = await fetch('/api/exams');
+                const exams = await res.json();
+                const container = document.getElementById('examList');
+
+                if (!exams.length) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 4rem; color: var(--text-muted); grid-column: 1 / -1;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">📝</div>
+                            <p>Chưa có đề thi nào. Vui lòng liên hệ giáo viên để thêm đề!</p>
+                        </div>`;
+                    return;
+                }
+
+                container.innerHTML = exams.map(exam => {
+                    const unlocked = JSON.parse(localStorage.getItem('easyrevise_unlocked') || '{}');
+                    const isLocked = exam.requireCode && !unlocked[exam.id];
+                    const clickAction = isLocked ? `openCodeModal('${exam.id}', '${exam.title.replace(/'/g, "\\'")}')` : `window.location.href='exam.html?id=${exam.id}'`;
+                    return `
+                    <div class="glass-panel exam-card" onclick="${clickAction}">
+                        <h3>${isLocked ? '🔒 ' : ''}${exam.title}</h3>
+                        <div class="meta">
+                            <span>📝 ${exam.totalQuestions} câu</span>
+                            <span>📂 ${exam.sectionCount} phần</span>
+                            ${exam.totalEssays > 0 ? `<span>✍️ ${exam.totalEssays} bài luận</span>` : ''}
+                        </div>
+                        <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">
+                            ${exam.subject} — ${exam.year}
+                        </p>
+                        <span class="btn btn-primary" style="pointer-events: none;">${isLocked ? '🔑 Nhập mã để mở' : 'Bắt đầu ôn tập →'}</span>
+                    </div>`;
+                }).join('');
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // In-progress exams
+        function loadInProgress() {
+            const inProgress = JSON.parse(localStorage.getItem('easyrevise_in_progress') || '{}');
+            const section = document.getElementById('inProgressSection');
+            const container = document.getElementById('inProgressList');
+            const entries = Object.entries(inProgress).filter(([id, data]) => data.answeredCount < data.totalQuestions);
+
+            if (!entries.length) { section.style.display = 'none'; return; }
+
+            section.style.display = 'block';
+            container.innerHTML = entries.map(([id, data]) => {
+                const percent = Math.round((data.answeredCount / data.totalQuestions) * 100);
+                const timeAgo = getTimeAgo(data.lastAccessed);
+                return `
+                    <div class="inprogress-card" onclick="window.location.href='exam.html?id=${id}'">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                                <span class="inprogress-badge">Đang làm</span>
+                                <span style="font-weight: 600; color: var(--text-main);">${data.examTitle}</span>
+                            </div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">
+                                ${data.answeredCount}/${data.totalQuestions} câu · ${percent}% · ${timeAgo}
+                            </div>
+                        </div>
+                        <span class="btn btn-primary" style="pointer-events: none; font-size: 0.8rem; padding: 0.4rem 0.8rem;">Tiếp tục →</span>
+                    </div>`;
+            }).join('');
+        }
+
+        function getTimeAgo(ts) {
+            const diff = Date.now() - ts;
+            const mins = Math.floor(diff / 60000);
+            if (mins < 1) return 'vừa xong';
+            if (mins < 60) return `${mins} phút trước`;
+            const hours = Math.floor(mins / 60);
+            if (hours < 24) return `${hours} giờ trước`;
+            return `${Math.floor(hours / 24)} ngày trước`;
+        }
+
+        // Init
+        const savedUser = localStorage.getItem('easyrevise_user');
+        if (savedUser) {
+            try { currentUser = JSON.parse(savedUser); } catch (e) { }
+        }
+        updateAuthUI();
+        loadExams();
+        loadInProgress();
+        if (currentUser) loadHistory();
+
+        // TN2: Auto-handle QR code deep-link (?code=XXX&examId=YYY) — show info popup
+        (async function handleQRDeepLink() {
+            const params = new URLSearchParams(window.location.search);
+            const qrCode = params.get('code');
+            const qrExamId = params.get('examId');
+            if (!qrCode || !qrExamId) return;
+
+            // Clean URL immediately
+            history.replaceState({}, '', '/');
+            showQREntryPopup(qrCode.toUpperCase().trim(), qrExamId);
+        })();
+
+        async function showQREntryPopup(code, examId) {
+            // Remove existing if any
+            document.getElementById('qrEntryPopup')?.remove();
+
+            // Create overlay
+            const overlay = document.createElement('div');
+            overlay.id = 'qrEntryPopup';
+            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(6px);z-index:10000;display:flex;align-items:center;justify-content:center;padding:1rem;animation:fadeIn 0.2s ease;';
+            overlay.innerHTML = `
+                <div id="qrPopupCard" style="background:var(--bg-card,#fff);border-radius:24px;max-width:480px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,0.25);overflow:hidden;animation:slideUp 0.25s ease;">
+                    <div style="background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:1.5rem 1.75rem;color:#fff;">
+                        <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;opacity:0.8;margin-bottom:0.35rem;">📱 QR Kích Hoạt</div>
+                        <div id="qrPopupTitle" style="font-size:1.4rem;font-weight:800;line-height:1.3;">Đang tải...</div>
+                        <div id="qrPopupMeta" style="font-size:0.85rem;opacity:0.85;margin-top:0.35rem;"></div>
+                        <div style="margin-top:0.75rem;display:inline-block;background:rgba(255,255,255,0.2);border-radius:8px;padding:0.25rem 0.75rem;font-family:monospace;font-size:1rem;font-weight:900;letter-spacing:3px;">${code}</div>
+                    </div>
+                    <div id="qrPopupBody" style="padding:1.5rem 1.75rem;">
+                        <div style="text-align:center;padding:1.5rem;color:#94a3b8;">⏳ Đang tải thông tin...</div>
+                    </div>
+                </div>`;
+            // style keyframes
+            if (!document.getElementById('qrPopupStyles')) {
+                const s = document.createElement('style');
+                s.id = 'qrPopupStyles';
+                s.textContent = `@keyframes fadeIn{from{opacity:0}to{opacity:1}} @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}`;
+                document.head.appendChild(s);
+            }
+            document.body.appendChild(overlay);
+            overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+
+            // Fetch preview
+            let data;
+            try {
+                const res = await fetch(`/api/exams/${examId}/preview-code`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code })
+                });
+                data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Lỗi không rõ');
+            } catch (err) {
+                document.getElementById('qrPopupBody').innerHTML = `
+                    <div style="text-align:center;padding:1.25rem;">
+                        <div style="font-size:2rem;margin-bottom:0.5rem;">⚠️</div>
+                        <div style="font-weight:700;color:#dc2626;margin-bottom:0.5rem;">Mã không hợp lệ</div>
+                        <div style="font-size:0.85rem;color:#64748b;">${err.message}</div>
+                        <button onclick="document.getElementById('qrEntryPopup').remove()" style="margin-top:1rem;padding:0.5rem 1.5rem;background:#f1f5f9;border:none;border-radius:10px;cursor:pointer;font-weight:600;color:#475569;">Đóng</button>
+                    </div>`;
+                return;
+            }
+
+            // Update header
+            document.getElementById('qrPopupTitle').textContent = data.exam.title;
+            const timeTxt = data.exam.timeLimit > 0 ? ` · ⏱ ${data.exam.timeLimit} phút` : '';
+            document.getElementById('qrPopupMeta').textContent = `${data.exam.subject} — ${data.exam.year} · ${data.exam.totalQuestions} câu${timeTxt}`;
+
+            // Build body
+            const alreadyUnlocked = JSON.parse(localStorage.getItem('easyrevise_unlocked') || '{}')[examId];
+            const inProgress = JSON.parse(localStorage.getItem('easyrevise_in_progress') || '{}')[examId];
+            const hasHistory = data.history && data.history.length > 0;
+            const hasInProgress = data.inProgress && data.inProgress.length > 0;
+
+            let historyHtml = '';
+            if (hasHistory) {
+                historyHtml = `<div style="margin-bottom:1rem;">
+                    <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#94a3b8;margin-bottom:0.5rem;">📋 Lịch sử làm bài</div>
+                    ${data.history.slice(0, 3).map(h => {
+                    const score = h.score !== null && h.score !== undefined ? parseFloat(h.score) : null;
+                    const scoreColor = score === null ? '#94a3b8' : score >= 8 ? '#16a34a' : score >= 5 ? '#d97706' : '#dc2626';
+                    const scoreTxt = score !== null ? score + '/10' : '—';
+                    const time = h.completedAt ? new Date(h.completedAt).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' }) : '';
+                    const mins = h.result ? Math.floor((h.result.timeSpent || 0) / 60) + ' phút' : '';
+                    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0.85rem;margin-bottom:0.35rem;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;">
+                            <div>
+                                <div style="font-weight:600;font-size:0.88rem;color:#1e293b;">${h.displayName}</div>
+                                <div style="font-size:0.75rem;color:#94a3b8;">${time}${mins ? ' · ' + mins : ''}</div>
+                            </div>
+                            <div style="font-weight:800;font-size:1.05rem;color:${scoreColor};">${scoreTxt}</div>
+                        </div>`;
+                }).join('')}
+                    ${data.history.length > 3 ? `<div style="font-size:0.78rem;color:#94a3b8;text-align:right;">+${data.history.length - 3} lần nữa</div>` : ''}
+                </div>`;
+            }
+
+            let inProgressHtml = '';
+            if (hasInProgress) {
+                inProgressHtml = `<div style="margin-bottom:1rem;padding:0.75rem 1rem;background:#fffbeb;border-radius:12px;border:1px solid #fde68a;">
+                    <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#92400e;margin-bottom:0.3rem;">⏳ Đang làm bài</div>
+                    ${data.inProgress.slice(0, 2).map(u => `<div style="font-size:0.85rem;color:#78350f;font-weight:600;">${u.displayName}</div>`).join('')}
+                </div>`;
+            }
+
+            // Local in-progress for this user
+            let localProgressHtml = '';
+            if (inProgress && alreadyUnlocked) {
+                const pct = Math.round((inProgress.answeredCount / inProgress.totalQuestions) * 100);
+                localProgressHtml = `<div style="margin-bottom:1rem;padding:0.75rem 1rem;background:#eff6ff;border-radius:12px;border:1px solid #bfdbfe;">
+                    <div style="font-size:0.72rem;font-weight:700;text-transform:uppercase;color:#1e40af;margin-bottom:0.3rem;">📌 Bài đang làm dở của bạn</div>
+                    <div style="font-size:0.85rem;color:#1e40af;">${inProgress.answeredCount}/${inProgress.totalQuestions} câu · ${pct}%</div>
+                </div>`;
+            }
+
+            // CTA button
+            let ctaBtn;
+            if (data.isFull && !alreadyUnlocked) {
+                ctaBtn = `<button disabled style="width:100%;padding:0.85rem;border-radius:14px;border:none;background:#e2e8f0;color:#94a3b8;font-size:1rem;font-weight:700;cursor:not-allowed;">🚫 Mã đã hết lượt sử dụng</button>`;
+            } else if (alreadyUnlocked && inProgress) {
+                ctaBtn = `<button onclick="window._qrStartExam('${examId}')" style="width:100%;padding:0.85rem;border-radius:14px;border:none;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-size:1rem;font-weight:700;cursor:pointer;">▶️ Tiếp tục làm bài</button>`;
+            } else {
+                ctaBtn = `<button onclick="window._qrStartExam('${examId}','${code}')" style="width:100%;padding:0.85rem;border-radius:14px;border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:1rem;font-weight:700;cursor:pointer;transition:opacity 0.2s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">🚀 Bắt đầu làm bài</button>`;
+            }
+
+            const usageTag = `<div style="font-size:0.78rem;color:#94a3b8;text-align:center;margin-bottom:0.85rem;">Đã dùng ${data.usedCount}/${data.maxUses < 500 ? data.maxUses : '∞'} lượt</div>`;
+
+            document.getElementById('qrPopupBody').innerHTML = `
+                ${localProgressHtml}${inProgressHtml}${historyHtml}${usageTag}${ctaBtn}
+                <button onclick="document.getElementById('qrEntryPopup').remove()" style="width:100%;margin-top:0.6rem;padding:0.6rem;background:none;border:none;color:#94a3b8;font-size:0.85rem;cursor:pointer;">Đóng</button>`;
+        }
+
+        // Start exam from QR popup — verify code then go
+        window._qrStartExam = async function (examId, code) {
+            const btn = document.querySelector('#qrEntryPopup button');
+            if (btn) { btn.textContent = '⏳ Đang mở khóa...'; btn.disabled = true; }
+
+            // If already unlocked (continuing), just go
+            const unlocked = JSON.parse(localStorage.getItem('easyrevise_unlocked') || '{}');
+            if (unlocked[examId]) {
+                document.getElementById('qrEntryPopup')?.remove();
+                window.location.href = `exam.html?id=${examId}`;
+                return;
+            }
+
+            try {
+                const userId = currentUser?.id || 'anonymous';
+                const displayName = currentUser?.displayName || 'Ẩn danh';
+                const res = await fetch(`/api/exams/${examId}/verify-code`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, userId, displayName })
+                });
+                const data = await res.json();
+                if (data.error) {
+                    alert('❌ ' + data.error);
+                    if (btn) { btn.textContent = '🚀 Bắt đầu làm bài'; btn.disabled = false; }
+                    return;
+                }
+                const unlocked2 = JSON.parse(localStorage.getItem('easyrevise_unlocked') || '{}');
+                unlocked2[examId] = data.code;
+                localStorage.setItem('easyrevise_unlocked', JSON.stringify(unlocked2));
+                document.getElementById('qrEntryPopup')?.remove();
+                window.location.href = `exam.html?id=${examId}`;
+            } catch (err) {
+                alert('❌ Lỗi kết nối: ' + err.message);
+                if (btn) { btn.textContent = '🚀 Bắt đầu làm bài'; btn.disabled = false; }
+            }
+        };
+
+        // Also show local history even without login
+        if (!currentUser) {
+            const localHistory = JSON.parse(localStorage.getItem('easyrevise_history') || '[]');
+            if (localHistory.length) {
+                document.getElementById('historySection').style.display = 'block';
+                document.getElementById('historyList').innerHTML = localHistory.slice(0, 10).map((h, i) => {
+                    const score = parseFloat(h.score);
+                    const color = score >= 8 ? 'var(--success)' : score >= 5 ? '#d97706' : 'var(--error)';
+                    const label = score >= 8 ? '<span class="score-label" style="background:#dcfce7;color:#16a34a;">Xuất sắc</span>' : score >= 5 ? '<span class="score-label" style="background:#fef3c7;color:#92400e;">Khá</span>' : '<span class="score-label" style="background:#fee2e2;color:#dc2626;">Cần cố gắng</span>';
+                    const timeMin = Math.floor((h.timeSpent || 0) / 60);
+                    const autoTag = h.autoSubmitted ? ' · <span style="color:#f59e0b;font-size:0.72rem;">⏰ Hết giờ</span>' : '';
+                    return `<div class="history-item" onclick="reviewResult(${i}, 'local')">
+                        <div>
+                            <div style="font-weight: 600; color: var(--text-main);">${h.examTitle || 'Đề thi'}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted);">${h.timestamp || ''} · ${h.correct}/${h.total} đúng · ${timeMin} phút${autoTag}</div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <div style="text-align:center;"><div class="history-score" style="color: ${color};">${h.score}</div>${label}</div>
+                            <span style="font-size: 0.75rem; color: var(--primary);">Xem lại →</span>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+        }
+
+        // Code entry modal
+        let _pendingCodeExamId = null;
+        function openCodeModal(examId, title) {
+            _pendingCodeExamId = examId;
+            document.getElementById('codeExamTitle').textContent = title;
+            document.getElementById('codeInput').value = '';
+            document.getElementById('codeError').style.display = 'none';
+            document.getElementById('codeModal').classList.add('active');
+            setTimeout(() => document.getElementById('codeInput').focus(), 100);
+        }
+        async function submitCode() {
+            const code = document.getElementById('codeInput').value.trim();
+            if (!code) return;
+            try {
+                const userId = currentUser?.id || 'anonymous';
+                const displayName = currentUser?.displayName || 'Ẩn danh';
+                const res = await fetch(`/api/exams/${_pendingCodeExamId}/verify-code`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, userId, displayName })
+                });
+                const data = await res.json();
+                if (data.error) { document.getElementById('codeError').textContent = data.error; document.getElementById('codeError').style.display = 'block'; return; }
+                // Save unlocked state
+                const unlocked = JSON.parse(localStorage.getItem('easyrevise_unlocked') || '{}');
+                unlocked[_pendingCodeExamId] = data.code;
+                localStorage.setItem('easyrevise_unlocked', JSON.stringify(unlocked));
+                document.getElementById('codeModal').classList.remove('active');
+                window.location.href = `exam.html?id=${_pendingCodeExamId}`;
+            } catch { document.getElementById('codeError').textContent = 'Lỗi kết nối'; document.getElementById('codeError').style.display = 'block'; }
+        }
+        document.getElementById('codeInput')?.addEventListener('keydown', e => { if (e.key === 'Enter') submitCode(); });
+        document.getElementById('pinInput')?.addEventListener('keydown', e => { if (e.key === 'Enter') submitPin(); });
+    </script>
+
+    <!-- PIN Modal -->
+    <div id="pinModal" class="auth-modal">
+        <div class="glass-panel auth-box" style="max-width:360px;text-align:center;">
+            <div style="font-size:2.5rem;margin-bottom:0.75rem;">🔐</div>
+            <h3 style="font-weight:700;margin-bottom:0.5rem;">Nhập PIN Admin</h3>
+            <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1.5rem;">Nhập mã PIN 6 số để truy cập
+                Admin Panel</p>
+            <div id="pinError" class="auth-error"></div>
+            <input id="pinInput" class="auth-input" type="password" maxlength="6" inputmode="numeric" pattern="[0-9]*"
+                placeholder="● ● ● ● ● ●"
+                style="text-align:center;font-size:1.5rem;letter-spacing:8px;font-family:monospace;">
+            <button class="btn btn-primary" style="width:100%;" onclick="submitPin()">Xác nhận</button>
+            <button
+                style="width:100%;margin-top:0.75rem;padding:0.5rem;background:none;border:none;color:var(--text-muted);font-size:0.85rem;cursor:pointer;"
+                onclick="document.getElementById('pinModal').classList.remove('active')">Hủy</button>
+        </div>
+    </div>
+
+    <!-- Review by Code Modal -->
+    <div id="reviewCodeModal" class="auth-modal">
+        <div class="glass-panel auth-box" style="max-width:380px;text-align:center;">
+            <div style="font-size:2.5rem;margin-bottom:0.75rem;">📋</div>
+            <h3 style="font-weight:700;margin-bottom:0.5rem;">Xem lại bài làm</h3>
+            <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1.5rem;">Nhập mã kích hoạt để xem lại kết
+                quả</p>
+            <div id="reviewCodeError" class="auth-error"></div>
+            <input id="reviewCodeInput" class="auth-input" placeholder="Nhập mã kích hoạt"
+                style="text-transform:uppercase;font-family:monospace;font-size:1.1rem;text-align:center;letter-spacing:3px;"
+                onkeydown="if(event.key==='Enter'){event.preventDefault();submitReviewCode();}">
+            <button class="btn btn-primary" style="width:100%;" onclick="submitReviewCode()">Xem kết quả</button>
+            <div id="reviewResultsList" style="display:none;margin-top:1rem;max-height:300px;overflow-y:auto;"></div>
+            <button
+                style="width:100%;margin-top:0.75rem;padding:0.5rem;background:none;border:none;color:var(--text-muted);font-size:0.85rem;cursor:pointer;"
+                onclick="document.getElementById('reviewCodeModal').classList.remove('active')">Hủy</button>
+        </div>
+    </div>
+
+    <script>
+        function openReviewByCodeModal() {
+            document.getElementById('reviewCodeModal').classList.add('active');
+            document.getElementById('reviewCodeInput').value = '';
+            document.getElementById('reviewCodeError').style.display = 'none';
+            document.getElementById('reviewResultsList').style.display = 'none';
+            document.getElementById('reviewResultsList').innerHTML = '';
+            setTimeout(() => document.getElementById('reviewCodeInput').focus(), 100);
+        }
+        async function submitReviewCode() {
+            const code = document.getElementById('reviewCodeInput').value.trim();
+            if (!code) return;
+            try {
+                const res = await fetch('/api/review-by-code', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code }) });
+                const data = await res.json();
+                if (data.error) { document.getElementById('reviewCodeError').textContent = data.error; document.getElementById('reviewCodeError').style.display = 'block'; return; }
+
+                if (data.count === 1) {
+                    // Single result - go directly
+                    sessionStorage.setItem('easyrevise_final_result', JSON.stringify(data.results[0].result));
+                    document.getElementById('reviewCodeModal').classList.remove('active');
+                    window.location.href = 'result.html';
+                } else {
+                    // Multiple results - show picker list
+                    const list = document.getElementById('reviewResultsList');
+                    list.style.display = 'block';
+                    list.innerHTML = `<p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.75rem;text-align:left;">📋 ${data.count} lần làm bài — ${data.examTitle}</p>` +
+                        data.results.map((r, i) => {
+                            const time = r.completedAt ? new Date(r.completedAt).toLocaleString('vi-VN') : 'N/A';
+                            const score = r.score !== null && r.score !== undefined && !isNaN(r.score) ? r.score + '/10' : '-';
+                            return `<div onclick="pickReviewResult(${i})" style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem 1rem;margin-bottom:0.35rem;background:var(--bg-input);border-radius:10px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='var(--primary-light)'" onmouseout="this.style.background='var(--bg-input)'">
+                            <div style="text-align:left;">
+                                <div style="font-weight:600;font-size:0.9rem;">${r.displayName}</div>
+                                <div style="font-size:0.75rem;color:var(--text-muted);">${time}</div>
+                            </div>
+                            <div style="font-weight:700;font-size:1rem;color:var(--primary);">${score}</div>
+                        </div>`;
+                        }).join('');
+                    window._reviewResults = data.results;
+                }
+            } catch { document.getElementById('reviewCodeError').textContent = 'Lỗi kết nối'; document.getElementById('reviewCodeError').style.display = 'block'; }
+        }
+        function pickReviewResult(index) {
+            const r = window._reviewResults[index];
+            if (!r) return;
+            sessionStorage.setItem('easyrevise_final_result', JSON.stringify(r.result));
+            document.getElementById('reviewCodeModal').classList.remove('active');
+            window.location.href = 'result.html';
+        }
+        document.getElementById('reviewCodeInput')?.addEventListener('keydown', e => { if (e.key === 'Enter') submitReviewCode(); });
+    </script>
+
+    <!-- QR Scanner Modal -->
+    <div id="qrScannerModal" class="auth-modal">
+        <div class="glass-panel auth-box" style="max-width:420px;padding:0;overflow:hidden;border-radius:24px;">
+            <div
+                style="background:linear-gradient(135deg,#1d4ed8,#3b82f6);padding:1.2rem 1.5rem;display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                    <div
+                        style="font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.7);">
+                        📷 Quét mã QR</div>
+                    <div style="font-size:1rem;font-weight:800;color:#fff;margin-top:0.15rem;">Hướng camera vào mã QR
+                    </div>
+                </div>
+                <button id="qrScanCloseBtn"
+                    style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:34px;height:34px;border-radius:50%;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">✕</button>
+            </div>
+            <div style="position:relative;background:#000;width:100%;height:300px;overflow:hidden;">
+                <video id="qrVideo" style="width:100%;height:100%;object-fit:cover;" playsinline muted></video>
+                <div
+                    style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;">
+                    <div style="width:65%;aspect-ratio:1;position:relative;">
+                        <div
+                            style="position:absolute;top:0;left:0;width:24px;height:24px;border-top:3px solid #60a5fa;border-left:3px solid #60a5fa;border-radius:3px 0 0 0;">
+                        </div>
+                        <div
+                            style="position:absolute;top:0;right:0;width:24px;height:24px;border-top:3px solid #60a5fa;border-right:3px solid #60a5fa;border-radius:0 3px 0 0;">
+                        </div>
+                        <div
+                            style="position:absolute;bottom:0;left:0;width:24px;height:24px;border-bottom:3px solid #60a5fa;border-left:3px solid #60a5fa;border-radius:0 0 0 3px;">
+                        </div>
+                        <div
+                            style="position:absolute;bottom:0;right:0;width:24px;height:24px;border-bottom:3px solid #60a5fa;border-right:3px solid #60a5fa;border-radius:0 0 3px 0;">
+                        </div>
+                        <div id="qrScanLine"
+                            style="position:absolute;top:0;left:4px;right:4px;height:2px;background:linear-gradient(90deg,transparent,#60a5fa,transparent);animation:scanLine 2s linear infinite;">
+                        </div>
+                    </div>
+                </div>
+                <canvas id="qrCanvas2" style="display:none;"></canvas>
+            </div>
+            <div id="qrScanStatus"
+                style="padding:0.85rem 1.25rem;text-align:center;font-size:0.85rem;color:#64748b;border-top:1px solid #f1f5f9;">
+                Đang khởi động camera...
+            </div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes scanLine {
+            0% {
+                top: 4px;
+            }
+
+            50% {
+                top: calc(100% - 6px);
+            }
+
+            100% {
+                top: 4px;
+            }
+        }
+
+        /* Nút Quét QR chỉ hiện trên mobile */
+        #qrScanBtn {
+            display: none;
+        }
+
+        @media (max-width: 767px) {
+            #qrScanBtn {
+                display: inline-flex;
+            }
+        }
+    </style>
+
+    <script>
+        let _qrStream = null, _qrAnimFrame = null, _qrDetected = false;
+
+        document.getElementById('qrScanCloseBtn').addEventListener('click', closeQRScanner);
+        document.getElementById('qrScannerModal').addEventListener('click', function (e) {
+            if (e.target === this) closeQRScanner();
+        });
+
+        function openQRScanner() {
+            _qrDetected = false;
+            document.getElementById('qrScannerModal').classList.add('active');
+            document.getElementById('qrScanStatus').textContent = 'Đang khởi động camera...';
+            document.getElementById('qrScanStatus').style.color = '#64748b';
+            startQRCamera();
+        }
+
+        function closeQRScanner() {
+            document.getElementById('qrScannerModal').classList.remove('active');
+            stopQRCamera();
+        }
+
+        async function startQRCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 1280 } }
+                });
+                _qrStream = stream;
+                const video = document.getElementById('qrVideo');
+                video.srcObject = stream;
+                await video.play();
+                document.getElementById('qrScanStatus').textContent = 'Đang quét... Hướng mã QR vào khung hình';
+                _qrDetected = false;
+                scanQRFrame();
+            } catch (err) {
+                let msg = '❌ Không thể truy cập camera.';
+                if (err.name === 'NotAllowedError') msg = '❌ Bạn cần cấp quyền camera trong trình duyệt.';
+                else if (err.name === 'NotFoundError') msg = '❌ Không tìm thấy camera trên thiết bị này.';
+                document.getElementById('qrScanStatus').textContent = msg;
+                document.getElementById('qrScanStatus').style.color = '#dc2626';
+            }
+        }
+
+        function stopQRCamera() {
+            if (_qrAnimFrame) { cancelAnimationFrame(_qrAnimFrame); _qrAnimFrame = null; }
+            if (_qrStream) { _qrStream.getTracks().forEach(function (t) { t.stop(); }); _qrStream = null; }
+            var video = document.getElementById('qrVideo');
+            video.srcObject = null;
+        }
+
+        function scanQRFrame() {
+            if (_qrDetected) return;
+            var video = document.getElementById('qrVideo');
+            if (video.readyState !== video.HAVE_ENOUGH_DATA) {
+                _qrAnimFrame = requestAnimationFrame(scanQRFrame);
+                return;
+            }
+            var canvas = document.getElementById('qrCanvas2');
+            var ctx = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            if (typeof jsQR !== 'undefined') {
+                var result = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+                if (result && result.data) { onQRDetected(result.data); return; }
+            }
+            _qrAnimFrame = requestAnimationFrame(scanQRFrame);
+        }
+
+        function onQRDetected(rawData) {
+            _qrDetected = true;
+            stopQRCamera();
+            var code = null, examId = null;
+            try {
+                var url = new URL(rawData);
+                code = url.searchParams.get('code');
+                examId = url.searchParams.get('examId');
+            } catch (e) { /* not a URL */ }
+
+            if (code && examId) {
+                document.getElementById('qrScanStatus').textContent = '✅ Đã nhận mã! Đang tải thông tin...';
+                document.getElementById('qrScanStatus').style.color = '#16a34a';
+                setTimeout(function () {
+                    closeQRScanner();
+                    showQREntryPopup(code.toUpperCase().trim(), examId);
+                }, 500);
+            } else {
+                document.getElementById('qrScanStatus').innerHTML =
+                    '<span style="color:#f59e0b;">⚠️ QR không phải đề EasyRevise.</span><br><small style="color:#94a3b8;">' + rawData.slice(0, 80) + '</small>';
+                setTimeout(function () { _qrDetected = false; startQRCamera(); }, 3000);
+            }
+        }
+    </script>
+
+</body>
+
+</html>
