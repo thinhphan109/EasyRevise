@@ -1,0 +1,2191 @@
+{
+  "exams": [
+    {
+      "id": "bada400e-ad01-4f0c-9bfa-edc9cc8ea287",
+      "title": "Đề Cương Kiểm Tra Giữa Kỳ II - Tiếng Anh 9",
+      "subject": "Tiếng Anh 9",
+      "year": "Năm Học 2025-2026",
+      "sections": [
+        {
+          "id": "language-focus",
+          "title": "I. LANGUAGE FOCUS",
+          "instruction": "Choose the correct answer A, B, C, or D to complete each of the sentences.",
+          "type": "multiple-choice",
+          "questions": [
+            {
+              "id": 1,
+              "question": "Choose the word A, B, C or D that has a different stress pattern.",
+              "options": [
+                "location",
+                "paradise",
+                "natural",
+                "tropical"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'location' có trọng âm rơi vào âm tiết thứ 2 (lo-CA-tion /ləʊˈkeɪʃən/), trong khi 'paradise', 'natural', 'tropical' đều có trọng âm rơi vào âm tiết thứ 1.",
+              "expansion": "Quy tắc: Các từ có đuôi -tion, -sion thường có trọng âm rơi vào âm tiết ngay trước đuôi. Ví dụ: education (e-du-CA-tion), information (in-for-MA-tion).",
+              "image": "/uploads/1774351568871-c99a.jpg",
+              "video": "https://www.youtube.com/watch?v=aYBuPGYInrg&list=RDaYBuPGYInrg&start_radio=1",
+              "mediaAsHint": false,
+              "explanationImage": null,
+              "explanationVideo": null
+            },
+            {
+              "id": 2,
+              "question": "Choose the word A, B, C or D that has a different stress pattern.",
+              "options": [
+                "authentic",
+                "amazing",
+                "natural",
+                "generous"
+              ],
+              "correctAnswer": 3,
+              "explanation": "'generous' có trọng âm ở âm tiết thứ 1 (GE-ne-rous /ˈdʒenərəs/). Các từ còn lại: authentic (au-THEN-tic), amazing (a-MA-zing), natural (cũng âm tiết 1 nhưng pattern khác).",
+              "expansion": "Từ 'generous' (adj) = hào phóng, rộng lượng. Các từ liên quan: generosity (n), generously (adv)."
+            },
+            {
+              "id": 3,
+              "question": "Choose the word A, B, C or D that has a different stress pattern.",
+              "options": [
+                "admire",
+                "explore",
+                "visit",
+                "support"
+              ],
+              "correctAnswer": 2,
+              "explanation": "'visit' có trọng âm ở âm tiết thứ 1 (VI-sit /ˈvɪzɪt/), trong khi 'admire' (ad-MIRE), 'explore' (ex-PLORE), 'support' (su-PPORT) đều có trọng âm ở âm tiết thứ 2.",
+              "expansion": "Quy tắc: Nhiều động từ 2 âm tiết trong tiếng Anh có trọng âm ở âm tiết thứ 2. Ngoại lệ phổ biến: visit, enter, offer, happen."
+            },
+            {
+              "id": 4,
+              "question": "Choose the word A, B, C or D which has a different sound in the underlined part.",
+              "options": [
+                "father",
+                "family",
+                "happen",
+                "matter"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'father' có âm /ɑː/ (fA-ther), trong khi 'family', 'happen', 'matter' đều có âm /æ/ (fA-mily, hA-ppen, mA-tter).",
+              "expansion": "Phân biệt /ɑː/ và /æ/: /ɑː/ là nguyên âm dài, miệng mở rộng (car, far, father). /æ/ là nguyên âm ngắn (cat, hat, map)."
+            },
+            {
+              "id": 5,
+              "question": "Choose the word A, B, C or D which has a different sound in the underlined part.",
+              "options": [
+                "bear",
+                "near",
+                "wear",
+                "pear"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'near' có âm /ɪə/ (nIEr), trong khi 'bear', 'wear', 'pear' đều có âm /eə/ (bEAr, wEAr, pEAr).",
+              "expansion": "Nhóm từ có âm /eə/: bear, wear, pear, care, share, dare. Nhóm từ có âm /ɪə/: near, hear, dear, fear, clear."
+            },
+            {
+              "id": 6,
+              "question": "Choose the word A, B, C or D which has a different sound in the underlined part.",
+              "options": [
+                "elegant",
+                "email",
+                "special",
+                "network"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'email' có âm /iː/ (E-mail), trong khi 'elegant', 'special', 'network' đều có âm /e/ ngắn.",
+              "expansion": "Chữ 'e' trong tiếng Anh có thể phát âm: /iː/ (email, he, she), /e/ (elegant, let, bed), /ɪ/ (enough, English)."
+            },
+            {
+              "id": 7,
+              "question": "He looked so funny; we couldn't help _______ at him.",
+              "options": [
+                "laugh",
+                "to laugh",
+                "laughed",
+                "laughing"
+              ],
+              "correctAnswer": 3,
+              "explanation": "Cấu trúc 'can't help + V-ing' = không thể nhịn được, không thể tránh được. 'We couldn't help laughing' = Chúng tôi không thể nhịn cười.",
+              "expansion": "Các cấu trúc tương tự: can't stand + V-ing (không chịu nổi), can't bear + V-ing (không chịu nổi), it's no use + V-ing (vô ích)."
+            },
+            {
+              "id": 8,
+              "question": "She asked the children _______ listening to her.",
+              "options": [
+                "if were they",
+                "whether they are",
+                "if they were",
+                "whether we were"
+              ],
+              "correctAnswer": 2,
+              "explanation": "Câu tường thuật (reported speech) dạng câu hỏi Yes/No: S + asked + O + if/whether + S + V (lùi thì). 'Are they listening?' → 'if they were listening'.",
+              "expansion": "Reported speech - Yes/No questions: Dùng if/whether. Lùi thì: are → were, is → was, do → did, will → would, can → could."
+            },
+            {
+              "id": 9,
+              "question": "Most countries in Southeast Asia have floating markets, _______ attract western visitors.",
+              "options": [
+                "they",
+                "who",
+                "whose",
+                "which"
+              ],
+              "correctAnswer": 3,
+              "explanation": "'which' là đại từ quan hệ thay thế cho 'floating markets' (vật). Dùng 'which' cho vật, 'who' cho người.",
+              "expansion": "Relative pronouns: who (người, chủ ngữ), whom (người, tân ngữ), which (vật), whose (sở hữu), that (người/vật, dùng trong mệnh đề xác định)."
+            },
+            {
+              "id": 10,
+              "question": "We plan to visit Paris, _______ Eiffel Tower is world-famous.",
+              "options": [
+                "which",
+                "its",
+                "whose",
+                "who"
+              ],
+              "correctAnswer": 2,
+              "explanation": "'whose' dùng để chỉ sở hữu. 'Paris, whose Eiffel Tower is world-famous' = Paris, mà tháp Eiffel của nó nổi tiếng thế giới.",
+              "expansion": "'Whose' có thể dùng cho cả người và vật trong mệnh đề quan hệ. Ví dụ: The house whose roof is red = Ngôi nhà mà mái của nó màu đỏ."
+            },
+            {
+              "id": 11,
+              "question": "Mi: Can I borrow your English-English dictionary for a while, Nam?\nNam: _______",
+              "options": [
+                "Yes, you can.",
+                "No, you can't",
+                "Sure. Here you are",
+                "Sure. It's useful"
+              ],
+              "correctAnswer": 2,
+              "explanation": "'Sure. Here you are' là cách trả lời tự nhiên nhất khi đồng ý cho mượn đồ. 'Here you are' = Đây, của bạn.",
+              "expansion": "Các cách đồng ý cho mượn: Sure, here you are. / Of course, go ahead. / No problem, help yourself. Cách từ chối lịch sự: I'm sorry, I'm using it right now."
+            },
+            {
+              "id": 12,
+              "question": "Nick asked Ann if she _______ on a tour of Hue that weekend.",
+              "options": [
+                "is going",
+                "was going",
+                "will go",
+                "should go"
+              ],
+              "correctAnswer": 1,
+              "explanation": "Reported speech: 'Are you going...?' → asked if she WAS GOING (lùi thì từ is going → was going). 'this weekend' → 'that weekend'.",
+              "expansion": "Tường thuật thì hiện tại tiếp diễn: am/is/are + V-ing → was/were + V-ing. Thay đổi trạng từ: this → that, now → then, today → that day."
+            },
+            {
+              "id": 13,
+              "question": "She _______ Italian when she was living in Rome.",
+              "options": [
+                "picked out",
+                "picked on",
+                "picked up",
+                "picked off"
+              ],
+              "correctAnswer": 2,
+              "explanation": "'pick up' = học được (một cách tự nhiên, không chính thức). 'She picked up Italian' = Cô ấy học được tiếng Ý (khi sống ở Rome).",
+              "expansion": "Phrasal verbs với 'pick': pick up (nhặt lên / học được / đón), pick out (chọn ra), pick on (bắt nạt), pick off (bắn hạ từng cái một)."
+            },
+            {
+              "id": 14,
+              "question": "This island has a very beautiful beach, but sadly it is not easily _______.",
+              "options": [
+                "inaccessibly",
+                "accessible",
+                "inaccessible",
+                "access"
+              ],
+              "correctAnswer": 2,
+              "explanation": "'inaccessible' (adj) = không thể tiếp cận, khó đến. Sau 'is not easily' cần tính từ. 'Not easily inaccessible' ≈ không dễ dàng không thể tiếp cận → khó đến.",
+              "expansion": "Word formation: access (n/v) → accessible (adj, có thể tiếp cận) → inaccessible (adj, không thể tiếp cận) → accessibility (n) → inaccessibility (n)."
+            },
+            {
+              "id": 15,
+              "question": "Everyone of us has made a positive _______ to the overall success of the project.",
+              "options": [
+                "contribute",
+                "contribution",
+                "contributor",
+                "contributing"
+              ],
+              "correctAnswer": 1,
+              "explanation": "Sau 'a positive' cần danh từ. 'contribution' (n) = sự đóng góp. 'Made a positive contribution' = đã có đóng góp tích cực.",
+              "expansion": "Word family: contribute (v) → contribution (n) → contributor (n, người đóng góp) → contributing (adj, góp phần)."
+            },
+            {
+              "id": 16,
+              "question": "There has been a _______ increase in the number of foreign tourists to Ha Long Bay, Viet Nam.",
+              "options": [
+                "signify",
+                "significantly",
+                "significance",
+                "significant"
+              ],
+              "correctAnswer": 3,
+              "explanation": "Trước danh từ 'increase' cần tính từ. 'significant' (adj) = đáng kể. 'A significant increase' = sự gia tăng đáng kể.",
+              "expansion": "Word family: signify (v, biểu thị) → significant (adj, đáng kể) → significantly (adv) → significance (n, tầm quan trọng)."
+            },
+            {
+              "id": 17,
+              "question": "The committee has _______ a survey of parking problems in residential areas.",
+              "options": [
+                "cut down",
+                "come around",
+                "carried out",
+                "worked out"
+              ],
+              "correctAnswer": 2,
+              "explanation": "'carry out' = thực hiện, tiến hành (a survey, a plan, an experiment). 'Carried out a survey' = thực hiện một cuộc khảo sát.",
+              "expansion": "Phrasal verbs hay gặp: carry out (thực hiện), carry on (tiếp tục), cut down (giảm bớt), come around (đến thăm / hồi tỉnh), work out (tập thể dục / giải quyết)."
+            },
+            {
+              "id": 18,
+              "question": "When you _______ a word in the dictionary, remember to learn its pronunciation.",
+              "options": [
+                "look up",
+                "pick up",
+                "try on",
+                "get to"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'look up' = tra (từ điển). 'Look up a word in the dictionary' = tra một từ trong từ điển.",
+              "expansion": "Phrasal verbs với 'look': look up (tra cứu), look after (chăm sóc), look for (tìm kiếm), look forward to (mong chờ), look into (điều tra)."
+            },
+            {
+              "id": 19,
+              "question": "The ancient town of Hoi An is a well-known destination for _______.",
+              "options": [
+                "travel agents",
+                "tour guides",
+                "holidaymakers",
+                "event organisers"
+              ],
+              "correctAnswer": 2,
+              "explanation": "'holidaymakers' = người đi nghỉ mát, du khách. Hội An là điểm đến nổi tiếng cho những người đi nghỉ mát.",
+              "expansion": "Vocabulary - Tourism: holidaymaker (người đi nghỉ), travel agent (đại lý du lịch), tour guide (hướng dẫn viên), backpacker (người du lịch bụi), sightseer (người đi ngắm cảnh)."
+            },
+            {
+              "id": 20,
+              "question": "Woods and fields are typical features of the English _______.",
+              "options": [
+                "attraction",
+                "landscape",
+                "development",
+                "exploration"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'landscape' = phong cảnh, cảnh quan. 'Woods and fields are typical features of the English landscape' = Rừng và cánh đồng là đặc trưng của cảnh quan nước Anh.",
+              "expansion": "Vocabulary: landscape (cảnh quan), scenery (phong cảnh), view (tầm nhìn), countryside (vùng nông thôn), surroundings (môi trường xung quanh)."
+            },
+            {
+              "id": 21,
+              "question": "_______ is for people who love trying different local dishes.",
+              "options": [
+                "Food tourism",
+                "Domestic tourism",
+                "Ecotourism",
+                "Shopping tourism"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Food tourism' = du lịch ẩm thực — dành cho những người thích thử các món ăn địa phương khác nhau.",
+              "expansion": "Types of tourism: Food tourism (ẩm thực), Ecotourism (sinh thái), Cultural tourism (văn hóa), Adventure tourism (mạo hiểm), Medical tourism (y tế), Heritage tourism (di sản)."
+            },
+            {
+              "id": 22,
+              "question": "Nick: Can I join your expedition to Quang Binh caves this summer?\nMi: _______",
+              "options": [
+                "I don't think you can.",
+                "Why do you ask me?",
+                "What can I do for you?",
+                "Certainly. You're welcome!"
+              ],
+              "correctAnswer": 3,
+              "explanation": "'Certainly. You're welcome!' là cách trả lời đồng ý nhiệt tình khi ai đó xin tham gia. = Chắc chắn rồi. Hoan nghênh bạn!",
+              "expansion": "Cách chấp nhận lời đề nghị: Certainly! / Of course! / Sure, why not? / Absolutely! Cách từ chối lịch sự: I'm afraid not. / Sorry, but..."
+            },
+            {
+              "id": 23,
+              "question": "Remember to go _______ the words you have learnt in class.",
+              "options": [
+                "over",
+                "from",
+                "in",
+                "up"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'go over' = ôn lại, xem lại. 'Go over the words' = ôn lại các từ vựng. ",
+              "expansion": "Phrasal verbs với 'go': go over (ôn lại), go on (tiếp tục), go through (trải qua), go off (nổ / kêu / hỏng), go ahead (tiến hành)."
+            },
+            {
+              "id": 24,
+              "question": "The teacher asked his students to copy the new words _______ their notebooks.",
+              "options": [
+                "over",
+                "on",
+                "up",
+                "into"
+              ],
+              "correctAnswer": 3,
+              "explanation": "'copy into' = chép vào. 'Copy the new words into their notebooks' = chép các từ mới vào vở.",
+              "expansion": "Giới từ chỉ hướng: into (vào trong), onto (lên trên), out of (ra khỏi), from (từ). 'Into' chỉ sự di chuyển từ ngoài vào trong."
+            },
+            {
+              "id": 25,
+              "question": "They spend a lot of time surfing the net; _______, they have little time to read books.",
+              "options": [
+                "however",
+                "therefore",
+                "although",
+                "otherwise"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'therefore' = vì vậy, do đó. Vế 1 là nguyên nhân (dành nhiều thời gian lướt net) → vế 2 là kết quả (ít thời gian đọc sách).",
+              "expansion": "Linking words: therefore/consequently (kết quả), however/nevertheless (tương phản), moreover/furthermore (bổ sung), otherwise (nếu không thì)."
+            },
+            {
+              "id": 26,
+              "question": "English is the language _______ is known as a global language.",
+              "options": [
+                "who",
+                "which",
+                "whose",
+                "what"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'which' là đại từ quan hệ thay thế cho 'the language' (vật). 'The language which is known as a global language'.",
+              "expansion": "Đại từ quan hệ cho vật: which / that. Trong mệnh đề quan hệ xác định, có thể dùng 'that' thay cho 'which'. Trong mệnh đề không xác định (có dấu phẩy), chỉ dùng 'which'."
+            },
+            {
+              "id": 27,
+              "question": "A: Son, good luck with your new job.\nB: _______",
+              "options": [
+                "Yes, I am doing a new job.",
+                "Thanks, Dad. I'll make you proud.",
+                "No, I couldn't do it.",
+                "Thanks for sharing with me."
+              ],
+              "correctAnswer": 1,
+              "explanation": "'Thanks, Dad. I'll make you proud.' là cách đáp lại lời chúc tự nhiên nhất. = Cảm ơn bố. Con sẽ làm bố tự hào.",
+              "expansion": "Cách đáp lại lời chúc: Thank you! / Thanks a lot! / That's very kind of you. / I appreciate it."
+            },
+            {
+              "id": 28,
+              "question": "That souvenir shop sells a lot of items, _______ they are all overpriced.",
+              "options": [
+                "but",
+                "and",
+                "or",
+                "so"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'but' = nhưng. Vế 1 (bán nhiều đồ) đối lập với vế 2 (tất cả đều đắt). 'But' dùng để nối hai ý tương phản.",
+              "expansion": "Liên từ đẳng lập (coordinating conjunctions): FANBOYS - For, And, Nor, But, Or, Yet, So. Mỗi từ có chức năng riêng."
+            },
+            {
+              "id": 29,
+              "question": "Most families in my village _______ their radios with TVs since 2000s.",
+              "options": [
+                "replace",
+                "have replaced",
+                "replaced",
+                "will replace"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'have replaced' — thì hiện tại hoàn thành (present perfect) vì có 'since 2000s' chỉ mốc thời gian kéo dài đến hiện tại.",
+              "expansion": "Dấu hiệu nhận biết Present Perfect: since + mốc thời gian, for + khoảng thời gian, already, yet, just, ever, never, so far, up to now, recently."
+            },
+            {
+              "id": 30,
+              "question": "I forgot my umbrella, _______ I got wet in the rain.",
+              "options": [
+                "unless",
+                "although",
+                "so",
+                "because"
+              ],
+              "correctAnswer": 2,
+              "explanation": "'so' = vì vậy. Quên ô (nguyên nhân) → bị ướt mưa (kết quả). 'So' nối nguyên nhân với kết quả.",
+              "expansion": "Phân biệt: so (kết quả), because (nguyên nhân), although (nhượng bộ), unless (trừ khi = if not)."
+            },
+            {
+              "id": 31,
+              "question": "The garden has a _______ of colourful flowers and plants.",
+              "options": [
+                "vary",
+                "various",
+                "variety",
+                "variously"
+              ],
+              "correctAnswer": 2,
+              "explanation": "'a variety of' = nhiều loại, đa dạng. Đây là cụm từ cố định: a variety of + N (plural). 'A variety of colourful flowers' = nhiều loại hoa rực rỡ.",
+              "expansion": "Word family: vary (v, thay đổi) → various (adj, khác nhau) → variety (n, sự đa dạng) → variously (adv). Cụm: a (wide/great) variety of = nhiều loại."
+            },
+            {
+              "id": 32,
+              "question": "In the old days, transportation in my village _______ on buffalo-drawn cart.",
+              "options": [
+                "depend",
+                "depended",
+                "will depend",
+                "has depended"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'depended' — thì quá khứ đơn vì 'In the old days' (ngày xưa) chỉ thời gian trong quá khứ, hành động đã kết thúc.",
+              "expansion": "Dấu hiệu quá khứ đơn: in the old days, in the past, yesterday, last + time, ago, in + năm quá khứ."
+            }
+          ]
+        },
+        {
+          "id": "reading-1a",
+          "title": "II. READING - Part 1A",
+          "instruction": "Choose the correct answer A, B, C or D to fill in each blank in the following passage.",
+          "type": "reading",
+          "passage": "English is the world's most widely spoken language, and it is used extensively in the workplace. Fluency in English can significantly (1)_______ one's job prospects for a variety of reasons. First, many foreign companies use English as their primary language of (2)_______ and meetings. Therefore, individuals who can effectively communicate with colleagues and customers from various countries will have (3)_______ job opportunities. Furthermore, English is an important language in the field of technology (4)_______ it is used in the majority of research papers, technical documents, and software code. As a result, fluent English speakers can (5)_______ up to date on the latest developments in their fields. In general, a strong command of the English language is a valuable asset in the workplace, allowing people to pursue global job opportunities and stay at the forefront of their fields.",
+          "questions": [
+            {
+              "id": 33,
+              "question": "(1) _______",
+              "options": [
+                "maintain",
+                "improve",
+                "reduce",
+                "control"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'improve' = cải thiện. 'Fluency in English can significantly improve one's job prospects' = Sự thông thạo tiếng Anh có thể cải thiện đáng kể triển vọng công việc.",
+              "expansion": "Collocations với 'improve': improve skills, improve performance, improve quality, improve chances/prospects."
+            },
+            {
+              "id": 34,
+              "question": "(2) _______",
+              "options": [
+                "communicate",
+                "communicative",
+                "communicator",
+                "communication"
+              ],
+              "correctAnswer": 3,
+              "explanation": "Sau 'language of' cần danh từ. 'communication' (n) = giao tiếp. 'Language of communication' = ngôn ngữ giao tiếp.",
+              "expansion": "Word family: communicate (v) → communication (n) → communicative (adj, hay giao tiếp) → communicator (n, người giao tiếp)."
+            },
+            {
+              "id": 35,
+              "question": "(3) _______",
+              "options": [
+                "good",
+                "better",
+                "best",
+                "the best"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'better' = tốt hơn (so sánh hơn). Ngụ ý: người giỏi tiếng Anh sẽ có cơ hội việc làm TỐT HƠN so với người không giỏi.",
+              "expansion": "So sánh hơn của 'good': good → better → best. Cấu trúc: S + will have + better + N = sẽ có ... tốt hơn."
+            },
+            {
+              "id": 36,
+              "question": "(4) _______",
+              "options": [
+                "when",
+                "because",
+                "while",
+                "before"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'because' = bởi vì. Tiếng Anh quan trọng trong công nghệ BỞI VÌ nó được sử dụng trong phần lớn tài liệu nghiên cứu.",
+              "expansion": "Liên từ chỉ nguyên nhân: because, since, as, due to, owing to. 'Because' là phổ biến nhất, theo sau bởi mệnh đề (S + V)."
+            },
+            {
+              "id": 37,
+              "question": "(5) _______",
+              "options": [
+                "stay",
+                "bring",
+                "catch",
+                "go"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'stay up to date' = cập nhật, theo kịp thông tin mới nhất. 'Fluent English speakers can stay up to date on the latest developments'.",
+              "expansion": "Cụm từ: stay up to date (on/with) = cập nhật. Tương tự: keep up with = theo kịp, catch up with = bắt kịp."
+            }
+          ]
+        },
+        {
+          "id": "reading-1b",
+          "title": "II. READING - Part 1B",
+          "instruction": "Choose the correct answer A, B, C or D to fill in each blank in the following passage.",
+          "type": "reading",
+          "passage": "The Harbour of Rio de Janeiro is one of the (1)_______ bays on Earth and is considered one of the seven natural wonders of the world. It is located in the city of Rio de Janeiro (2)_______ the southeastern coastline of Brazil. It is also known as Guanabara Bay. The harbour is surrounded by mountains and is connected to the sea via a series of channels.\n\nThe major (3)_______ of this natural wonder is its tropical climate, which attracts tourists from all over the world. It also has some beautiful beaches and lush forests (4)_______ provide recreation areas for visitors. Additionally, the mouth of the harbour is unique (5)_______ it resembles more of a river than a bay. This is the reason why the city has its name Rio de Janeiro, which means \"River of January\".",
+          "questions": [
+            {
+              "id": 38,
+              "question": "(1) _______",
+              "options": [
+                "large",
+                "largest",
+                "larger",
+                "most large"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'largest' = lớn nhất (so sánh nhất). 'One of the largest bays on Earth' = một trong những vịnh lớn nhất trên Trái Đất. Cấu trúc: one of the + superlative + N(plural).",
+              "expansion": "Cấu trúc so sánh nhất: the + adj-est (1 âm tiết) / the most + adj (2+ âm tiết). 'One of the + superlative + Ns' = một trong những ... nhất."
+            },
+            {
+              "id": 39,
+              "question": "(2) _______",
+              "options": [
+                "on",
+                "in",
+                "at",
+                "for"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'on the coastline' = trên bờ biển. Giới từ 'on' dùng cho bề mặt, đường bờ biển.",
+              "expansion": "Giới từ nơi chốn: on the coast/coastline, on the river/road, in the city/country, at the corner/station."
+            },
+            {
+              "id": 40,
+              "question": "(3) _______",
+              "options": [
+                "attract",
+                "attracting",
+                "attractive",
+                "attraction"
+              ],
+              "correctAnswer": 3,
+              "explanation": "'attraction' (n) = điểm thu hút, sức hút. Sau 'The major' cần danh từ. 'The major attraction' = điểm thu hút chính.",
+              "expansion": "Word family: attract (v) → attraction (n, sức hút / điểm du lịch) → attractive (adj, hấp dẫn) → attractively (adv)."
+            },
+            {
+              "id": 41,
+              "question": "(4) _______",
+              "options": [
+                "what",
+                "who",
+                "which",
+                "whose"
+              ],
+              "correctAnswer": 2,
+              "explanation": "'which' là đại từ quan hệ thay thế cho 'beaches and lush forests' (vật). 'Forests which provide recreation areas'.",
+              "expansion": "Khi tiền ngữ (antecedent) là vật hoặc hỗn hợp người + vật, dùng 'which' hoặc 'that'."
+            },
+            {
+              "id": 42,
+              "question": "(5) _______",
+              "options": [
+                "because",
+                "where",
+                "although",
+                "if"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'because' = bởi vì. Cửa vịnh độc đáo BỞI VÌ nó giống một con sông hơn là một vịnh.",
+              "expansion": "Phân biệt: because (nguyên nhân), although (nhượng bộ), if (điều kiện), where (nơi chốn)."
+            }
+          ]
+        },
+        {
+          "id": "reading-2a",
+          "title": "II. READING - Part 2A",
+          "instruction": "Read the passage about tourism in Viet Nam and choose the correct answer A, B, C or D to each of the questions.",
+          "type": "reading",
+          "passage": "Tourism in Viet Nam has seen a lot of changes in recent years. For backpackers, culture and nature lovers, military veterans, Viet Nam has become a new tourist destination in Southeast Asia.\n\nInternational tourist arrivals to Viet Nam have continuously risen. In 2008, Viet Nam received 4.218 million tourists. In 2012, the number rose to 6.84 million. Four years later, the country welcomed 10 million national visitors, and in 2019, it was 18 million. This increase made Viet Nam the fifth most visited country in the Asia-Pacific region.\n\nBy March 2023, the four countries with the largest numbers of visitors to Viet Nam are South Korea, the USA, Thailand, and China. The most attractive destinations in Viet Nam are national parks like Cuc Phuong, Phong Nha-Ke Bang, Cape Ca Mau, and World Heritage Sites like Ha Long Bay, Hue, and Hoi An.\n\nTourism is important to the country's economy. For example, in 2016, tourism contributed 6.6 per cent to gross domestic product (GDP) equal to VND 279,287 billion. It has also helped to promote the development of related sectors, such as hotels, transportation, entertainment, and food.",
+          "questions": [
+            {
+              "id": 43,
+              "question": "Most tourists to Viet Nam are interested in its _______.",
+              "options": [
+                "medical treatment",
+                "history",
+                "entertainment",
+                "culture"
+              ],
+              "correctAnswer": 3,
+              "explanation": "Đoạn văn đề cập 'For backpackers, culture and nature lovers' — du khách đến Việt Nam quan tâm đến văn hóa (culture).",
+              "expansion": "Kỹ năng đọc: Scanning — tìm thông tin cụ thể bằng cách lướt nhanh đoạn văn và tìm từ khóa."
+            },
+            {
+              "id": 44,
+              "question": "In 2019, the number of international tourists to Viet Nam was roughly _______ as big as that in 2008.",
+              "options": [
+                "four times",
+                "twice",
+                "six times",
+                "one and a half times"
+              ],
+              "correctAnswer": 0,
+              "explanation": "2008: 4.218 triệu, 2019: 18 triệu. 18 ÷ 4.218 ≈ 4.27 lần → roughly four times (khoảng 4 lần).",
+              "expansion": "Cách diễn đạt so sánh gấp bội: twice as big as (gấp 2), three times as big as (gấp 3), four times as big as (gấp 4)."
+            },
+            {
+              "id": 45,
+              "question": "Phong Nha-Ke Bang is an example of a _______ in Viet Nam.",
+              "options": [
+                "historical site",
+                "cultural destination",
+                "national park",
+                "architectural attraction"
+              ],
+              "correctAnswer": 2,
+              "explanation": "Đoạn văn nói: 'national parks like Cuc Phuong, Phong Nha-Ke Bang, Cape Ca Mau' → Phong Nha-Ke Bang là vườn quốc gia (national park).",
+              "expansion": "Phân biệt: national park (vườn quốc gia), World Heritage Site (di sản thế giới), historical site (di tích lịch sử), cultural destination (điểm đến văn hóa)."
+            },
+            {
+              "id": 46,
+              "question": "The development of tourism _______ the development of transportation.",
+              "options": [
+                "is not related to",
+                "leads to",
+                "depends on",
+                "prevents"
+              ],
+              "correctAnswer": 1,
+              "explanation": "Đoạn cuối: 'It has also helped to promote the development of related sectors, such as hotels, transportation...' → Du lịch DẪN ĐẾN (leads to) sự phát triển của giao thông.",
+              "expansion": "Kỹ năng đọc: Inference — suy luận từ thông tin trong bài. 'Helped to promote the development' ≈ leads to the development."
+            },
+            {
+              "id": 47,
+              "question": "The word \"it\" in paragraph 2 refers to _______.",
+              "options": [
+                "2019",
+                "the number of international tourists",
+                "Viet Nam",
+                "the increase in tourism"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'In 2012, the number rose to 6.84 million... and in 2019, IT was 18 million.' → 'it' thay thế cho 'the number of international tourists'.",
+              "expansion": "Kỹ năng đọc: Reference — xác định từ thay thế (pronoun reference). Đọc câu trước để tìm danh từ mà đại từ thay thế."
+            }
+          ]
+        },
+        {
+          "id": "reading-2b",
+          "title": "II. READING - Part 2B",
+          "instruction": "Read the passage and choose the correct answer A, B, C or D to each of the questions.",
+          "type": "reading",
+          "passage": "There are many ways to learn English, and each has its own benefits and effectiveness.\n\nOne popular method is learning English online. There are a lot of websites, apps and online courses that are suitable for different language levels. You can learn to read, write and speak English through video lessons, practice exercises and even real-time conversations with native speakers. However, it is important to remember that the internet alone might not be enough to help you learn well and improve your English language skills. It is essential to support your online learning with other activities and resources.\n\nAnother good way is reading English books, newspapers or magazines. This activity can help you learn new words, improve your grammar and grasp sentence structure. You can start with materials that are right for your English level, then continue with more difficult texts.\n\nYou can also improve your English by listening to podcast music and watching movies. This will allow you to hear different accents and improve your listening skills.\n\nFinally, think about taking an English language course if you can. In a classroom with an experienced instructor, you can get help, feedback and a chance to practice with other students.",
+          "questions": [
+            {
+              "id": 48,
+              "question": "What is the best title for the text?",
+              "options": [
+                "Online English",
+                "English Speakers' Talks",
+                "Reading Textbooks",
+                "Ways to learn English"
+              ],
+              "correctAnswer": 3,
+              "explanation": "Bài văn nói về nhiều cách học tiếng Anh (online, đọc sách, nghe, đi học). Tiêu đề phù hợp nhất: 'Ways to learn English' = Các cách học tiếng Anh.",
+              "expansion": "Kỹ năng đọc: Main idea — tìm ý chính bằng cách đọc câu đầu mỗi đoạn và tổng hợp."
+            },
+            {
+              "id": 49,
+              "question": "Which word has the CLOSEST meaning to the word \"method\" in paragraph 1?",
+              "options": [
+                "way",
+                "tool",
+                "device",
+                "utensils"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'method' = phương pháp, cách thức. 'Way' = cách — có nghĩa gần nhất. 'One popular method' ≈ 'One popular way'.",
+              "expansion": "Synonyms of 'method': way, approach, technique, manner, procedure, strategy."
+            },
+            {
+              "id": 50,
+              "question": "What does the word \"its\" in paragraph 1 refer to?",
+              "options": [
+                "English",
+                "way to learn English",
+                "benefit",
+                "effectiveness"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'There are many ways to learn English, and each has ITS own benefits' → 'its' thay thế cho 'each way to learn English' (mỗi cách học).",
+              "expansion": "Pronoun reference: 'its' (possessive) thay thế cho danh từ số ít ở phía trước. Cần đọc cả câu để xác định."
+            },
+            {
+              "id": 51,
+              "question": "According to the text, which is NOT mentioned as a suggestion for learning English?",
+              "options": [
+                "reading English texts",
+                "traveling to another country",
+                "talking with native speakers",
+                "practicing through video lessons"
+              ],
+              "correctAnswer": 1,
+              "explanation": "Bài văn đề cập: đọc (reading), nói chuyện với người bản xứ, học qua video. KHÔNG đề cập 'traveling to another country' (du lịch nước ngoài).",
+              "expansion": "Kỹ năng đọc: NOT mentioned — đọc kỹ từng đáp án và đối chiếu với bài để tìm thông tin KHÔNG được nhắc đến."
+            },
+            {
+              "id": 52,
+              "question": "What is mentioned as an important aspect of learning English online?",
+              "options": [
+                "Using only apps for quick results.",
+                "Avoiding video lessons to focus on written exercises.",
+                "Practicing with native speakers through real-time conversations.",
+                "Relying solely on the Internet for complete language mastery."
+              ],
+              "correctAnswer": 2,
+              "explanation": "Đoạn 2: 'even real-time conversations with native speakers' — luyện tập với người bản xứ qua hội thoại thời gian thực là khía cạnh quan trọng.",
+              "expansion": "Bài cũng nhấn mạnh: 'the internet alone might not be enough' — học online cần kết hợp với các hoạt động khác."
+            }
+          ]
+        },
+        {
+          "id": "writing-choice",
+          "title": "III. WRITING - Part 1",
+          "instruction": "Choose A, B, C, or D to indicate the sentence that is closest in meaning to the sentence given.",
+          "type": "writing-choice",
+          "questions": [
+            {
+              "id": 53,
+              "question": "Singapore is a multilingual country. It has four official languages.",
+              "options": [
+                "Singapore is a multilingual country which have four official languages.",
+                "Singapore is a multilingual country who has four official languages.",
+                "Singapore is a multilingual country which has four official languages.",
+                "Singapore is a multilingual country who have four official languages."
+              ],
+              "correctAnswer": 2,
+              "explanation": "Dùng 'which' (cho vật/quốc gia) + 'has' (số ít, vì 'country' là danh từ số ít). 'Singapore is a multilingual country WHICH HAS four official languages.'",
+              "expansion": "Nối câu bằng mệnh đề quan hệ: Danh từ chung → which/that. Chia động từ theo danh từ tiền ngữ (antecedent). 'Country' (số ít) → has."
+            },
+            {
+              "id": 54,
+              "question": "We learnt about the vital role of clean water on Earth. Its surface is mostly covered by water.",
+              "options": [
+                "We learnt about the vital role of clean water on Earth, which surface is mostly covered by water.",
+                "We learnt about the vital role of clean water on Earth, whose surface is mostly covered by water.",
+                "We learnt about the vital role of clean water on Earth, who surface is mostly covered by water.",
+                "We learnt about the vital role of clean water on Earth, what surface is mostly covered by water."
+              ],
+              "correctAnswer": 1,
+              "explanation": "'whose' = mà ... của nó (sở hữu). 'Earth, WHOSE surface is mostly covered by water' = Trái Đất, mà bề mặt của nó phần lớn được bao phủ bởi nước.",
+              "expansion": "'Whose' dùng cho cả người và vật trong mệnh đề quan hệ để chỉ sở hữu. Thay thế cho: its, his, her, their."
+            },
+            {
+              "id": 55,
+              "question": "English is now the most popular language. A lot of people learn it.",
+              "options": [
+                "English is now the most popular language a lot of people learn it.",
+                "English is now the most popular language a lot of people learn.",
+                "English is now the most popular language which a lot of people learn it.",
+                "English is now the most popular language which lot of people learn."
+              ],
+              "correctAnswer": 1,
+              "explanation": "Mệnh đề quan hệ rút gọn: bỏ 'which/that' khi nó là tân ngữ. 'The most popular language (that) a lot of people learn.' — bỏ 'that' và không giữ 'it'.",
+              "expansion": "Contact clause (mệnh đề quan hệ rút gọn): Khi đại từ quan hệ làm tân ngữ, có thể lược bỏ nó. Ví dụ: The book (which/that) I bought = Cuốn sách tôi mua."
+            },
+            {
+              "id": 56,
+              "question": "Vietnamese people use English to communicate with foreigners. Foreigners come to Viet Nam to work, study, or visit.",
+              "options": [
+                "Vietnamese people use English to communicate with foreigners they come to Viet Nam to work, study, or visit.",
+                "Vietnamese people use English to communicate with foreigners come to Viet Nam to work, study, or visit.",
+                "Vietnamese people use English to communicate with foreigners which come to Viet Nam to work, study, or visit.",
+                "Vietnamese people use English to communicate with foreigners who come to Viet Nam to work, study, or visit."
+              ],
+              "correctAnswer": 3,
+              "explanation": "'who' là đại từ quan hệ thay thế cho 'foreigners' (người). '...with foreigners WHO come to Viet Nam to work, study, or visit.'",
+              "expansion": "Đại từ quan hệ cho người: who (chủ ngữ), whom (tân ngữ). 'Foreigners' là người → dùng 'who'."
+            },
+            {
+              "id": 57,
+              "question": "My friend, Peter, plays the guitar. He has just released a CD.",
+              "options": [
+                "My friend, Peter, who plays the guitar, has just released a CD.",
+                "My friend, Peter, who has just released a CD, plays the guitar.",
+                "My friend, Peter, who playing the guitar, has just released a CD.",
+                "My friend, Peter, who has just released a CD, playing the guitar."
+              ],
+              "correctAnswer": 0,
+              "explanation": "Mệnh đề quan hệ không xác định (có dấu phẩy): 'Peter, WHO PLAYS THE GUITAR, has just released a CD.' — Thông tin chính: vừa ra CD. Thông tin phụ: chơi guitar.",
+              "expansion": "Non-defining relative clause: Dùng dấu phẩy, không dùng 'that'. Mệnh đề bổ sung thông tin thêm, bỏ đi câu vẫn hoàn chỉnh."
+            },
+            {
+              "id": 58,
+              "question": "\"Can I do the shopping when I am here?\"",
+              "options": [
+                "I asked the guide whether I could do the shopping when I was there.",
+                "I asked the guide whether I can do the shopping when I was there.",
+                "I asked the guide if I could do the shopping when I am there.",
+                "I asked the guide if I could do the shopping when I was here."
+              ],
+              "correctAnswer": 0,
+              "explanation": "Reported speech: can → could, am → was, here → there. 'I asked the guide WHETHER I COULD do the shopping when I WAS THERE.'",
+              "expansion": "Quy tắc tường thuật: Lùi thì (can → could, am → was), đổi đại từ (I → I giữ nguyên vì người nói tường thuật), đổi trạng từ (here → there, now → then)."
+            },
+            {
+              "id": 59,
+              "question": "\"Are you willing to travel this weekend?\" she asked.",
+              "options": [
+                "She asked me am I willing to travel this weekend.",
+                "She asked me if I am willing to travel this weekend.",
+                "She asked me was I willing to travel that weekend.",
+                "She asked me if I was willing to travel that weekend."
+              ],
+              "correctAnswer": 3,
+              "explanation": "Reported speech yes/no question: S + asked + O + if/whether + S + V (lùi thì). are willing → was willing, this weekend → that weekend.",
+              "expansion": "Câu hỏi Yes/No tường thuật: KHÔNG đảo ngữ. Dùng if/whether + trật tự S + V. Sai: asked me was I → Đúng: asked me if I was."
+            },
+            {
+              "id": 60,
+              "question": "\"Do you want to look for a new job?\" Ellie asked Stan.",
+              "options": [
+                "Ellie asked Stan did he want to look for a new job.",
+                "Ellie asked Stan do you want to look for a new job.",
+                "Ellie asked Stan if he wanted to look for a new job.",
+                "Ellie asked Stan whether he wants to look for a new job."
+              ],
+              "correctAnswer": 2,
+              "explanation": "Reported speech: Do you want → if he wanted (đổi you → he, lùi thì want → wanted). 'Ellie asked Stan IF HE WANTED to look for a new job.'",
+              "expansion": "Lưu ý: Không giữ trợ động từ do/does/did trong mệnh đề tường thuật. Sai: asked did he want → Đúng: asked if he wanted."
+            },
+            {
+              "id": 61,
+              "question": "\"Are they coming to this meeting?\" he asked.",
+              "options": [
+                "He asked me if they were coming to that meeting.",
+                "He asked me whether they are coming to that meeting.",
+                "He asked that they were coming to that meeting.",
+                "He asked did they come to this meeting."
+              ],
+              "correctAnswer": 0,
+              "explanation": "Reported speech: are coming → were coming, this meeting → that meeting. 'He asked me IF THEY WERE COMING to THAT meeting.'",
+              "expansion": "Thay đổi trạng từ trong tường thuật: this → that, these → those, here → there, now → then, today → that day, tomorrow → the next day."
+            },
+            {
+              "id": 62,
+              "question": "\"Do you want to go to the cinema tonight?\" she asked.",
+              "options": [
+                "She asked if I wanted to go to the cinema tonight.",
+                "She asked whether I wanted to go to the cinema that night.",
+                "She asked me if I wanted to go to the cinema that night.",
+                "She asked if I wanted to go to the cinema that night."
+              ],
+              "correctAnswer": 2,
+              "explanation": "'She asked ME if I wanted to go to the cinema THAT NIGHT.' — Có tân ngữ 'me', lùi thì want → wanted, tonight → that night.",
+              "expansion": "Cả B, C, D đều đúng ngữ pháp, nhưng C đầy đủ nhất vì có tân ngữ 'me'. Trong bài thi, chọn đáp án đầy đủ và chính xác nhất."
+            }
+          ]
+        },
+        {
+          "id": "writing-essay-2a",
+          "title": "IV. WRITING - Part 2A",
+          "instruction": "Write a short paragraph/description or an email about a topic given.",
+          "type": "writing-essay",
+          "prompt": "Write a paragraph about some tips to improve vocabulary learning based on the cues given.",
+          "context": "I have learnt English for six years and I usually find it challenging to learn its vocabulary. Here are some tips I have tried to improve my vocabulary learning.",
+          "cues": [
+            "1. Firstly, I / spend time / read / different kinds / English books.",
+            "2. My mum / buy / me / English-English dictionary / three years ago.",
+            "3. The dictionary / also help / me / understand / better / when / I use the word.",
+            "4. I / have / the habit / copying / all new words / a notebook.",
+            "5. Finally, I / take / every opportunity / speak / people / in English."
+          ],
+          "sampleAnswer": "I have learnt English for six years and I usually find it challenging to learn its vocabulary. Here are some tips I have tried to improve my vocabulary learning.\n\nFirstly, I spend time reading different kinds of English books. When I see a new word, I try to guess its meaning from the sentence. Secondly, I use a good dictionary. My mum bought me an English-English dictionary three years ago. The dictionary also helps me understand better when I use the word. Thirdly, I have made my own vocabulary notebook. I have the habit of copying all new words into a notebook. This way I can know how many words I have learnt and can revise the words easily. Finally, I take every opportunity to speak with people in English. I have done these things regularly and now I am quite confident about my English vocabulary.",
+          "explanation": "Đoạn văn sử dụng các từ nối (Firstly, Secondly, Thirdly, Finally) để liên kết ý. Mỗi gợi ý được mở rộng thành 1-2 câu hoàn chỉnh. Thì sử dụng: hiện tại đơn (thói quen), hiện tại hoàn thành (kinh nghiệm)."
+        },
+        {
+          "id": "writing-essay-2b",
+          "title": "IV. WRITING - Part 2B",
+          "instruction": "Write a paragraph about tourism in Ninh Thuan based on the cues given.",
+          "type": "writing-essay",
+          "prompt": "Write a paragraph about tourism in Ninh Thuan based on the cues given.",
+          "context": "Ninh Thuan is a province in central Viet Nam. It has recently become a popular destination for tourists.",
+          "cues": [
+            "1. Sea lovers / can / swim / the sunny white-sand beaches / boat / in Vinh Hy Bay.",
+            "2. Those who enjoy nature / can visit / Nam Cuong sandhill, which / especially / beautiful / dawn or sunset.",
+            "3. Ninh Thuan / be / also / popular / the unique culture / its Cham minority ethnic group.",
+            "4. You can attend / one / their / many festivals / the year.",
+            "5. Ninh Thuan / offer / visitors / wide range of / homestays / hotels."
+          ],
+          "sampleAnswer": "Ninh Thuan is a province in central Viet Nam. It has recently become a popular destination for tourists.\n\nSea lovers can swim in the sunny white-sand beaches in Vinh Hy Bay. Those who enjoy nature can visit Nam Cuong sandhill, which is especially beautiful at dawn or sunset. Ninh Thuan is also popular with the unique culture and art of its Cham minority ethnic group. You can attend one of their many festivals during the year. Ninh Thuan offers visitors a wide range of homestays and hotels. There are so many choices that it is up to you.",
+          "explanation": "Đoạn văn giới thiệu du lịch Ninh Thuận với các điểm: bãi biển (Vịnh Hy), thiên nhiên (đồi cát Nam Cương), văn hóa Chăm, lễ hội, và chỗ ở. Sử dụng thì hiện tại đơn vì mô tả sự thật/thông tin chung."
+        }
+      ],
+      "createdAt": "2026-03-23T11:42:15.249Z",
+      "updatedAt": "2026-03-24T11:29:09.872Z",
+      "accessCodes": [],
+      "requireCode": false,
+      "timeLimit": 0
+    },
+    {
+      "id": "ff54a47d-bbb9-47b9-92ca-d68e5f189782",
+      "title": "KỲ THI TUYỂN SINH VÀO LỚP 10 THPT - ĐỀ MINH HỌA 01",
+      "subject": "Toán 9",
+      "year": "2025-2026",
+      "sections": [
+        {
+          "id": "f98c1b38-c039-4f0b-a2d4-67df93492bb0",
+          "title": "Câu 1",
+          "instruction": "Cho biểu đồ đoạn thẳng biểu diễn số lượng máy tính để bàn và máy tính xách tay được bán ra\ntrong 6 tháng đầu năm của một công ty X. Số lượng tính theo đơn vị cái.\na) Trong 6 tháng đầu năm, tháng có sự chênh lệch giữa số lượng máy tính xách tay và máy tính\nđể bàn được bán ra là ít nhất?\nb) Chọn ngẫu nhiên 1 tháng trong 6 tháng đầu năm, tính xác suất của các biến cố sau:\nA: “Tháng được chọn có số lượng máy tính để bàn mà công ty bán được không quá 30 cái”.\nB: “Tháng được chọn có số lượng máy tính xách tay mà công ty bán được ít nhất 50 cái”.",
+          "type": "free-form",
+          "passage": null,
+          "questions": [],
+          "prompt": null,
+          "context": null,
+          "cues": [],
+          "sampleAnswer": null,
+          "explanation": null,
+          "showInstruction": true,
+          "showCues": false
+        },
+        {
+          "id": "74c737a4-e4f3-44be-88a6-e1eb2aeddb0b",
+          "title": "Phần mới",
+          "instruction": "",
+          "type": "free-form",
+          "passage": null,
+          "questions": [],
+          "prompt": null,
+          "context": null,
+          "cues": [],
+          "sampleAnswer": null,
+          "explanation": null,
+          "showInstruction": true,
+          "showCues": false
+        }
+      ],
+      "createdAt": "2026-03-24T05:14:25.180Z",
+      "updatedAt": "2026-03-24T11:38:17.968Z",
+      "accessCodes": [
+        {
+          "code": "9XK7JB",
+          "maxUses": 1,
+          "usedBy": [],
+          "createdAt": "2026-03-24T11:20:02.547Z"
+        }
+      ],
+      "requireCode": true
+    },
+    {
+      "id": "8fc27f2f-dffa-49c4-b640-8797b3a07e42",
+      "title": "ESSAY WRITING",
+      "subject": "Tiếng Anh (HSG + IELTS)",
+      "year": "202x-202x",
+      "sections": [
+        {
+          "id": "caf3580d-de39-4b3d-9983-0918fbf6d2bc",
+          "title": "Câu 1",
+          "instruction": "",
+          "type": "writing-essay",
+          "passage": null,
+          "questions": [],
+          "prompt": "Write a paragraph of 150 words on the following benefits of the Internet: as a source of\ninformation, entertainment and education.",
+          "context": null,
+          "cues": [
+            "Outline:",
+            "I. Introduction",
+            "- introducing benefits of the Internet as a source of information, entertainment and education.",
+            "II. Body",
+            "- as a source of information: providing a vast pool of knowledge",
+            "- with the role of entertainment: a wide variety of forms of entertainment (streaming movies, TV",
+            "shows, playing online games, listening to music...)",
+            "- for education: providing a new platform for learning and researching (online courses, tutorials,",
+            "educational videos...)",
+            "III. Conclusion",
+            "- making the world a smaller and more connected place."
+          ],
+          "sampleAnswer": "The Internet has revolutionized the way we access information, entertainment, and education.\nAs a source of information, the Internet provides us with a vast pool of knowledge at our\nfingertips. With just a few clicks, we can access articles, news, research papers, and a wealth of\nother information on virtually any topic imaginable. In addition, the Internet has also become a\nmajor source of entertainment. From streaming movies and TV shows to playing online games\nand listening to music, there is never a dull moment when you have access to the Internet. For\neducation, the Internet has provided a new platform for learning and researching. Online\ncourses, tutorials, and educational videos have made education more accessible and convenient\nfor people of all ages. With the Internet, students can take classes from top-ranked universities,\nlearn new skills, and gain knowledge from the comfort of their own homes. In short, the Internet\nhas made the world a smaller and more connected place with adequate amenities for our\nconvenience.",
+          "explanation": "Tham khảo bài trên"
+        }
+      ],
+      "createdAt": "2026-03-24T05:15:59.730Z",
+      "updatedAt": "2026-03-24T05:17:23.648Z",
+      "accessCodes": [
+        {
+          "code": "O4JRG7",
+          "maxUses": 5,
+          "usedBy": [
+            {
+              "userId": "anonymous",
+              "displayName": "Ẩn danh",
+              "usedAt": "2026-03-24T07:18:52.576Z",
+              "completed": true,
+              "score": "NaN",
+              "completedAt": "2026-03-24T07:18:57.019Z",
+              "result": {
+                "examId": "8fc27f2f-dffa-49c4-b640-8797b3a07e42",
+                "score": "NaN",
+                "correct": 0,
+                "incorrect": 0,
+                "skipped": 0,
+                "total": 0,
+                "results": [
+                  {
+                    "id": "caf3580d-de39-4b3d-9983-0918fbf6d2bc",
+                    "userAnswer": "aaaaaaaaaaa",
+                    "isCorrect": null,
+                    "isEssay": true
+                  }
+                ],
+                "examTitle": "ESSAY WRITING",
+                "timestamp": "14:18:56 24/3/2026",
+                "timeSpent": 4,
+                "autoSubmitted": false
+              }
+            },
+            {
+              "userId": "anonymous",
+              "displayName": "Ẩn danh",
+              "usedAt": "2026-03-24T07:25:50.992Z",
+              "completed": true,
+              "score": "NaN",
+              "completedAt": "2026-03-24T07:25:53.112Z",
+              "result": {
+                "examId": "8fc27f2f-dffa-49c4-b640-8797b3a07e42",
+                "score": "NaN",
+                "correct": 0,
+                "incorrect": 0,
+                "skipped": 0,
+                "total": 0,
+                "results": [
+                  {
+                    "id": "caf3580d-de39-4b3d-9983-0918fbf6d2bc",
+                    "isCorrect": null,
+                    "isEssay": true
+                  }
+                ],
+                "examTitle": "ESSAY WRITING",
+                "timestamp": "14:25:53 24/3/2026",
+                "timeSpent": 1,
+                "autoSubmitted": false
+              }
+            },
+            {
+              "userId": "anonymous",
+              "displayName": "Ẩn danh",
+              "usedAt": "2026-03-24T07:26:21.600Z",
+              "completed": true,
+              "score": "NaN",
+              "completedAt": "2026-03-24T07:26:23.929Z",
+              "result": {
+                "examId": "8fc27f2f-dffa-49c4-b640-8797b3a07e42",
+                "score": "NaN",
+                "correct": 0,
+                "incorrect": 0,
+                "skipped": 0,
+                "total": 0,
+                "results": [
+                  {
+                    "id": "caf3580d-de39-4b3d-9983-0918fbf6d2bc",
+                    "isCorrect": null,
+                    "isEssay": true
+                  }
+                ],
+                "examTitle": "ESSAY WRITING",
+                "timestamp": "14:26:23 24/3/2026",
+                "timeSpent": 2,
+                "autoSubmitted": false
+              }
+            },
+            {
+              "userId": "anonymous",
+              "displayName": "Ẩn danh",
+              "usedAt": "2026-03-24T07:26:26.518Z",
+              "completed": true,
+              "score": "NaN",
+              "completedAt": "2026-03-24T07:26:28.449Z",
+              "result": {
+                "examId": "8fc27f2f-dffa-49c4-b640-8797b3a07e42",
+                "score": "NaN",
+                "correct": 0,
+                "incorrect": 0,
+                "skipped": 0,
+                "total": 0,
+                "results": [
+                  {
+                    "id": "caf3580d-de39-4b3d-9983-0918fbf6d2bc",
+                    "isCorrect": null,
+                    "isEssay": true
+                  }
+                ],
+                "examTitle": "ESSAY WRITING",
+                "timestamp": "14:26:28 24/3/2026",
+                "timeSpent": 1,
+                "autoSubmitted": false
+              }
+            },
+            {
+              "userId": "anonymous",
+              "displayName": "Ẩn danh",
+              "usedAt": "2026-03-24T07:26:37.709Z",
+              "completed": true,
+              "score": "NaN",
+              "completedAt": "2026-03-24T07:26:40.088Z",
+              "result": {
+                "examId": "8fc27f2f-dffa-49c4-b640-8797b3a07e42",
+                "score": "NaN",
+                "correct": 0,
+                "incorrect": 0,
+                "skipped": 0,
+                "total": 0,
+                "results": [
+                  {
+                    "id": "caf3580d-de39-4b3d-9983-0918fbf6d2bc",
+                    "isCorrect": null,
+                    "isEssay": true
+                  }
+                ],
+                "examTitle": "ESSAY WRITING",
+                "timestamp": "14:26:40 24/3/2026",
+                "timeSpent": 2,
+                "autoSubmitted": false
+              }
+            }
+          ],
+          "createdAt": "2026-03-24T07:18:41.976Z",
+          "result": {
+            "examId": "8fc27f2f-dffa-49c4-b640-8797b3a07e42",
+            "score": "NaN",
+            "correct": 0,
+            "incorrect": 0,
+            "skipped": 0,
+            "total": 0,
+            "results": [
+              {
+                "id": "caf3580d-de39-4b3d-9983-0918fbf6d2bc",
+                "isCorrect": null,
+                "isEssay": true
+              }
+            ],
+            "examTitle": "ESSAY WRITING",
+            "timestamp": "14:26:40 24/3/2026",
+            "timeSpent": 2,
+            "autoSubmitted": false,
+            "savedAt": "2026-03-24T07:26:40.088Z"
+          }
+        },
+        {
+          "code": "IJU97Z",
+          "maxUses": 5,
+          "usedBy": [],
+          "createdAt": "2026-03-24T07:18:41.976Z"
+        },
+        {
+          "code": "9F8ER1",
+          "maxUses": 5,
+          "usedBy": [],
+          "createdAt": "2026-03-24T07:18:41.976Z"
+        }
+      ],
+      "requireCode": true
+    },
+    {
+      "id": "59bb686c-f50c-41c5-afb6-fa81fd6bd0b4",
+      "title": "[GĐTC 2026] SIÊU TẬP ĐỀ TỔNG ÔN CHUYÊN & HSG - TUẦN 1",
+      "subject": "Tiếng Anh Chuyên",
+      "year": "2025-2026",
+      "sections": [
+        {
+          "title": "I. LEXICO - GRAMMAR (VOCABULARY & IDIOMS)",
+          "instruction": "Choose the correct answer (A, B, C, or D) to complete each sentence.",
+          "type": "multiple-choice",
+          "questions": [
+            {
+              "id": 1,
+              "question": "The following ________ is taken from her new novel about a humanoid robot.",
+              "options": [
+                "A. extract",
+                "B. finale",
+                "C. memo",
+                "D. composition"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Extract' /'ekstrækt/ (n) là đoạn trích từ một cuốn sách hoặc văn bản[cite: 76].",
+              "expansion": "Phân biệt: 'Finale' (phần kết chương trình); 'Memo' (bản ghi chú); 'Composition' (tác phẩm)[cite: 92, 177]."
+            },
+            {
+              "id": 2,
+              "question": "That evidence is ________ to the case and should not be considered by the jury.",
+              "options": [
+                "A. prominent",
+                "B. irrelevant",
+                "C. distinguished",
+                "D. vital"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'Irrelevant' /ı'reləvənt/ (a) là không liên quan, không quan trọng[cite: 76].",
+              "expansion": "Trái nghĩa: 'Relevant' (liên quan). 'Vital' là thiết yếu."
+            },
+            {
+              "id": 3,
+              "question": "He has had a long and ________ career in medicine, winning numerous international awards.",
+              "options": [
+                "A. trivial",
+                "B. distinguished",
+                "C. absurd",
+                "D. fragile"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'Distinguished' /di'stingwift/ (a) nghĩa là xuất sắc, kiệt xuất, lỗi lạc[cite: 76].",
+              "expansion": "'Trivial' là tầm thường; 'Absurd' là vô lý[cite: 88]."
+            },
+            {
+              "id": 4,
+              "question": "Her disappearance has been the subject of ________ investigation for several months.",
+              "options": [
+                "A. intensive",
+                "B. deliberate",
+                "C. internal",
+                "D. inductive"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Intensive' /in'tensiv/ (a) nghĩa là tập trung, chuyên sâu[cite: 76].",
+              "expansion": "Collocation: 'Intensive investigation'. 'Inductive' là quy nạp[cite: 81, 167]."
+            },
+            {
+              "id": 5,
+              "question": "If they're not careful, they're ________ for disaster with those risky investments.",
+              "options": [
+                "A. heading",
+                "B. setting",
+                "C. ending",
+                "D. picking"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Head for sth' (phr v) nghĩa là đang tiến tới hoặc sắp trải qua một tình huống tồi tệ[cite: 84].",
+              "expansion": "Phân biệt: 'Head into' là đi vào một khu vực hoặc đối đầu với cái gì[cite: 102]."
+            },
+            {
+              "id": 6,
+              "question": "She got ________ on the show after watching just one episode.",
+              "options": [
+                "A. fed up",
+                "B. hooked",
+                "C. wrapped up",
+                "D. stuck"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'Be hooked on' (phr v) nghĩa là rất hứng thú, bị mê hoặc bởi điều gì[cite: 84].",
+              "expansion": "'Be wrapped up in' là chìm đắm vào cái gì đó."
+            },
+            {
+              "id": 7,
+              "question": "The company's initial verdict in the police officers' trial ________ off serious riots.",
+              "options": [
+                "A. set",
+                "B. broke",
+                "C. carried",
+                "D. came"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Set off' (phr v) nghĩa là dẫn đến một hành động hay sự kiện nào đó (thường là tiêu cực)[cite: 84].",
+              "expansion": "'Break out' là bùng nổ; 'Carry out' là thực hiện; 'Come out' là xuất hiện[cite: 141, 143]."
+            },
+            {
+              "id": 8,
+              "question": "Advertisements put ________ on young girls to be thin, which can lead to eating disorders.",
+              "options": [
+                "A. progress",
+                "B. pressure",
+                "C. effort",
+                "D. incentive"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'Put pressure on sb' nghĩa là tạo áp lực lên ai đó[cite: 84].",
+              "expansion": "Cụm 'Put tremendous pressure on' dùng để nhấn mạnh mức độ áp lực cực lớn[cite: 124]."
+            },
+            {
+              "id": 9,
+              "question": "I think we're making ________; the project is almost finished.",
+              "options": [
+                "A. progress",
+                "B. effort",
+                "C. response",
+                "D. impression"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Make progress' nghĩa là tiến bộ, đang hoàn thiện[cite: 84].",
+              "expansion": "'Make effort' là nỗ lực; 'Make an impression' là gây ấn tượng[cite: 108]."
+            },
+            {
+              "id": 10,
+              "question": "I know it sounds ________, but I'm really worried about what he said.",
+              "options": [
+                "A. trivial",
+                "B. vital",
+                "C. considerable",
+                "D. noble"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Trivial' /'triviǝl/ (a) nghĩa là tầm thường, ít quan trọng[cite: 88].",
+              "expansion": "Danh từ 'Trivia' chỉ những chuyện vặt vãnh, linh tinh[cite: 169]."
+            },
+            {
+              "id": 11,
+              "question": "He's a ________ actor who has played a wide variety of parts.",
+              "options": [
+                "A. versatile",
+                "B. arrogant",
+                "C. conservative",
+                "D. reckless"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Versatile' /'v3:rsətl/ (a) nghĩa là đa tài, tháo vát[cite: 88].",
+              "expansion": "'Arrogant' là kiêu ngạo; 'Reckless' là liều lĩnh[cite: 135, 139]."
+            },
+            {
+              "id": 12,
+              "question": "The project wasted a ________ amount of time and money.",
+              "options": [
+                "A. considerate",
+                "B. considerable",
+                "C. trivial",
+                "D. needless"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'Considerable' /kən'sıdərəbl/ (a) nghĩa là đáng kể.",
+              "expansion": "Phân biệt: 'Considerate' (a) là chu đáo, ân cần."
+            },
+            {
+              "id": 13,
+              "question": "The jacket has a ________ design, so you can wear it inside out.",
+              "options": [
+                "A. reversible",
+                "B. irreversible",
+                "C. explicable",
+                "D. contradictory"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Reversible' /rı'v3:rsəbl/ (a) nghĩa là có thể đảo ngược[cite: 118].",
+              "expansion": "Trái nghĩa: 'Irreversible' (không thể đảo ngược)[cite: 118]."
+            },
+            {
+              "id": 14,
+              "question": "It is ________ to carry out such experiments on animals.",
+              "options": [
+                "A. ethical",
+                "B. unethical",
+                "C. ethnic",
+                "D. aesthetic"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'Unethical' /ʌη'εθıkǝl/ (a) nghĩa là không đạo đức, không đúng đắn[cite: 120].",
+              "expansion": "Gốc từ: 'Ethics' (đạo đức)[cite: 120]."
+            },
+            {
+              "id": 15,
+              "question": "She is always ________ my birthday, which makes me feel very disappointed.",
+              "options": [
+                "A. forgetting",
+                "B. to forget",
+                "C. forgets",
+                "D. forgot"
+              ],
+              "correctAnswer": 0,
+              "explanation": "Cấu trúc 'S + be + always + Ving' dùng để phàn nàn về một thói quen gây khó chịu[cite: 108].",
+              "expansion": "Ví dụ: He is always forgetting my birthday[cite: 108]."
+            },
+            {
+              "id": 16,
+              "question": "I really ________ to her; managing a full-time job and three kids is impressive.",
+              "options": [
+                "A. hold my breath",
+                "B. take my hat off",
+                "C. keep a straight face",
+                "D. use my noodle"
+              ],
+              "correctAnswer": 1,
+              "explanation": "Thành ngữ 'Take one's hat off to sb' nghĩa là thán phục/ngưỡng mộ ai đó[cite: 100].",
+              "expansion": "'Hold one's breath' là nín thở do lo lắng[cite: 102]."
+            },
+            {
+              "id": 17,
+              "question": "He lived life in the ________ when he was young, but now he prefers a quiet life.",
+              "options": [
+                "A. fast lane",
+                "B. slow uptake",
+                "C. vicinity",
+                "D. fast track"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Life in the fast lane' (idiom) chỉ cuộc sống sôi động, ồn ào và vội vã[cite: 102].",
+              "expansion": "'In the vicinity of' nghĩa là ở khu vực gần nơi nào đó[cite: 102]."
+            },
+            {
+              "id": 18,
+              "question": "Their plans to set up their own business are just ________ at the moment.",
+              "options": [
+                "A. pie in the sky",
+                "B. a bone to pick",
+                "C. a breath of fresh air",
+                "D. a slip of the tongue"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Pie in the sky' là một ý tưởng viển vông, không thể thực hiện được[cite: 104].",
+              "expansion": "'Slip of the tongue' là lỡ lời[cite: 102]."
+            },
+            {
+              "id": 19,
+              "question": "When it ________ to fishing, Harry is an absolute expert.",
+              "options": [
+                "A. turns",
+                "B. comes",
+                "C. goes",
+                "D. speaks"
+              ],
+              "correctAnswer": 1,
+              "explanation": "Cấu trúc 'When it comes to...' dùng để giới thiệu một chủ đề/vấn đề cụ thể[cite: 104].",
+              "expansion": "Ví dụ: When it comes to fishing, Harry is an expert[cite: 104]."
+            },
+            {
+              "id": 20,
+              "question": "Losing that job turned out to be a ________ as I found a much better opportunity shortly after.",
+              "options": [
+                "A. blessing in disguise",
+                "B. bone to pick",
+                "C. breath of fresh air",
+                "D. slip of the tongue"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Blessing in disguise' nghĩa là trong cái rủi có cái may[cite: 124].",
+              "expansion": "'Breath of fresh air' là sự mới mẻ; 'Have a bone to pick with sb' là có chuyện nghiêm trọng muốn nói với ai[cite: 124]."
+            },
+            {
+              "id": 21,
+              "question": "She tried to ________, but unable to contain herself, she burst into laughter.",
+              "options": [
+                "A. hold her breath",
+                "B. keep a straight face",
+                "C. catch her breath",
+                "D. use her noodle"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'Keep a straight face' nghĩa là tự kiềm chế, giữ bộ mặt bình thản không cười[cite: 102].",
+              "expansion": "'Use one's noodle' là động não[cite: 104]."
+            },
+            {
+              "id": 22,
+              "question": "The match ended in ________ in the fifth round.",
+              "options": [
+                "A. knockout",
+                "B. setback",
+                "C. let-down",
+                "D. lay-by"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Knockout' /'npk.aut/ (n) nghĩa là hạ gục, đo ván[cite: 158].",
+              "expansion": "'Setback' là trở ngại; 'Let-down' là sự thất vọng[cite: 158]."
+            },
+            {
+              "id": 23,
+              "question": "The rent is ________ of water and heating, so you don't need to pay extra.",
+              "options": [
+                "A. inclusive",
+                "B. economical",
+                "C. self-catering",
+                "D. extravagant"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Inclusive' /ın'klu:.srv/ (a) nghĩa là bao gồm[cite: 161].",
+              "expansion": "'Economical' là tiết kiệm; 'Extravagant' là hoang phí[cite: 161]."
+            },
+            {
+              "id": 24,
+              "question": "The government needs to take ________ to address the issue of air pollution.",
+              "options": [
+                "A. measures",
+                "B. steps",
+                "C. efforts",
+                "D. Both A and B"
+              ],
+              "correctAnswer": 3,
+              "explanation": "Cả 'take measures' và 'take steps' đều có nghĩa là thực hiện biện pháp[cite: 126].",
+              "expansion": "'Take effort' là tốn nhiều nỗ lực[cite: 108]."
+            },
+            {
+              "id": 25,
+              "question": "He ________ his life to helping the poor in his community.",
+              "options": [
+                "A. devoted",
+                "B. provided",
+                "C. applied",
+                "D. adjusted"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Devote one's life to sth/doing sth' nghĩa là cống hiến đời mình cho cái gì[cite: 108].",
+              "expansion": "'Provide sb with sth' là cung cấp cho ai cái gì[cite: 106]."
+            },
+            {
+              "id": 26,
+              "question": "I had terrible ________ in my stomach before I gave that important talk.",
+              "options": [
+                "A. bees",
+                "B. butterflies",
+                "C. ants",
+                "D. worms"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'Have butterflies in one's stomach' nghĩa là bồn chồn, lo lắng[cite: 110].",
+              "expansion": "Thường dùng trước khi thuyết trình hoặc thi cử."
+            },
+            {
+              "id": 27,
+              "question": "You ________ have bought so many eggs; there are a dozen in the fridge.",
+              "options": [
+                "A. needn't",
+                "B. shouldn't",
+                "C. can't",
+                "D. mustn't"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Needn't have + P2' diễn tả sự việc lẽ ra không cần làm trong quá khứ nhưng đã làm[cite: 100].",
+              "expansion": "Phân biệt: 'Didn't need to V' là không cần và đã không làm[cite: 100]."
+            },
+            {
+              "id": 28,
+              "question": "The company face ________ competition from its rivals in the market.",
+              "options": [
+                "A. stiff",
+                "B. rigid",
+                "C. fragile",
+                "D. versatile"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Stiff' /stif/ (a) khi đi với 'competition' nghĩa là cạnh tranh gay gắt[cite: 175, 177].",
+              "expansion": "'Rigid' là cứng nhắc[cite: 173]; 'Fragile' là mỏng manh[cite: 135]."
+            },
+            {
+              "id": 29,
+              "question": "She went to great ________ to ensure the project was a success.",
+              "options": [
+                "A. lengths",
+                "B. efforts",
+                "C. measures",
+                "D. progress"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Go to great lengths to do sth' nghĩa là làm mọi cách để làm gì đó.",
+              "expansion": "'Make progress' là tiến bộ[cite: 84]."
+            },
+            {
+              "id": 30,
+              "question": "You really hit the ________ on the head with that analysis.",
+              "options": [
+                "A. nail",
+                "B. hammer",
+                "C. door",
+                "D. target"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Hit the nail on the head' nghĩa là nói chính xác, trúng phóc.",
+              "expansion": "Thường dùng khi ai đó giải thích đúng nguyên nhân cốt lõi."
+            },
+            {
+              "id": 31,
+              "question": "I don't feel I'm ________ anywhere with my research lately.",
+              "options": [
+                "A. getting",
+                "B. coming",
+                "C. going",
+                "D. making"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Not get anywhere' nghĩa là không có tiến bộ, không đi đến đâu[cite: 192].",
+              "expansion": "Ví dụ: I don't feel I'm getting anywhere."
+            },
+            {
+              "id": 32,
+              "question": "The situation is ________ in modern times; nothing like this has happened before.",
+              "options": [
+                "A. unprecedented",
+                "B. preceding",
+                "C. contemporary",
+                "D. eternal"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Unprecedented' /an'presidentid/ (a) nghĩa là chưa từng xảy ra[cite: 175].",
+              "expansion": "'Contemporary' là đương thời[cite: 163]."
+            },
+            {
+              "id": 33,
+              "question": "I think you must be ________ me for someone else.",
+              "options": [
+                "A. mistaking",
+                "B. confusing",
+                "C. recognizing",
+                "D. distinguishing"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Mistake sb for sb' nghĩa là nhầm ai với ai[cite: 188].",
+              "expansion": "'Distinguish' là phân biệt[cite: 169]."
+            },
+            {
+              "id": 34,
+              "question": "He is head and ________ above the rest of the candidates.",
+              "options": [
+                "A. shoulders",
+                "B. knees",
+                "C. ears",
+                "D. feet"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Head and shoulders above' nghĩa là vượt trội hơn hẳn.",
+              "expansion": "Thành ngữ so sánh sự chênh lệch lớn về năng lực."
+            },
+            {
+              "id": 35,
+              "question": "Stop making jokes at my ________; it's not funny at all.",
+              "options": [
+                "A. expense",
+                "B. cost",
+                "C. price",
+                "D. value"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'At the expense of sb' nghĩa là làm cho ai đó trở nên ngu ngốc hoặc bị chế nhạo.",
+              "expansion": "Ví dụ: making jokes at my expense."
+            },
+            {
+              "id": 36,
+              "question": "The new system is ________ with existing equipment.",
+              "options": [
+                "A. compatible",
+                "B. versatile",
+                "C. inclusive",
+                "D. responsive"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Compatible with sth' nghĩa là tương thích với cái gì[cite: 186].",
+              "expansion": "'Versatile' là đa năng[cite: 88]."
+            },
+            {
+              "id": 37,
+              "question": "The residents are fighting ________ and nail to stop the new development.",
+              "options": [
+                "A. tooth",
+                "B. finger",
+                "C. hand",
+                "D. mouth"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Tooth and nail' nghĩa là nỗ lực hết sức để đạt được điều gì.",
+              "expansion": "Thường dùng trong văn cảnh đấu tranh, phản đối mạnh mẽ."
+            },
+            {
+              "id": 38,
+              "question": "The inquiry is by no ________ cut and dried; there are many questions left.",
+              "options": [
+                "A. means",
+                "B. ways",
+                "C. modes",
+                "D. forms"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'By no means' nghĩa là không một chút nào[cite: 194]. 'Cut and dried' là rõ ràng, đơn giản.",
+              "expansion": "Cụm từ nhấn mạnh sự phủ định tuyệt đối."
+            },
+            {
+              "id": 39,
+              "question": "She resigned and handed in her ________ at the bank yesterday.",
+              "options": [
+                "A. notice",
+                "B. memo",
+                "C. agenda",
+                "D. letter"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Hand in one's notice' nghĩa là nộp đơn xin nghỉ việc[cite: 188].",
+              "expansion": "'Memo' là bản ghi chú[cite: 161]."
+            },
+            {
+              "id": 40,
+              "question": "Travel was necessary for one to ________ knowledge of the world.",
+              "options": [
+                "A. expand",
+                "B. broaden",
+                "C. widen",
+                "D. All are correct"
+              ],
+              "correctAnswer": 3,
+              "explanation": "Cả 'expand', 'broaden', và 'widen' đều có thể đi với 'knowledge'.",
+              "expansion": "Cô Trang Anh ghi chú 'Expand one's knowledge of sth'."
+            },
+            {
+              "id": 41,
+              "question": "The problems of the past few months have ________ a toll on her health.",
+              "options": [
+                "A. taken",
+                "B. made",
+                "C. had",
+                "D. put"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Take a toll on sth' nghĩa là gây thiệt hại, ảnh hưởng xấu.",
+              "expansion": "Ví dụ: taken their toll on her health."
+            },
+            {
+              "id": 42,
+              "question": "He believed that unemployment ________ at the root of the problem.",
+              "options": [
+                "A. lies",
+                "B. stays",
+                "C. sits",
+                "D. stands"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'To lie at the root of sth' nghĩa là nằm ở gốc rễ của cái gì (nguyên nhân chính).",
+              "expansion": "Ví dụ: unemployment lies at the root of the problem."
+            },
+            {
+              "id": 43,
+              "question": "We collected publicly available ________ over a 10-day period.",
+              "options": [
+                "A. data",
+                "B. figures",
+                "C. information",
+                "D. All are correct"
+              ],
+              "correctAnswer": 3,
+              "explanation": "Cả 'data', 'figures', 'information' đều phù hợp.",
+              "expansion": "Cô Trang Anh liệt kê: Gather/capture/collect data."
+            },
+            {
+              "id": 44,
+              "question": "The facilities have improved beyond all ________ in recent years.",
+              "options": [
+                "A. recognition",
+                "B. expectation",
+                "C. doubt",
+                "D. limit"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Beyond all recognition' nghĩa là thay đổi đến mức không thể nhận ra được.",
+              "expansion": "Thường dùng để khen ngợi sự thay đổi tích cực vượt bậc."
+            },
+            {
+              "id": 45,
+              "question": "So beautiful ________ the car that everybody wants to buy it.",
+              "options": [
+                "A. is",
+                "B. was",
+                "C. are",
+                "D. were"
+              ],
+              "correctAnswer": 0,
+              "explanation": "Cấu trúc đảo ngữ: 'So + Adj + be + S + that...'[cite: 192].",
+              "expansion": "Dùng để nhấn mạnh mức độ của tính từ."
+            },
+            {
+              "id": 46,
+              "question": "However intelligent he ________, he has no common sense.",
+              "options": [
+                "A. is",
+                "B. may be",
+                "C. could be",
+                "D. Both A and B"
+              ],
+              "correctAnswer": 3,
+              "explanation": "Cấu trúc 'However + adj/adv + S + be/V...'[cite: 192].",
+              "expansion": "Nghĩa là 'Dù cho... đi chăng nữa'."
+            },
+            {
+              "id": 47,
+              "question": "She begged him ________ go, but he didn't listen.",
+              "options": [
+                "A. not to",
+                "B. don't",
+                "C. didn't",
+                "D. to not"
+              ],
+              "correctAnswer": 0,
+              "explanation": "Cấu trúc 'Beg sb (not) to do sth' nghĩa là cầu xin ai (đừng) làm gì[cite: 194].",
+              "expansion": "Ví dụ: She begged him not to go[cite: 194]."
+            },
+            {
+              "id": 48,
+              "question": "The sight of his pale face ________ home to me how ill he really was.",
+              "options": [
+                "A. brought",
+                "B. took",
+                "C. sent",
+                "D. gave"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Bring sth home to sb' nghĩa là giúp ai hiểu rõ điều gì[cite: 194].",
+              "expansion": "Thường dùng khi một sự việc thực tế làm sáng tỏ một vấn đề."
+            },
+            {
+              "id": 49,
+              "question": "The outcome of the vote is a ________ conclusion; everyone knows the result.",
+              "options": [
+                "A. foregone",
+                "B. former",
+                "C. preceding",
+                "D. future"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Foregone conclusion' là một kết quả có thể dự đoán trước[cite: 194].",
+              "expansion": "Ví dụ: The outcome... is a foregone conclusion[cite: 194]."
+            },
+            {
+              "id": 50,
+              "question": "The driver didn't ________ a chance of stopping in time.",
+              "options": [
+                "A. stand",
+                "B. have",
+                "C. get",
+                "D. make"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Stand a chance of doing sth' nghĩa là có khả năng đạt được điều gì[cite: 194].",
+              "expansion": "Ví dụ: didn't stand a chance of stopping[cite: 194]."
+            }
+          ],
+          "id": "0c3b9a76-daf1-442d-8435-2339c0d91a59"
+        },
+        {
+          "title": "II. SENTENCE TRANSFORMATION (USING TARGET WORDS)",
+          "instruction": "Rewrite the sentences below using the word provided in brackets.",
+          "type": "writing-essay",
+          "questions": [
+            {
+              "id": 151,
+              "question": "She bought many eggs, but it wasn't necessary because the fridge was full. (NEEDN'T)",
+              "prompt": "Rewrite with 'NEEDN'T HAVE'.",
+              "cues": [
+                "Must use P2 form."
+              ],
+              "sampleAnswer": "She needn't have bought so many eggs as the fridge was full.",
+              "explanation": "'Needn't have + P2' dùng cho hành động lẽ ra không cần nhưng đã làm[cite: 100, 106].",
+              "expansion": "Dùng 'didn't need to V' nếu hành động chưa xảy ra[cite: 100]."
+            },
+            {
+              "id": 152,
+              "question": "The matter is definitely not simple or clear. (CUT)",
+              "prompt": "Use the idiom 'CUT AND DRIED'.",
+              "cues": [
+                "Use 'by no means'."
+              ],
+              "sampleAnswer": "The matter is by no means cut and dried.",
+              "explanation": "'Cut and dried' nghĩa là đơn giản, rõ ràng.",
+              "expansion": "'By no means' mang nghĩa nhấn mạnh phủ định[cite: 194]."
+            },
+            {
+              "id": 153,
+              "question": "You said exactly the right thing about the problem. (HIT)",
+              "prompt": "Use 'HIT THE NAIL ON THE HEAD'.",
+              "cues": [
+                "Past tense."
+              ],
+              "sampleAnswer": "You hit the nail on the head with that comment.",
+              "explanation": "'Hit the nail on the head' nghĩa là nói chính xác vấn đề.",
+              "expansion": "Idiom này rất phổ biến trong đề thi Chuyên."
+            },
+            {
+              "id": 154,
+              "question": "She went to extraordinary efforts to ensure the success of the project. (LENGTHS)",
+              "prompt": "Use 'GO TO GREAT LENGTHS'.",
+              "cues": [
+                "Go to great lengths to do sth."
+              ],
+              "sampleAnswer": "She went to great lengths to ensure the success of the project.",
+              "explanation": "'Go to great lengths to do sth' nghĩa là làm mọi cách.",
+              "expansion": "Collocation quan trọng trong chủ đề Effort."
+            },
+            {
+              "id": 155,
+              "question": "I don't feel I'm making any progress with my studies. (ANYWHERE)",
+              "prompt": "Use 'NOT GETTING ANYWHERE'.",
+              "cues": [
+                "Progress = Getting somewhere."
+              ],
+              "sampleAnswer": "I don't feel I'm getting anywhere with my studies.",
+              "explanation": "'Not get anywhere' nghĩa là không tiến triển[cite: 192].",
+              "expansion": "Dùng trong văn cảnh tự sự hoặc phàn nàn."
+            }
+          ],
+          "id": "c9d387f3-082f-4bdc-a42e-fb8a0b8be736"
+        },
+        {
+          "title": "III. READING COMPREHENSION (20 QUESTIONS)",
+          "instruction": "Read the passage and choose the best answers.",
+          "type": "reading",
+          "passage": "In the **contemporary** world [cite: 163], the **pace** of economic change is often **unprecedented**[cite: 131, 175]. This creates a **constant flux** of information [cite: 116], and individuals must **adapt to** new environments[cite: 143]. However, many people suffer from an **indifference** to the **underlying** issues [cite: 94, 177], focusing on **domestic trivia**[cite: 169]. Education must **revitalize** students' minds  and help them **expand their knowledge**. It is **vital**  to build **disciplined** individuals [cite: 114] who can **articulate** complex thoughts clearly[cite: 137]. Firms must be **responsive** to consumer demand  while avoiding **fraud** and **reckless** behavior[cite: 139]. Only through **intensive** study [cite: 76] and **perseverance** [cite: 161] can one **prosper** [cite: 129] and achieve **noble** ends [cite: 139] in this **fragile** world[cite: 135].",
+          "questions": [
+            {
+              "id": 201,
+              "question": "What does 'contemporary' mean in the passage?",
+              "options": [
+                "A. modern",
+                "B. ancient",
+                "C. eternal",
+                "D. obscure"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Contemporary' /kən'tem.pər.ǝr.i/ là đương đại, hiện đại[cite: 163].",
+              "expansion": "'Obscure' là vô danh[cite: 165]."
+            },
+            {
+              "id": 202,
+              "question": "The word 'pace' refers to the ________ of change.",
+              "options": [
+                "A. quality",
+                "B. speed",
+                "C. cost",
+                "D. size"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'Pace' /peis/ là tốc độ[cite: 131].",
+              "expansion": "Ví dụ: the pace of economic change[cite: 131]."
+            },
+            {
+              "id": 203,
+              "question": "The term 'unprecedented' suggests that the change is:",
+              "options": [
+                "A. expected",
+                "B. never seen before",
+                "C. trivial",
+                "D. rigid"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'Unprecedented' /an'presidentid/ là chưa từng có[cite: 175].",
+              "expansion": "Dùng cho các tình huống mới lạ hoàn toàn."
+            },
+            {
+              "id": 204,
+              "question": "What does 'constant flux' imply?",
+              "options": [
+                "A. stability",
+                "B. continuous change",
+                "C. indifference",
+                "D. fraud"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'Flux' /floks/ là sự biến động, thay đổi liên tục[cite: 116].",
+              "expansion": "'Influx' là sự tràn vào[cite: 116]."
+            },
+            {
+              "id": 205,
+              "question": "The word 'adapt to' means to:",
+              "options": [
+                "A. avoid",
+                "B. adjust to",
+                "C. subvert",
+                "D. omit"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'Adapt to' /ə'dæpt/ là thích nghi[cite: 143].",
+              "expansion": "'Omit' là bỏ sót."
+            },
+            {
+              "id": 206,
+              "question": "The word 'indifference' is closest in meaning to:",
+              "options": [
+                "A. care",
+                "B. unconcern",
+                "C. hostility",
+                "D. riot"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'Indifference' /in'dıf.a.ǝns/ là sự thờ ơ, không quan tâm[cite: 94].",
+              "expansion": "'Hostility' là sự thù địch[cite: 129]."
+            },
+            {
+              "id": 207,
+              "question": "What are 'underlying issues'?",
+              "options": [
+                "A. basic/root causes",
+                "B. trivial details",
+                "C. final goals",
+                "D. reckless actions"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Underlying' /kompə'zıfən/ là cơ bản, nằm ở cơ sở.",
+              "expansion": "Gốc từ 'Underlie' (làm nền tảng)."
+            },
+            {
+              "id": 208,
+              "question": "The term 'domestic trivia' refers to things that are:",
+              "options": [
+                "A. important",
+                "B. minor/unimportant",
+                "C. prestigious",
+                "D. noble"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'Trivia' /'triviǝ/ là những chuyện vặt vãnh, linh tinh[cite: 169].",
+              "expansion": "Tính từ: 'Trivial'[cite: 88]."
+            },
+            {
+              "id": 209,
+              "question": "To 'revitalize' means to:",
+              "options": [
+                "A. destroy",
+                "B. bring new life to",
+                "C. capture",
+                "D. drench"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'Revitalize' /,ri:'vaı.ţəl.aız/ là đem lại sức sống mới.",
+              "expansion": "'Drench' là làm ướt sũng[cite: 165]."
+            },
+            {
+              "id": 210,
+              "question": "Education helps students 'expand' their knowledge. What does 'expand' mean?",
+              "options": [
+                "A. broaden",
+                "B. decrease",
+                "C. forget",
+                "D. omit"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Expand' /ıks'pænd/ là mở rộng.",
+              "expansion": "Ví dụ: Expand one's knowledge."
+            },
+            {
+              "id": 211,
+              "question": "A 'vital' thing is a ________ thing.",
+              "options": [
+                "A. necessary/important",
+                "B. useless",
+                "C. fragile",
+                "D. reckless"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Vital' /'var.tǝl/ là cần thiết, quan trọng.",
+              "expansion": "Ví dụ: vital for health."
+            },
+            {
+              "id": 212,
+              "question": "A 'disciplined' student is one who:",
+              "options": [
+                "A. obeys rules",
+                "B. acts up",
+                "C. is a chicken",
+                "D. is a rebel"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Disciplined' /'dısəplınd/ là có kỷ luật, quy tắc[cite: 114].",
+              "expansion": "'Rebel' là người bướng bỉnh/nổi loạn[cite: 171]."
+            },
+            {
+              "id": 213,
+              "question": "To 'articulate' thoughts is to:",
+              "options": [
+                "A. express clearly",
+                "B. hide",
+                "C. forget",
+                "D. prosecute"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Articulate' /a:'tık.ju.lət/ là bày tỏ rõ ràng[cite: 137].",
+              "expansion": "'Prosecute' là khởi tố[cite: 137]."
+            },
+            {
+              "id": 214,
+              "question": "A 'responsive' firm ________ to consumer needs.",
+              "options": [
+                "A. reacts quickly",
+                "B. ignores",
+                "C. subverts",
+                "D. omits"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Responsive' /ri'spa:n.sıv/ là phản ứng nhanh nhạy.",
+              "expansion": "Tính từ của 'Response'."
+            },
+            {
+              "id": 215,
+              "question": "What is 'fraud'?",
+              "options": [
+                "A. honesty",
+                "B. deception",
+                "C. merit",
+                "D. incentive"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'Fraud' /fro:d/ là gian lận, lừa đảo[cite: 139].",
+              "expansion": "'Merit' là công lao[cite: 173]."
+            },
+            {
+              "id": 216,
+              "question": "A 'reckless' person is:",
+              "options": [
+                "A. careful",
+                "B. rash/careless",
+                "C. diplomatic",
+                "D. noble"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'Reckless' /'reklis/ là thiếu thận trọng, liều lĩnh[cite: 139].",
+              "expansion": "'Diplomatic' là có tài ngoại giao/khéo xử[cite: 175]."
+            },
+            {
+              "id": 217,
+              "question": "To 'prosper' is to:",
+              "options": [
+                "A. fail",
+                "B. thrive/be successful",
+                "C. rot",
+                "D. vanish"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'Prosper' /'prospǝr/ là phồn thịnh, thịnh vượng[cite: 129].",
+              "expansion": "'Vanish' là biến mất[cite: 163]."
+            },
+            {
+              "id": 218,
+              "question": "'Perseverance' (verb form: persevere) means:",
+              "options": [
+                "A. giving up",
+                "B. persisting",
+                "C. acting up",
+                "D. logging off"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'Persevere' /,p3:rsə'vır/ là kiên trì[cite: 161].",
+              "expansion": "'Act up' là cư xử tệ[cite: 104]."
+            },
+            {
+              "id": 219,
+              "question": "'Noble' describes something that is:",
+              "options": [
+                "A. honorable",
+                "B. absurd",
+                "C. trivial",
+                "D. reckless"
+              ],
+              "correctAnswer": 0,
+              "explanation": "'Noble' /'noubǝl/ là cao quý, đáng kính[cite: 139].",
+              "expansion": "'Absurd' là vô lý[cite: 88]."
+            },
+            {
+              "id": 220,
+              "question": "A 'fragile' object is ________.",
+              "options": [
+                "A. strong",
+                "B. easily broken",
+                "C. rigid",
+                "D. stiff"
+              ],
+              "correctAnswer": 1,
+              "explanation": "'Fragile' /'frædzaıl/ là dễ vỡ, mỏng manh[cite: 135].",
+              "expansion": "'Rigid' là cứng nhắc[cite: 173]."
+            }
+          ],
+          "id": "7a62326f-9cb6-41e8-b156-ee6c213a3651"
+        },
+        {
+          "title": "IV. WRITING ESSAY",
+          "instruction": "Write an essay (250-300 words) on the following topic.",
+          "type": "writing-essay",
+          "prompt": "In the contemporary world [cite: 163], the pace of change is unprecedented[cite: 131, 175]. Discuss the merits of individual effort versus background in achieving success. Use keywords: 'address', 'vital', 'inequality'[cite: 92, 94, 96].",
+          "cues": [
+            "1. Merits of effort (disciplined, perseverance)[cite: 114, 161].",
+            "2. Inequality of opportunity[cite: 96].",
+            "3. Personal opinion."
+          ],
+          "sampleAnswer": "In the contemporary digital age, the pace of change is unprecedented, creating a constant flux of information... (Student should address inequality and merit).",
+          "explanation": "Essay requires formal vocabulary[cite: 74].",
+          "expansion": "Use structures like 'Not until' or 'Rarely'[cite: 104, 108].",
+          "id": "315c3f9e-4f3f-4079-bed2-2401a286fef5"
+        }
+      ],
+      "createdAt": "2026-03-24T06:08:35.529Z",
+      "updatedAt": "2026-03-24T06:08:35.529Z"
+    }
+  ]
+}
