@@ -3,11 +3,745 @@
     {
       "id": "f57f790f-b615-4a2f-bb6f-4d8042312e05",
       "username": "admin",
-      "passwordHash": "h2boonx10",
+      "passwordHash": "pbkdf2:1e568bc1b6de89f688579fa52e9036bf64f5ca9b75b87ec82d4dbfb9d4da38dc:cba950bb56e0b4b67988c9b6dafb164edd77121be58c3b608e668c2215fe3387e0886e3b3ca161f73ea03a43151cac02f8f69b15dec4f200d33f3d23aaee65a2",
       "displayName": "admin",
       "role": "admin",
-      "token": "ZjU3Zjc5MGYtYjYxNS00YTJmLWJiNmYtNGQ4MDQyMzEyZTA1OjE3NzQzNDkzNjQ2NjU6amJldDIwbmM0ZG0=",
+      "token": "ZjU3Zjc5MGYtYjYxNS00YTJmLWJiNmYtNGQ4MDQyMzEyZTA1OjE3NzU2ODkyNjA3OTQ6Mzc3NDdmY2U2NWM3ZjM5MTQ3ZDNmY2U0ODI2MWY0ZGY=",
       "history": [
+        {
+          "examId": "bada400e-ad01-4f0c-9bfa-edc9cc8ea287",
+          "score": "0.3",
+          "correct": 2,
+          "incorrect": 3,
+          "skipped": 57,
+          "total": 62,
+          "results": [
+            {
+              "id": 1,
+              "userAnswer": 0,
+              "isCorrect": true,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 2,
+              "userAnswer": 3,
+              "isCorrect": true,
+              "correctAnswer": 3,
+              "isEssay": false
+            },
+            {
+              "id": 3,
+              "userAnswer": 3,
+              "isCorrect": false,
+              "correctAnswer": 2,
+              "isEssay": false
+            },
+            {
+              "id": 4,
+              "userAnswer": 3,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 5,
+              "userAnswer": 3,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 6,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 7,
+              "isCorrect": false,
+              "correctAnswer": 3,
+              "isEssay": false
+            },
+            {
+              "id": 8,
+              "isCorrect": false,
+              "correctAnswer": 2,
+              "isEssay": false
+            },
+            {
+              "id": 9,
+              "isCorrect": false,
+              "correctAnswer": 3,
+              "isEssay": false
+            },
+            {
+              "id": 10,
+              "isCorrect": false,
+              "correctAnswer": 2,
+              "isEssay": false
+            },
+            {
+              "id": 11,
+              "isCorrect": false,
+              "correctAnswer": 2,
+              "isEssay": false
+            },
+            {
+              "id": 12,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 13,
+              "isCorrect": false,
+              "correctAnswer": 2,
+              "isEssay": false
+            },
+            {
+              "id": 14,
+              "isCorrect": false,
+              "correctAnswer": 2,
+              "isEssay": false
+            },
+            {
+              "id": 15,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 16,
+              "isCorrect": false,
+              "correctAnswer": 3,
+              "isEssay": false
+            },
+            {
+              "id": 17,
+              "isCorrect": false,
+              "correctAnswer": 2,
+              "isEssay": false
+            },
+            {
+              "id": 18,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 19,
+              "isCorrect": false,
+              "correctAnswer": 2,
+              "isEssay": false
+            },
+            {
+              "id": 20,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 21,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 22,
+              "isCorrect": false,
+              "correctAnswer": 3,
+              "isEssay": false
+            },
+            {
+              "id": 23,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 24,
+              "isCorrect": false,
+              "correctAnswer": 3,
+              "isEssay": false
+            },
+            {
+              "id": 25,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 26,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 27,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 28,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 29,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 30,
+              "isCorrect": false,
+              "correctAnswer": 2,
+              "isEssay": false
+            },
+            {
+              "id": 31,
+              "isCorrect": false,
+              "correctAnswer": 2,
+              "isEssay": false
+            },
+            {
+              "id": 32,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 33,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 34,
+              "isCorrect": false,
+              "correctAnswer": 3,
+              "isEssay": false
+            },
+            {
+              "id": 35,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 36,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 37,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 38,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 39,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 40,
+              "isCorrect": false,
+              "correctAnswer": 3,
+              "isEssay": false
+            },
+            {
+              "id": 41,
+              "isCorrect": false,
+              "correctAnswer": 2,
+              "isEssay": false
+            },
+            {
+              "id": 42,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 43,
+              "isCorrect": false,
+              "correctAnswer": 3,
+              "isEssay": false
+            },
+            {
+              "id": 44,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 45,
+              "isCorrect": false,
+              "correctAnswer": 2,
+              "isEssay": false
+            },
+            {
+              "id": 46,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 47,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 48,
+              "isCorrect": false,
+              "correctAnswer": 3,
+              "isEssay": false
+            },
+            {
+              "id": 49,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 50,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 51,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 52,
+              "isCorrect": false,
+              "correctAnswer": 2,
+              "isEssay": false
+            },
+            {
+              "id": 53,
+              "isCorrect": false,
+              "correctAnswer": 2,
+              "isEssay": false
+            },
+            {
+              "id": 54,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 55,
+              "isCorrect": false,
+              "correctAnswer": 1,
+              "isEssay": false
+            },
+            {
+              "id": 56,
+              "isCorrect": false,
+              "correctAnswer": 3,
+              "isEssay": false
+            },
+            {
+              "id": 57,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 58,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 59,
+              "isCorrect": false,
+              "correctAnswer": 3,
+              "isEssay": false
+            },
+            {
+              "id": 60,
+              "isCorrect": false,
+              "correctAnswer": 2,
+              "isEssay": false
+            },
+            {
+              "id": 61,
+              "isCorrect": false,
+              "correctAnswer": 0,
+              "isEssay": false
+            },
+            {
+              "id": 62,
+              "isCorrect": false,
+              "correctAnswer": 2,
+              "isEssay": false
+            },
+            {
+              "id": "writing-essay-2a",
+              "userAnswer": "",
+              "attachments": [],
+              "isCorrect": null,
+              "isEssay": true
+            },
+            {
+              "id": "writing-essay-2b",
+              "userAnswer": "",
+              "attachments": [],
+              "isCorrect": null,
+              "isEssay": true
+            }
+          ],
+          "examTitle": "Đề Cương Kiểm Tra Giữa Kỳ II - Tiếng Anh 9",
+          "timestamp": "01:09:59 8/4/2026",
+          "timeSpent": 9,
+          "autoSubmitted": false
+        },
+        {
+          "examId": "c5d57ab1-96f5-4217-9787-d5752edd4c60",
+          "score": "—",
+          "correct": 0,
+          "incorrect": 0,
+          "skipped": 1,
+          "total": 0,
+          "results": [
+            {
+              "id": "36a6c0f6-954e-4194-80cc-16db8fcb21a2",
+              "userAnswer": "Phần 1: (chưa điền)\nPhần 2: (chưa điền)\nPhần 3: (chưa điền)\nPhần 4: (chưa điền)\nPhần 5: (chưa điền)\nPhần 6: (chưa điền)\nPhần 7: (chưa điền)",
+              "attachments": [],
+              "isCorrect": null,
+              "isEssay": true,
+              "isFreeFormOrigin": true
+            }
+          ],
+          "examTitle": "ĐỀ THI GIỮA KÌ II - MÔN TOÁN",
+          "timestamp": "01:08:53 8/4/2026",
+          "timeSpent": 3,
+          "autoSubmitted": false
+        },
+        {
+          "examId": "87e1b929-2b47-4f06-91b5-f4cbb0be22a3",
+          "score": "—",
+          "correct": 0,
+          "incorrect": 0,
+          "skipped": 2,
+          "total": 0,
+          "results": [
+            {
+              "id": "959d5a3c-bba2-4b3c-ae48-8fe1a29c4494",
+              "userAnswer": "Phần 1: (chưa điền)\nPhần 2: (chưa điền)\nPhần 3: (chưa điền)\nPhần 4: (chưa điền)",
+              "attachments": [],
+              "isCorrect": null,
+              "isEssay": true,
+              "isFreeFormOrigin": true
+            },
+            {
+              "id": "45c66961-1a99-48ee-87bf-f49113a8d3e6",
+              "userAnswer": "",
+              "attachments": [],
+              "isCorrect": null,
+              "isEssay": true,
+              "isFreeFormOrigin": true
+            }
+          ],
+          "examTitle": "TEST",
+          "timestamp": "01:08:39 8/4/2026",
+          "timeSpent": 19,
+          "autoSubmitted": false
+        },
+        {
+          "examId": "b599524f-0afb-4d46-a6d1-2b1eac935fff",
+          "score": "—",
+          "correct": 0,
+          "incorrect": 0,
+          "skipped": 1,
+          "total": 0,
+          "results": [
+            {
+              "id": "93409898-8d12-49d1-a6ec-9c27ce0fc8d5",
+              "userAnswer": "Phần 1: (chưa điền)\nPhần 2: (chưa điền)\nPhần 3: (chưa điền)\nPhần 4: (chưa điền)\nPhần 5: (chưa điền)\nPhần 6: (chưa điền)\nPhần 7: (chưa điền)",
+              "attachments": [],
+              "isCorrect": null,
+              "isEssay": true,
+              "isFreeFormOrigin": true
+            }
+          ],
+          "examTitle": "KỲ THI TUYỂN SINH VÀO LỚP 10 THPT - ĐỀ MINH HỌA 01",
+          "timestamp": "19:37:32 7/4/2026",
+          "timeSpent": 6,
+          "autoSubmitted": false
+        },
+        {
+          "examId": "60a2c504-3521-4c06-ac16-2dd475d5c7a0",
+          "score": "—",
+          "correct": 0,
+          "incorrect": 0,
+          "skipped": 1,
+          "total": 0,
+          "results": [
+            {
+              "id": "ai-sec-1775411599544-0",
+              "userAnswer": "Phần 1: (chưa điền)",
+              "attachments": [],
+              "isCorrect": null,
+              "isEssay": true,
+              "isFreeFormOrigin": true
+            }
+          ],
+          "examTitle": "Kỳ thi chọn học sinh giỏi các môn văn hóa cấp tỉnh",
+          "timestamp": "19:13:36 7/4/2026",
+          "timeSpent": 2,
+          "autoSubmitted": false
+        },
+        {
+          "examId": "c5d57ab1-96f5-4217-9787-d5752edd4c60",
+          "score": "—",
+          "correct": 0,
+          "incorrect": 0,
+          "skipped": 1,
+          "total": 0,
+          "results": [
+            {
+              "id": "36a6c0f6-954e-4194-80cc-16db8fcb21a2",
+              "userAnswer": "Phần 1: (chưa điền)\nPhần 2: (chưa điền)\nPhần 3: (chưa điền)\nPhần 4: (chưa điền)\nPhần 5: (chưa điền)\nPhần 6: (chưa điền)\nPhần 7: (chưa điền)",
+              "attachments": [],
+              "isCorrect": null,
+              "isEssay": true,
+              "isFreeFormOrigin": true
+            }
+          ],
+          "examTitle": "ĐỀ THI GIỮA KÌ II - MÔN TOÁN",
+          "timestamp": "18:02:04 1/4/2026",
+          "timeSpent": 5,
+          "autoSubmitted": false
+        },
+        {
+          "examId": "1d3fb776-618a-4579-a54a-b00462a80b2c",
+          "score": "—",
+          "correct": 0,
+          "incorrect": 0,
+          "skipped": 1,
+          "total": 0,
+          "results": [
+            {
+              "id": "14cb9545-7e4b-4705-8a62-0821e8a1116f",
+              "userAnswer": "Phần 1: (chưa điền)\nPhần 2: (chưa điền)\nPhần 3: (chưa điền)\nPhần 4: (chưa điền)",
+              "attachments": [],
+              "isCorrect": null,
+              "isEssay": true,
+              "isFreeFormOrigin": true
+            }
+          ],
+          "examTitle": "BÀI TẬP TOÁN 9 CTST - TRANG 56",
+          "timestamp": "18:01:35 1/4/2026",
+          "timeSpent": 7,
+          "autoSubmitted": false
+        },
+        {
+          "examId": "1d3fb776-618a-4579-a54a-b00462a80b2c",
+          "score": "—",
+          "correct": 0,
+          "incorrect": 0,
+          "skipped": 1,
+          "total": 0,
+          "results": [
+            {
+              "id": "14cb9545-7e4b-4705-8a62-0821e8a1116f",
+              "userAnswer": "Phần 1: (chưa điền)\nPhần 2: (chưa điền)\nPhần 3: (chưa điền)\nPhần 4: (chưa điền)",
+              "attachments": [],
+              "isCorrect": null,
+              "isEssay": true,
+              "isFreeFormOrigin": true
+            }
+          ],
+          "examTitle": "BÀI TẬP TOÁN 9 CTST - TRANG 56",
+          "timestamp": "21:40:17 31/3/2026",
+          "timeSpent": 7,
+          "autoSubmitted": false
+        },
+        {
+          "examId": "c5d57ab1-96f5-4217-9787-d5752edd4c60",
+          "score": "—",
+          "correct": 0,
+          "incorrect": 0,
+          "skipped": 1,
+          "total": 0,
+          "results": [
+            {
+              "id": "36a6c0f6-954e-4194-80cc-16db8fcb21a2",
+              "userAnswer": "Phần 1: (chưa điền)\nPhần 2: (chưa điền)\nPhần 3: (chưa điền)\nPhần 4: (chưa điền)\nPhần 5: (chưa điền)\nPhần 6: (chưa điền)\nPhần 7: (chưa điền)",
+              "attachments": [],
+              "isCorrect": null,
+              "isEssay": true,
+              "isFreeFormOrigin": true
+            }
+          ],
+          "examTitle": "ĐỀ THI GIỮA KÌ II - MÔN TOÁN",
+          "timestamp": "21:30:34 31/3/2026",
+          "timeSpent": 3,
+          "autoSubmitted": false
+        },
+        {
+          "examId": "c5d57ab1-96f5-4217-9787-d5752edd4c60",
+          "score": "—",
+          "correct": 0,
+          "incorrect": 0,
+          "skipped": 1,
+          "total": 0,
+          "results": [
+            {
+              "id": "36a6c0f6-954e-4194-80cc-16db8fcb21a2",
+              "userAnswer": "Phần 1: (chưa điền)\nPhần 2: (chưa điền)\nPhần 3: (chưa điền)\nPhần 4: (chưa điền)\nPhần 5: (chưa điền)\nPhần 6: (chưa điền)\nPhần 7: (chưa điền)",
+              "attachments": [],
+              "isCorrect": null,
+              "isEssay": true,
+              "isFreeFormOrigin": true
+            }
+          ],
+          "examTitle": "ĐỀ THI GIỮA KÌ II - MÔN TOÁN",
+          "timestamp": "21:53:25 30/3/2026",
+          "timeSpent": 3,
+          "autoSubmitted": false
+        },
+        {
+          "examId": "c5d57ab1-96f5-4217-9787-d5752edd4c60",
+          "score": "—",
+          "correct": 0,
+          "incorrect": 0,
+          "skipped": 1,
+          "total": 0,
+          "results": [
+            {
+              "id": "36a6c0f6-954e-4194-80cc-16db8fcb21a2",
+              "userAnswer": "Phần 1: (chưa điền)\nPhần 2: (chưa điền)\nPhần 3: (chưa điền)\nPhần 4: (chưa điền)\nPhần 5: (chưa điền)\nPhần 6: (chưa điền)\nPhần 7: (chưa điền)",
+              "attachments": [],
+              "isCorrect": null,
+              "isEssay": true,
+              "isFreeFormOrigin": true
+            }
+          ],
+          "examTitle": "ĐỀ THI GIỮA KÌ II - MÔN TOÁN",
+          "timestamp": "19:44:48 30/3/2026",
+          "timeSpent": 6,
+          "autoSubmitted": false
+        },
+        {
+          "examId": "c5d57ab1-96f5-4217-9787-d5752edd4c60",
+          "score": "—",
+          "correct": 0,
+          "incorrect": 0,
+          "skipped": 1,
+          "total": 0,
+          "results": [
+            {
+              "id": "36a6c0f6-954e-4194-80cc-16db8fcb21a2",
+              "userAnswer": "Phần 1: (chưa điền)\nPhần 2: (chưa điền)\nPhần 3: (chưa điền)\nPhần 4: (chưa điền)\nPhần 5: (chưa điền)\nPhần 6: (chưa điền)\nPhần 7: (chưa điền)",
+              "attachments": [],
+              "isCorrect": null,
+              "isEssay": true,
+              "isFreeFormOrigin": true
+            }
+          ],
+          "examTitle": "ĐỀ THI GIỮA KÌ II - MÔN TOÁN",
+          "timestamp": "12:37:12 30/3/2026",
+          "timeSpent": 3,
+          "autoSubmitted": false
+        },
+        {
+          "examId": "c5d57ab1-96f5-4217-9787-d5752edd4c60",
+          "score": "—",
+          "correct": 0,
+          "incorrect": 0,
+          "skipped": 1,
+          "total": 0,
+          "results": [
+            {
+              "id": "36a6c0f6-954e-4194-80cc-16db8fcb21a2",
+              "userAnswer": "Phần 1: (chưa điền)\nPhần 2: (chưa điền)\nPhần 3: (chưa điền)\nPhần 4: (chưa điền)\nPhần 5: (chưa điền)\nPhần 6: (chưa điền)\nPhần 7: (chưa điền)",
+              "attachments": [],
+              "isCorrect": null,
+              "isEssay": true,
+              "isFreeFormOrigin": true
+            }
+          ],
+          "examTitle": "ĐỀ THI GIỮA KÌ II - MÔN TOÁN",
+          "timestamp": "12:35:46 30/3/2026",
+          "timeSpent": 8,
+          "autoSubmitted": false
+        },
+        {
+          "examId": "c5d57ab1-96f5-4217-9787-d5752edd4c60",
+          "score": "—",
+          "correct": 0,
+          "incorrect": 0,
+          "skipped": 1,
+          "total": 0,
+          "results": [
+            {
+              "id": "36a6c0f6-954e-4194-80cc-16db8fcb21a2",
+              "userAnswer": "Phần 1: (chưa điền)\nPhần 2: (chưa điền)\nPhần 3: (chưa điền)\nPhần 4: (chưa điền)\nPhần 5: (chưa điền)\nPhần 6: (chưa điền)\nPhần 7: (chưa điền)",
+              "attachments": [],
+              "isCorrect": null,
+              "isEssay": true,
+              "isFreeFormOrigin": true
+            }
+          ],
+          "examTitle": "ĐỀ THI GIỮA KÌ II - MÔN TOÁN",
+          "timestamp": "12:13:47 30/3/2026",
+          "timeSpent": 2,
+          "autoSubmitted": false
+        },
+        {
+          "examId": "7a931ea4-94e4-44d9-b743-1086627e0d8d",
+          "score": "NaN",
+          "correct": 0,
+          "incorrect": 0,
+          "skipped": 0,
+          "total": 0,
+          "results": [
+            {
+              "id": "ai-sec-1774416333294-0",
+              "userAnswer": "llllll",
+              "isCorrect": null,
+              "isEssay": true
+            },
+            {
+              "id": "ai-sec-1774416333294-1",
+              "isCorrect": null,
+              "isEssay": true
+            },
+            {
+              "id": "ai-sec-1774416333294-2",
+              "isCorrect": null,
+              "isEssay": true
+            },
+            {
+              "id": "ai-sec-1774416333294-3",
+              "isCorrect": null,
+              "isEssay": true
+            }
+          ],
+          "examTitle": "Đề Toán Lớp 9",
+          "timestamp": "12:28:00 25/3/2026",
+          "timeSpent": 136,
+          "autoSubmitted": false
+        },
         {
           "examId": "59bb686c-f50c-41c5-afb6-fa81fd6bd0b4",
           "score": "0.0",
@@ -852,7 +1586,8 @@
           "savedAt": "2026-03-23T12:07:31.514Z"
         }
       ],
-      "createdAt": "2026-03-23T12:01:07.837Z"
+      "createdAt": "2026-03-23T12:01:07.837Z",
+      "tokenExpiry": 1776294060794
     }
   ]
 }

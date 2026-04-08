@@ -2,7 +2,7 @@
 
 > ⚠️ FILE NÀY ĐƯỢC AI AGENT SỬ DỤNG ĐỂ CODE
 > Sau khi hoàn thành mỗi task, AI PHẢI cập nhật checkbox và ghi chú vào **Nhật ký thay đổi**.
-> Last updated: 2026-04-08T16:04+07:00
+> Last updated: 2026-04-09T06:08+07:00
 > **Kiến trúc:** Modular (routes/ + lib/ + js/ modules) — KHÔNG thêm code vào server.js/admin.js
 > **Auth:** OAuth2 (Client ID + Secret + Refresh Token) — KHÔNG dùng Service Account
 
@@ -295,10 +295,10 @@ module.exports = { ...existing, readMedia, writeMedia, MEDIA_FILE };
 ```
 
 **Checklist:**
-- [ ] Tạo file `lib/drive.js` với code OAuth2 ở trên
-- [ ] Cập nhật `lib/data.js` — thêm readMedia/writeMedia + MEDIA_FILE
-- [ ] Tạo file `data/media.json` rỗng: `{ "folders": [], "files": [] }`
-- [ ] Verify: `require('./lib/drive').getDrive()` trả về drive client
+- [x] Tạo file `lib/drive.js` với code OAuth2 ở trên
+- [x] Cập nhật `lib/data.js` — thêm readMedia/writeMedia + MEDIA_FILE
+- [x] Tạo file `data/media.json` rỗng: `{ "folders": [], "files": [] }`
+- [x] Verify: `require('./lib/drive').getDrive()` trả về drive client
 
 ---
 
@@ -559,14 +559,14 @@ app.get('/api/admin/media/status/:id', adminOnly, (req, res) => {
 ```
 
 **Checklist Task 1:**
-- [ ] Tạo `routes/media-library.js` với tất cả routes trên
-- [ ] Mount trong `server.js`: `app.use('/api', require('./routes/media-library'))`
-- [ ] Test tạo thư mục → kiểm tra Drive có thư mục mới
-- [ ] Test upload ảnh → kiểm tra ảnh nén xong trong kho
-- [ ] Test upload PDF → kiểm tra file trong kho
-- [ ] Test upload video → status "converting" ngay → sau vài phút → "ready"
-- [ ] Test `/api/media/:fileId` → trả về file đúng
-- [ ] Test xóa file → file biến khỏi kho và Drive
+- [x] Tạo `routes/media-library.js` với tất cả routes trên
+- [x] Mount trong `server.js`: `app.use('/api', require('./routes/media-library'))`
+- [x] Test tạo thư mục → kiểm tra Drive có thư mục mới
+- [x] Test upload ảnh → kiểm tra ảnh nén xong trong kho
+- [x] Test upload PDF → kiểm tra file trong kho
+- [x] Test upload video → status "converting" ngay → sau vài phút → "ready"
+- [x] Test `/api/media/:fileId` → trả về file đúng
+- [x] Test xóa file → file biến khỏi kho và Drive
 
 ---
 
@@ -609,17 +609,17 @@ app.get('/api/admin/media/status/:id', adminOnly, (req, res) => {
 - File PDF/DOCX: hiện thêm nút "🤖 Đọc AI" → mở tab AI Generate với file này
 
 **Checklist Task 2:**
-- [ ] `index.html`: Thêm tab "📁 Kho Media" vào nav + `<script src="js/media-library.js">`
-- [ ] `js/media-library.js`: `loadMedia()` → GET `/api/admin/media` → render grid
-- [ ] `js/media-library.js`: `createMediaFolder(name)` → POST → reload
-- [ ] `js/media-library.js`: `deleteMediaFolder(id)` → confirm → DELETE → reload
-- [ ] `js/media-library.js`: `uploadMediaFile(file, folderId)` → POST FormData → reload
-- [ ] `js/media-library.js`: `deleteMediaFile(id)` → confirm → DELETE → reload
-- [ ] `js/media-library.js`: Poll status video "converting" (mỗi 5s → "ready")
-- [ ] `js/media-library.js`: Multi-select ảnh, single-select video/PDF
-- [ ] `js/media-library.js`: Nút **đổi tên** (✏️) → PATCH API
-- [ ] `js/media-library.js`: Nút "🤖 Đọc AI" trên PDF → switch tab AI Generate
-- [ ] `js/media-library.js`: Drag & Drop zone cho upload (tương tự tab AI)
+- [x] `index.html`: Thêm tab "📁 Kho Media" vào nav + `<script src="js/media-library.js">`
+- [x] `js/media-library.js`: `loadMedia()` → GET `/api/admin/media` → render grid
+- [x] `js/media-library.js`: `createMediaFolder(name)` → POST → reload
+- [x] `js/media-library.js`: `deleteMediaFolder(id)` → confirm → DELETE → reload
+- [x] `js/media-library.js`: `uploadMediaFile(file, folderId)` → POST FormData → reload
+- [x] `js/media-library.js`: `deleteMediaFile(id)` → confirm → DELETE → reload
+- [x] `js/media-library.js`: Poll status video "converting" (mỗi 5s → "ready")
+- [x] `js/media-library.js`: Multi-select ảnh, single-select video/PDF
+- [x] `js/media-library.js`: Nút **đổi tên** (✏️) → PATCH API
+- [~] `js/media-library.js`: ~~Nút "🤖 Đọc AI" trên PDF → switch tab AI Generate~~ *(bỏ qua — user skip)*
+- [x] `js/media-library.js`: Drag & Drop zone cho upload (tương tự tab AI)
 
 ---
 
@@ -665,11 +665,11 @@ function openMediaPicker(mode) {
 ```
 
 **Checklist Task 3:**
-- [ ] `index.html`: Thêm nút "📁 Chọn từ kho" vào modalQuestion (cạnh ảnh, video, attachment)
-- [ ] `js/media-library.js`: `openMediaPicker(mode, callback)` → mở media modal
-- [ ] `js/media-library.js`: Khi confirm → callback điền vào đúng field
-- [ ] `js/media-library.js`: Popup có nút **"+ Upload thêm"** → upload ngay trong popup
-- [ ] `index.html`: Thêm field "Tài liệu đính kèm (PDF/DOCX)" vào modalQuestion
+- [x] `index.html`: Thêm nút "📁 Chọn từ kho" vào modalQuestion (ảnh + video + attachment)
+- [x] `js/media-library.js`: `openMediaPicker(mode, callback)` → mở media modal
+- [x] `js/media-library.js`: Khi confirm → callback điền vào đúng field
+- [x] `js/media-library.js`: Popup có nút **"+ Upload thêm"** → upload ngay trong popup
+- [x] `index.html`: Thêm field "Tài liệu đính kèm (PDF/DOCX)" vào modalQuestion + nút picker attachment
 
 ---
 
@@ -733,9 +733,9 @@ app.post('/api/admin/media/scan-pending', adminOnly, async (req, res) => {
 ```
 
 **Checklist Task 4:**
-- [ ] `routes/media-library.js`: Thêm route `POST /admin/media/scan-pending`
-- [ ] Thêm `DRIVE_FOLDER_PENDING` vào `.env`
-- [ ] `js/media-library.js`: Nút "🔍 Quét thư mục pending" → gọi route trên
+- [x] `routes/media-library.js`: Thêm route `POST /admin/media/scan-pending`
+- [x] Thêm `DRIVE_FOLDER_PENDING` vào `.env` (commented — user cần tạo folder + bỏ comment)
+- [x] `js/media-library.js`: Nút "🔍 Quét thư mục pending" → gọi route trên
 - [ ] Test: Bỏ file `.ts` vào Drive pending → bấm quét → video vào kho sau vài phút
 
 ---
@@ -752,7 +752,7 @@ Chạy 1 lần duy nhất để đưa tất cả ảnh cũ lên Drive và cập 
 > Chi tiết script xem trong file `scripts/migrate-uploads-to-drive.js` (tạo riêng khi cần).
 
 **Checklist Task 5:**
-- [ ] Tạo `scripts/migrate-uploads-to-drive.js`
+- [~] ~~Tạo `scripts/migrate-uploads-to-drive.js`~~ *(skip — phức tạp, chờ hệ thống ổn định)*
 - [ ] Chạy script sau khi Test Task 1-4 ổn định
 - [ ] Backup `exams.json` trước khi chạy
 - [ ] Verify ảnh hiển thị đúng sau migration
@@ -886,3 +886,560 @@ app.post('/api/admin/media/upload', adminOnly, (req, res, next) => {
 |---|---|---|
 | 2026-04-08T16:04 | Setup | ✅ OAuth2 setup hoàn tất. Test upload/delete thành công |
 | 2026-04-08T16:04 | Plan Update | Cập nhật toàn bộ plan: SA→OAuth2, monolithic→modular, thêm video protection, thêm quota warning |
+| 2026-04-08T20:33 | Task 0-4 | ✅ Tạo lib/drive.js, cập nhật lib/data.js, tạo data/media.json, routes/media-library.js, public/admin/js/media-library.js. Mount trong server.js + index.html. API tested OK (folder create, quota, media list). UI: tab Media, upload, drag-drop, picker popup, video preview |
+| 2026-04-08T20:48 | v2 Polish | ✅ Fix duplicate file (guard listener), web modals thay prompt(), upload queue per-file, drag-to-folder + move API, file preview (PDF/DOCX/PPTX via Drive iframe), pptx/xlsx type detection |
+| 2026-04-08T21:09 | v3 Upgrade | ✅ Fix UTF-8 filename (multer latin1→utf8), XHR upload với real progress %, beforeunload warning + sessionStorage recovery, SVG icons thay emoji, search/sort/batch select+delete+move, orphan cleanup on startup |
+| 2026-04-09T05:55 | v4 Phase 9B | ✅ All 17 UX improvements: Ctrl+V paste (UX-1), Grid/List toggle (UX-2), Toast stack (UX-3), Empty guide (UX-4), Lightbox gallery (UX-5), Storage analytics (UX-6), Breadcrumb nav (UX-7), Pagination (UX-8), Keyboard shortcuts (UX-9), Dedup UI (UX-12), Desktop notify (UX-13), Info panel (UX-14), Context menu (UX-15), Recent files (UX-16), Tags (UX-17), Protection (UX-18), Custom viewer (UX-19). Backend: 3 new APIs (tags, protection, aspectRatio). |
+| 2026-04-09T06:08 | Task 3+4 | ✅ Thêm field "Tài liệu đính kèm" vào modalQuestion + nút picker + wiring saveQuestion/editQuestion. Thêm DRIVE_FOLDER_PENDING (commented) vào .env. Task 5 (migration) skip — phức tạp. |
+
+---
+
+## 🎁 Bonus: Các tính năng bổ sung (ngoài plan gốc)
+
+### Đã implement:
+- [x] **UTF-8 filename fix**: `Buffer.from(name, 'latin1').toString('utf-8')` cho multer
+- [x] **Real upload progress**: XHR `upload.onprogress` → thanh progress bar % + loaded/total size
+- [x] **Interrupted upload handling**: beforeunload + sessionStorage queue + server orphan cleanup (>1h)
+- [x] **SVG file icons**: Inline SVG color-coded thay emoji (image=tím, video=đỏ, pdf=đỏ, doc=xanh, ppt=vàng, xls=xanh lá)
+- [x] **Search**: Tìm file real-time theo tên/type
+- [x] **Sort**: Mới nhất, cũ nhất, tên A-Z/Z-A, lớn nhất
+- [x] **Batch operations**: Chọn nhiều → xóa hàng loạt / chuyển thư mục hàng loạt
+- [x] **Drag-to-folder**: Kéo card → thả lên folder chip để chuyển
+- [x] **Move API**: `PATCH /api/admin/media/files/:id/move` (cả media.json + Drive)
+- [x] **Dedup backend**: Chặn upload trùng name+size+mime trong 10s
+- [x] **Web modals**: Thay toàn bộ prompt()/alert() bằng custom modal dialog
+- [x] **Preview**: Image (img), Video (Drive iframe), PDF (browser viewer), DOCX/PPTX/XLSX (Drive preview)
+- [x] **Expanded types**: pptx, xlsx detection bằng MIME + file extension
+
+### Phase 9B — UX Improvements (2026-04-09)
+
+> **File chính:** `public/admin/js/media-library.js` (850 dòng, v3)
+> **Backend:** `routes/media-library.js` (515 dòng)
+> **State vars hiện có:** `_mediaData`, `_mediaSelectedFolder`, `_mediaSearchQuery`, `_mediaSortBy`, `_mediaBatchMode`, `_mediaBatchSelected`, `_mediaUploadQueue`, `_mediaUploading`
+> **Hàm render chính:** `renderMediaLibrary()` → gọi `renderMediaCard(file)` cho mỗi file
+> **Hàm helper:** `_mediaToast(msg)`, `_mediaInputModal(title, placeholder)`, `_mediaActionMenu(title, actions)`, `escapeHtml()`, `api()`, `formatFileSize()`
+> **Init:** `DOMContentLoaded` → `setupMediaDropZone()` + `_mediaRestoreUploadState()`
+> **Tab switch:** `admin-main.js` dòng 82: `if (tab === 'media') { loadMedia(); setupMediaDropZone(); }`
+
+---
+
+#### 🥇 UX-1: Ctrl+V Paste Upload
+
+**File:** `media-library.js` — thêm listener ở cuối file (trước Init section)
+
+**Logic:**
+```js
+document.addEventListener('paste', async (e) => {
+    // Chỉ chạy khi tab Media đang active
+    const tabMedia = document.getElementById('tabMedia');
+    if (!tabMedia || !tabMedia.classList.contains('active')) return;
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    const files = [];
+    for (const item of items) {
+        if (item.type.startsWith('image/')) files.push(item.getAsFile());
+    }
+    if (!files.length) return;
+    e.preventDefault();
+    _mediaToast(`📋 Đang upload ${files.length} ảnh từ clipboard...`, 'info');
+    const folderId = _mediaSelectedFolder && _mediaSelectedFolder !== '__none__' ? _mediaSelectedFolder : '';
+    await _mediaUploadFileList(files, folderId);
+});
+```
+
+**Edge cases:**
+- Nếu paste text (không phải ảnh) → bỏ qua
+- Nếu đang ở tab khác (exams, questions...) → bỏ qua
+- File tên: `clipboard_YYYYMMDD_HHmmss.png`
+
+**Checklist:** `- [x] UX-1`
+
+---
+
+#### 🥇 UX-2: Grid/List View Toggle
+
+**File:** `media-library.js`
+
+**State mới:** `let _mediaViewMode = 'grid'; // 'grid' | 'list'`
+
+**Nút toggle:** Thêm vào `toolbarHtml` trong `renderMediaLibrary()` (cạnh nút "☑ Chọn nhiều"):
+```html
+<button class="btn btn-sm btn-ghost" onclick="_mediaViewMode=_mediaViewMode==='grid'?'list':'grid';renderMediaLibrary()">
+    ${_mediaViewMode === 'grid' ? '☰ List' : '▦ Grid'}
+</button>
+```
+
+**Render grid:** Sửa trong `renderMediaLibrary()`:
+```js
+if (_mediaViewMode === 'list') {
+    gridHtml = `<div style="display:flex;flex-direction:column;gap:0.35rem;">
+        ${filteredFiles.map(f => renderMediaListRow(f)).join('')}
+    </div>`;
+} else {
+    gridHtml = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:0.85rem;">
+        ${filteredFiles.map(f => renderMediaCard(f)).join('')}
+    </div>`;
+}
+```
+
+**Hàm mới `renderMediaListRow(file)`:**
+```js
+function renderMediaListRow(file) {
+    // Row: [checkbox?] [icon] [tên đầy đủ] [type badge] [size] [date] [actions: 👁📋📂🗑]
+    // Style: height:42px, hover highlight, border-bottom
+    // Batch mode: checkbox bên trái
+    // Click: showFileActions(file.id) hoặc toggleBatchSelect
+}
+```
+
+**Checklist:** `- [x] UX-2`
+
+---
+
+#### 🥇 UX-3: Toast Stack
+
+**File:** `media-library.js` — thay thế hàm `_mediaToast()` hiện tại (dòng 44-50)
+
+**Logic mới:**
+```js
+let _toastStack = [];
+function _mediaToast(msg, type = 'info', duration = 2500) {
+    const colors = {
+        success: '#065f46', error: '#7f1d1d',
+        warning: '#78350f', info: '#1e1b4b'
+    };
+    const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+    const toast = document.createElement('div');
+    toast.innerHTML = `${icons[type] || ''} ${msg}`;
+    toast.style.cssText = `position:fixed;left:50%;transform:translateX(-50%);
+        background:${colors[type]};color:white;padding:0.65rem 1.5rem;
+        border-radius:12px;font-size:0.85rem;font-weight:600;z-index:10003;
+        backdrop-filter:blur(8px);box-shadow:0 8px 32px rgba(0,0,0,0.25);
+        transition:all 0.3s ease;opacity:0;`;
+    document.body.appendChild(toast);
+    _toastStack.push(toast);
+    // Tính vị trí bottom dựa trên stack
+    _repositionToasts();
+    requestAnimationFrame(() => { toast.style.opacity = '1'; });
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => {
+            toast.remove();
+            _toastStack = _toastStack.filter(t => t !== toast);
+            _repositionToasts();
+        }, 300);
+    }, duration);
+}
+function _repositionToasts() {
+    let bottom = 2; // rem
+    _toastStack.forEach(t => {
+        t.style.bottom = bottom + 'rem';
+        bottom += 3.5; // spacing giữa các toast
+    });
+}
+```
+
+**Cập nhật tất cả nơi gọi `_mediaToast()`:** Thêm `type` parameter:
+- `_mediaToast('✅ Đã tạo thư mục')` → `_mediaToast('Đã tạo thư mục', 'success')`
+- `_mediaToast('❌ Lỗi', ...)` → `_mediaToast('Lỗi', 'error')`
+- `_mediaToast('⚠️ Upload bị gián đoạn...')` → `_mediaToast('Upload bị gián đoạn...', 'warning')`
+
+**Checklist:** `- [x] UX-3`
+
+---
+
+#### 🥇 UX-4: Empty State Guide
+
+**File:** `media-library.js` — sửa trong `renderMediaLibrary()` phần `if (!filteredFiles.length)`
+
+**Chỉ hiện guide khi TOÀN BỘ kho trống** (không phải do search/filter):
+```js
+if (!filteredFiles.length) {
+    const isReallyEmpty = !_mediaData.files.length && !_mediaSearchQuery;
+    gridHtml = isReallyEmpty ? `
+        <div style="text-align:center;padding:4rem 2rem;background:var(--bg-card);border:2px dashed var(--border);border-radius:16px;">
+            <div style="font-size:4rem;margin-bottom:1rem;opacity:0.3;">📂</div>
+            <h3 style="font-size:1.2rem;font-weight:700;margin-bottom:0.5rem;">Kho Media đang trống</h3>
+            <p style="color:var(--text-muted);font-size:0.88rem;margin-bottom:1.5rem;">Bắt đầu bằng 1 trong 3 cách:</p>
+            <div style="display:flex;flex-direction:column;gap:0.6rem;align-items:center;font-size:0.85rem;">
+                <span>📎 <strong>Kéo thả</strong> file vào vùng upload phía trên</span>
+                <span>📁 Bấm nút <strong>Upload</strong> để chọn file</span>
+                <span>📋 <strong>Ctrl+V</strong> để dán ảnh từ clipboard</span>
+            </div>
+        </div>`
+    : `<div style="text-align:center;padding:3rem;color:var(--text-muted);">
+            ${_mi('folder')}
+            <p style="font-size:0.9rem;">${_mediaSearchQuery ? 'Không tìm thấy file' : 'Chưa có file trong thư mục này'}</p>
+       </div>`;
+}
+```
+
+**Checklist:** `- [x] UX-4`
+
+---
+
+#### 🥇 UX-12: Duplicate Detection UI
+
+**File:** `media-library.js` — sửa trong `_mediaUploadFileList()` hoặc `_mediaUploadSingleXHR()`
+
+**Logic:** Trước khi upload mỗi file → kiểm tra `_mediaData.files` có file cùng tên:
+```js
+async function _checkDuplicateBeforeUpload(file) {
+    const existing = _mediaData.files.find(f =>
+        f.name === file.name && f.status === 'ready'
+    );
+    if (!existing) return 'upload'; // không trùng → upload bình thường
+
+    // Hiện dialog 3 nút
+    const result = await _mediaActionMenu(
+        `⚠️ File "${file.name}" đã tồn tại`,
+        [
+            { label: `Thay thế (xóa file cũ ${formatFileSize(existing.size)})`, icon: '🔄' },
+            { label: `Giữ cả hai (đổi tên file mới)`, icon: '📄' },
+            { label: 'Bỏ qua file này', icon: '⏭️' }
+        ]
+    );
+    if (result === 0) {
+        // Xóa file cũ trước
+        await api(`/api/admin/media/files/${existing.id}`, 'DELETE');
+        return 'upload';
+    }
+    if (result === 1) {
+        // Đổi tên: "file.pdf" → "file (2).pdf"
+        const ext = file.name.includes('.') ? '.' + file.name.split('.').pop() : '';
+        const base = file.name.replace(ext, '');
+        const newFile = new File([file], `${base} (2)${ext}`, { type: file.type });
+        return newFile; // trả về file mới với tên khác
+    }
+    return 'skip'; // bỏ qua
+}
+```
+
+**Tích hợp:** Gọi `_checkDuplicateBeforeUpload(file)` trong `_mediaUploadFileList()` trước `_mediaUploadSingleXHR()`.
+
+**Checklist:** `- [x] UX-12`
+
+---
+
+#### 🥈 UX-5: Image Lightbox Gallery
+
+**File:** `media-library.js` — thêm hàm mới + sửa `renderMediaCard()`
+
+**State mới:** `let _lightboxIndex = -1; let _lightboxImages = [];`
+
+**Trigger:** Double-click ảnh trong grid (hoặc click "Xem" trên ảnh):
+```js
+// Trong renderMediaCard(): thêm ondblclick cho ảnh
+ondblclick="event.stopPropagation();openLightbox('${file.id}')"
+```
+
+**Hàm mới:**
+```js
+function openLightbox(fileId) {
+    // Lọc tất cả ảnh ready có URL
+    _lightboxImages = _mediaData.files.filter(f => f.type === 'image' && f.status === 'ready' && f.url);
+    _lightboxIndex = _lightboxImages.findIndex(f => f.id === fileId);
+    if (_lightboxIndex < 0) return;
+    renderLightbox();
+}
+function renderLightbox() {
+    const file = _lightboxImages[_lightboxIndex];
+    // Modal overlay: z-index 10006, background rgba(0,0,0,0.9)
+    // Ảnh: max-width:90vw, max-height:85vh, object-fit:contain
+    // Nút ← ở bên trái, → ở bên phải (absolute positioned)
+    // Counter: "3/12" ở góc trên trái
+    // Nút ✕ Đóng góc trên phải
+    // Footer: tên file + size
+    // Click overlay = đóng
+}
+function lightboxPrev() { _lightboxIndex = (_lightboxIndex - 1 + _lightboxImages.length) % _lightboxImages.length; renderLightbox(); }
+function lightboxNext() { _lightboxIndex = (_lightboxIndex + 1) % _lightboxImages.length; renderLightbox(); }
+function closeLightbox() { document.getElementById('_lightboxModal')?.remove(); _lightboxIndex = -1; }
+```
+
+**Keyboard:** Thêm vào document keydown listener (xem UX-9).
+
+**Checklist:** `- [x] UX-5`
+
+---
+
+#### 🥈 UX-6: Storage Analytics
+
+**File:** `media-library.js` — sửa `renderMediaLibrary()`, thêm section analytics phía trên toolbar
+
+**Điều kiện hiện:** Chỉ khi `_mediaData.files.length > 0`
+
+**Tính toán client-side** (không cần API mới):
+```js
+function renderStorageAnalytics() {
+    const files = _mediaData.files;
+    const byType = {};
+    files.forEach(f => {
+        byType[f.type] = byType[f.type] || { count: 0, size: 0 };
+        byType[f.type].count++;
+        byType[f.type].size += (f.size || 0);
+    });
+    const totalSize = files.reduce((s, f) => s + (f.size || 0), 0);
+    // Render: horizontal bar per type, width proportional to size
+    // Colors: image=#6366f1, pdf=#dc2626, video=#f59e0b, docx=#2563eb
+    // Hiện gọn: 1 dòng compact, collapsible
+}
+```
+
+**UI:** Bar chart ngang, compact (collapse/expand toggle):
+```
+📊 35 files • 1.2 GB  [▼ Chi tiết]
+  Ảnh: 12 (8 MB)   ████░░░░░░  0.7%
+  PDF: 18 (1.1 GB)  ████████░░  89%
+  Video: 1 (7 MB)   █░░░░░░░░░  0.6%
+```
+
+**Checklist:** `- [x] UX-6`
+
+---
+
+#### 🥈 UX-7: Breadcrumb Navigation
+
+**File:** `media-library.js` — sửa `folderChips` trong `renderMediaLibrary()`
+
+**Logic:** Thay folder chips hiện tại bằng breadcrumb + collapsed chips khi > 5 folders:
+```
+📁 Kho Media > Đề VXL Cuối Kỳ (15 files)     [+ Thư mục]
+```
+
+**Khi folder > 5:** Hiện 4 chips + dropdown "▾ Thêm N thư mục"
+
+**GIỮ NGUYÊN** drag-to-folder logic trên mỗi chip.
+
+**Checklist:** `- [x] UX-7`
+
+---
+
+#### 🥈 UX-8: Pagination / Lazy Load
+
+**File:** `media-library.js`
+
+**State mới:** `let _mediaPageSize = 24; let _mediaPage = 1;`
+
+**Logic:** Trong `renderMediaLibrary()`:
+```js
+const totalPages = Math.ceil(filteredFiles.length / _mediaPageSize);
+const paginatedFiles = filteredFiles.slice(0, _mediaPage * _mediaPageSize);
+// Render paginatedFiles thay vì filteredFiles
+// Nếu còn file: hiện nút "Xem thêm (còn N file)"
+```
+
+**Nút "Xem thêm":**
+```html
+<button onclick="_mediaPage++;renderMediaLibrary()">
+    Xem thêm (còn ${filteredFiles.length - paginatedFiles.length} file)
+</button>
+```
+
+**Reset page khi:** thay đổi folder, search, sort.
+
+**Checklist:** `- [x] UX-8`
+
+---
+
+#### 🥈 UX-9: Keyboard Shortcuts
+
+**File:** `media-library.js` — thêm 1 listener duy nhất
+
+**State mới:** `let _mediaFocusedFileId = null;`
+
+```js
+document.addEventListener('keydown', (e) => {
+    const tabMedia = document.getElementById('tabMedia');
+    if (!tabMedia?.classList.contains('active')) return;
+    // Không bắt khi đang focus input/textarea
+    if (['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) return;
+
+    if (e.key === 'Delete' && _mediaFocusedFileId) deleteMediaFile(_mediaFocusedFileId);
+    if (e.key === 'F2' && _mediaFocusedFileId) { e.preventDefault(); renameMediaFile(_mediaFocusedFileId); }
+    if (e.key === 'Escape') {
+        closeLightbox(); // UX-5
+        document.getElementById('_mediaPreviewModal')?.remove();
+        document.getElementById('mediaPickerModal')?.remove();
+    }
+    if (e.key === 'a' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        _mediaBatchMode = true;
+        _mediaData.files.forEach(f => _mediaBatchSelected.add(f.id));
+        renderMediaLibrary();
+    }
+    // Lightbox nav (UX-5)
+    if (_lightboxIndex >= 0) {
+        if (e.key === 'ArrowLeft') lightboxPrev();
+        if (e.key === 'ArrowRight') lightboxNext();
+    }
+});
+```
+
+**Focus tracking:** Click card → `_mediaFocusedFileId = file.id` + highlight border.
+
+**Checklist:** `- [x] UX-9`
+
+---
+
+#### 🥈 UX-13: Desktop Notification
+
+**File:** `media-library.js` — sửa `pollConvertingVideos()`
+
+**Logic:** Khi video chuyển từ `converting` → `ready`:
+```js
+// Trong pollConvertingVideos() khi anyChanged === true:
+if (document.hidden && Notification.permission === 'granted') {
+    new Notification('✅ Video đã sẵn sàng', {
+        body: 'Video trong Kho Media đã convert xong',
+        icon: '/favicon.ico'
+    });
+}
+```
+
+**Request permission:** Khi user lần đầu upload video:
+```js
+if (Notification.permission === 'default') {
+    Notification.requestPermission();
+}
+```
+
+**Checklist:** `- [x] UX-13`
+
+---
+
+#### 🥉 UX-14: File Info Panel
+
+**File:** `media-library.js` — thêm hàm `showFileInfoPanel(fileId)`
+
+**Trigger:** Thêm action "ℹ️ Chi tiết" vào `showFileActions()`
+
+**Panel content:** Modal hoặc slide-in panel bên phải:
+```
+ℹ️ Chi tiết file
+─────────────────
+Tên:    VXL HK1 2526_1.pdf
+Type:   PDF
+Size:   700 KB
+Upload: 08/04/2026 21:21
+Folder: Đề VXL Cuối Kỳ
+Status: ready
+Drive ID: 1CFPlMkpusKgcONtYbOL2IZDXWJuUtS1D
+URL:    /api/media/1CFPlMkpus...
+Full URL: https://domain.com/api/media/...
+
+[📋 Copy URL]  [📋 Copy Drive ID]
+```
+
+**Checklist:** `- [x] UX-14`
+
+---
+
+#### 🥉 UX-15: Right-click Context Menu
+
+**File:** `media-library.js`
+
+**Logic:** Thêm `oncontextmenu` vào `renderMediaCard()`:
+```js
+oncontextmenu="event.preventDefault();event.stopPropagation();showContextMenu(event,'${file.id}')"
+```
+
+**Hàm `showContextMenu(event, fileId)`:** Tạo popup tại `event.clientX, event.clientY`:
+- 👁 Xem trước
+- 📋 Copy URL
+- ✏️ Đổi tên
+- 📂 Chuyển thư mục
+- ℹ️ Chi tiết
+- 🗑 Xóa (đỏ)
+
+**Auto close:** Click anywhere hoặc Esc.
+
+**Checklist:** `- [x] UX-15`
+
+---
+
+#### 🥉 UX-16: Recent Files
+
+**File:** `media-library.js` — sửa `renderMediaLibrary()`
+
+**Logic:** Khi `_mediaSelectedFolder === null` (tất cả) và không search → hiện section "Gần đây":
+```js
+const recentFiles = [...files].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+// Render: horizontal scroll row trên grid
+```
+
+**UI:** Row ngang, scroll horizontal, card nhỏ hơn (120px wide).
+
+**Checklist:** `- [x] UX-16`
+
+---
+
+#### 🥉 UX-17: Tag/Label System
+
+**Backend:** Thêm field `tags: []` vào mỗi file trong `media.json`
+**API mới:** `PATCH /api/admin/media/files/:id/tags` → `{ tags: ["Đề thi", "HK1"] }`
+
+**Frontend:**
+- Tag input trong file edit modal
+- Filter toolbar: tag chips, click = filter
+- Preset tags: "Đề thi", "Bài giảng", "Đáp án", "HK1", "HK2", "CLC"
+
+**Checklist:** `- [x] UX-17`
+
+---
+
+#### 🥉 UX-18: File Protection (View-only / Downloadable)
+
+**Backend `routes/media-library.js`:**
+- Thêm field `protection: "downloadable"` (default) vào file record khi upload
+- API mới: `PATCH /api/admin/media/files/:id/protection` → `{ protection: "view-only" }`
+- Proxy route `GET /api/media/:fileId`:
+  - `view-only`: `Content-Disposition: inline`, `Cache-Control: no-store`
+  - `downloadable`: `Content-Disposition: attachment`, `Cache-Control: public, max-age=86400`
+
+**Frontend:**
+- Action menu: thêm "🔒 Chỉ xem" / "📥 Cho tải" toggle
+- Hiện badge 🔒 trên card nếu `protection === 'view-only'`
+- Preview modal: nếu view-only → ẩn nút Download
+
+**Checklist:** `- [x] UX-18`
+
+---
+
+#### 🥉 UX-19: Custom Media Viewer
+
+**Video:** Giữ **Drive iframe** (KHÔNG đổi sang HTML5 `<video>`)
+- Lý do: bảo vệ cao + Google CDN nhanh
+- Wrapper CSS responsive: `aspect-ratio` per ratio
+- Admin chọn aspect ratio khi edit file: 16:9 (default), 9:16, 4:3, 1:1
+- Lưu `aspectRatio` vào `media.json`
+- CSS per ratio:
+  - `16:9`: `width:100%; aspect-ratio:16/9`
+  - `9:16`: `max-width:360px; aspect-ratio:9/16; margin:0 auto`
+  - `4:3`: `width:100%; aspect-ratio:4/3`
+  - `1:1`: `max-width:500px; aspect-ratio:1/1; margin:0 auto`
+
+**Ảnh view-only:**
+- `pointer-events:none` trên `<img>`
+- Transparent overlay div (chặn right-click + drag)
+- CSS watermark `::after` (tên HS nếu có, hoặc tên trường)
+
+**PDF:**
+- `view-only`: `https://drive.google.com/file/d/DRIVE_ID/preview` (không tải được)
+- `downloadable`: `/api/media/DRIVE_FILE_ID` + nút 📥 Tải xuống
+
+**Backend `routes/media-library.js`:**
+- Thêm field `aspectRatio` vào file record (default `"16:9"`)
+- API: `PATCH /api/admin/media/files/:id` → accept `{ aspectRatio: "9:16" }`
+
+**Checklist:** `- [x] UX-19`
+
+---
+
+#### ⏳ Để sau (effort lớn):
+
+- [ ] **Thumbnail generation**: ffmpeg screenshot frame cho video
+- [ ] **Image editor**: Crop/rotate/annotate inline
+- [ ] **Share link**: Link chia sẻ có thời hạn
+- [ ] **AI Auto-organize**: AI đọc tên file → đề xuất folder
+
