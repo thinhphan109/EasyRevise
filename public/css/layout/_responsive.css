@@ -1,0 +1,92 @@
+/* ========================================
+   EasyRevise — Responsive
+   @media queries, .hide-mobile, .hide-desktop
+   ======================================== */
+
+/* ── Breakpoint variables (for reference) ──
+   --screen-sm: 640px
+   --screen-md: 768px
+   --screen-lg: 1024px
+   --screen-xl: 1280px
+*/
+
+/* ── Visibility utilities ── */
+/* Show on mobile only (below 768px) */
+.show-mobile { display: none !important; }
+@media (max-width: 767px) {
+    .show-mobile { display: initial !important; }
+}
+
+/* Hide on mobile (below 768px) */
+.hide-mobile { display: initial; }
+@media (max-width: 767px) {
+    .hide-mobile { display: none !important; }
+}
+
+/* Hide on desktop (768px+) */
+@media (min-width: 768px) {
+    .hide-desktop { display: none !important; }
+}
+
+/* ── Mobile responsive adjustments ── */
+@media (max-width: 640px) {
+    h1 { font-size: var(--text-2xl); }
+    h2 { font-size: var(--text-xl); }
+
+    .container {
+        padding: 0 var(--space-4);
+    }
+
+    .container-page {
+        padding: var(--space-4) var(--space-4);
+    }
+
+    .site-header {
+        padding: var(--space-4) 0;
+    }
+
+    .site-header h1 {
+        font-size: var(--text-xl);
+    }
+
+    .btn {
+        padding: 0.6rem 1rem;
+        font-size: var(--text-sm);
+    }
+
+    .question-container {
+        padding: var(--space-5);
+    }
+
+    /* Stack grid to single column */
+    .exam-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .grid-cols-2,
+    .grid-cols-3,
+    .grid-cols-4 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Tablet adjustments ── */
+@media (min-width: 641px) and (max-width: 1023px) {
+    .grid-cols-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .grid-cols-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ── QR button: mobile only ── */
+#qrScanBtn {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    #qrScanBtn {
+        display: inline-flex;
+    }
+}

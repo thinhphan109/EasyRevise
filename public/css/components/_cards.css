@@ -1,0 +1,74 @@
+/* ========================================
+   EasyRevise — Card System
+   .card, .card-glass, .card-accent
+   ======================================== */
+
+/* ── Standard card ── */
+.card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    transition: all var(--duration-normal) var(--ease-out);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Legacy alias */
+.glass-panel {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+/* ── Hoverable card ── */
+.card-hover:hover,
+.card-interactive:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-border-hover);
+}
+
+/* ── Glass card (overlays, hero) ── */
+.card-glass {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-md), var(--glass-highlight);
+}
+
+/* ── Accent top border (exam cards) ── */
+.card-accent::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-card);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+/* ── Card padding variants ── */
+.card-sm { padding: var(--space-4); }
+.card-md { padding: var(--space-6); }
+.card-lg { padding: var(--space-8); }
+
+/* ── Card with header ── */
+.card-header {
+    padding: var(--space-4) var(--space-6);
+    border-bottom: 1px solid var(--color-border);
+    font-weight: 600;
+}
+
+.card-body {
+    padding: var(--space-6);
+}
+
+.card-footer {
+    padding: var(--space-4) var(--space-6);
+    border-top: 1px solid var(--color-border);
+}

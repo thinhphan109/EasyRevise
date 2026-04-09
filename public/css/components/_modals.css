@@ -1,0 +1,109 @@
+/* ========================================
+   EasyRevise — Modal System
+   .modal-overlay, .modal-box, .modal-header
+   ======================================== */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--z-modal-backdrop);
+    padding: var(--space-4);
+    animation: fadeIn 0.2s ease;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-box {
+    width: 90%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-xl);
+    animation: scaleIn 0.25s var(--ease-spring);
+}
+
+.modal-box-sm { max-width: 380px; }
+.modal-box-lg { max-width: 640px; }
+
+.modal-header {
+    padding: var(--space-6) var(--space-6) var(--space-4);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.modal-header h3 {
+    font-weight: 700;
+    font-size: var(--text-lg);
+}
+
+.modal-body {
+    padding: 0 var(--space-6) var(--space-6);
+}
+
+.modal-footer {
+    padding: var(--space-4) var(--space-6);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-3);
+}
+
+/* ── Close button ── */
+.modal-close {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    font-size: 1.1rem;
+    color: var(--color-text-muted);
+    transition: all var(--duration-fast);
+    flex-shrink: 0;
+}
+
+.modal-close:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+/* ── Auth modal (backward compat) ── */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--z-modal);
+    padding: var(--space-4);
+}
+
+.auth-modal.active {
+    display: flex;
+}
+
+.auth-box {
+    width: 90%;
+    max-width: 420px;
+    padding: var(--space-10);
+    border-radius: var(--radius-2xl);
+    animation: scaleIn 0.2s var(--ease-out);
+}
