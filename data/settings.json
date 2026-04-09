@@ -1,7 +1,10 @@
 {
   "adminPin": "123456",
   "pinSessionHours": 3,
-  "siteName": "EasyRevise",
-  "siteDescription": "Hệ thống ôn tập đề cương thông minh",
-  "codeExpireHours": 1
+  "siteName": "*Sivuong.vn*",
+  "siteDescription": "**Học để tô lên độ sĩ của mình**",
+  "codeExpireHours": 1,
+  "generateModel": "",
+  "gradeModel": "",
+  "ocrModel": ""
 }
