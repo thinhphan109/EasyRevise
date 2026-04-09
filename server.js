@@ -76,8 +76,11 @@ app.use('/api/admin', aiToolsRouter);           // /api/admin/ocr
 // explain-wrong needs :examId param — register with exported handler
 app.post('/api/exams/:examId/explain-wrong', aiToolsRouter.explainWrongHandler);
 
-// Media Upload
+// Media Upload (legacy local)
 app.use('/api', require('./routes/media'));
+
+// Media Library (Google Drive)
+app.use('/api', require('./routes/media-library'));
 
 // History + Admin PIN
 app.use('/api', require('./routes/history'));

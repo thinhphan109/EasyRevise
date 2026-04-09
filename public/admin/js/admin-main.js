@@ -60,7 +60,7 @@ function adminLogout() { localStorage.removeItem('easyrevise_token'); localStora
 
 // Tabs
 function switchTab(tab) {
-    const tabs = ['exams', 'users', 'subjects', 'codeLogs', 'submissions', 'questionBank', 'settings', 'aiGen', 'help'];
+    const tabs = ['exams', 'users', 'subjects', 'codeLogs', 'submissions', 'questionBank', 'settings', 'aiGen', 'help', 'media'];
     document.querySelectorAll('.tab-item').forEach((t, i) => { t.classList.toggle('active', tabs[i] === tab); });
     tabs.forEach(t => { const el = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)); if (el) el.classList.toggle('active', t === tab); });
     if (tab === 'exams') { showView('viewExamList'); loadExamList(); }
@@ -79,6 +79,7 @@ function switchTab(tab) {
     } else { if (window._submissionsInterval) { clearInterval(window._submissionsInterval); window._submissionsInterval = null; } }
     if (tab === 'questionBank') loadQuestionBank();
     if (tab === 'settings') loadSettings();
+    if (tab === 'media') { loadMedia(); setupMediaDropZone(); }
     if (tab === 'aiGen') {
         const btn = document.getElementById('aiGenerateBtn'); const loading = document.getElementById('aiLoading');
         if (btn && btn.disabled) {

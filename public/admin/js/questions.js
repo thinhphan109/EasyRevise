@@ -6,7 +6,7 @@ function showAddQuestionModal() {
     editingQuestionId = null; questionImageUrl = null; explanationImageUrl = null; fillBlanks = [];
     questionImages = []; optionImages = [null, null, null, null]; explanationImages = [];
     document.getElementById('modalQuestionTitle').textContent = 'Thêm câu hỏi';
-    ['inputQuestionText', 'inputOptA', 'inputOptB', 'inputOptC', 'inputOptD', 'inputExplanation', 'inputExpansion', 'inputFreeformAnswer', 'inputQuestionVideo', 'inputExplanationVideo'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    ['inputQuestionText', 'inputOptA', 'inputOptB', 'inputOptC', 'inputOptD', 'inputExplanation', 'inputExpansion', 'inputFreeformAnswer', 'inputQuestionVideo', 'inputExplanationVideo', 'inputQuestionAttachment'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     document.querySelector('input[name="correctOpt"][value="0"]').checked = true;
     document.getElementById('questionImageImg').style.display = 'none'; document.getElementById('questionImagePreview').textContent = '';
     document.getElementById('explanationImageImg').style.display = 'none'; document.getElementById('explanationImagePreview').textContent = '';
@@ -60,6 +60,8 @@ function editQuestion(qId) {
     explanationImageUrl = q.explanationImage || null;
     if (explanationImageUrl) { document.getElementById('explanationImageImg').src = explanationImageUrl; document.getElementById('explanationImageImg').style.display = 'block'; } else { document.getElementById('explanationImageImg').style.display = 'none'; }
     document.getElementById('inputExplanationVideo').value = q.explanationVideo || '';
+    const attachEl = document.getElementById('inputQuestionAttachment');
+    if (attachEl) attachEl.value = q.attachment || '';
     document.getElementById('ocrPreviewImg').style.display = 'none';
     questionImages = Array.isArray(q.images) ? [...q.images] : [];
     optionImages = Array.isArray(q.optionImages) ? [...q.optionImages] : [null, null, null, null];
@@ -273,7 +275,8 @@ async function saveQuestion() {
         showExplanation: document.getElementById('toggleShowExplanation').checked,
         showExpansion: document.getElementById('toggleShowExpansion').checked,
         explanationImage: explanationImageUrl,
-        explanationVideo: document.getElementById('inputExplanationVideo').value.trim() || null
+        explanationVideo: document.getElementById('inputExplanationVideo').value.trim() || null,
+        attachment: document.getElementById('inputQuestionAttachment')?.value?.trim() || null
     };
     if (currentSectionType === 'fill-in-blank') {
         body.type = 'fill-in-blank';
