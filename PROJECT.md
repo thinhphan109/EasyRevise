@@ -2,7 +2,7 @@
 
 > **⚠️ FILE NÀY ĐƯỢC TỰ ĐỘNG CẬP NHẬT BỞI AI AGENT**
 > Mỗi khi có thay đổi code, agent PHẢI cập nhật file này.
-> Last updated: 2026-04-08T05:00+07:00
+> Last updated: 2026-04-09T06:40+07:00
 
 ---
 
@@ -32,12 +32,15 @@ EasyRevise/
 ├── .env                   # API keys, SDK config
 ├── package.json           # Dependencies
 │
-├── lib/                   # 🆕 Shared backend modules
+├── lib/                   # Shared backend modules
 │   ├── data.js            # read/write JSON helpers (82L)
 │   ├── auth.js            # middleware + rate limit + token (52L)
-│   └── backup.js          # daily auto-backup (34L)
+│   ├── backup.js          # daily auto-backup (34L)
+│   ├── drive.js           # Google Drive API integration
+│   ├── ai-helpers.js      # AI SDK abstraction (dual SDK)
+│   └── validate.js        # Input validation helpers
 │
-├── routes/                # 🆕 Express Router modules (17 files, 2225L total)
+├── routes/                # Express Router modules (18 files)
 │   ├── auth.js            # register, login, me (53L)
 │   ├── users.js           # CRUD users (53L)
 │   ├── subjects.js        # CRUD subjects (39L)
@@ -52,6 +55,7 @@ EasyRevise/
 │   ├── ai-generate.js     # AI exam gen + extract QB + cache (508L)
 │   ├── ai-tools.js        # OCR + explain-wrong (165L)
 │   ├── media.js           # image upload multer (33L)
+│   ├── media-library.js   # 🆕 Google Drive media library (30L)
 │   ├── stats.js           # code-logs + CSV + exam stats (126L)
 │   ├── settings.js        # settings + site-info (32L)
 │   └── history.js         # exam history + admin PIN (36L)
@@ -73,7 +77,7 @@ EasyRevise/
 │   ├── admin/
 │   │   ├── index.html     # Admin panel HTML
 │   │   ├── admin.js       # (legacy backup — NOT loaded)
-│   │   └── js/            # 🆕 Admin panel modules (16 files, 1922L total)
+│   │   └── js/            # Admin panel modules (17 files)
 │   │       ├── helpers.js         # State vars, api(), renderMarkdown (102L)
 │   │       ├── admin-main.js      # Auth, tabs, init (115L)
 │   │       ├── exams.js           # Exam list + editor (178L)
@@ -89,7 +93,8 @@ EasyRevise/
 │   │       ├── latex-toolbar.js   # LaTeX toolbar (86L)
 │   │       ├── submissions.js     # Submissions + review (168L)
 │   │       ├── stats.js           # Stats + code logs (140L)
-│   │       └── question-bank.js   # Question bank UI (100L)
+│   │       ├── question-bank.js   # Question bank UI (100L)
+│   │       └── media-library.js   # 🆕 Media library UI (Drive)
 │   │
 │   ├── css/style.css      # Main stylesheet
 │   ├── js/
@@ -100,13 +105,17 @@ EasyRevise/
 │       ├── ai-images/     # AI-cropped images
 │       └── submissions/   # Student essay uploads
 │
+├── README.md              # 🆕 Project README
+├── LICENSE                # 🆕 MIT License
 ├── PLAN_PHASE1-6.md       # Phase 1-6 plans (✅ all complete)
 ├── PLAN_BUGFIX.md         # Bug fix plan (✅ complete)
 ├── PLAN_ESSAY_FIX.md      # Essay fix plan (✅ complete)
 ├── PLAN_PHASE7.md         # Phase 7 plan (✅ COMPLETE — 21/21 tasks)
-├── PLAN_REFACTOR.md       # Refactor plan (✅ P1+P2 DONE, P3 docs pending)
-├── PLAN_PHASE8.md         # Phase 8 plan (🔲 Stabilization & Polish)
-├── PLAN_STORAGE.md        # Storage migration plan (🔲 not started)
+├── PLAN_REFACTOR.md       # Refactor plan (✅ COMPLETE)
+├── PLAN_PHASE8.md         # Phase 8 plan (✅ Security hardening done)
+├── PLAN_STORAGE.md        # Storage migration plan (✅ Phase 9A+9B done)
+├── PLAN_QUICKWINS.md      # Quick wins UX plan
+├── PLAN_UI_OVERHAUL.md    # 🆕 UI overhaul plan (🔲 in progress)
 │
 └── .agents/workflows/easyrevise.md  # Workflow for cross-conversation work
 ```
@@ -551,26 +560,34 @@ MONGODB_URI=mongodb+srv://...            # (installed but not used for primary d
 
 > 📄 **Chi tiết:** Xem [PLAN_REFACTOR.md](./PLAN_REFACTOR.md)
 
-### 🔲 Phase 8 — Stabilization & Polish (chưa bắt đầu)
-**6 bước, ~8 giờ:**
-
-- [ ] Runtime test — verify 6 flows chính sau refactor
-- [ ] XSS Protection — sanitize user input toàn bộ (admin + student)
-- [ ] Archive cleanup — dọn legacy files (admin.js cũ, seed.js, etc.)
-- [ ] AI Helpers — centralize SDK config vào `lib/ai-helpers.js`
-- [ ] Input Validation — validate data types, ranges, URL formats
-- [ ] Test Suite — ~20 automated tests (data, auth, grading, validation)
+### ✅ Phase 8 — Stabilization & Security (Hoàn thành 2026-04-08)
+- [x] Runtime test — verify 6 flows chính sau refactor
+- [x] Password hashing — pbkdf2 (thay simpleHash)
+- [x] Token expiry — 24h auto-expire
+- [x] Rate limiting — login + API
+- [x] Input validation — `lib/validate.js`
+- [x] Test suite — 20+ tests (ai-helpers, grading, validate)
 
 > 📄 **Chi tiết:** Xem [PLAN_PHASE8.md](./PLAN_PHASE8.md)
 
-### 🔲 Storage Migration — (chưa bắt đầu, thực hiện sau Phase 7)
-- Tự động upload ảnh/PDF lên Google Drive (admin không cần can thiệp)
-- Video watcher: bỏ file .ts/.m3u8 vào folder `pending/` → tự convert .mp4 → tự lên Drive
-- Proxy route `/api/file/:id` → serve file từ Drive qua server (có cache RAM)
-- Migration script: chuyển file cũ từ /uploads/ lên Drive (chạy 1 lần)
-- VPS chỉ làm nơi xử lý tạm, không lưu file vĩnh viễn
+### ✅ Phase 9 — Storage Migration (Hoàn thành 2026-04-09)
+**Phase 9A:** Google Drive integration — upload, proxy, metadata
+**Phase 9B:** 17 UX improvements cho Media Library
+- [x] Drive upload + proxy serve
+- [x] Media library UI (grid/list, tags, protection, bulk ops)
+- [x] Clipboard paste, drag-drop, duplicate detection
+- [x] Lightbox, responsive viewer, aspect ratio
 
 > 📄 **Chi tiết:** Xem [PLAN_STORAGE.md](./PLAN_STORAGE.md)
+
+### 🔲 UI Overhaul — (đang plan, branch `feature/ui-overhaul`)
+- [ ] File restructure: tách monolith HTML/CSS/JS → modular
+- [ ] Design system: Clean + Liquid Glass, dark mode
+- [ ] Student Dashboard
+- [ ] Admin settings upgrade
+- [ ] Cross-platform optimization
+
+> 📄 **Chi tiết:** Xem [PLAN_UI_OVERHAUL.md](./PLAN_UI_OVERHAUL.md)
 
 ---
 
@@ -586,6 +603,13 @@ MONGODB_URI=mongodb+srv://...            # (installed but not used for primary d
 | Video hosting | Kế hoạch: tự convert .ts/.m3u8 → .mp4 bằng ffmpeg → lưu Drive |
 | AI Explain limit | Mặc định tắt (0). Giáo viên tự bật per đề/mã, giới hạn lần dùng để tránh spam token |
 | Architecture | Modular: server.js entry → routes/ + lib/ ; admin panel → js/ modules (post-refactor 2026-04-08) |
+| Storage backend | ✅ Google Drive (Drive API + service account + proxy serve) |
+| Video hosting | Drive iframe (DRM) hoặc HTML5 qua proxy route |
+| AI Explain limit | Mặc định tắt (0). Giáo viên tự bật per đề/mã |
+| Architecture | Modular: server.js entry → routes/ + lib/ ; admin panel → js/ modules |
+| UI Direction | Style C: Clean solid + Liquid Glass (hover/modal/dark). No gradient |
+| Framework | Vanilla JS — không React/Vite/Tailwind. Tổ chức file chuẩn enterprise |
+|
 
 ---
 
@@ -615,4 +639,13 @@ MONGODB_URI=mongodb+srv://...            # (installed but not used for primary d
 | **2026-03-27T02:59** | **Phase 5 ✅ hoàn thành:** autoGrade, toggles, sub-parts, blank markers, CSV, Stats |
 | **2026-03-26** | **Phase 2-4 ✅ hoàn thành.** AI pipeline, upload, grading, security, backup |
 | 2026-03-25 | Phase 1 ✅. Model selector, streaming fix, multi-image, OCR, notifications |
-| 2026-03-23-24 | Initial release: AI exam generator, dual SDK, admin panel, student UI |
+| 2026-03-23-24 | Initial release: AI exam generator, dual SDK, admin panel, student UI | **2026-04-09** | **README.md + LICENSE created.** PROJECT.md updated. Branch `feature/ui-overhaul` created. PLAN_UI_OVERHAUL.md 7 phần (file structure, design, dark mode, cross-platform, features, dashboard, admin settings) |
+| **2026-04-09** | **Phase 9B ✅ COMPLETE (17/17):** Media library UX (paste, drag-drop, grid/list, toast, lightbox, breadcrumb, pagination, keyboard, duplicate detect, notifications, file info, context menu, recent files, tags, protection, responsive viewer) |
+| **2026-04-08** | **Phase 9A ✅:** Google Drive integration (upload, proxy, metadata, migration script) |
+| **2026-04-08** | **Phase 8 ✅:** Security hardening (pbkdf2, token expiry, rate limit, validation, 20+ tests) |
+| **2026-04-08** | **Refactor ✅:** server.js 2378→113L. admin.js→17 modules |
+| **2026-04-08** | **Phase 7 ✅ (21/21):** Fill-blank upgrade, Print, Question Bank, Drag&Drop, etc. |
+| **2026-03-27** | **Phase 5-6 ✅ + Bug Fixes ✅:** autoGrade, toggles, QR, LaTeX toolbar, AI explain, crash guard, security |
+| **2026-03-26** | **Phase 2-4 ✅:** AI pipeline, upload, grading, security, backup, KaTeX |
+| **2026-03-25** | **Phase 1 ✅:** Multi-image, OCR, notifications, model selector |
+| **2026-03-23** | Initial release: AI exam generator, dual SDK, admin panel, student UI |

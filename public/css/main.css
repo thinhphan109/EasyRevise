@@ -1,0 +1,26 @@
+/* ========================================
+   EasyRevise — main.css
+   Master entry point: imports all CSS modules
+   ======================================== */
+
+/* ── 1. Base: Reset & Foundations ── */
+@import url('./base/_reset.css');
+@import url('./base/_tokens.css');
+@import url('./base/_typography.css');
+@import url('./base/_animations.css');
+@import url('./base/_dark-mode.css');
+
+/* ── 2. Components: Reusable UI ── */
+@import url('./components/_buttons.css');
+@import url('./components/_cards.css');
+@import url('./components/_modals.css');
+@import url('./components/_forms.css');
+@import url('./components/_badges.css');
+@import url('./components/_toasts.css');
+@import url('./components/_skeleton.css');
+@import url('./components/_progress.css');
+
+/* ── 3. Layout: Structure ── */
+@import url('./layout/_grid.css');
+@import url('./layout/_header.css');
+@import url('./layout/_responsive.css');
