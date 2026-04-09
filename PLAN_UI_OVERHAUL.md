@@ -3,7 +3,7 @@
 > **Branch:** `feature/ui-overhaul`
 > **Ngày tạo:** 2026-04-09
 > **Mục tiêu:** Chuyển EasyRevise từ project nhỏ → nền tảng chuyên nghiệp cấp Coursera/Notion
-> **Trạng thái:** 🔲 Đang plan
+> **Trạng thái:** 🟡 Đang implement — Steps 1-3, 10 done
 > **Quyết định:** ✅ **Vanilla JS (Option A)** — tổ chức lại file, KHÔNG dùng framework/bundler
 > Lý do: 4 trang, <100 users, Express backend giữ nguyên, dễ maintain, deploy đơn giản
 
@@ -418,6 +418,7 @@ Dark mode test all pages
 | 2026-04-09 | Tạo plan UI Overhaul. Branch `feature/ui-overhaul`. Phần 1-5 hoàn tất |
 | 2026-04-09 | Quyết định: Vanilla JS Option A. Không dùng React/Vite/Tailwind/Next.js |
 | 2026-04-09 | Style C (Mixed: Clean + Liquid Glass selective). Không gradient. Không PWA. Thêm Student Dashboard |
+| 2026-04-09 | ✅ **Step 1-3, 10 DONE**: CSS Foundation (5 base + 8 components + 3 layout + 3 pages = 19 files), Dark mode toggle + theme.js + toast.js. All 3 HTML pages migrated to main.css. Tất cả 21 files HTTP 200 verified |
 
 ---
 
@@ -966,22 +967,22 @@ Exam cards xuất hiện lần lượt với delay:
 
 ## 📋 TỔNG HỢP — Thứ tự thực hiện
 
-| # | Step | Effort | Nội dung |
-|---|---|---|---|
-| 1 | CSS Foundation | 2h | `_reset`, `_tokens`, `_typography`, `_dark-mode`, `_animations` |
-| 2 | CSS Components | 1.5h | `_buttons`, `_cards`, `_modals`, `_forms`, `_badges`, glass effects |
-| 3 | CSS Layout + Pages | 1h | `_grid`, `_header`, `_responsive`, `home.css`, `exam.css`, `result.css` |
-| 4 | JS Core + Components | 2h | `api`, `auth`, `utils`, `store`, `modal`, `toast`, `theme` |
-| 5 | Tách index.html | 2h | HTML skeleton + 6 JS files home/ |
-| 6 | Tách app.js | 2h | 10 JS files exam/ |
-| 7 | Tách result.js | 1.5h | 6 JS files result/ |
-| 8 | Assets (fonts + icons) | 1h | Self-host Inter, SVG sprite |
-| 9 | Admin CSS cleanup | 1h | Tách inline CSS, dùng chung components |
-| 10 | Dark mode | 1h | Toggle, localStorage, Liquid Glass dark |
-| 11 | Animations + Polish | 1h | Stagger, score count-up, glass hover |
-| 12 | Cross-platform | 1h | Swipe, safe area, landscape, haptic |
-| 13 | Student Dashboard | 2h | Trang /dashboard.html + API + UI |
-| 14 | QA + Testing | 1h | All browsers, mobile, dark mode, perf |
+| # | Step | Effort | Nội dung | Status |
+|---|---|---|---|---|
+| 1 | CSS Foundation | 2h | `_reset`, `_tokens`, `_typography`, `_dark-mode`, `_animations` | ✅ DONE |
+| 2 | CSS Components | 1.5h | `_buttons`, `_cards`, `_modals`, `_forms`, `_badges`, `_toasts`, `_skeleton`, `_progress` | ✅ DONE |
+| 3 | CSS Layout + Pages | 1h | `_grid`, `_header`, `_responsive`, `home.css`, `exam.css`, `result.css` | ✅ DONE |
+| 4 | JS Core + Components | 2h | `api`, `auth`, `utils`, `store`, `modal`, `toast`, `theme` | 🟡 toast + theme DONE, core pending |
+| 5 | Tách index.html | 2h | HTML skeleton + 6 JS files home/ | 🔲 Pending |
+| 6 | Tách app.js | 2h | 10 JS files exam/ | 🔲 Pending |
+| 7 | Tách result.js | 1.5h | 6 JS files result/ | 🔲 Pending |
+| 8 | Assets (fonts + icons) | 1h | Self-host Inter, SVG sprite | 🔲 Pending |
+| 9 | Admin CSS cleanup | 1h | Tách inline CSS, dùng chung components | 🔲 Pending |
+| 10 | Dark mode | 1h | Toggle, localStorage, Liquid Glass dark | ✅ DONE |
+| 11 | Animations + Polish | 1h | Stagger, score count-up, glass hover | 🔲 Pending |
+| 12 | Cross-platform | 1h | Swipe, safe area, landscape, haptic | 🔲 Pending |
+| 13 | Student Dashboard | 2h | Trang /dashboard.html + API + UI | 🔲 Pending |
+| 14 | QA + Testing | 1h | All browsers, mobile, dark mode, perf | 🔲 Pending |
 | | **Tổng** | **~20h** | |
 
 ---
