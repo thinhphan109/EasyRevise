@@ -1,0 +1,94 @@
+/* ========================================
+   EasyRevise — Toast System
+   .toast, .toast-stack, .toast-success/error/warning/info
+   ======================================== */
+
+.toast-stack {
+    position: fixed;
+    top: var(--space-4);
+    right: var(--space-4);
+    z-index: var(--z-toast);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    pointer-events: none;
+    max-width: 380px;
+    width: calc(100% - var(--space-8));
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    animation: slideInRight 0.3s var(--ease-spring), fadeIn 0.3s var(--ease-out);
+    pointer-events: auto;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    transition: all var(--duration-normal);
+}
+
+.toast-exit {
+    animation: fadeOut 0.2s var(--ease-out) forwards;
+}
+
+.toast-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.toast-message {
+    flex: 1;
+    color: var(--color-text);
+}
+
+.toast-close {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.toast-close:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+/* ── Semantic variants ── */
+.toast-success {
+    border-left: 4px solid var(--color-success);
+}
+
+.toast-error {
+    border-left: 4px solid var(--color-error);
+}
+
+.toast-warning {
+    border-left: 4px solid var(--color-warning);
+}
+
+.toast-info {
+    border-left: 4px solid var(--color-info);
+}
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+    .toast-stack {
+        top: auto;
+        bottom: var(--space-4);
+        right: var(--space-4);
+        left: var(--space-4);
+        max-width: none;
+        width: auto;
+    }
+}

@@ -1,18 +1,23 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-theme="light">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EasyRevise - Ôn Tập Đề Cương </title>
+    <title>EasyRevise — Ôn Tập Đề Cương</title>
     <meta name="description"
         content="Hệ thống ôn tập hiệu quả với đề cương chi tiết, chấm điểm tự động và lời giải mở rộng.">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+
+    <!-- Theme: apply before render to prevent flash -->
+    <script>
+        (function(){var t=localStorage.getItem('easyrevise_theme')||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();
+    </script>
+
+    <!-- CSS: New modular system -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/pages/home.css">
+
+    <!-- Vendors: KaTeX -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
@@ -269,21 +274,23 @@
 </head>
 
 <body>
-    <div class="container">
-        <header style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <div class="container container-page">
+        <header class="site-header">
             <div>
                 <h1>EasyRevise</h1>
-                <p class="subtitle" style="margin-bottom: 0;">Hệ thống ôn tập đề cương Tiếng Anh thông minh</p>
+                <p class="subtitle" style="margin-bottom: 0;">Hệ thống ôn tập đề cương thông minh</p>
             </div>
             <div class="user-bar">
-                <button id="qrScanBtn" class="btn"
-                    style="background:#eff6ff;color:#1d4ed8;font-size:0.85rem;padding:0.4rem 0.8rem;"
-                    onclick="openQRScanner()">📷 Quét QR</button>
-                <button class="btn" style="background:#fffbeb;color:#92400e;font-size:0.85rem;padding:0.4rem 0.8rem;"
-                    onclick="openReviewByCodeModal()">📋 Xem lại bằng mã</button>
+                <button id="themeToggle" class="btn btn-icon btn-ghost" onclick="toggleTheme()" title="Đổi giao diện">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                </button>
+                <button id="qrScanBtn" class="btn btn-sm btn-ghost"
+                    style="background:#eff6ff;color:#1d4ed8;"
+                    onclick="openQRScanner()">📷 <span class="hide-mobile">Quét QR</span></button>
+                <button class="btn btn-sm btn-ghost" style="background:#fffbeb;color:#92400e;"
+                    onclick="openReviewByCodeModal()">📋 <span class="hide-mobile">Xem lại bằng mã</span></button>
                 <div id="authArea">
-                    <button class="btn"
-                        style="background: var(--primary-light); color: var(--primary); font-size: 0.9rem;"
+                    <button class="btn btn-ghost"
                         onclick="openAuthModal()">Đăng nhập</button>
                 </div>
             </div>
@@ -1155,6 +1162,10 @@
             }
         }
     </script>
+
+    <!-- Theme & Toast components -->
+    <script src="/js/components/theme.js"></script>
+    <script src="/js/components/toast.js"></script>
 
 </body>
 

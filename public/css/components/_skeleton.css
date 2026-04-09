@@ -1,0 +1,60 @@
+/* ========================================
+   EasyRevise — Skeleton Loading
+   .skeleton, .skeleton-card, .skeleton-text
+   ======================================== */
+
+.skeleton-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-6);
+    min-height: 180px;
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton-line {
+    height: 14px;
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-3);
+    background: linear-gradient(90deg, var(--color-border) 25%, var(--color-surface-hover) 50%, var(--color-border) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+.skeleton-line.w80 { width: 80%; height: 18px; margin-bottom: var(--space-4); }
+.skeleton-line.w60 { width: 60%; }
+.skeleton-line.w50 { width: 50%; height: 12px; }
+.skeleton-line.w40 { width: 40%; }
+.skeleton-line.w30 { width: 30%; }
+
+.skeleton-btn {
+    width: 130px;
+    height: 38px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(90deg, var(--color-border) 25%, var(--color-surface-hover) 50%, var(--color-border) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    margin-top: var(--space-4);
+}
+
+/* ── Skeleton circle (avatar) ── */
+.skeleton-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(90deg, var(--color-border) 25%, var(--color-surface-hover) 50%, var(--color-border) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+/* ── Skeleton text block ── */
+.skeleton-text {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.skeleton-text .skeleton-line:last-child {
+    width: 70%;
+}

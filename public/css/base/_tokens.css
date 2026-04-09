@@ -1,0 +1,118 @@
+/* ========================================
+   EasyRevise — Design Tokens
+   Colors, spacing, radius, shadows, timing
+   ======================================== */
+
+:root {
+    /* ── Primary: Indigo (brand color) ── */
+    --color-primary: #6366f1;
+    --color-primary-hover: #4f46e5;
+    --color-primary-light: #eef2ff;
+    --color-primary-50: rgba(99,102,241,0.08);
+    --color-primary-glow: rgba(99,102,241,0.25);
+
+    /* ── Accent: Violet ── */
+    --color-accent: #8b5cf6;
+    --color-accent-light: #f5f3ff;
+
+    /* ── Semantic colors ── */
+    --color-success: #10b981;
+    --color-success-bg: #ecfdf5;
+    --color-error: #ef4444;
+    --color-error-bg: #fef2f2;
+    --color-warning: #f59e0b;
+    --color-warning-bg: #fffbeb;
+    --color-info: #3b82f6;
+    --color-info-bg: #eff6ff;
+
+    /* ── Neutral (Slate scale) ── */
+    --color-bg: #f8fafc;
+    --color-surface: #ffffff;
+    --color-surface-elevated: #ffffff;
+    --color-surface-hover: #f1f5f9;
+    --color-text: #0f172a;
+    --color-text-secondary: #475569;
+    --color-text-muted: #94a3b8;
+    --color-border: #e2e8f0;
+    --color-border-hover: #cbd5e1;
+    --color-input-bg: #f1f5f9;
+
+    /* ── Legacy aliases (backward compat with existing CSS) ── */
+    --primary: var(--color-primary);
+    --primary-light: var(--color-primary-light);
+    --primary-hover: var(--color-primary-hover);
+    --secondary: #ec4899;
+    --secondary-light: #fdf2f8;
+    --bg-body: var(--color-bg);
+    --bg-card: var(--color-surface);
+    --bg-input: var(--color-input-bg);
+    --text-main: var(--color-text);
+    --text-secondary: var(--color-text-secondary);
+    --text-muted: var(--color-text-muted);
+    --border: var(--color-border);
+    --border-hover: var(--color-border-hover);
+    --success: var(--color-success);
+    --success-bg: var(--color-success-bg);
+    --error: var(--color-error);
+    --error-bg: var(--color-error-bg);
+    --warning: var(--color-warning);
+    --warning-bg: var(--color-warning-bg);
+
+    /* ── Liquid Glass tokens (hover, modal, dark mode) ── */
+    --glass-bg: rgba(255,255,255,0.7);
+    --glass-blur: blur(16px) saturate(180%);
+    --glass-border: rgba(255,255,255,0.3);
+    --glass-highlight: inset 0 1px 0 rgba(255,255,255,0.5);
+
+    /* ── Spacing scale (4px base) ── */
+    --space-0: 0;
+    --space-1: 0.25rem;   /* 4px */
+    --space-2: 0.5rem;    /* 8px */
+    --space-3: 0.75rem;   /* 12px */
+    --space-4: 1rem;      /* 16px */
+    --space-5: 1.25rem;   /* 20px */
+    --space-6: 1.5rem;    /* 24px */
+    --space-8: 2rem;      /* 32px */
+    --space-10: 2.5rem;   /* 40px */
+    --space-12: 3rem;     /* 48px */
+    --space-16: 4rem;     /* 64px */
+
+    /* ── Border radius ── */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 20px;
+    --radius-2xl: 24px;
+    --radius-full: 9999px;
+    --radius: var(--radius-lg);  /* legacy alias */
+
+    /* ── Shadows ── */
+    --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    --shadow-lg: 0 12px 36px rgba(0,0,0,0.10);
+    --shadow-xl: 0 24px 60px rgba(0,0,0,0.14);
+    --shadow-primary: 0 4px 14px var(--color-primary-glow);
+    --shadow-accent: 0 4px 14px rgba(139,92,246,0.3);
+
+    /* ── Transitions ── */
+    --duration-fast: 150ms;
+    --duration-normal: 250ms;
+    --duration-slow: 400ms;
+    --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --transition: all 0.2s ease;  /* legacy alias */
+
+    /* ── Gradient (card accent only) ── */
+    --gradient-card: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+
+    /* ── Z-index scale ── */
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-fixed: 300;
+    --z-modal-backdrop: 900;
+    --z-modal: 1000;
+    --z-toast: 1100;
+    --z-tooltip: 1200;
+}

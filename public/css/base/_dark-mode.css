@@ -1,0 +1,84 @@
+/* ========================================
+   EasyRevise — Dark Mode
+   [data-theme="dark"] overrides
+   ======================================== */
+
+[data-theme="dark"] {
+    /* ── Neutral surface ── */
+    --color-bg: #0c1222;
+    --color-surface: #1a2332;
+    --color-surface-elevated: #243044;
+    --color-surface-hover: #2a3a4e;
+    --color-text: #e2e8f0;
+    --color-text-secondary: #94a3b8;
+    --color-text-muted: #64748b;
+    --color-border: #2d3f54;
+    --color-border-hover: #3d5068;
+    --color-input-bg: #1e2d3d;
+
+    /* ── Primary adjustments ── */
+    --color-primary-light: rgba(99,102,241,0.15);
+    --color-primary-50: rgba(99,102,241,0.1);
+
+    /* ── Semantic bg adjustments ── */
+    --color-success-bg: rgba(16,185,129,0.12);
+    --color-error-bg: rgba(239,68,68,0.12);
+    --color-warning-bg: rgba(245,158,11,0.12);
+    --color-info-bg: rgba(59,130,246,0.12);
+
+    /* ── Legacy aliases ── */
+    --bg-body: var(--color-bg);
+    --bg-card: var(--color-surface);
+    --bg-input: var(--color-input-bg);
+    --text-main: var(--color-text);
+    --text-secondary: var(--color-text-secondary);
+    --text-muted: var(--color-text-muted);
+    --border: var(--color-border);
+    --border-hover: var(--color-border-hover);
+    --secondary-light: rgba(236,72,153,0.12);
+    --success-bg: var(--color-success-bg);
+    --error-bg: var(--color-error-bg);
+    --warning-bg: var(--color-warning-bg);
+
+    /* ── Shadows (deeper in dark) ── */
+    --shadow-xs: 0 1px 2px rgba(0,0,0,0.2);
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.25);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.3);
+    --shadow-lg: 0 12px 36px rgba(0,0,0,0.35);
+    --shadow-xl: 0 24px 60px rgba(0,0,0,0.4);
+
+    /* ── Glass card in dark mode ── */
+    --glass-bg: rgba(26,35,50,0.8);
+    --glass-blur: blur(20px) saturate(180%);
+    --glass-border: rgba(255,255,255,0.08);
+    --glass-highlight: inset 0 1px 0 rgba(255,255,255,0.06);
+
+    color-scheme: dark;
+}
+
+/* ── Dark mode specific element overrides ── */
+[data-theme="dark"] .glass-panel {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+}
+
+[data-theme="dark"] .skeleton-line,
+[data-theme="dark"] .skeleton-btn {
+    background: linear-gradient(90deg, #243044 25%, #2a3a4e 50%, #243044 75%);
+    background-size: 200% 100%;
+}
+
+[data-theme="dark"] .passage-box {
+    background: rgba(254,252,232,0.06);
+    border-color: rgba(254,240,138,0.15);
+    color: var(--color-text);
+}
+
+[data-theme="dark"] .score-circle {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+}
+
+[data-theme="dark"] img {
+    opacity: 0.92;
+}
