@@ -6,7 +6,7 @@
       "passwordHash": "pbkdf2:82b3f318d18fe78e2a0b4e8bb0ff82bbabd92365c7f6e998183700f7eee62265:b198bbb679fdee81341bb6783af387d23042ea39366562ec8e929620dba8886bdf905665e8e27d3a723491e40ea36dc2364af51f511e175066196c84aaf60bd1",
       "displayName": "admin",
       "role": "admin",
-      "token": "ZjU3Zjc5MGYtYjYxNS00YTJmLWJiNmYtNGQ4MDQyMzEyZTA1OjE3NzU2OTEzNjI1Mzk6MjIxYmJkYTJlOTI3NjUzYWZjYjM3NzM3YjIwNzcwOGY=",
+      "token": "ZjU3Zjc5MGYtYjYxNS00YTJmLWJiNmYtNGQ4MDQyMzEyZTA1OjE3NzU2OTM5MDAwOTc6OWNjNDE4NjM3ZWJkODBlZmZhOTcxYWZjZTcyZGQ4MDA=",
       "history": [
         {
           "examId": "bada400e-ad01-4f0c-9bfa-edc9cc8ea287",
@@ -1587,7 +1587,7 @@
         }
       ],
       "createdAt": "2026-03-23T12:01:07.837Z",
-      "tokenExpiry": 1776296162540
+      "tokenExpiry": 1776298700097
     }
   ]
 }

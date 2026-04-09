@@ -107,9 +107,13 @@ app.use((err, req, res, next) => {
 });
 
 // Start
-app.listen(PORT, () => {
-    console.log(`\n  🚀 EasyRevise Server running at http://localhost:${PORT}`);
-    console.log(`  📝 Student:  http://localhost:${PORT}/`);
-    console.log(`  ⚙️  Admin:    http://localhost:${PORT}/admin\n`);
-    require('./lib/backup').startDailyBackup();
-});
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+    app.listen(PORT, () => {
+        console.log(`\n  🚀 EasyRevise Server running at http://localhost:${PORT}`);
+        console.log(`  📝 Student:  http://localhost:${PORT}/`);
+        console.log(`  ⚙️  Admin:    http://localhost:${PORT}/admin\n`);
+        require('./lib/backup').startDailyBackup();
+    });
+}
+
+module.exports = app;
