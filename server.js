@@ -85,6 +85,9 @@ app.use('/api', require('./routes/media-library'));
 // History + Admin PIN
 app.use('/api', require('./routes/history'));
 
+// Dashboard (Student)
+app.use('/api', require('./routes/dashboard'));
+
 // Settings
 app.use('/api', require('./routes/settings'));
 
@@ -107,13 +110,9 @@ app.use((err, req, res, next) => {
 });
 
 // Start
-if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
-    app.listen(PORT, () => {
-        console.log(`\n  🚀 EasyRevise Server running at http://localhost:${PORT}`);
-        console.log(`  📝 Student:  http://localhost:${PORT}/`);
-        console.log(`  ⚙️  Admin:    http://localhost:${PORT}/admin\n`);
-        require('./lib/backup').startDailyBackup();
-    });
-}
-
-module.exports = app;
+app.listen(PORT, () => {
+    console.log(`\n  🚀 EasyRevise Server running at http://localhost:${PORT}`);
+    console.log(`  📝 Student:  http://localhost:${PORT}/`);
+    console.log(`  ⚙️  Admin:    http://localhost:${PORT}/admin\n`);
+    require('./lib/backup').startDailyBackup();
+});

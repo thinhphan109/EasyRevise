@@ -1,12 +1,24 @@
 /* ========================================
    EasyRevise — Result Page Styles
-   Score circle, review items, explanations
+   Score circle, review items, explanations,
+   stat cards, AI grading banner
    ======================================== */
 
 /* ── Result Header ── */
 .result-header {
     text-align: center;
     margin-bottom: var(--space-10);
+}
+
+.result-header h1 {
+    font-size: 2rem;
+}
+
+/* ── Score Section ── */
+.score-section {
+    padding: 2.5rem;
+    text-align: center;
+    margin-bottom: 2rem;
 }
 
 /* ── Score Circle ── */
@@ -36,6 +48,122 @@
     font-size: var(--text-sm);
     color: var(--color-text-muted);
     margin-top: var(--space-1);
+}
+
+/* ── Result Stats Grid ── */
+.result-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.result-stat-item {
+    padding: 1rem;
+    border-radius: 16px;
+    text-align: center;
+}
+
+.result-stat-item--success { background: rgba(34, 197, 94, 0.1); }
+.result-stat-item--error   { background: rgba(239, 68, 68, 0.1); }
+.result-stat-item--warning { background: rgba(245, 158, 11, 0.1); }
+.result-stat-item--primary { background: rgba(99, 102, 241, 0.1); }
+
+[data-theme="dark"] .result-stat-item--success { background: rgba(34, 197, 94, 0.12); }
+[data-theme="dark"] .result-stat-item--error   { background: rgba(239, 68, 68, 0.12); }
+[data-theme="dark"] .result-stat-item--warning { background: rgba(245, 158, 11, 0.12); }
+[data-theme="dark"] .result-stat-item--primary { background: rgba(99, 102, 241, 0.12); }
+
+.result-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.result-stat-value--success { color: var(--color-success); }
+.result-stat-value--error   { color: var(--color-error); }
+.result-stat-value--warning { color: var(--color-warning); }
+.result-stat-value--primary { color: var(--color-primary); }
+
+.result-stat-label {
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-top: 0.25rem;
+}
+
+/* ── Result Actions ── */
+.result-actions {
+    margin-top: 3rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-back {
+    background: var(--color-surface-hover);
+    color: var(--color-text);
+}
+
+/* ── AI Grading Banner ── */
+.ai-grading-banner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.12));
+    border: 1px solid rgba(99,102,241,0.3);
+    border-radius: 16px;
+    margin-bottom: 1.5rem;
+}
+
+.ai-grading-spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid rgba(99,102,241,0.2);
+    border-top-color: var(--color-primary);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.ai-grading-text {
+    flex: 1;
+}
+
+.ai-grading-title {
+    font-weight: 700;
+    color: var(--color-primary);
+    margin-bottom: 0.2rem;
+}
+
+.ai-grading-subtitle {
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+}
+
+.ai-grading-timer {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.ai-grade-done-banner {
+    animation: slideUp 0.4s var(--ease-out);
+}
+
+/* ── Review Section ── */
+.review-section-title {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    color: var(--color-text);
+    font-weight: 700;
 }
 
 /* ── Review Items ── */
@@ -82,32 +210,13 @@
     font-size: var(--text-sm);
 }
 
-/* ── Result Stats Grid ── */
-.result-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: var(--space-4);
-    margin: var(--space-6) 0;
+/* ── Result Footer ── */
+.result-footer {
     text-align: center;
-}
-
-.result-stat-card {
-    padding: var(--space-4);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-}
-
-.result-stat-value {
-    font-size: var(--text-2xl);
-    font-weight: 800;
-    color: var(--color-primary);
-}
-
-.result-stat-label {
-    font-size: var(--text-xs);
+    margin-top: 4rem;
+    padding-bottom: 2rem;
     color: var(--color-text-muted);
-    margin-top: var(--space-1);
+    font-size: 0.875rem;
 }
 
 /* ── Mobile ── */
@@ -124,5 +233,13 @@
 
     .review-item {
         padding: var(--space-5);
+    }
+
+    .result-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .score-section {
+        padding: 1.5rem;
     }
 }

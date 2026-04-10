@@ -39,6 +39,7 @@ QW-5: Activation Code System         (~4 giờ)    — Batch mã, QR, auto-expir
 
 ### 1.3 Focus Indicators
 - [x] CSS focus ring cho buttons và inputs ✅ (`public/css/style.css` — focus-visible)
+- [x] focus-visible + :focus:not(:focus-visible) ✅ (`_crossplatform.css`)
 - [ ] Auto-focus input đầu tiên khi mở modal
 
 ---
@@ -70,18 +71,21 @@ QW-5: Activation Code System         (~4 giờ)    — Batch mã, QR, auto-expir
 - [x] Highlight các câu chưa làm (pills với số câu) ✅
 
 ### 3.3 Mobile Touch Improvements
-- [ ] Swipe left/right để chuyển câu (nếu hiện từng câu)
-- [x] Larger touch targets cho mobile ✅ (mobile-drawer with button nav)
+- [x] Swipe left/right để chuyển câu ✅ (`js/components/swipe.js` — UI Overhaul Step 12)
+- [x] Larger touch targets cho mobile ✅ (`_crossplatform.css` — 48px min per WCAG)
 - [x] Bottom navigation bar (Previous / Question Grid / Next) ✅ (mobile-drawer)
+- [x] Haptic feedback on swipe ✅ (navigator.vibrate)
+- [x] One-time swipe hint ✅ (localStorage flag)
 
 ### 3.4 Dark/Light Mode Toggle
-- [ ] Button toggle ở góc phải trên
-- [ ] Lưu preference vào localStorage
-- [ ] CSS variables cho dark mode (đang dùng sẵn nhiều variables rồi)
+- [x] Button toggle ở góc phải trên ✅ (`js/components/theme.js` — UI Overhaul Step 10)
+- [x] Lưu preference vào localStorage ✅
+- [x] CSS variables cho dark mode ✅ (`_dark-mode.css` — 32 vars)
+- [x] System auto-detect ✅ (prefers-color-scheme)
 
 ### 3.5 Timer Cải Tiến
 - [x] Hiện timer mm:ss format ✅
-- [x] Đổi màu khi < 5 phút (vàng), < 1 phút (đỏ nhấp nháy) ✅ (app.js:260-271 + exam.html CSS animations)
+- [x] Đổi màu khi < 5 phút (vàng), < 1 phút (đỏ nhấp nháy) ✅ (app.js:260-271 + exam.css animations)
 - [ ] Sound alert khi hết giờ (optional)
 
 ---
@@ -202,3 +206,4 @@ Student mở trang → Nhập mã kích hoạt
 | 2026-04-08 | Tạo plan Quick Wins — 5 nhóm cải tiến cơ bản |
 | 2026-04-08 | ✅ QW-1: Enter/Tab/Focus — code input, review-by-code input, guest name Enter handlers + CSS focus-visible |
 | 2026-04-08 | ✅ QW-3.1/3.2/3.5: Đã có sẵn từ Phase 5-7 (progress bar, confirm modal, timer warnings) |
+| 2026-04-09 | ✅ QW-3.3/3.4: Done via UI Overhaul — swipe nav, dark mode, touch targets, haptic, system detect |

@@ -11,7 +11,7 @@
         (function(){var t=localStorage.getItem('easyrevise_theme')||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();
     </script>
 
-    <!-- CSS: New modular system -->
+    <!-- CSS: Modular system -->
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/pages/result.css">
 
@@ -24,95 +24,62 @@
 <body>
     <div class="container" style="max-width: 900px;">
         <header class="result-header">
-            <h1 style="font-size: 2rem;">Kết Quả Ôn Tập</h1>
+            <h1>Kết Quả Ôn Tập</h1>
             <p class="subtitle" id="examDate">Hoàn thành vào: --:--</p>
         </header>
 
-        <section class="glass-panel" style="padding: 2.5rem; text-align: center; margin-bottom: 2rem;">
+        <section class="glass-panel score-section">
             <div class="score-circle">
                 <span id="scoreValue" class="score-value">0.0</span>
                 <span id="scoreLabel" class="score-label">Điểm (Thang 10)</span>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-top: 2rem;">
-                <div style="background: rgba(34, 197, 94, 0.1); padding: 1rem; border-radius: 16px;">
-                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--success);" id="correctCount">0</div>
-                    <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Câu Đúng</div>
+            <div class="result-stats-grid">
+                <div class="result-stat-item result-stat-item--success">
+                    <div class="result-stat-value result-stat-value--success" id="correctCount">0</div>
+                    <div class="result-stat-label">Câu Đúng</div>
                 </div>
-                <div style="background: rgba(239, 68, 68, 0.1); padding: 1rem; border-radius: 16px;">
-                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--error);" id="incorrectCount">0</div>
-                    <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Câu Sai</div>
+                <div class="result-stat-item result-stat-item--error">
+                    <div class="result-stat-value result-stat-value--error" id="incorrectCount">0</div>
+                    <div class="result-stat-label">Câu Sai</div>
                 </div>
-                <div style="background: rgba(245, 158, 11, 0.1); padding: 1rem; border-radius: 16px;">
-                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--warning);" id="skipCount">0</div>
-                    <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Bỏ Qua</div>
+                <div class="result-stat-item result-stat-item--warning">
+                    <div class="result-stat-value result-stat-value--warning" id="skipCount">0</div>
+                    <div class="result-stat-label">Bỏ Qua</div>
                 </div>
-                <div style="background: rgba(99, 102, 241, 0.1); padding: 1rem; border-radius: 16px;">
-                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary);" id="timeSpent">--</div>
-                    <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase;">Thời Gian</div>
+                <div class="result-stat-item result-stat-item--primary">
+                    <div class="result-stat-value result-stat-value--primary" id="timeSpent">--</div>
+                    <div class="result-stat-label">Thời Gian</div>
                 </div>
             </div>
 
-            <div style="margin-top: 3rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                <a href="/" class="btn" style="background: rgba(255,255,255,0.1); color: var(--text-main);">← Về trang
-                    chủ</a>
+            <div class="result-actions">
+                <a href="/" class="btn btn-back">← Về trang chủ</a>
                 <a id="retakeBtn" href="#" class="btn btn-primary">Làm lại bài này</a>
             </div>
         </section>
 
         <!-- AI Grading Status Banner (shown/hidden by result.js) -->
-        <div id="aiGradingBanner" style="display:none; margin-bottom:1.5rem;">
-            <div style="display:flex;align-items:center;gap:1rem;padding:1rem 1.5rem;
-                background:linear-gradient(135deg,rgba(99,102,241,0.12),rgba(139,92,246,0.12));
-                border:1px solid rgba(99,102,241,0.3); border-radius:16px;">
-                <div id="aiGradingSpinner" style="width:28px;height:28px;border:3px solid rgba(99,102,241,0.2);
-                    border-top-color:#6366f1;border-radius:50%;animation:spin 0.9s linear infinite;flex-shrink:0;">
-                </div>
-                <div style="flex:1;">
-                    <div style="font-weight:700;color:#6366f1;margin-bottom:0.2rem;">📝 AI Đang chấm bài...
-                    </div>
-                    <div id="aiGradingSubtext" style="font-size:0.82rem;color:var(--text-muted);">
+        <div id="aiGradingBanner" style="display:none;">
+            <div class="ai-grading-banner">
+                <div id="aiGradingSpinner" class="ai-grading-spinner"></div>
+                <div class="ai-grading-text">
+                    <div class="ai-grading-title">📝 AI Đang chấm bài...</div>
+                    <div id="aiGradingSubtext" class="ai-grading-subtitle">
                         Điểm tự luận sẽ tự cập nhật khi có kết quả — bạn không cần làm gì. <em>(Chờ khoảng 30-60
                             giây)</em>
                     </div>
                 </div>
-                <div id="aiGradingTimer"
-                    style="font-size:0.8rem;color:var(--text-muted);white-space:nowrap;font-variant-numeric:tabular-nums;">
-                </div>
+                <div id="aiGradingTimer" class="ai-grading-timer"></div>
             </div>
         </div>
-        <style>
-            @keyframes spin {
-                to {
-                    transform: rotate(360deg);
-                }
-            }
-
-            .ai-grade-done-banner {
-                animation: fadeInUp 0.4s ease;
-            }
-
-            @keyframes fadeInUp {
-                from {
-                    opacity: 0;
-                    transform: translateY(8px);
-                }
-
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-            }
-        </style>
 
         <section id="reviewSection">
-            <h2 style="font-size: 1.5rem; margin-bottom: 2rem; color: var(--text-main); font-weight: 700;">📚 Xem lại
-                đáp án &amp; Giải thích chi tiết</h2>
+            <h2 class="review-section-title">📚 Xem lại đáp án &amp; Giải thích chi tiết</h2>
             <div id="reviewContainer"></div>
         </section>
 
-        <footer
-            style="text-align: center; margin-top: 4rem; padding-bottom: 2rem; color: var(--text-muted); font-size: 0.875rem;">
+        <footer class="result-footer">
             &copy; 2026 EasyRevise — English Learning Companion
         </footer>
     </div>

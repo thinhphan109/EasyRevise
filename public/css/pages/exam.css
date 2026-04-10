@@ -1,7 +1,16 @@
 /* ========================================
    EasyRevise — Exam Page Styles
-   Question UI, options, timer, navigation
+   Question UI, options, timer, sidebar,
+   navigation, mobile drawer, essay upload
    ======================================== */
+
+/* ── Exam Layout ── */
+.exam-layout {
+    display: grid;
+    grid-template-columns: 1fr 200px;
+    gap: 1.25rem;
+    align-items: flex-start;
+}
 
 /* ── Question container ── */
 .question-container {
@@ -16,6 +25,18 @@
     margin-bottom: var(--space-8);
     color: var(--color-text);
     line-height: 1.5;
+}
+
+.question-number {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    background: var(--color-primary-light);
+    color: var(--color-primary);
+    font-weight: 700;
+    font-size: 0.75rem;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 /* ── Answer Options ── */
@@ -76,13 +97,259 @@
     color: white;
 }
 
-/* ── Exam Footer ── */
-.exam-footer {
+/* ── Exam Header Nav ── */
+.header-nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: var(--space-6);
+    margin-bottom: 0.75rem;
 }
+
+.header-nav-left {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* ── Timer Badge ── */
+.timer-badge {
+    font-weight: 600;
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+    padding: 0.4rem 0.75rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+}
+
+/* ── Timer Animations ── */
+@keyframes pulse-warning {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+}
+
+@keyframes pulse-danger {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.12); }
+}
+
+.timer-warning {
+    animation: pulse-warning 2s ease-in-out infinite;
+}
+
+.timer-danger {
+    animation: pulse-danger 0.8s ease-in-out infinite;
+    box-shadow: 0 0 16px rgba(220, 38, 38, 0.5);
+}
+
+/* ── Progress ── */
+.progress-container {
+    margin-bottom: 0.25rem;
+}
+
+.progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+/* ── Flag Button ── */
+.flag-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3rem 0.6rem;
+    background: var(--color-input-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.flag-btn:hover {
+    border-color: #dc2626;
+    color: #dc2626;
+}
+
+.flag-btn.flagged {
+    background: var(--color-error-bg);
+    border-color: #dc2626;
+    color: #dc2626;
+}
+
+/* ── Exit Button ── */
+.exit-btn {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.8rem;
+    background: var(--color-input-bg);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+}
+
+.exit-btn:hover {
+    border-color: var(--color-error);
+    color: var(--color-error);
+}
+
+/* ── Instruction Block ── */
+.instruction-block {
+    margin-bottom: 1rem;
+    padding: 0.6rem 0.85rem;
+    border-left: 3px solid var(--color-primary);
+    background: var(--color-primary-light);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+}
+
+/* ── Sidebar (Desktop) ── */
+.sidebar {
+    position: sticky;
+    top: 1rem;
+}
+
+.sidebar-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    box-shadow: var(--shadow-sm);
+    padding: 0.75rem;
+}
+
+.sidebar-title {
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text-muted);
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.sidebar-summary {
+    text-align: center;
+    font-size: 0.65rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.4rem;
+    font-weight: 500;
+}
+
+.sidebar-nav {
+    display: flex;
+    gap: 3px;
+}
+
+.sidebar-nav .btn {
+    flex: 1;
+    padding: 0.35rem 0;
+    font-size: 0.75rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+/* ── Question Grid ── */
+.q-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 3px;
+    margin-bottom: 0.5rem;
+}
+
+.q-cell {
+    width: 100%;
+    height: 28px;
+    border: 1.5px solid var(--color-border);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.12s ease;
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    position: relative;
+}
+
+.q-cell:hover {
+    border-color: var(--color-primary);
+    background: var(--color-primary-light);
+}
+
+.q-cell.active {
+    border-color: var(--color-primary);
+    background: var(--color-primary);
+    color: white;
+}
+
+.q-cell.visited {
+    border-color: #f59e0b;
+    background: #fef9c3;
+    color: #92400e;
+}
+
+[data-theme="dark"] .q-cell.visited {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: rgba(245, 158, 11, 0.4);
+}
+
+.q-cell.answered {
+    border-color: #16a34a;
+    background: #dcfce7;
+    color: #15803d;
+}
+
+[data-theme="dark"] .q-cell.answered {
+    background: rgba(22, 163, 74, 0.15);
+    border-color: rgba(22, 163, 74, 0.4);
+}
+
+.q-cell.flagged::after {
+    content: '';
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #dc2626;
+}
+
+/* ── Legend ── */
+.legend-mini {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: center;
+    font-size: 0.55rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.legend-mini span {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.ldot {
+    width: 6px;
+    height: 6px;
+    border-radius: 2px;
+    display: inline-block;
+}
+
+.ldot-empty { background: var(--color-surface); border: 1px solid var(--color-border-hover); }
+.ldot-visited { background: #fef9c3; }
+.ldot-answered { background: #dcfce7; }
+.ldot-flagged { background: #dc2626; width: 4px; height: 4px; border-radius: 50%; }
 
 /* ── Passage Box (reading comprehension) ── */
 .passage-box {
@@ -98,9 +365,237 @@
     color: var(--color-text);
 }
 
+[data-theme="dark"] .passage-box {
+    background: rgba(254, 252, 232, 0.08);
+    border-color: rgba(254, 240, 138, 0.2);
+}
+
 .passage-box::-webkit-scrollbar { width: 6px; }
 .passage-box::-webkit-scrollbar-track { background: transparent; }
 .passage-box::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+
+/* ── Essay Input ── */
+.essay-input {
+    width: 100%;
+    min-height: 200px;
+    padding: 1.25rem;
+    background: var(--color-bg);
+    border: 2px solid var(--color-border);
+    border-radius: 14px;
+    color: var(--color-text);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.essay-input:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* ── Cues Box ── */
+.cues-box {
+    margin-bottom: 1.5rem;
+    padding: 1.25rem;
+    background: var(--color-warning-bg);
+    border: 1px solid #fef08a;
+    border-radius: 12px;
+}
+
+[data-theme="dark"] .cues-box {
+    background: rgba(245, 158, 11, 0.08);
+    border-color: rgba(245, 158, 11, 0.2);
+}
+
+.cues-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #92400e;
+    font-weight: 700;
+}
+
+[data-theme="dark"] .cues-label { color: #fbbf24; }
+
+.cues-list {
+    list-style: none;
+    padding-left: 0;
+    color: var(--color-text-secondary);
+    font-size: 0.95rem;
+}
+
+.cues-list li {
+    margin-bottom: 0.5rem;
+}
+
+/* ── Essay Upload Zone ── */
+.essay-upload-area {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--color-input-bg);
+    border: 1.5px dashed var(--color-border);
+    border-radius: 12px;
+}
+
+.essay-attach-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+}
+
+.essay-attach-item {
+    position: relative;
+}
+
+.essay-attach-thumb {
+    width: 90px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: zoom-in;
+    border: 2px solid var(--color-border);
+    transition: transform 0.15s;
+}
+
+.essay-attach-thumb:hover {
+    transform: scale(1.04);
+}
+
+.essay-attach-thumb.zoomed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: contain;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+    border-radius: 0;
+    cursor: zoom-out;
+    max-width: none;
+}
+
+.essay-attach-pdf {
+    width: 90px;
+    height: 70px;
+    border: 2px solid var(--color-border);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.2rem;
+    background: #fff7ed;
+    font-size: 1.5rem;
+}
+
+[data-theme="dark"] .essay-attach-pdf {
+    background: rgba(255, 247, 237, 0.08);
+}
+
+.essay-attach-remove {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #dc2626;
+    color: white;
+    border: none;
+    font-size: 0.65rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    line-height: 1;
+}
+
+.essay-upload-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    background: var(--color-surface);
+    border: 1.5px solid var(--color-border);
+    border-radius: 10px;
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+
+.essay-upload-btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-light);
+}
+
+/* ── Mobile Bottom Drawer ── */
+.mobile-drawer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-border);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+    border-radius: 16px 16px 0 0;
+}
+
+.drawer-handle {
+    display: flex;
+    justify-content: center;
+    padding: 0.5rem;
+    cursor: pointer;
+}
+
+.drawer-handle-bar {
+    width: 36px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--color-border);
+}
+
+.drawer-nav-m {
+    display: flex;
+    gap: 0.5rem;
+    padding: 0 0.75rem 0.75rem;
+}
+
+.drawer-nav-m .btn {
+    flex: 1;
+    padding: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.drawer-content {
+    padding: 0 0.75rem 0.75rem;
+    max-height: 45vh;
+    overflow-y: auto;
+    display: none;
+}
+
+.drawer-content.open {
+    display: block;
+}
+
+.drawer-content .q-grid {
+    grid-template-columns: repeat(8, 1fr);
+}
+
+/* ── Exam Footer ── */
+.exam-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--space-6);
+}
 
 /* ── QR Scanner scan line ── */
 @keyframes scanLine {
@@ -109,7 +604,37 @@
     100% { top: 4px; }
 }
 
-/* ── Mobile adjustments ── */
+/* ── Mobile Responsive ── */
+@media (max-width: 768px) {
+    .exam-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar-desktop {
+        display: none;
+    }
+
+    .mobile-drawer {
+        display: block;
+    }
+
+    body {
+        padding-bottom: 70px;
+    }
+}
+
+@media (min-width: 769px) {
+    .mobile-drawer {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .drawer-content .q-grid {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
 @media (max-width: 640px) {
     .question-container {
         padding: var(--space-5);

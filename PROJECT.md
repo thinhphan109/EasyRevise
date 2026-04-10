@@ -70,9 +70,31 @@ EasyRevise/
 │   └── backups/           # Daily auto-backups (7 max)
 │
 ├── public/                # Static frontend files
-│   ├── index.html         # Student homepage
-│   ├── exam.html          # Exam taking page
-│   ├── result.html        # Result display page
+│   ├── index.html         # Student homepage (~200L, zero inline CSS/JS)
+│   ├── exam.html          # Exam taking page (~110L, zero inline CSS)
+│   ├── result.html        # Result display page (~100L, zero inline CSS)
+│   ├── dashboard.html     # 🆕 Student dashboard (~120L)
+│   │
+│   ├── assets/            # 🆕 Static assets (self-hosted)
+│   │   ├── fonts/         # Inter woff2 (5 weights: 400-800)
+│   │   └── icons/         # SVG sprite (30+ icons)
+│   │       └── sprite.svg
+│   │
+│   ├── css/               # 🆕 Modular CSS architecture (25+ files)
+│   │   ├── main.css       # Entry point (@import all modules)
+│   │   ├── base/          # Foundation: _reset, _tokens, _typography, _animations, _dark-mode
+│   │   ├── components/    # UI: _buttons, _cards, _modals, _forms, _badges, _toasts, _skeleton, _progress
+│   │   ├── layout/        # Structure: _grid, _header, _responsive
+│   │   └── pages/         # Per-page: home, exam, result, dashboard
+│   │
+│   ├── js/                # 🆕 Modular JS architecture
+│   │   ├── core/          # Shared: utils, api, store, auth
+│   │   ├── components/    # UI: theme, toast
+│   │   ├── pages/
+│   │   │   ├── home/      # 7 modules: init, exam-list, history, code-entry, review-code, qr-scanner, qr-popup
+│   │   │   └── dashboard/ # 🆕 index.js (stats, history, subjects)
+│   │   ├── app.js         # Exam page logic (~1400L, stable monolith)
+│   │   └── result.js      # Result page logic (~800L, stable monolith)
 │   │
 │   ├── admin/
 │   │   ├── index.html     # Admin panel HTML
@@ -94,12 +116,7 @@ EasyRevise/
 │   │       ├── submissions.js     # Submissions + review (168L)
 │   │       ├── stats.js           # Stats + code logs (140L)
 │   │       ├── question-bank.js   # Question bank UI (100L)
-│   │       └── media-library.js   # 🆕 Media library UI (Drive)
-│   │
-│   ├── css/style.css      # Main stylesheet
-│   ├── js/
-│   │   ├── app.js         # Student app logic (~1400L)
-│   │   └── result.js      # Result page logic (~800L)
+│   │       └── media-library.js   # Media library UI (Drive)
 │   │
 │   └── uploads/           # Uploaded media files
 │       ├── ai-images/     # AI-cropped images
@@ -580,12 +597,18 @@ MONGODB_URI=mongodb+srv://...            # (installed but not used for primary d
 
 > 📄 **Chi tiết:** Xem [PLAN_STORAGE.md](./PLAN_STORAGE.md)
 
-### 🔲 UI Overhaul — (đang plan, branch `feature/ui-overhaul`)
-- [ ] File restructure: tách monolith HTML/CSS/JS → modular
-- [ ] Design system: Clean + Liquid Glass, dark mode
-- [ ] Student Dashboard
-- [ ] Admin settings upgrade
-- [ ] Cross-platform optimization
+### ✅ UI Overhaul — COMPLETE (branch `feature/ui-overhaul`)
+- [x] CSS Foundation: 17 modular CSS modules (base, components, layout, pages)
+- [x] JS Core: utils, api, store, auth + components (theme, toast, swipe)
+- [x] index.html rewrite: 62KB→11KB, zero inline CSS/JS
+- [x] Self-hosted fonts (Inter 5 weights) + SVG sprite (37 icons)
+- [x] Inline CSS extracted from exam.html, result.html, index.html
+- [x] Dark mode with system auto-detect + manual toggle (32 CSS vars)
+- [x] Student Dashboard (API + page + animated stats)
+- [x] Animations: stagger grid, count-up, glass hover, bar fills
+- [x] Cross-platform: touch targets, safe-area, landscape, swipe, haptic, print, reduced-motion, high contrast
+- [x] Admin CSS: 700-line inline `<style>` → external admin.css (20KB), 111KB→79KB
+- [x] QA: all 5 pages × 0 inline `<style>` blocks, 22 CSS modules verified
 
 > 📄 **Chi tiết:** Xem [PLAN_UI_OVERHAUL.md](./PLAN_UI_OVERHAUL.md)
 

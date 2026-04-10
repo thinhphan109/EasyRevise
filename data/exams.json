@@ -6185,6 +6185,35 @@
             "autoSubmitted": false
           },
           "essayGrades": []
+        },
+        {
+          "userId": "f57f790f-b615-4a2f-bb6f-4d8042312e05",
+          "displayName": "admin",
+          "completedAt": "2026-04-09T08:21:24.125Z",
+          "score": "—",
+          "result": {
+            "examId": "b599524f-0afb-4d46-a6d1-2b1eac935fff",
+            "score": "—",
+            "correct": 0,
+            "incorrect": 0,
+            "skipped": 1,
+            "total": 0,
+            "results": [
+              {
+                "id": "93409898-8d12-49d1-a6ec-9c27ce0fc8d5",
+                "userAnswer": "Phần 1: (chưa điền)\nPhần 2: (chưa điền)\nPhần 3: (chưa điền)\nPhần 4: (chưa điền)\nPhần 5: (chưa điền)\nPhần 6: (chưa điền)\nPhần 7: (chưa điền)",
+                "attachments": [],
+                "isCorrect": null,
+                "isEssay": true,
+                "isFreeFormOrigin": true
+              }
+            ],
+            "examTitle": "KỲ THI TUYỂN SINH VÀO LỚP 10 THPT - ĐỀ MINH HỌA 01",
+            "timestamp": "15:21:23 9/4/2026",
+            "timeSpent": 11,
+            "autoSubmitted": false
+          },
+          "essayGrades": []
         }
       ]
     },
@@ -7168,6 +7197,64 @@
             "autoSubmitted": false
           },
           "essayGrades": []
+        },
+        {
+          "userId": "f57f790f-b615-4a2f-bb6f-4d8042312e05",
+          "displayName": "admin",
+          "completedAt": "2026-04-09T07:51:45.378Z",
+          "score": "—",
+          "result": {
+            "examId": "69e9166e-50ce-4f73-bbdd-2d2f557ef45a",
+            "score": "—",
+            "correct": 0,
+            "incorrect": 0,
+            "skipped": 1,
+            "total": 0,
+            "results": [
+              {
+                "id": "0200d0d0-190e-437c-ae98-8b29f4f8be2d",
+                "userAnswer": "Phần 1: (chưa điền)\nPhần 2: (chưa điền)\nPhần 3: (chưa điền)\nPhần 4: (chưa điền)\nPhần 5: (chưa điền)\nPhần 6: (chưa điền)\nPhần 7: (chưa điền)",
+                "attachments": [],
+                "isCorrect": null,
+                "isEssay": true,
+                "isFreeFormOrigin": true
+              }
+            ],
+            "examTitle": "KỲ THI TUYỂN SINH VÀO LỚP 10 THPT - ĐỀ MINH HỌA 2",
+            "timestamp": "14:51:45 9/4/2026",
+            "timeSpent": 6,
+            "autoSubmitted": false
+          },
+          "essayGrades": []
+        },
+        {
+          "userId": "f57f790f-b615-4a2f-bb6f-4d8042312e05",
+          "displayName": "admin",
+          "completedAt": "2026-04-09T08:04:26.742Z",
+          "score": "—",
+          "result": {
+            "examId": "69e9166e-50ce-4f73-bbdd-2d2f557ef45a",
+            "score": "—",
+            "correct": 0,
+            "incorrect": 0,
+            "skipped": 1,
+            "total": 0,
+            "results": [
+              {
+                "id": "0200d0d0-190e-437c-ae98-8b29f4f8be2d",
+                "userAnswer": "Phần 1: (chưa điền)\nPhần 2: (chưa điền)\nPhần 3: (chưa điền)\nPhần 4: (chưa điền)\nPhần 5: (chưa điền)\nPhần 6: (chưa điền)\nPhần 7: (chưa điền)",
+                "attachments": [],
+                "isCorrect": null,
+                "isEssay": true,
+                "isFreeFormOrigin": true
+              }
+            ],
+            "examTitle": "KỲ THI TUYỂN SINH VÀO LỚP 10 THPT - ĐỀ MINH HỌA 2",
+            "timestamp": "15:04:26 9/4/2026",
+            "timeSpent": 7,
+            "autoSubmitted": false
+          },
+          "essayGrades": []
         }
       ]
     },
@@ -7971,6 +8058,35 @@
             "examTitle": "BÀI TẬP TOÁN 9 CTST - TRANG 56",
             "timestamp": "18:01:35 1/4/2026",
             "timeSpent": 7,
+            "autoSubmitted": false
+          },
+          "essayGrades": []
+        },
+        {
+          "userId": "f57f790f-b615-4a2f-bb6f-4d8042312e05",
+          "displayName": "admin",
+          "completedAt": "2026-04-09T08:04:58.858Z",
+          "score": "—",
+          "result": {
+            "examId": "1d3fb776-618a-4579-a54a-b00462a80b2c",
+            "score": "—",
+            "correct": 0,
+            "incorrect": 0,
+            "skipped": 1,
+            "total": 0,
+            "results": [
+              {
+                "id": "14cb9545-7e4b-4705-8a62-0821e8a1116f",
+                "userAnswer": "Phần 1: (chưa điền)\nPhần 2: (chưa điền)\nPhần 3: (chưa điền)\nPhần 4: (chưa điền)",
+                "attachments": [],
+                "isCorrect": null,
+                "isEssay": true,
+                "isFreeFormOrigin": true
+              }
+            ],
+            "examTitle": "BÀI TẬP TOÁN 9 CTST - TRANG 56",
+            "timestamp": "15:04:58 9/4/2026",
+            "timeSpent": 3,
             "autoSubmitted": false
           },
           "essayGrades": []
