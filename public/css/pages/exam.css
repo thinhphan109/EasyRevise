@@ -648,3 +648,26 @@
         padding: var(--space-3) var(--space-4);
     }
 }
+
+/* ── Timer Warning & Danger Animations ── */
+.timer-warning {
+    animation: timerPulse 2s ease-in-out infinite;
+}
+
+.timer-danger {
+    animation: timerUrgent 0.8s ease-in-out infinite;
+}
+
+@keyframes timerPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); box-shadow: 0 0 12px rgba(245, 158, 11, 0.4); }
+}
+
+@keyframes timerUrgent {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); box-shadow: 0 0 16px rgba(220, 38, 38, 0.5); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .timer-warning, .timer-danger { animation: none; }
+}

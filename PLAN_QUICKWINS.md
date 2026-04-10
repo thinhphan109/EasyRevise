@@ -40,7 +40,7 @@ QW-5: Activation Code System         (~4 giờ)    — Batch mã, QR, auto-expir
 ### 1.3 Focus Indicators
 - [x] CSS focus ring cho buttons và inputs ✅ (`public/css/style.css` — focus-visible)
 - [x] focus-visible + :focus:not(:focus-visible) ✅ (`_crossplatform.css`)
-- [ ] Auto-focus input đầu tiên khi mở modal
+- [x] Auto-focus input đầu tiên khi mở modal ✅ (`auth.js` — login modal auto-focus)
 
 ---
 
@@ -86,7 +86,7 @@ QW-5: Activation Code System         (~4 giờ)    — Batch mã, QR, auto-expir
 ### 3.5 Timer Cải Tiến
 - [x] Hiện timer mm:ss format ✅
 - [x] Đổi màu khi < 5 phút (vàng), < 1 phút (đỏ nhấp nháy) ✅ (app.js:260-271 + exam.css animations)
-- [ ] Sound alert khi hết giờ (optional)
+- [x] Sound alert khi hết giờ ✅ (Web Audio API beep — 60s warning + expiry alert)
 
 ---
 

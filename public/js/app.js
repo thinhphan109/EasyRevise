@@ -262,6 +262,11 @@ class ExamApp {
                     this.countdown.style.background = '#dc2626';
                     this.countdown.classList.remove('timer-warning');
                     this.countdown.classList.add('timer-danger');
+                    // Sound alert once at 60s mark
+                    if (remaining === 60 && !this._warned60s) {
+                        this._warned60s = true;
+                        this._playBeep(880, 0.18, 2); // high beep x2
+                    }
                 } else if (remaining <= 300) {
                     this.countdown.style.background = '#f59e0b';
                     this.countdown.classList.add('timer-warning');
@@ -282,6 +287,7 @@ class ExamApp {
                 // Auto-submit
                 if (remaining <= 0) {
                     clearInterval(this.timerInterval);
+                    this._playBeep(660, 0.25, 3); // triple beep on expiry
                     alert('⏰ Hết giờ! Bài sẽ được tự động nộp.');
                     this.submitExam(true);
                 }
@@ -340,6 +346,25 @@ class ExamApp {
         document.body.appendChild(banner);
         // Auto-dismiss after 12 seconds
         setTimeout(() => { if (banner.parentNode) banner.remove(); }, 12000);
+    }
+
+    /** Play a short beep via Web Audio API (no external files needed) */
+    _playBeep(freq = 880, duration = 0.15, count = 1) {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            for (let i = 0; i < count; i++) {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.3);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.3 + duration);
+                osc.start(ctx.currentTime + i * 0.3);
+                osc.stop(ctx.currentTime + i * 0.3 + duration);
+            }
+        } catch (e) { /* Audio not supported — silent fallback */ }
     }
 
     attachEventListeners() {
