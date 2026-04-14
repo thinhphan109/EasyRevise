@@ -115,6 +115,7 @@
                         style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;">
                         <h2 style="font-size:1.5rem;font-weight:700;">Quản lý Đề Thi</h2>
                         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                            <button class="btn btn-sm btn-outline" onclick="batchExportAll()">📦 Export All</button>
                             <button class="btn btn-sm btn-info" onclick="triggerImport()">Import JSON</button>
                             <input type="file" id="importFileInput" accept=".json" onchange="handleImportFile(event)">
                             <button class="btn btn-primary" onclick="showCreateExamModal()">+ Tạo đề mới</button>

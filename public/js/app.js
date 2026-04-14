@@ -182,6 +182,20 @@ class ExamApp {
 
         this.totalQuestions = this.questionsList.length;
 
+        // Guard: sections exist but no questions were flattened (e.g. all sections empty)
+        if (this.totalQuestions === 0) {
+            if (this.examData.requireCode) {
+                const unlocked = JSON.parse(localStorage.getItem('easyrevise_unlocked') || '{}');
+                delete unlocked[this.examId];
+                localStorage.setItem('easyrevise_unlocked', JSON.stringify(unlocked));
+                alert('Mã kích hoạt không hợp lệ hoặc đề thi chưa có câu hỏi.');
+            } else {
+                alert('Đề thi chưa có câu hỏi!');
+            }
+            window.location.href = '/';
+            return;
+        }
+
         // Load saved progress
         const saved = localStorage.getItem(`easyrevise_progress_${this.examId}`);
         if (saved) { try { this.userAnswers = JSON.parse(saved); } catch (e) { } }

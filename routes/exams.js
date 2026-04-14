@@ -135,4 +135,52 @@ router.post('/import', adminOnly, (req, res) => {
 // POST /api/admin/exams/:id/copy-section — mounted at /api/admin prefix externally
 // These are in routes/exams-admin.js
 
+// GET /api/exams/batch-export?ids=id1,id2,id3
+router.get('/batch-export', adminOnly, (req, res) => {
+    const data = readData();
+    const ids = (req.query.ids || '').split(',').filter(Boolean);
+    const exams = ids.length > 0
+        ? data.exams.filter(e => ids.includes(e.id))
+        : data.exams; // export all if no ids specified
+    const exportData = {
+        _format: 'easyrevise-backup-v1',
+        _exportedAt: new Date().toISOString(),
+        _count: exams.length,
+        exams: exams.map(e => ({
+            title: e.title, subject: e.subject, year: e.year,
+            sections: e.sections, timeLimit: e.timeLimit || 0,
+            autoGrade: e.autoGrade !== false,
+            aiExplainLimit: e.aiExplainLimit ?? -1
+        }))
+    };
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename="easyrevise-backup-${new Date().toISOString().slice(0,10)}.json"`);
+    res.json(exportData);
+});
+
+// POST /api/exams/batch-import
+router.post('/batch-import', adminOnly, (req, res) => {
+    const importData = req.body;
+    if (!importData || !Array.isArray(importData.exams)) {
+        return res.status(400).json({ error: 'Invalid batch format. Expected { exams: [...] }' });
+    }
+    const data = readData();
+    const imported = [];
+    for (const ex of importData.exams) {
+        if (!ex.title && !ex.sections) continue;
+        const newExam = {
+            id: uuidv4(), title: ex.title || 'Đề nhập',
+            subject: ex.subject || 'Tiếng Anh', year: ex.year || new Date().getFullYear().toString(),
+            sections: ex.sections || [], requireCode: false, accessCodes: [],
+            timeLimit: ex.timeLimit || 0, autoGrade: ex.autoGrade !== false,
+            aiExplainLimit: ex.aiExplainLimit ?? -1,
+            createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
+        };
+        data.exams.push(newExam);
+        imported.push({ id: newExam.id, title: newExam.title });
+    }
+    writeData(data);
+    res.status(201).json({ success: true, imported: imported.length, exams: imported });
+});
+
 module.exports = router;

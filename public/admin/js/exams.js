@@ -172,6 +172,25 @@ function exportExam() { window.open(`/api/exams/${currentExamId}/export`, '_blan
 function triggerImport() { document.getElementById('importFileInput').click(); }
 async function handleImportFile(event) {
     const file = event.target.files[0]; if (!file) return;
-    try { const text = await file.text(); const data = JSON.parse(text); const r = await api('/api/exams/import', 'POST', data); if (r.error) alert('Lỗi: ' + r.error); else { alert('Import OK: ' + r.title); loadExamList(); } } catch (e) { alert('File lỗi: ' + e.message); }
+    try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        // Support batch format
+        if (data._format === 'easyrevise-backup-v1' && Array.isArray(data.exams)) {
+            const r = await api('/api/exams/batch-import', 'POST', data);
+            if (r.error) alert('Lỗi: ' + r.error);
+            else { alert(`✅ Import thành công ${r.imported} đề!`); loadExamList(); }
+        } else {
+            // Single exam import
+            const r = await api('/api/exams/import', 'POST', data);
+            if (r.error) alert('Lỗi: ' + r.error);
+            else { alert('Import OK: ' + r.title); loadExamList(); }
+        }
+    } catch (e) { alert('File lỗi: ' + e.message); }
     event.target.value = '';
+}
+
+// Batch export all (or filtered) exams
+function batchExportAll() {
+    window.open('/api/exams/batch-export', '_blank');
 }

@@ -2620,6 +2620,70 @@
           "maxAttempts": 0,
           "usedBy": [],
           "createdAt": "2026-04-07T18:09:43.707Z"
+        },
+        {
+          "code": "PWF2E3",
+          "maxUses": 1,
+          "maxAttempts": 0,
+          "usedBy": [],
+          "createdAt": "2026-04-14T13:47:52.199Z"
+        },
+        {
+          "code": "853O5Y",
+          "maxUses": 1,
+          "maxAttempts": 0,
+          "usedBy": [],
+          "createdAt": "2026-04-14T13:47:52.200Z"
+        },
+        {
+          "code": "7P8L6U",
+          "maxUses": 1,
+          "maxAttempts": 0,
+          "usedBy": [],
+          "createdAt": "2026-04-14T13:47:52.200Z"
+        },
+        {
+          "code": "5U0N7V",
+          "maxUses": 3,
+          "maxAttempts": 0,
+          "usedBy": [
+            {
+              "userId": "anonymous",
+              "displayName": "Ẩn danh",
+              "usedAt": "2026-04-14T13:51:04.996Z",
+              "completed": false,
+              "score": null
+            },
+            {
+              "userId": "anonymous",
+              "displayName": "Ẩn danh",
+              "usedAt": "2026-04-14T13:52:21.066Z",
+              "completed": false,
+              "score": null
+            },
+            {
+              "userId": "f57f790f-b615-4a2f-bb6f-4d8042312e05",
+              "displayName": "admin",
+              "usedAt": "2026-04-14T13:53:25.704Z",
+              "completed": false,
+              "score": null
+            },
+            {
+              "userId": "anonymous",
+              "displayName": "Ẩn danh",
+              "usedAt": "2026-04-14T13:57:50.126Z",
+              "completed": false,
+              "score": null
+            },
+            {
+              "userId": "anonymous",
+              "displayName": "Ẩn danh",
+              "usedAt": "2026-04-14T13:57:50.142Z",
+              "completed": false,
+              "score": null
+            }
+          ],
+          "createdAt": "2026-04-14T13:47:57.934Z"
         }
       ],
       "requireCode": true,
@@ -8592,6 +8656,34 @@
       "updatedAt": "2026-04-06T15:35:54.927Z",
       "autoGrade": true,
       "aiExplainLimit": -1
+    },
+    {
+      "id": "b455da9f-8c2a-47c9-8bce-2fbea1b22872",
+      "title": "ĐỀ THI TS 10 LONG AN 2025 - MÔN TOÁN",
+      "subject": "Toán 9",
+      "year": "2025",
+      "sections": [
+        {
+          "id": "06eb65c7-35c9-4393-97d7-35473598da3a",
+          "title": "ĐỀ BÀI",
+          "instruction": "",
+          "type": "free-form",
+          "passage": null,
+          "questions": [],
+          "prompt": null,
+          "context": null,
+          "cues": [],
+          "sampleAnswer": null,
+          "explanation": null,
+          "showInstruction": false,
+          "showCues": false
+        }
+      ],
+      "requireCode": false,
+      "accessCodes": [],
+      "timeLimit": 0,
+      "createdAt": "2026-04-14T05:26:09.923Z",
+      "updatedAt": "2026-04-14T05:26:22.473Z"
     }
   ]
 }

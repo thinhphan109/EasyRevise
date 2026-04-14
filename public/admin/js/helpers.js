@@ -50,7 +50,9 @@ async function api(url, method = 'GET', body = null) {
     const opts = { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` } };
     if (body) opts.body = JSON.stringify(body);
     const res = await fetch(url, opts);
-    return res.json();
+    const data = await res.json();
+    if (!res.ok && !data.error) data.error = `HTTP ${res.status}`;
+    return data;
 }
 
 // Alias used in switchTab auto-refresh

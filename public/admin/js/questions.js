@@ -157,9 +157,9 @@ function renderMultiImagePreviews() {
     if (!c) return;
     if (!questionImages.length) { c.innerHTML = '<span style="color:var(--text-muted);font-size:0.8rem;">Chưa có ảnh</span>'; return; }
     c.innerHTML = questionImages.map((url, i) => `
-        <div style="position:relative;display:inline-block;margin:0.25rem;">
+        <div style="position:relative;display:inline-block;margin:0.25rem;padding:3px;">
             <img src="${url}" style="width:70px;height:70px;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:zoom-in;" onclick="window.open('${url}','_blank')">
-            <button onclick="removeQuestionImage(${i})" style="position:absolute;top:-5px;right:-5px;background:#dc2626;color:white;border:none;border-radius:50%;width:18px;height:18px;font-size:0.65rem;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;" title="Xóa">×</button>
+            <button type="button" onclick="event.stopPropagation();removeQuestionImage(${i})" style="position:absolute;top:0;right:0;background:#dc2626;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;z-index:2;line-height:1;" title="Xóa ảnh">×</button>
         </div>`).join('');
 }
 
@@ -176,9 +176,9 @@ function renderOptionImagePreviews() {
         const c = document.getElementById(`optionImgPreview${label}`);
         if (!c) return;
         if (optionImages[i]) {
-            c.innerHTML = `<div style="position:relative;display:inline-block;">
+            c.innerHTML = `<div style="position:relative;display:inline-block;padding:2px;">
                 <img src="${optionImages[i]}" style="width:50px;height:50px;object-fit:cover;border-radius:6px;border:1px solid var(--border);">
-                <button onclick="removeOptionImage(${i})" style="position:absolute;top:-4px;right:-4px;background:#dc2626;color:white;border:none;border-radius:50%;width:16px;height:16px;font-size:0.6rem;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;">×</button>
+                <button type="button" onclick="event.stopPropagation();removeOptionImage(${i})" style="position:absolute;top:0;right:0;background:#dc2626;color:white;border:none;border-radius:50%;width:18px;height:18px;font-size:0.6rem;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;z-index:2;" title="Xóa ảnh">×</button>
             </div>`;
         } else { c.innerHTML = ''; }
     });
@@ -197,9 +197,9 @@ function renderExplanationImagePreviews() {
     if (!c) return;
     if (!explanationImages.length) { c.innerHTML = '<span style="color:var(--text-muted);font-size:0.8rem;">Chưa có ảnh</span>'; return; }
     c.innerHTML = explanationImages.map((url, i) => `
-        <div style="position:relative;display:inline-block;margin:0.25rem;">
+        <div style="position:relative;display:inline-block;margin:0.25rem;padding:3px;">
             <img src="${url}" style="width:70px;height:70px;object-fit:cover;border-radius:8px;border:1px solid var(--border);cursor:zoom-in;" onclick="window.open('${url}','_blank')">
-            <button onclick="removeExplanationImage(${i})" style="position:absolute;top:-5px;right:-5px;background:#dc2626;color:white;border:none;border-radius:50%;width:18px;height:18px;font-size:0.65rem;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;" title="Xóa">×</button>
+            <button type="button" onclick="event.stopPropagation();removeExplanationImage(${i})" style="position:absolute;top:0;right:0;background:#dc2626;color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:0.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;z-index:2;line-height:1;" title="Xóa ảnh">×</button>
         </div>`).join('');
 }
 
@@ -293,9 +293,13 @@ async function saveQuestion() {
         body.correctAnswer = parseInt(document.querySelector('input[name="correctOpt"]:checked').value);
         body.options = [document.getElementById('inputOptA').value, document.getElementById('inputOptB').value, document.getElementById('inputOptC').value, document.getElementById('inputOptD').value];
     }
-    if (editingQuestionId) await api(`/api/exams/${currentExamId}/sections/${currentSectionId}/questions/${editingQuestionId}`, 'PUT', body);
-    else await api(`/api/exams/${currentExamId}/sections/${currentSectionId}/questions`, 'POST', body);
-    closeModal('modalQuestion'); currentExamData = await api(`/api/exams/${currentExamId}`); openSectionEditor(currentSectionId);
+    try {
+        let result;
+        if (editingQuestionId) result = await api(`/api/exams/${currentExamId}/sections/${currentSectionId}/questions/${editingQuestionId}`, 'PUT', body);
+        else result = await api(`/api/exams/${currentExamId}/sections/${currentSectionId}/questions`, 'POST', body);
+        if (result.error) { alert('❌ Lỗi lưu câu hỏi: ' + result.error); return; }
+        closeModal('modalQuestion'); currentExamData = await api(`/api/exams/${currentExamId}`); openSectionEditor(currentSectionId);
+    } catch (err) { alert('❌ Lỗi kết nối: ' + err.message); }
 }
 
 async function deleteQuestion(qId) { if (!(await customConfirm('⚠️ Xóa câu hỏi?', 'Câu hỏi này sẽ bị xóa vĩnh viễn.', 'Xóa câu', true))) return; await api(`/api/exams/${currentExamId}/sections/${currentSectionId}/questions/${qId}`, 'DELETE'); currentExamData = await api(`/api/exams/${currentExamId}`); openSectionEditor(currentSectionId); }
