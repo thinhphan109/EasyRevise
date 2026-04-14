@@ -105,8 +105,8 @@ QW-5: Activation Code System         (~4 giờ)    — Batch mã, QR, auto-expir
 **Chưa có:**
 
 ### 4.3 Batch Export
-- [ ] Chọn nhiều đề → Export tất cả thành 1 file JSON backup
-- [ ] Import backup → khôi phục nhiều đề 1 lúc
+- [x] Chọn nhiều đề → Export tất cả thành 1 file JSON backup ✅ (GET /api/exams/batch-export)
+- [x] Import backup → khôi phục nhiều đề 1 lúc ✅ (POST /api/exams/batch-import, auto-detect format)
 
 ---
 
