@@ -18,6 +18,74 @@ router.get('/', (req, res) => {
     })));
 });
 
+// ⚠️ Static named routes MUST come before /:id to avoid being matched as exam IDs
+
+// GET /api/exams/batch-export?ids=id1,id2,id3
+router.get('/batch-export', adminOnly, (req, res) => {
+    const data = readData();
+    const ids = (req.query.ids || '').split(',').filter(Boolean);
+    const exams = ids.length > 0
+        ? data.exams.filter(e => ids.includes(e.id))
+        : data.exams;
+    const exportData = {
+        _format: 'easyrevise-backup-v1',
+        _exportedAt: new Date().toISOString(),
+        _count: exams.length,
+        exams: exams.map(e => ({
+            title: e.title, subject: e.subject, year: e.year,
+            sections: e.sections, timeLimit: e.timeLimit || 0,
+            autoGrade: e.autoGrade !== false,
+            aiExplainLimit: e.aiExplainLimit ?? -1
+        }))
+    };
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename="easyrevise-backup-${new Date().toISOString().slice(0,10)}.json"`);
+    res.json(exportData);
+});
+
+// POST /api/exams/batch-import
+router.post('/batch-import', adminOnly, (req, res) => {
+    const importData = req.body;
+    if (!importData || !Array.isArray(importData.exams)) {
+        return res.status(400).json({ error: 'Invalid batch format. Expected { exams: [...] }' });
+    }
+    const data = readData();
+    const imported = [];
+    for (const ex of importData.exams) {
+        if (!ex.title && !ex.sections) continue;
+        const newExam = {
+            id: uuidv4(), title: ex.title || 'Đề nhập',
+            subject: ex.subject || 'Tiếng Anh', year: ex.year || new Date().getFullYear().toString(),
+            sections: ex.sections || [], requireCode: false, accessCodes: [],
+            timeLimit: ex.timeLimit || 0, autoGrade: ex.autoGrade !== false,
+            aiExplainLimit: ex.aiExplainLimit ?? -1,
+            createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
+        };
+        data.exams.push(newExam);
+        imported.push({ id: newExam.id, title: newExam.title });
+    }
+    writeData(data);
+    res.status(201).json({ success: true, imported: imported.length, exams: imported });
+});
+
+// POST /api/exams/import (single exam)
+router.post('/import', adminOnly, (req, res) => {
+    const data = readData();
+    const importData = req.body;
+    if (!importData || (!importData.sections && !importData.title)) {
+        return res.status(400).json({ error: 'Invalid format' });
+    }
+    const newExam = {
+        id: uuidv4(), title: importData.title || 'Đề nhập',
+        subject: importData.subject || 'Tiếng Anh', year: importData.year || new Date().getFullYear().toString(),
+        sections: importData.sections || [], requireCode: false, accessCodes: [],
+        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
+    };
+    data.exams.push(newExam);
+    writeData(data);
+    res.status(201).json(newExam);
+});
+
 // GET /api/exams/:id
 router.get('/:id', (req, res) => {
     const data = readData();
@@ -112,75 +180,8 @@ router.get('/:id/export', adminOnly, (req, res) => {
     res.json(exportData);
 });
 
-// POST /api/exams/import
-router.post('/import', adminOnly, (req, res) => {
-    const data = readData();
-    const importData = req.body;
-    if (!importData || (!importData.sections && !importData.title)) {
-        return res.status(400).json({ error: 'Invalid format' });
-    }
-    const newExam = {
-        id: uuidv4(), title: importData.title || 'Đề nhập',
-        subject: importData.subject || 'Tiếng Anh', year: importData.year || new Date().getFullYear().toString(),
-        sections: importData.sections || [], requireCode: false, accessCodes: [],
-        createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
-    };
-    data.exams.push(newExam);
-    writeData(data);
-    res.status(201).json(newExam);
-});
-
-
 // POST /api/admin/exams/:id/duplicate — mounted at /api/admin prefix externally
 // POST /api/admin/exams/:id/copy-section — mounted at /api/admin prefix externally
 // These are in routes/exams-admin.js
-
-// GET /api/exams/batch-export?ids=id1,id2,id3
-router.get('/batch-export', adminOnly, (req, res) => {
-    const data = readData();
-    const ids = (req.query.ids || '').split(',').filter(Boolean);
-    const exams = ids.length > 0
-        ? data.exams.filter(e => ids.includes(e.id))
-        : data.exams; // export all if no ids specified
-    const exportData = {
-        _format: 'easyrevise-backup-v1',
-        _exportedAt: new Date().toISOString(),
-        _count: exams.length,
-        exams: exams.map(e => ({
-            title: e.title, subject: e.subject, year: e.year,
-            sections: e.sections, timeLimit: e.timeLimit || 0,
-            autoGrade: e.autoGrade !== false,
-            aiExplainLimit: e.aiExplainLimit ?? -1
-        }))
-    };
-    res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Content-Disposition', `attachment; filename="easyrevise-backup-${new Date().toISOString().slice(0,10)}.json"`);
-    res.json(exportData);
-});
-
-// POST /api/exams/batch-import
-router.post('/batch-import', adminOnly, (req, res) => {
-    const importData = req.body;
-    if (!importData || !Array.isArray(importData.exams)) {
-        return res.status(400).json({ error: 'Invalid batch format. Expected { exams: [...] }' });
-    }
-    const data = readData();
-    const imported = [];
-    for (const ex of importData.exams) {
-        if (!ex.title && !ex.sections) continue;
-        const newExam = {
-            id: uuidv4(), title: ex.title || 'Đề nhập',
-            subject: ex.subject || 'Tiếng Anh', year: ex.year || new Date().getFullYear().toString(),
-            sections: ex.sections || [], requireCode: false, accessCodes: [],
-            timeLimit: ex.timeLimit || 0, autoGrade: ex.autoGrade !== false,
-            aiExplainLimit: ex.aiExplainLimit ?? -1,
-            createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
-        };
-        data.exams.push(newExam);
-        imported.push({ id: newExam.id, title: newExam.title });
-    }
-    writeData(data);
-    res.status(201).json({ success: true, imported: imported.length, exams: imported });
-});
 
 module.exports = router;

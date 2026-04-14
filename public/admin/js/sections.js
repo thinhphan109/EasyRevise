@@ -95,9 +95,13 @@ async function saveSection() {
         const explVid = document.getElementById('inputFreeformExplVideo')?.value.trim();
         if (explVid) body.explanationVideo = explVid; else body.explanationVideo = null;
     }
-    if (editingSectionId) await api(`/api/exams/${currentExamId}/sections/${editingSectionId}`, 'PUT', body);
-    else await api(`/api/exams/${currentExamId}/sections`, 'POST', body);
-    closeModal('modalSection'); await openExamEditor(currentExamId);
+    try {
+        let result;
+        if (editingSectionId) result = await api(`/api/exams/${currentExamId}/sections/${editingSectionId}`, 'PUT', body);
+        else result = await api(`/api/exams/${currentExamId}/sections`, 'POST', body);
+        if (result.error) { alert('❌ Lỗi lưu phần: ' + result.error); return; }
+        closeModal('modalSection'); await openExamEditor(currentExamId);
+    } catch (err) { alert('❌ Lỗi kết nối: ' + err.message); }
 }
 
 async function deleteSection() { if (!(await customConfirm('⚠️ Xóa phần này?', 'Tất cả câu hỏi trong phần này sẽ bị xóa vĩnh viễn.', 'Xóa phần', true))) return; await api(`/api/exams/${currentExamId}/sections/${currentSectionId}`, 'DELETE'); await openExamEditor(currentExamId); }

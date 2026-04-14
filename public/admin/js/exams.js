@@ -153,9 +153,13 @@ async function saveExam() {
         autoGrade: document.getElementById('checkAutoGrade').checked,
         aiExplainLimit: aiExplainLimitEl ? (parseInt(aiExplainLimitEl.value) ?? -1) : -1
     };
-    if (editingExamId) await api(`/api/exams/${editingExamId}`, 'PUT', body);
-    else await api('/api/exams', 'POST', body);
-    closeModal('modalExam'); loadExamList(); if (editingExamId) openExamEditor(editingExamId);
+    try {
+        let result;
+        if (editingExamId) result = await api(`/api/exams/${editingExamId}`, 'PUT', body);
+        else result = await api('/api/exams', 'POST', body);
+        if (result.error) { alert('❌ Lỗi lưu đề: ' + result.error); return; }
+        closeModal('modalExam'); loadExamList(); if (editingExamId) openExamEditor(editingExamId);
+    } catch (err) { alert('❌ Lỗi kết nối: ' + err.message); }
 }
 
 async function deleteExam() {
