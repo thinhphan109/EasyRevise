@@ -9478,5 +9478,16 @@
       "updatedAt": "2026-04-14T05:26:22.473Z"
     }
   ],
-  "activationCodes": []
+  "activationCodes": [
+    {
+      "id": "e29bd035-7ea7-42ed-b4ae-322abca1bdb5",
+      "code": "VXL-001-RGQV",
+      "batchName": "Batch 2026-04-15",
+      "studentName": null,
+      "studentId": null,
+      "expiresAt": null,
+      "usedAt": null,
+      "createdAt": "2026-04-15T00:58:21.949Z"
+    }
+  ]
 }
