@@ -27,7 +27,7 @@ function renderAIFileList() {
 }
 
 async function generateWithAI() {
-    if (!aiSelectedFiles.length) { alert('Vui lòng chọn ít nhất 1 file!'); return; }
+    if (!aiSelectedFiles.length) { showToast('Vui lòng chọn ít nhất 1 file!', 'warning'); return; }
     const btn = document.getElementById('aiGenerateBtn');
     const loading = document.getElementById('aiLoading');
     const preview = document.getElementById('aiPreview');
@@ -107,4 +107,4 @@ function renderAIPreview(data) {
 
 function deleteAIQuestion(sectionIdx, qIdx) { if (!aiGeneratedData) return; const section = aiGeneratedData.exam.sections[sectionIdx]; if (!section || !section.questions) return; section.questions.splice(qIdx, 1); renderAIPreview(aiGeneratedData); }
 
-function deleteAISection(sectionIdx) { if (!aiGeneratedData) return; if (!confirm('Xóa cả phần này khỏi preview?')) return; aiGeneratedData.exam.sections.splice(sectionIdx, 1); renderAIPreview(aiGeneratedData); }
+function deleteAISection(sectionIdx) { if (!aiGeneratedData) return; aiGeneratedData.exam.sections.splice(sectionIdx, 1); renderAIPreview(aiGeneratedData); }

@@ -848,3 +848,152 @@
 .help-section-body ul { padding-left: 1.25rem; margin: 0.5rem 0; }
 .help-section-body li { margin-bottom: 0.3rem; }
 .help-section-body h4 { font-size: 0.9rem; font-weight: 700; color: var(--color-text); margin: 1.25rem 0 0.5rem; }
+
+/* ========================================
+   DARK MODE — Comprehensive Overrides
+   ======================================== */
+[data-theme="dark"] .toggle-slider {
+    background: #475569;
+}
+
+[data-theme="dark"] .toggle-slider:before {
+    background: #e2e8f0;
+}
+
+[data-theme="dark"] .modal-overlay {
+    background: rgba(0, 0, 0, 0.65);
+}
+
+[data-theme="dark"] .modal-content {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+}
+
+[data-theme="dark"] .exam-table th {
+    background: var(--color-surface);
+}
+
+[data-theme="dark"] .exam-table tr:hover td {
+    background: var(--color-surface-hover);
+}
+
+[data-theme="dark"] .section-card {
+    border-color: var(--color-border);
+}
+
+[data-theme="dark"] .section-card:hover {
+    border-color: var(--color-border-hover);
+    background: var(--color-surface-hover);
+}
+
+[data-theme="dark"] .empty-state,
+[data-theme="dark"] .admin-empty-state {
+    color: var(--color-text-muted);
+}
+
+/* Admin toast styles */
+.admin-toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 10002;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    pointer-events: none;
+    max-width: 400px;
+}
+
+.admin-toast {
+    pointer-events: auto;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.85rem 1.15rem;
+    border-radius: 14px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-lg);
+    font-size: 0.88rem;
+    color: var(--color-text);
+    animation: toastSlideIn 0.3s ease;
+    max-width: 100%;
+    word-break: break-word;
+}
+
+.admin-toast.toast-success { border-left: 4px solid #10b981; }
+.admin-toast.toast-error   { border-left: 4px solid #ef4444; }
+.admin-toast.toast-warning { border-left: 4px solid #f59e0b; }
+.admin-toast.toast-info    { border-left: 4px solid #3b82f6; }
+
+.admin-toast .toast-icon {
+    font-size: 1.15rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.admin-toast .toast-msg {
+    flex: 1;
+    line-height: 1.4;
+}
+
+.admin-toast .toast-close {
+    background: none;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.admin-toast .toast-close:hover {
+    color: var(--color-text);
+}
+
+.admin-toast.toast-exit {
+    animation: toastSlideOut 0.25s ease forwards;
+}
+
+@keyframes toastSlideIn {
+    from { opacity: 0; transform: translateX(100%); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes toastSlideOut {
+    from { opacity: 1; transform: translateX(0); }
+    to   { opacity: 0; transform: translateX(100%); }
+}
+
+/* Main image delete overlay */
+.main-image-container {
+    position: relative;
+    display: inline-block;
+    margin-top: 0.5rem;
+}
+
+.main-image-container .img-delete-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(220,38,38,0.9);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.2s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.main-image-container:hover .img-delete-btn {
+    opacity: 1;
+}

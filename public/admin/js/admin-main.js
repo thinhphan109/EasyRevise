@@ -9,7 +9,7 @@ async function checkAdminAuth() {
         const res = await fetch('/api/auth/me', { headers: { Authorization: `Bearer ${adminToken}` } });
         if (!res.ok) throw new Error();
         const user = await res.json();
-        if (user.role !== 'admin') { alert('Tài khoản không có quyền admin'); return showLoginGate(); }
+        if (user.role !== 'admin') { showToast('Tài khoản không có quyền admin', 'error'); return showLoginGate(); }
         const pinSession = JSON.parse(localStorage.getItem('easyrevise_admin_pin_session') || '{}');
         if (!pinSession.expiry || Date.now() >= pinSession.expiry) { localStorage.removeItem('easyrevise_admin_pin_session'); return showPinGate(); }
         adminUser = user;

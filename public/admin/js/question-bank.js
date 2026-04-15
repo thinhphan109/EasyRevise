@@ -33,25 +33,25 @@ async function deleteQBQuestion(id) { if (!(await customConfirm('Xóa câu hỏi
 
 async function showImportFromExamModal() {
     const exams = await api('/api/exams');
-    if (!exams.length) { alert('Chưa có đề thi nào!'); return; }
+    if (!exams.length) { showToast('Chưa có đề thi nào!', 'warning'); return; }
     document.getElementById('importExamModal')?.remove();
     const m = document.createElement('div'); m.id = 'importExamModal'; m.className = 'modal-overlay active'; m.style.cssText = 'display:flex;';
     m.innerHTML = `<div class="glass-panel modal-content" style="max-width:460px;"><h3 style="margin-bottom:1rem;">📥 Import câu hỏi từ đề thi</h3><select id="importExamSelect" class="form-input" style="margin-bottom:1rem;">${exams.map(e => `<option value="${e.id}">${escapeHtml(e.title)} (${escapeHtml(e.subject)}, ${e.totalQuestions} câu)</option>`).join('')}</select><div style="display:flex;gap:0.75rem;justify-content:flex-end;"><button class="btn btn-sm btn-ghost" onclick="document.getElementById('importExamModal').remove()">Hủy</button><button class="btn btn-sm btn-success" onclick="doImportFromExam()">📥 Import</button></div></div>`;
     document.body.appendChild(m); m.addEventListener('click', e => { if (e.target === m) m.remove(); });
 }
 
-async function doImportFromExam() { const examId = document.getElementById('importExamSelect').value; const res = await api('/api/admin/questions/import-from-exam', 'POST', { examId }); document.getElementById('importExamModal')?.remove(); if (res.success) { alert(`✅ Đã import ${res.imported} câu hỏi! Tổng: ${res.total}`); loadQuestionBank(); } else { alert('❌ Lỗi: ' + (res.error || 'Không rõ')); } }
+async function doImportFromExam() { const examId = document.getElementById('importExamSelect').value; const res = await api('/api/admin/questions/import-from-exam', 'POST', { examId }); document.getElementById('importExamModal')?.remove(); if (res.success) { showToast(`Đã import ${res.imported} câu hỏi! Tổng: ${res.total}`, 'success'); loadQuestionBank(); } else { showToast('Lỗi: ' + (res.error || 'Không rõ'), 'error'); } }
 
 async function showGenerateExamFromBankModal() {
     const ids = getSelectedQBIds();
-    if (!ids.length) { alert('⚠️ Vui lòng chọn ít nhất 1 câu hỏi!'); return; }
+    if (!ids.length) { showToast('Vui lòng chọn ít nhất 1 câu hỏi!', 'warning'); return; }
     document.getElementById('genExamModal')?.remove();
     const m = document.createElement('div'); m.id = 'genExamModal'; m.className = 'modal-overlay active'; m.style.cssText = 'display:flex;';
     m.innerHTML = `<div class="glass-panel modal-content" style="max-width:460px;"><h3 style="margin-bottom:1rem;">🎲 Tạo đề từ ${ids.length} câu đã chọn</h3><div style="display:flex;flex-direction:column;gap:0.75rem;"><input id="genExamTitle" class="form-input" placeholder="Tên đề" value="Đề từ Ngân hàng"><input id="genExamSubject" class="form-input" placeholder="Môn học"><input id="genExamTime" class="form-input" type="number" placeholder="Thời gian (phút)" value="60"></div><div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1rem;"><button class="btn btn-sm btn-ghost" onclick="document.getElementById('genExamModal').remove()">Hủy</button><button class="btn btn-sm btn-primary" onclick="doGenerateExamFromBank()">🎲 Tạo đề</button></div></div>`;
     document.body.appendChild(m); m.addEventListener('click', e => { if (e.target === m) m.remove(); });
 }
 
-async function doGenerateExamFromBank() { const ids = getSelectedQBIds(); const title = document.getElementById('genExamTitle').value.trim() || 'Đề từ Ngân hàng'; const subject = document.getElementById('genExamSubject').value.trim(); const timeLimit = parseInt(document.getElementById('genExamTime').value) || 60; const res = await api('/api/admin/questions/generate-exam', 'POST', { questionIds: ids, title, subject, timeLimit }); document.getElementById('genExamModal')?.remove(); if (res.success) { alert(`✅ Đã tạo đề "${res.title}"!`); switchTab('exams'); } else { alert('❌ Lỗi: ' + (res.error || 'Không rõ')); } }
+async function doGenerateExamFromBank() { const ids = getSelectedQBIds(); const title = document.getElementById('genExamTitle').value.trim() || 'Đề từ Ngân hàng'; const subject = document.getElementById('genExamSubject').value.trim(); const timeLimit = parseInt(document.getElementById('genExamTime').value) || 60; const res = await api('/api/admin/questions/generate-exam', 'POST', { questionIds: ids, title, subject, timeLimit }); document.getElementById('genExamModal')?.remove(); if (res.success) { showToast(`Đã tạo đề "${res.title}"!`, 'success'); switchTab('exams'); } else { showToast('Lỗi: ' + (res.error || 'Không rõ'), 'error'); } }
 
 // AI Extract Questions from PDF/Images
 function showAIExtractModal() {
@@ -63,7 +63,7 @@ function showAIExtractModal() {
 
 async function doAIExtract() {
     const files = document.getElementById('aiExtractFiles').files;
-    if (!files.length) { alert('Vui lòng chọn file!'); return; }
+    if (!files.length) { showToast('Vui lòng chọn file!', 'warning'); return; }
     const subject = document.getElementById('aiExtractSubject').value.trim();
     const tags = document.getElementById('aiExtractTags').value.trim();
     const status = document.getElementById('aiExtractStatus');
@@ -89,10 +89,10 @@ async function doAIExtract() {
 
 async function importExtractedQuestions() {
     const checked = [...document.querySelectorAll('.extract-check:checked')].map(c => parseInt(c.value));
-    if (!checked.length) { alert('Chưa chọn câu nào!'); return; }
+    if (!checked.length) { showToast('Chưa chọn câu nào!', 'warning'); return; }
     const toImport = checked.map(i => _extractedQuestions[i]);
     for (const q of toImport) { await api('/api/admin/questions', 'POST', q); }
-    alert(`✅ Đã import ${toImport.length} câu vào Ngân hàng!`);
+    showToast(`Đã import ${toImport.length} câu vào Ngân hàng!`, 'success');
     document.getElementById('aiExtractModal')?.remove();
     _extractedQuestions = [];
     loadQuestionBank();

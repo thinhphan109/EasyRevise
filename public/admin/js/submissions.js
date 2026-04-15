@@ -52,7 +52,7 @@ function exportSubmissionsCSV(examId) {
         a.download = `ket_qua_${examId || 'all'}.csv`;
         a.click();
         URL.revokeObjectURL(url);
-    }).catch(err => alert('Lỗi tải CSV: ' + err.message));
+    }).catch(err => showToast('Lỗi tải CSV: ' + err.message, 'error'));
 }
 
 function renderSubmissions(submissions) {
@@ -142,7 +142,7 @@ async function aiGradeEssay(examId, code, userId, questionId, si, ei) {
         const statusEl = document.getElementById(`reviewStatus_${key}`);
         if (statusEl) { statusEl.style.display = 'block'; statusEl.textContent = `✅ AI chấm: ${result.score}/${result.maxScore || 10}`; }
     } catch (err) {
-        alert('❌ Lỗi AI chấm: ' + (err.message || err));
+        showToast('Lỗi AI chấm: ' + (err.message || err), 'error');
         if (btn) { btn.disabled = false; btn.textContent = '🤖 AI chấm điểm'; }
     }
 }
@@ -162,6 +162,6 @@ async function reviewSubmission(examId, code, userId, questionId, key) {
         if (statusEl) { statusEl.style.display = 'block'; statusEl.textContent = '✅ Đã lưu điểm giáo viên!'; }
         setTimeout(() => { if (statusEl) statusEl.style.display = 'none'; }, 3000);
     } catch (err) {
-        alert('❌ Lỗi lưu điểm: ' + (err.message || err));
+        showToast('Lỗi lưu điểm: ' + (err.message || err), 'error');
     }
 }

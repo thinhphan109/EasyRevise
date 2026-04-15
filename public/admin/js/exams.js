@@ -60,24 +60,25 @@ function renderFilteredExams() {
 }
 
 async function duplicateExam(examId) {
-    if (!confirm('Nhân bản đề thi này? Đề mới sẽ không có mã kích hoạt.')) return;
+    if (!(await customConfirm('Nhân bản đề thi', 'Đề mới sẽ không có mã kích hoạt. Tiếp tục?', 'Nhân bản'))) return;
     const res = await api(`/api/admin/exams/${examId}/duplicate`, 'POST');
-    if (res.success) { alert(`✅ Đã tạo bản sao: "${res.title}"`); loadExamList(); }
-    else { alert('❌ Lỗi: ' + (res.error || 'Không rõ')); }
+    if (res.success) { showToast(`Đã tạo bản sao: "${res.title}"`, 'success'); loadExamList(); }
+    else { showToast('Lỗi: ' + (res.error || 'Không rõ'), 'error'); }
 }
 
 async function copySectionTo(sectionId) {
     const exams = await api('/api/exams');
     const others = exams.filter(e => e.id !== currentExamId);
-    if (!others.length) { alert('Không có đề khác để copy vào!'); return; }
+    if (!others.length) { showToast('Không có đề khác để copy vào!', 'warning'); return; }
     const opts = others.map((e, i) => `${i + 1}. ${e.title}`).join('\n');
-    const choice = prompt(`Chọn đề đích (nhập số):\n${opts}`);
+    const choice = await customPrompt('Copy sang đề khác', `Chọn đề đích (nhập số):\n${opts}`);
+    if (choice === null) return;
     const idx = parseInt(choice) - 1;
-    if (isNaN(idx) || idx < 0 || idx >= others.length) { alert('Hủy hoặc lựa chọn không hợp lệ.'); return; }
+    if (isNaN(idx) || idx < 0 || idx >= others.length) { showToast('Lựa chọn không hợp lệ', 'warning'); return; }
     const targetExam = others[idx];
     const res = await api(`/api/admin/exams/${currentExamId}/copy-section`, 'POST', { sectionId, targetExamId: targetExam.id });
-    if (res.success) { alert(`✅ Đã copy section sang đề "${targetExam.title}"`); }
-    else { alert('❌ Lỗi: ' + (res.error || 'Không rõ')); }
+    if (res.success) { showToast(`Đã copy section sang đề "${targetExam.title}"`, 'success'); }
+    else { showToast('Lỗi: ' + (res.error || 'Không rõ'), 'error'); }
 }
 
 async function openExamEditor(examId) {
@@ -157,9 +158,9 @@ async function saveExam() {
         let result;
         if (editingExamId) result = await api(`/api/exams/${editingExamId}`, 'PUT', body);
         else result = await api('/api/exams', 'POST', body);
-        if (result.error) { alert('❌ Lỗi lưu đề: ' + result.error); return; }
+        if (result.error) { showToast('Lỗi lưu đề: ' + result.error, 'error'); return; }
         closeModal('modalExam'); loadExamList(); if (editingExamId) openExamEditor(editingExamId);
-    } catch (err) { alert('❌ Lỗi kết nối: ' + err.message); }
+    } catch (err) { showToast('Lỗi kết nối: ' + err.message, 'error'); }
 }
 
 async function deleteExam() {
@@ -182,15 +183,15 @@ async function handleImportFile(event) {
         // Support batch format
         if (data._format === 'easyrevise-backup-v1' && Array.isArray(data.exams)) {
             const r = await api('/api/exams/batch-import', 'POST', data);
-            if (r.error) alert('Lỗi: ' + r.error);
-            else { alert(`✅ Import thành công ${r.imported} đề!`); loadExamList(); }
+            if (r.error) showToast('Lỗi: ' + r.error, 'error');
+            else { showToast(`Import thành công ${r.imported} đề!`, 'success'); loadExamList(); }
         } else {
             // Single exam import
             const r = await api('/api/exams/import', 'POST', data);
-            if (r.error) alert('Lỗi: ' + r.error);
-            else { alert('Import OK: ' + r.title); loadExamList(); }
+            if (r.error) showToast('Lỗi: ' + r.error, 'error');
+            else { showToast('Import OK: ' + r.title, 'success'); loadExamList(); }
         }
-    } catch (e) { alert('File lỗi: ' + e.message); }
+    } catch (e) { showToast('File lỗi: ' + e.message, 'error'); }
     event.target.value = '';
 }
 

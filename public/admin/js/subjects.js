@@ -14,4 +14,4 @@ async function loadSubjects() {
 
 function showAddSubjectModal() { document.getElementById('inputSubjectName').value = ''; document.getElementById('inputSubjectIcon').value = '📚'; openModal('modalSubject'); }
 async function saveSubject() { await api('/api/subjects', 'POST', { name: document.getElementById('inputSubjectName').value, icon: document.getElementById('inputSubjectIcon').value }); closeModal('modalSubject'); loadSubjects(); }
-async function deleteSubject(id) { if (!confirm('Xóa môn này?')) return; await api(`/api/subjects/${id}`, 'DELETE'); loadSubjects(); }
+async function deleteSubject(id) { if (!(await customConfirm('Xóa môn học', 'Xóa môn này? Thao tác không thể hoàn tác.', 'Xóa', true))) return; await api(`/api/subjects/${id}`, 'DELETE'); loadSubjects(); }

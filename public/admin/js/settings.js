@@ -25,7 +25,7 @@ async function saveSettings() {
         gradeModel: document.getElementById('settingsGradeModel').value,
         ocrModel: document.getElementById('settingsOcrModel').value
     };
-    if (data.adminPin.length !== 6 || !/^\d{6}$/.test(data.adminPin)) { alert('PIN phải là 6 chữ số'); return; }
+    if (data.adminPin.length !== 6 || !/^\d{6}$/.test(data.adminPin)) { showToast('PIN phải là 6 chữ số', 'warning'); return; }
     await api('/api/settings', 'PUT', data);
     const msg = document.getElementById('settingsSaveStatus');
     msg.style.display = 'inline'; setTimeout(() => { msg.style.display = 'none'; }, 2000);

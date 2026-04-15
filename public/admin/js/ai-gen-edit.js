@@ -31,15 +31,14 @@ function saveAIQuestion(sectionIdx, qIdx) {
 
 async function importAIResult() {
     if (!aiGeneratedData) return;
-    if (!confirm(`Import đề "${aiGeneratedData.exam.title}" vào hệ thống?`)) return;
+    if (!(await customConfirm('Import đề', `Import đề "${aiGeneratedData.exam.title}" vào hệ thống?`, 'Import'))) return;
     try {
         const exam = aiGeneratedData.exam;
         const sections = exam.sections.map((s, i) => ({ id: `ai-sec-${Date.now()}-${i}`, title: s.title || `Phần ${i + 1}`, type: s.type || 'multiple-choice', instruction: s.instruction || '', passage: s.passage || null, prompt: s.prompt || null, context: s.context || null, cues: s.cues || [], sampleAnswer: s.sampleAnswer || null, explanation: s.explanation || null, questions: (s.questions || []).map(q => ({ id: q.id, question: q.question, options: q.options || [], correctAnswer: q.correctAnswer ?? 0, explanation: q.explanation || '', expansion: q.expansion || '', answer: q.answer || '', image: q.image || null, imageUrl: q.imageUrl || null, imageRegion: q.imageRegion || null, table: q.table || null, blanks: q.blanks || null, subParts: q.subParts || null })) }));
         const newExam = await api('/api/exams', 'POST', { title: exam.title || 'Đề AI', subject: exam.subject || 'Chưa phân loại', year: exam.year || '', timeLimit: 0, sections });
-        if (!newExam?.id) { alert('Lỗi tạo đề!'); return; }
-        alert(`✅ Import thành công! Đề "${exam.title}" với ${sections.length} phần đã được thêm.`);
-        switchTab('exams');
-    } catch (err) { alert('❌ Lỗi import: ' + err.message); }
+        if (!newExam?.id) { showToast('Lỗi tạo đề!', 'error'); return; }
+        showToast(`Import thành công! Đề "${exam.title}" với ${sections.length} phần đã được thêm.`, 'success');
+    } catch (err) { showToast('Lỗi import: ' + err.message, 'error'); }
 }
 
 function regenerateAI() { document.getElementById('aiPreview').style.display = 'none'; document.getElementById('aiError').style.display = 'none'; document.getElementById('aiStatus').textContent = ''; generateWithAI(); }

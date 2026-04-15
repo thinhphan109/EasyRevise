@@ -67,5 +67,5 @@ async function saveUser() {
 }
 
 async function toggleRole(id, current) { await api(`/api/users/${id}`, 'PUT', { role: current === 'admin' ? 'student' : 'admin' }); loadUsers(); }
-async function resetPw(id, name) { const pw = prompt(`Mật khẩu mới cho ${name}:`, '1234'); if (!pw) return; const r = await api(`/api/users/${id}/reset-password`, 'PUT', { password: pw }); alert(`Đã reset: ${r.newPassword}`); }
-async function deleteUser(id, name) { if (!confirm(`Xóa "${name}"?`)) return; await api(`/api/users/${id}`, 'DELETE'); loadUsers(); }
+async function resetPw(id, name) { const pw = await customPrompt('Reset mật khẩu', `Mật khẩu mới cho ${name}:`, '1234'); if (!pw) return; const r = await api(`/api/users/${id}/reset-password`, 'PUT', { password: pw }); showToast(`Đã reset mật khẩu: ${r.newPassword}`, 'success'); }
+async function deleteUser(id, name) { if (!(await customConfirm('Xóa người dùng', `Xóa "${name}"? Thao tác này không thể hoàn tác.`, 'Xóa', true))) return; await api(`/api/users/${id}`, 'DELETE'); loadUsers(); }

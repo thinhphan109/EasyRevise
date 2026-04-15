@@ -8,8 +8,8 @@ function showAddQuestionModal() {
     document.getElementById('modalQuestionTitle').textContent = 'Thêm câu hỏi';
     ['inputQuestionText', 'inputOptA', 'inputOptB', 'inputOptC', 'inputOptD', 'inputExplanation', 'inputExpansion', 'inputFreeformAnswer', 'inputQuestionVideo', 'inputExplanationVideo', 'inputQuestionAttachment'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     document.querySelector('input[name="correctOpt"][value="0"]').checked = true;
-    document.getElementById('questionImageImg').style.display = 'none'; document.getElementById('questionImagePreview').textContent = '';
-    document.getElementById('explanationImageImg').style.display = 'none'; document.getElementById('explanationImagePreview').textContent = '';
+    document.getElementById('questionImageContainer').style.display = 'none'; document.getElementById('questionImagePreview').textContent = '';
+    document.getElementById('explanationImageContainer').style.display = 'none'; document.getElementById('explanationImagePreview').textContent = '';
     document.getElementById('toggleMediaAsHint').checked = false;
     document.getElementById('toggleShowExplanation').checked = true;
     document.getElementById('toggleShowExpansion').checked = true;
@@ -52,13 +52,13 @@ function editQuestion(qId) {
     document.getElementById('inputExplanation').value = q.explanation || '';
     document.getElementById('inputExpansion').value = q.expansion || '';
     questionImageUrl = q.image || null;
-    if (questionImageUrl) { document.getElementById('questionImageImg').src = questionImageUrl; document.getElementById('questionImageImg').style.display = 'block'; } else { document.getElementById('questionImageImg').style.display = 'none'; }
+    if (questionImageUrl) { document.getElementById('questionImageImg').src = questionImageUrl; document.getElementById('questionImageContainer').style.display = 'inline-block'; } else { document.getElementById('questionImageContainer').style.display = 'none'; }
     document.getElementById('inputQuestionVideo').value = q.video || '';
     document.getElementById('toggleMediaAsHint').checked = !!q.mediaAsHint;
     document.getElementById('toggleShowExplanation').checked = q.showExplanation !== false;
     document.getElementById('toggleShowExpansion').checked = q.showExpansion !== false;
     explanationImageUrl = q.explanationImage || null;
-    if (explanationImageUrl) { document.getElementById('explanationImageImg').src = explanationImageUrl; document.getElementById('explanationImageImg').style.display = 'block'; } else { document.getElementById('explanationImageImg').style.display = 'none'; }
+    if (explanationImageUrl) { document.getElementById('explanationImageImg').src = explanationImageUrl; document.getElementById('explanationImageContainer').style.display = 'inline-block'; } else { document.getElementById('explanationImageContainer').style.display = 'none'; }
     document.getElementById('inputExplanationVideo').value = q.explanationVideo || '';
     const attachEl = document.getElementById('inputQuestionAttachment');
     if (attachEl) attachEl.value = q.attachment || '';
@@ -134,7 +134,20 @@ async function uploadImageFile(file) {
     const formData = new FormData(); formData.append('image', file);
     const res = await fetch('/api/upload', { method: 'POST', headers: { Authorization: `Bearer ${adminToken}` }, body: formData });
     const data = await res.json();
-    if (data.url) { questionImageUrl = data.url; document.getElementById('questionImageImg').src = data.url; document.getElementById('questionImageImg').style.display = 'block'; document.getElementById('questionImagePreview').textContent = '✅ Đã tải ảnh'; }
+    if (data.url) { questionImageUrl = data.url; document.getElementById('questionImageImg').src = data.url; document.getElementById('questionImageContainer').style.display = 'inline-block'; document.getElementById('questionImagePreview').textContent = '✅ Đã tải ảnh'; }
+}
+
+function removeMainQuestionImage() {
+    questionImageUrl = null;
+    document.getElementById('questionImageContainer').style.display = 'none';
+    document.getElementById('questionImagePreview').textContent = '';
+    document.getElementById('questionImageInput').value = '';
+}
+
+function removeMainExplanationImage() {
+    explanationImageUrl = null;
+    document.getElementById('explanationImageContainer').style.display = 'none';
+    document.getElementById('explanationImagePreview').textContent = '';
 }
 
 async function uploadSingleImage(file) {
@@ -224,7 +237,7 @@ async function uploadExplanationImage(event) {
     const formData = new FormData(); formData.append('image', file);
     const res = await fetch('/api/upload', { method: 'POST', headers: { Authorization: `Bearer ${adminToken}` }, body: formData });
     const data = await res.json();
-    if (data.url) { explanationImageUrl = data.url; document.getElementById('explanationImageImg').src = data.url; document.getElementById('explanationImageImg').style.display = 'block'; document.getElementById('explanationImagePreview').textContent = '✅ Đã tải ảnh'; }
+    if (data.url) { explanationImageUrl = data.url; document.getElementById('explanationImageImg').src = data.url; document.getElementById('explanationImageContainer').style.display = 'inline-block'; document.getElementById('explanationImagePreview').textContent = '✅ Đã tải ảnh'; }
 }
 
 async function pasteImageForOCR(file) {
@@ -297,9 +310,9 @@ async function saveQuestion() {
         let result;
         if (editingQuestionId) result = await api(`/api/exams/${currentExamId}/sections/${currentSectionId}/questions/${editingQuestionId}`, 'PUT', body);
         else result = await api(`/api/exams/${currentExamId}/sections/${currentSectionId}/questions`, 'POST', body);
-        if (result.error) { alert('❌ Lỗi lưu câu hỏi: ' + result.error); return; }
+        if (result.error) { showToast('Lỗi lưu câu hỏi: ' + result.error, 'error'); return; }
         closeModal('modalQuestion'); currentExamData = await api(`/api/exams/${currentExamId}`); openSectionEditor(currentSectionId);
-    } catch (err) { alert('❌ Lỗi kết nối: ' + err.message); }
+    } catch (err) { showToast('Lỗi kết nối: ' + err.message, 'error'); }
 }
 
 async function deleteQuestion(qId) { if (!(await customConfirm('⚠️ Xóa câu hỏi?', 'Câu hỏi này sẽ bị xóa vĩnh viễn.', 'Xóa câu', true))) return; await api(`/api/exams/${currentExamId}/sections/${currentSectionId}/questions/${qId}`, 'DELETE'); currentExamData = await api(`/api/exams/${currentExamId}`); openSectionEditor(currentSectionId); }

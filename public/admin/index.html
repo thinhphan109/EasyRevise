@@ -23,6 +23,7 @@
 </head>
 
 <body>
+    <div id="adminToastContainer" class="admin-toast-container"></div>
     <div class="container" style="max-width:1100px;">
         <!-- Login Gate -->
         <div id="loginGate" class="login-gate" style="display:none;">
@@ -1036,7 +1037,10 @@
                         style="padding:0.35rem 0.85rem;font-size:0.82rem;">📷 Ảnh chính</button>
                     <span id="questionImagePreview" style="font-size:0.8rem;color:var(--text-muted);"></span>
                 </div>
-                <img id="questionImageImg" style="display:none;max-width:200px;margin-top:0.5rem;border-radius:8px;">
+                <div class="main-image-container" id="questionImageContainer" style="display:none;">
+                    <img id="questionImageImg" style="max-width:200px;border-radius:8px;">
+                    <button type="button" class="img-delete-btn" onclick="removeMainQuestionImage()" title="Xóa ảnh chính">×</button>
+                </div>
                 <!-- Multi-image for question -->
                 <div
                     style="margin-top:0.75rem;padding:0.75rem;background:var(--bg-body);border:1px dashed var(--border);border-radius:10px;">
@@ -1090,7 +1094,10 @@
                         style="padding:0.35rem 0.85rem;font-size:0.82rem;">📷 Ảnh chính</button>
                     <span id="explanationImagePreview" style="font-size:0.8rem;color:var(--text-muted);"></span>
                 </div>
-                <img id="explanationImageImg" style="display:none;max-width:200px;margin-top:0.5rem;border-radius:8px;">
+                <div class="main-image-container" id="explanationImageContainer" style="display:none;">
+                    <img id="explanationImageImg" style="max-width:200px;border-radius:8px;">
+                    <button type="button" class="img-delete-btn" onclick="removeMainExplanationImage()" title="Xóa ảnh giải thích">×</button>
+                </div>
                 <!-- Multi-image for explanation -->
                 <div
                     style="margin-top:0.75rem;padding:0.75rem;background:var(--bg-body);border:1px dashed var(--border);border-radius:10px;">

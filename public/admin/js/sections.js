@@ -99,9 +99,9 @@ async function saveSection() {
         let result;
         if (editingSectionId) result = await api(`/api/exams/${currentExamId}/sections/${editingSectionId}`, 'PUT', body);
         else result = await api(`/api/exams/${currentExamId}/sections`, 'POST', body);
-        if (result.error) { alert('❌ Lỗi lưu phần: ' + result.error); return; }
+        if (result.error) { showToast('Lỗi lưu phần: ' + result.error, 'error'); return; }
         closeModal('modalSection'); await openExamEditor(currentExamId);
-    } catch (err) { alert('❌ Lỗi kết nối: ' + err.message); }
+    } catch (err) { showToast('Lỗi kết nối: ' + err.message, 'error'); }
 }
 
 async function deleteSection() { if (!(await customConfirm('⚠️ Xóa phần này?', 'Tất cả câu hỏi trong phần này sẽ bị xóa vĩnh viễn.', 'Xóa phần', true))) return; await api(`/api/exams/${currentExamId}/sections/${currentSectionId}`, 'DELETE'); await openExamEditor(currentExamId); }

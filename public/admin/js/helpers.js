@@ -112,3 +112,44 @@ function customConfirm(title, message, confirmText = 'Xác nhận', danger = fal
         m.addEventListener('click', e => { if (e.target === m) { m.remove(); resolve(false); } });
     });
 }
+
+// Custom Prompt Modal (replaces browser prompt())
+function customPrompt(title, message, defaultValue = '') {
+    return new Promise(resolve => {
+        document.getElementById('customPromptModal')?.remove();
+        const m = document.createElement('div');
+        m.id = 'customPromptModal';
+        m.className = 'modal-overlay active';
+        m.style.cssText = 'display:flex;z-index:10001;';
+        m.innerHTML = `<div class="glass-panel modal-content" style="max-width:420px;text-align:center;">
+            <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:0.75rem;">${title}</h3>
+            <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.5;margin-bottom:1rem;">${message}</p>
+            <input type="text" class="form-input" id="cpmInput" value="${escapeHtml(defaultValue)}" style="margin-bottom:1.25rem;text-align:center;">
+            <div style="display:flex;gap:0.75rem;justify-content:center;">
+                <button class="btn btn-sm btn-ghost" id="cpmCancel" style="min-width:80px;">Hủy</button>
+                <button class="btn btn-sm btn-primary" id="cpmConfirm" style="min-width:80px;">OK</button>
+            </div>
+        </div>`;
+        document.body.appendChild(m);
+        const inp = m.querySelector('#cpmInput');
+        setTimeout(() => { inp.focus(); inp.select(); }, 50);
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') { m.remove(); resolve(inp.value); } });
+        m.querySelector('#cpmCancel').onclick = () => { m.remove(); resolve(null); };
+        m.querySelector('#cpmConfirm').onclick = () => { m.remove(); resolve(inp.value); };
+        m.addEventListener('click', e => { if (e.target === m) { m.remove(); resolve(null); } });
+    });
+}
+
+// Toast notification (replaces browser alert())
+function showToast(message, type = 'info', duration = 4000) {
+    const container = document.getElementById('adminToastContainer');
+    if (!container) { console.warn('Toast:', message); return; }
+    const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+    const toast = document.createElement('div');
+    toast.className = `admin-toast toast-${type}`;
+    toast.innerHTML = `<span class="toast-icon">${icons[type] || icons.info}</span><span class="toast-msg">${escapeHtml(message)}</span><button class="toast-close" onclick="this.parentElement.classList.add('toast-exit');setTimeout(()=>this.parentElement.remove(),250)">×</button>`;
+    container.appendChild(toast);
+    if (duration > 0) setTimeout(() => { if (toast.parentElement) { toast.classList.add('toast-exit'); setTimeout(() => toast.remove(), 250); } }, duration);
+    // Keep max 5 toasts
+    while (container.children.length > 5) container.removeChild(container.firstChild);
+}
