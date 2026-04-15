@@ -60,7 +60,7 @@ function adminLogout() { localStorage.removeItem('easyrevise_token'); localStora
 
 // Tabs
 function switchTab(tab) {
-    const tabs = ['exams', 'users', 'subjects', 'codeLogs', 'submissions', 'questionBank', 'settings', 'aiGen', 'help', 'media'];
+    const tabs = ['exams', 'users', 'subjects', 'codeLogs', 'submissions', 'questionBank', 'settings', 'aiGen', 'help', 'media', 'activation'];
     document.querySelectorAll('.tab-item').forEach((t, i) => { t.classList.toggle('active', tabs[i] === tab); });
     tabs.forEach(t => { const el = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)); if (el) el.classList.toggle('active', t === tab); });
     if (tab === 'exams') { showView('viewExamList'); loadExamList(); }
@@ -91,6 +91,7 @@ function switchTab(tab) {
             if (lastSuccess) { aiGeneratedData = lastSuccess.data; renderAIPreview(aiGeneratedData); document.getElementById('aiPreview').style.display = 'block'; }
         }
     }
+    if (tab === 'activation') loadActivationCodes();
 }
 
 // Section type change listener

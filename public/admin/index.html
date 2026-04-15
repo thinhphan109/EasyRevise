@@ -104,6 +104,7 @@
                 <div class="tab-item" onclick="switchTab('settings')">⚙️ Cài đặt</div>
                 <div class="tab-item" onclick="switchTab('help')" style="color:#0369a1;">📖 Hướng dẫn</div>
                 <div class="tab-item" onclick="switchTab('media')" style="color:#0891b2;">📁 Kho Media</div>
+                <div class="tab-item" onclick="switchTab('activation')" style="color:#7c3aed;">🔑 Mã KH</div>
                 <div class="tab-item" onclick="switchTab('aiGen')"
                     style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border-radius:8px;margin-left:auto;padding:0.6rem 1.2rem;">
                     🤖 AI Tạo Đề</div>
@@ -675,6 +676,17 @@
                 </div>
             </div>
 
+            <!-- TAB: Activation Codes -->
+            <div id="tabActivation" class="view">
+                <div class="admin-section-header">
+                    <h2 style="font-size:1.5rem;font-weight:700;">🔑 Mã kích hoạt</h2>
+                    <button class="btn btn-primary" onclick="showGenerateCodesModal()">+ Tạo mã mới</button>
+                </div>
+                <div id="activationContainer">
+                    <div class="empty-state"><div class="emoji">🔑</div><p>Đang tải...</p></div>
+                </div>
+            </div>
+
             <!-- TAB: AI Generator -->
             <div id="tabAiGen" class="view">
                 <h2 style="font-size:1.5rem;font-weight:700;margin-bottom:0.5rem;">🤖 AI Tạo Đề Thi</h2>
@@ -817,6 +829,21 @@
     </div>
 
     <!-- MODALS -->
+    <!-- Generate Activation Codes Modal -->
+    <div id="modalGenerateCodes" class="modal-overlay">
+        <div class="glass-panel modal-content" style="max-width:450px;">
+            <h3 style="font-size:1.25rem;font-weight:700;margin-bottom:1.5rem;">🔑 Tạo mã kích hoạt</h3>
+            <div class="form-group"><label>Tiền tố (Prefix)</label><input id="genCodePrefix" class="form-input" placeholder="VD: ENGL-6A1"></div>
+            <div class="form-group"><label>Tên batch</label><input id="genCodeBatch" class="form-input" placeholder="VD: Lớp 6A1 - HK2 2026"></div>
+            <div class="form-group"><label>Số lượng mã</label><input id="genCodeCount" class="form-input" type="number" min="1" max="500" value="10" style="max-width:150px;"></div>
+            <div class="form-group"><label>Hạn sử dụng (tùy chọn)</label><input id="genCodeExpiry" class="form-input" type="date"></div>
+            <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:1.5rem;">
+                <button class="btn btn-ghost" onclick="closeModal('modalGenerateCodes')">Hủy</button>
+                <button class="btn btn-primary" onclick="generateActivationCodes()">🔑 Tạo mã</button>
+            </div>
+        </div>
+    </div>
+
     <div id="modalExam" class="modal-overlay">
         <div class="glass-panel modal-content">
             <h3 id="modalExamTitle" style="font-size:1.25rem;font-weight:700;margin-bottom:2rem;">Tạo đề mới</h3>
@@ -1185,6 +1212,7 @@
     <script src="/admin/js/question-bank.js"></script>
     <!-- 3b. Media Library module -->
     <script src="/admin/js/media-library.js"></script>
+    <script src="/admin/js/activation.js"></script>
     <!-- 4. Entry point: auth, tabs, init (must be last) -->
     <script src="/admin/js/admin-main.js"></script>
 </body>

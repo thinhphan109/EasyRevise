@@ -97,6 +97,11 @@ app.use('/api', require('./routes/stats'));
 // Exam Admin (Duplicate + Copy Section)
 app.use('/api/admin', require('./routes/exams-admin'));
 
+// Activation Codes (Admin + Public verify)
+const activationRouter = require('./routes/activation');
+app.use('/api/admin/activation', activationRouter);  // admin endpoints
+app.use('/api/activation', activationRouter);          // /api/activation/verify (public)
+
 // ========================
 // SPA fallback
 // ========================

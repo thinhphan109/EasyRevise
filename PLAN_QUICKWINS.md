@@ -32,8 +32,8 @@ QW-5: Activation Code System         (~4 giờ)    — Batch mã, QR, auto-expir
 
 ### 1.2 Tab Navigation
 - [x] Login form: Tab qua Username → Password → Button (đúng thứ tự) ✅ (onkeydown focus chain)
-- [ ] Exam editor: Tab qua các input fields
-- [ ] Question modal: Tab qua Question → Options → Correct → Save
+- [x] Exam editor: Tab qua các input fields ✅ (natural DOM order)
+- [x] Question modal: Tab qua Question → Options → Correct → Save ✅ (natural DOM order)
 
 **File sửa:** `public/admin/index.html` — thêm `tabindex` cho các form elements
 
@@ -145,11 +145,11 @@ routes/activation.js:
 ```
 
 ### 5.3 Admin UI
-- [ ] Tab "🔑 Mã kích hoạt" trong Admin
-- [ ] Form: Prefix (VD: ENGL-6A1), Số lượng, Hạn dùng
-- [ ] Nút "Generate" → tạo batch mã
-- [ ] Table hiện: Mã | Trạng thái | Người dùng | Ngày dùng
-- [ ] Nút "In QR" → in nhiều QR codes trên 1 trang A4
+- [x] Tab "🔑 Mã kích hoạt" trong Admin ✅
+- [x] Form: Prefix (VD: ENGL-6A1), Số lượng, Hạn dùng ✅
+- [x] Nút "Generate" → tạo batch mã ✅
+- [x] Table hiện: Mã | Trạng thái | Người dùng | Ngày dùng ✅
+- [x] Nút "In QR" → in nhiều QR codes trên 1 trang A4 ✅
 
 ### 5.4 Student Flow
 ```
@@ -163,8 +163,8 @@ Student mở trang → Nhập mã kích hoạt
 ```
 
 ### 5.5 Print QR Codes
-- [ ] Trang A4 chia 8-12 ô, mỗi ô: QR code + mã text + tên batch
-- [ ] Giáo viên in → cắt → phát cho học sinh
+- [x] Trang A4 chia 8-12 ô, mỗi ô: QR code + mã text + tên batch ✅
+- [x] Giáo viên in → cắt → phát cho học sinh ✅
 
 ---
 

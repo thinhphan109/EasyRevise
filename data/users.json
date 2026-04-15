@@ -9,6 +9,27 @@
       "token": "ZjU3Zjc5MGYtYjYxNS00YTJmLWJiNmYtNGQ4MDQyMzEyZTA1OjE3NzYxNDUyOTc3OTA6ZGEwMGY3MDRiM2FlNzk0YTExNmNkY2E2NTJlNTM5YTk=",
       "history": [
         {
+          "examId": "8fc27f2f-dffa-49c4-b640-8797b3a07e42",
+          "score": "—",
+          "correct": 0,
+          "incorrect": 0,
+          "skipped": 0,
+          "total": 0,
+          "results": [
+            {
+              "id": "caf3580d-de39-4b3d-9983-0918fbf6d2bc",
+              "userAnswer": "",
+              "attachments": [],
+              "isCorrect": null,
+              "isEssay": true
+            }
+          ],
+          "examTitle": "ESSAY WRITING",
+          "timestamp": "07:47:39 15/4/2026",
+          "timeSpent": 555805,
+          "autoSubmitted": false
+        },
+        {
           "examId": "b599524f-0afb-4d46-a6d1-2b1eac935fff",
           "score": "—",
           "correct": 0,
