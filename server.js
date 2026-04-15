@@ -94,6 +94,9 @@ app.use('/api', require('./routes/settings'));
 // Stats (Code logs at /api, CSV export + exam stats at /api)
 app.use('/api', require('./routes/stats'));
 
+// FaceHash Avatars (deterministic SVG avatars)
+app.use('/api', require('./routes/avatar'));
+
 // Exam Admin (Duplicate + Copy Section)
 app.use('/api/admin', require('./routes/exams-admin'));
 

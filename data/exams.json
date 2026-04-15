@@ -9477,5 +9477,57 @@
       "createdAt": "2026-04-14T05:26:09.923Z",
       "updatedAt": "2026-04-14T05:26:22.473Z"
     }
+  ],
+  "activationCodes": [
+    {
+      "id": "ddcd595f-2948-4a3e-8ece-3c9de7d71cb4",
+      "code": "CODE-011-MCTV",
+      "batchName": "Batch 2026-04-15",
+      "studentName": null,
+      "studentId": null,
+      "expiresAt": null,
+      "usedAt": null,
+      "createdAt": "2026-04-15T00:51:44.275Z"
+    },
+    {
+      "id": "89c4f365-1051-4b03-9962-01873418090c",
+      "code": "CODE-013-X9MZ",
+      "batchName": "Batch 2026-04-15",
+      "studentName": null,
+      "studentId": null,
+      "expiresAt": null,
+      "usedAt": null,
+      "createdAt": "2026-04-15T00:51:44.275Z"
+    },
+    {
+      "id": "5a8b4bd8-04be-4b8e-9acd-37629fcf9acc",
+      "code": "CODE-015-493V",
+      "batchName": "Batch 2026-04-15",
+      "studentName": null,
+      "studentId": null,
+      "expiresAt": null,
+      "usedAt": null,
+      "createdAt": "2026-04-15T00:51:44.275Z"
+    },
+    {
+      "id": "9e0076bc-b563-4f2e-9bc3-0cc37b10428c",
+      "code": "CODE-017-LNP8",
+      "batchName": "Batch 2026-04-15",
+      "studentName": null,
+      "studentId": null,
+      "expiresAt": null,
+      "usedAt": null,
+      "createdAt": "2026-04-15T00:51:44.275Z"
+    },
+    {
+      "id": "c1f0d2ce-e90f-4a4a-98aa-76bc79ef9178",
+      "code": "CODE-019-4ESJ",
+      "batchName": "Batch 2026-04-15",
+      "studentName": null,
+      "studentId": null,
+      "expiresAt": null,
+      "usedAt": null,
+      "createdAt": "2026-04-15T00:51:44.275Z"
+    }
   ]
 }

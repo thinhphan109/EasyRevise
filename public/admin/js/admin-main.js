@@ -14,6 +14,7 @@ async function checkAdminAuth() {
         if (!pinSession.expiry || Date.now() >= pinSession.expiry) { localStorage.removeItem('easyrevise_admin_pin_session'); return showPinGate(); }
         adminUser = user;
         document.getElementById('adminName').textContent = user.displayName;
+        const avEl = document.getElementById('adminAvatar'); if (avEl) { avEl.src = `/api/avatar?name=${encodeURIComponent(user.username)}&size=32`; avEl.style.display = 'block'; }
         document.getElementById('loginGate').style.display = 'none';
         document.getElementById('adminMain').style.display = 'block';
         loadExamList();
