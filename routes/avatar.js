@@ -45,7 +45,16 @@ router.get('/avatar', async (req, res) => {
             size: Math.min(Math.max(size, 16), 256), // clamp 16-256
         });
 
-        const svg = _renderToStaticMarkup(element);
+        const reactHtml = _renderToStaticMarkup(element);
+
+        // Wrap the HTML output in a valid SVG envelope using foreignObject
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">
+            <foreignObject width="100%" height="100%">
+                <div xmlns="http://www.w3.org/1999/xhtml" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;">
+                    ${reactHtml}
+                </div>
+            </foreignObject>
+        </svg>`;
 
         // Cache result
         if (svgCache.size >= MAX_CACHE) {
