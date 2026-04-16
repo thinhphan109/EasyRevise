@@ -61,8 +61,15 @@ function adminLogout() { localStorage.removeItem('easyrevise_token'); localStora
 
 // Tabs
 function switchTab(tab) {
-    const tabs = ['exams', 'users', 'subjects', 'codeLogs', 'submissions', 'questionBank', 'settings', 'aiGen', 'help', 'media', 'activation'];
-    document.querySelectorAll('.tab-item').forEach((t, i) => { t.classList.toggle('active', tabs[i] === tab); });
+    const tabs = ['exams', 'users', 'subjects', 'codeLogs', 'submissions', 'questionBank', 'settings', 'help', 'media', 'activation', 'aiGen'];
+    // Clear all tab-item active states (including AI button outside tab-bar)
+    document.querySelectorAll('.tab-bar .tab-item, .tab-ai-btn').forEach(el => el.classList.remove('active'));
+    // Set active on the right tab item by index within .tab-bar
+    const tabItems = document.querySelectorAll('.tab-bar .tab-item');
+    const idx = tabs.indexOf(tab);
+    if (idx >= 0 && idx < tabItems.length) tabItems[idx].classList.add('active');
+    // Handle AI button separately
+    if (tab === 'aiGen') { const aiBtn = document.querySelector('.tab-ai-btn'); if (aiBtn) aiBtn.classList.add('active'); }
     tabs.forEach(t => { const el = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)); if (el) el.classList.toggle('active', t === tab); });
     if (tab === 'exams') { showView('viewExamList'); loadExamList(); }
     if (tab === 'users') loadUsers();
