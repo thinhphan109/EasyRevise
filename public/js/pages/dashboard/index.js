@@ -51,14 +51,12 @@ document.addEventListener('DOMContentLoaded', async () => {
  * Render profile card
  */
 function renderProfile(user, stats) {
-    const initials = (user.displayName || '?')
-        .split(' ')
-        .map(w => w[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2);
+    // Set FaceHash avatar
+    const avatarEl = document.getElementById('profileAvatar');
+    const avatarName = user.username || user.displayName || 'anonymous';
+    avatarEl.src = `/api/avatar?name=${encodeURIComponent(avatarName)}&size=64`;
+    avatarEl.alt = user.displayName || 'Avatar';
 
-    document.getElementById('profileAvatar').textContent = initials;
     document.getElementById('profileName').textContent = user.displayName;
 
     const joinDate = user.joinedAt

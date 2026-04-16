@@ -50,14 +50,9 @@
     width: 56px;
     height: 56px;
     border-radius: var(--radius-full);
-    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: var(--text-xl);
-    font-weight: 800;
+    object-fit: cover;
     flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
 }
 
 .profile-name {

@@ -143,6 +143,7 @@ function updateAuthUI() {
     if (!area) return;
     if (currentUser) {
         const initial = (currentUser.displayName || currentUser.username).charAt(0).toUpperCase();
+        const avatarName = encodeURIComponent(currentUser.username || currentUser.displayName || 'anonymous');
         const isAdmin = currentUser.role === 'admin';
         const adminBtn = isAdmin
             ? `<a href="javascript:void(0)" onclick="goAdmin()" class="btn btn-sm" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-radius:10px;">⚙️ Admin</a>`
@@ -150,7 +151,7 @@ function updateAuthUI() {
         area.innerHTML = `
             <div class="flex items-center gap-3">
                 ${adminBtn}
-                <a href="/dashboard.html" class="user-avatar" title="Dashboard">${initial}</a>
+                <a href="/dashboard.html" class="user-avatar" title="Dashboard"><img src="/api/avatar?name=${avatarName}&size=40" style="width:100%;height:100%;border-radius:inherit;" alt="${initial}"></a>
                 <div>
                     <a href="/dashboard.html" class="font-semibold text-sm" style="color:inherit;text-decoration:none;">${escapeHtml(currentUser.displayName)}</a>
                     <button class="text-muted text-xs" style="background:none;border:none;cursor:pointer;padding:0;" onclick="logout()">Đăng xuất</button>
