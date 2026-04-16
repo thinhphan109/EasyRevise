@@ -72,7 +72,7 @@
                     <span class="admin-badge">Quản trị</span>
                 </div>
                 <div style="display:flex;align-items:center;gap:0.75rem;">
-                    <img id="adminAvatar" src="/api/avatar?name=admin&size=32" style="width:32px;height:32px;border-radius:50%;display:none;">
+                    <span id="adminAvatar" class="facehash-inline" data-name="admin" data-size="32" style="display:none;"></span>
                     <span id="adminName" style="font-size:0.85rem;color:var(--text-muted);"></span>
                     <!-- Notification Bell -->
                     <div style="position:relative;">
@@ -107,7 +107,7 @@
                 <div class="tab-item" onclick="switchTab('media')" style="color:#0891b2;">📁 Kho Media</div>
                 <div class="tab-item" onclick="switchTab('activation')" style="color:#7c3aed;">🔑 Mã KH</div>
                 <div class="tab-item" onclick="switchTab('aiGen')"
-                    style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border-radius:8px;margin-left:auto;padding:0.6rem 1.2rem;">
+                    style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border-radius:8px;padding:0.6rem 1.2rem;">
                     🤖 AI Tạo Đề</div>
             </div>
 
@@ -169,10 +169,12 @@
             <div id="tabQuestionBank" class="view">
                 <div class="glass-panel">
                     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:0.75rem;">
-                        <h2>📚 Ngân hàng câu hỏi</h2>
+                        <h2 style="font-size:1.5rem;font-weight:700;">📚 Ngân hàng câu hỏi</h2>
                         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-                            <button class="btn btn-sm btn-success" onclick="showImportFromExamModal()">📥 Import từ đề</button><button class="btn btn-sm btn-outline" onclick="showAIExtractModal()" style="border-color:#8b5cf6;color:#8b5cf6;">🤖 AI Bóc tách</button>
-                            <button class="btn btn-sm btn-primary" onclick="showGenerateExamFromBankModal()">🎲 Tạo đề từ kho</button>
+                            <button class="btn btn-sm" onclick="showImportFromExamModal()" style="background:#10b981;color:white;border:none;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><path d="M12 5v14M5 12l7 7 7-7"/></svg>Import từ đề</button>
+                            <button class="btn btn-sm btn-outline" onclick="showAIExtractModal()" style="border-color:#8b5cf6;color:#8b5cf6;">🤖 AI Bóc tách</button>
+                            <button class="btn btn-sm" onclick="showGenerateExamFromBankModal()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border:none;">🎲 Tạo đề từ kho</button>
                         </div>
                     </div>
                     <div id="qbFilterBar" style="display:flex;gap:0.5rem;margin-bottom:1rem;align-items:center;flex-wrap:wrap;">

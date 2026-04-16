@@ -109,7 +109,7 @@ function renderSubmissions(submissions) {
                  style="display:flex;align-items:flex-start;gap:0.75rem;cursor:pointer;user-select:none;">
                 <span class="sub-chevron" style="margin-top:0.2rem;font-size:0.72rem;color:var(--text-muted);flex-shrink:0;">▶</span>
                 <div style="flex:1;min-width:0;">
-                    <div class="submission-name"><img src="/api/avatar?name=${encodeURIComponent(sub.userId)}&size=24" style="width:24px;height:24px;border-radius:50%;vertical-align:middle;margin-right:0.35rem;"> ${escapeHtml(sub.displayName || sub.userId)}</div>
+                    <div class="submission-name"><span class="facehash-inline" data-name="${encodeURIComponent(sub.userId)}" data-size="24"></span> ${escapeHtml(sub.displayName || sub.userId)}</div>
                     <div class="submission-meta">🎫 ${sub.code ? `Mã: <strong>${escapeHtml(sub.code)}</strong>` : '<span style="color:var(--success);">🔓 Đề mở (không cần mã)</span>'} &nbsp;|&nbsp; 📝 ${escapeHtml(sub.examTitle)}</div>
                     <div class="submission-meta">⏰ Nộp: ${time} &nbsp;|&nbsp; 📊 MC: ${sub.mcScore !== null ? sub.mcScore + '/10' : '—'}</div>
                 </div>

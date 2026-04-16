@@ -153,3 +153,44 @@ function showToast(message, type = 'info', duration = 4000) {
     // Keep max 5 toasts
     while (container.children.length > 5) container.removeChild(container.firstChild);
 }
+
+// ── FaceHash inline avatar loader ──────────────────────────────────
+// Finds all .facehash-inline spans and loads the real facehash HTML via fetch
+const _facehashCache = new Map();
+
+async function loadFacehashAvatars(root) {
+    const els = (root || document).querySelectorAll('.facehash-inline:not([data-loaded])');
+    for (const el of els) {
+        const name = decodeURIComponent(el.dataset.name || 'anonymous');
+        const size = parseInt(el.dataset.size) || 32;
+        el.setAttribute('data-loaded', '1');
+        el.style.cssText = `display:inline-flex;width:${size}px;height:${size}px;border-radius:50%;overflow:hidden;flex-shrink:0;vertical-align:middle;`;
+
+        const cacheKey = `${name}:${size}`;
+        if (_facehashCache.has(cacheKey)) {
+            el.innerHTML = _facehashCache.get(cacheKey);
+            continue;
+        }
+
+        try {
+            const res = await fetch(`/api/avatar?name=${encodeURIComponent(name)}&size=${size}&mode=html`);
+            const html = await res.text();
+            _facehashCache.set(cacheKey, html);
+            el.innerHTML = html;
+        } catch (e) {
+            el.textContent = name.charAt(0).toUpperCase();
+            el.style.background = '#6366f1';
+            el.style.color = 'white';
+            el.style.alignItems = 'center';
+            el.style.justifyContent = 'center';
+            el.style.fontWeight = '700';
+        }
+    }
+}
+
+// Auto-load facehash avatars when DOM updates
+const _fhObserver = new MutationObserver(() => loadFacehashAvatars());
+document.addEventListener('DOMContentLoaded', () => {
+    _fhObserver.observe(document.body, { childList: true, subtree: true });
+    loadFacehashAvatars();
+});

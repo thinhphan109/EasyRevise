@@ -8,7 +8,7 @@ async function loadUsers() {
     if (!users.length) { c.innerHTML = '<div class="empty-state"><div class="emoji">👥</div><p>Chưa có tài khoản</p></div>'; return; }
     c.innerHTML = `<table class="exam-table"><thead><tr><th>Tên</th><th>Username</th><th>Role</th><th>Lịch sử</th><th>Ngày tạo</th><th></th></tr></thead><tbody>
     ${users.map(u => `<tr class="exam-row user-row">
-        <td style="font-weight:600;"><div style="display:flex;align-items:center;gap:0.5rem;"><img src="/api/avatar?name=${encodeURIComponent(u.username)}&size=32" style="width:32px;height:32px;border-radius:50%;flex-shrink:0;" alt="">${escapeHtml(u.displayName)}</div></td><td>${escapeHtml(u.username)}</td>
+        <td style="font-weight:600;"><div style="display:flex;align-items:center;gap:0.5rem;"><span class="facehash-inline" data-name="${encodeURIComponent(u.username)}" data-size="32"></span>${escapeHtml(u.displayName)}</div></td><td>${escapeHtml(u.username)}</td>
         <td><span class="role-badge role-${u.role}">${u.role}</span></td>
         <td>${u.historyCount} bài</td>
         <td style="font-size:0.85rem;color:var(--text-muted);">${new Date(u.createdAt).toLocaleDateString('vi-VN')}</td>

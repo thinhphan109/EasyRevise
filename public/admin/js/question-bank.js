@@ -20,8 +20,32 @@ async function loadQuestionBank() {
         try { const subjects = await api('/api/subjects'); subjects.forEach(s => { const opt = document.createElement('option'); opt.value = s.name; opt.textContent = s.name; subjectSelect.appendChild(opt); }); } catch (e) { }
     }
     if (!data.questions.length) { c.innerHTML = `<div class="empty-state"><div class="emoji">📚</div><p>${data.total === 0 ? 'Chưa có câu hỏi. Bấm <strong>"Import từ đề"</strong> để bắt đầu.' : 'Không tìm thấy câu phù hợp.'}</p></div>`; document.getElementById('qbPagination').innerHTML = ''; return; }
-    c.innerHTML = `<table class="exam-table"><thead><tr><th style="width:30px;"><input type="checkbox" id="qbCheckAll" onchange="toggleQBCheckAll(this.checked)"></th><th>Câu hỏi</th><th>Loại</th><th>Môn</th><th>Độ khó</th><th>Nguồn</th><th></th></tr></thead><tbody>
-    ${data.questions.map(q => { const shortQ = escapeHtml((q.question || '').substring(0, 80)) + ((q.question || '').length > 80 ? '...' : ''); const typeBadge = q.sectionType === 'multiple-choice' ? '🔘' : q.sectionType === 'fill-in-blank' ? '✏️' : q.sectionType === 'writing-essay' ? '📝' : q.sectionType === 'free-form' ? '💬' : '📖'; const diffBadge = q.difficulty === 'easy' ? '🟢' : q.difficulty === 'hard' ? '🔴' : '🟡'; return `<tr><td><input type="checkbox" class="qb-check" value="${q.id}"></td><td style="font-size:0.85rem;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(q.question || '')}">${shortQ}</td><td>${typeBadge}</td><td style="font-size:0.82rem;color:var(--text-muted);">${escapeHtml(q.subject || '—')}</td><td>${diffBadge}</td><td style="font-size:0.78rem;color:var(--text-muted);">${q.source === 'exam' ? '📥 Import' : '✍️ Tạo tay'}</td><td><button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();deleteQBQuestion('${q.id}')" title="Xóa">🗑</button></td></tr>`; }).join('')}</tbody></table>`;
+
+    const typeLabels = { 'multiple-choice': ['🔘', 'Trắc nghiệm', '#3b82f6'], 'fill-in-blank': ['✏️', 'Điền khuyết', '#f59e0b'], 'writing-essay': ['📝', 'Tự luận', '#8b5cf6'], 'free-form': ['💬', 'Tự do', '#ec4899'], 'reading': ['📖', 'Đọc hiểu', '#06b6d4'] };
+    const diffLabels = { 'easy': ['Dễ', '#10b981', 'rgba(16,185,129,0.12)'], 'medium': ['TB', '#f59e0b', 'rgba(245,158,11,0.12)'], 'hard': ['Khó', '#ef4444', 'rgba(239,68,68,0.12)'] };
+
+    c.innerHTML = `<table class="exam-table qb-table"><thead><tr>
+        <th style="width:30px;"><input type="checkbox" id="qbCheckAll" onchange="toggleQBCheckAll(this.checked)"></th>
+        <th>Câu hỏi</th><th style="width:100px;">Loại</th><th style="width:100px;">Môn</th><th style="width:60px;">Độ khó</th><th style="width:80px;">Nguồn</th><th style="width:40px;"></th>
+    </tr></thead><tbody>
+    ${data.questions.map(q => {
+        const shortQ = escapeHtml((q.question || '').substring(0, 80)) + ((q.question || '').length > 80 ? '...' : '');
+        const tl = typeLabels[q.sectionType] || ['📋', q.sectionType || '—', '#6b7280'];
+        const dl = diffLabels[q.difficulty] || diffLabels['medium'];
+        const sourceLabel = q.source === 'exam'
+            ? '<span style="display:inline-flex;align-items:center;gap:0.2rem;font-size:0.75rem;color:#3b82f6;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>Import</span>'
+            : '<span style="display:inline-flex;align-items:center;gap:0.2rem;font-size:0.75rem;color:#8b5cf6;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>Tạo tay</span>';
+        return `<tr class="qb-row">
+            <td><input type="checkbox" class="qb-check" value="${q.id}"></td>
+            <td class="qb-question-cell" title="${escapeHtml(q.question || '')}">${shortQ}</td>
+            <td><span class="qb-type-badge" style="color:${tl[2]};background:${tl[2]}14;">${tl[0]} ${tl[1]}</span></td>
+            <td class="qb-subject-cell">${escapeHtml(q.subject || '—')}</td>
+            <td><span class="qb-diff-badge" style="color:${dl[0]};background:${dl[2]};">${dl[1]}</span></td>
+            <td>${sourceLabel}</td>
+            <td><button class="btn btn-sm btn-ghost qb-delete-btn" onclick="event.stopPropagation();deleteQBQuestion('${q.id}')" title="Xóa">🗑</button></td>
+        </tr>`;
+    }).join('')}</tbody></table>`;
+
     const pg = document.getElementById('qbPagination');
     if (data.pages > 1) { let pgHtml = ''; for (let i = 1; i <= data.pages; i++) { pgHtml += `<button class="btn btn-sm ${i === data.page ? 'btn-primary' : 'btn-ghost'}" onclick="_qbPage=${i};loadQuestionBank()">${i}</button>`; } pg.innerHTML = pgHtml; } else { pg.innerHTML = ''; }
 }
