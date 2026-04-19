@@ -256,73 +256,23 @@
                     <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;">🌐 Trang chủ</h3>
                     <div class="form-group">
                         <label>Tên hệ thống</label>
-                        <input id="settingsSiteName" class="form-input" placeholder="EasyRevise"
-                            style="max-width:300px;">
+                        <input id="settingsSiteName" class="form-input" placeholder="EasyRevise" style="max-width:300px;">
                     </div>
                     <div class="form-group">
                         <label>Mô tả</label>
                         <input id="settingsSiteDesc" class="form-input" placeholder="Hệ thống ôn tập...">
                     </div>
                 </div>
-                <!-- ── AI Provider Panel ── -->
                 <div class="glass-panel" style="padding:2rem;margin-bottom:1.5rem;border:1px solid rgba(99,102,241,0.2);">
-                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1rem;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1.25rem;">
                         <div>
-                            <h3 style="font-size:1.1rem;font-weight:700;margin:0 0 0.2rem;">🔌 AI Provider</h3>
-                            <p style="font-size:0.8rem;color:var(--text-muted);margin:0;">Thay đổi ngay — không cần restart server</p>
+                            <h3 style="font-size:1.1rem;font-weight:700;margin:0 0 0.2rem;">🔌 AI Providers</h3>
+                            <p style="font-size:0.8rem;color:var(--text-muted);margin:0;">Chuyển qua lại giữa các provider — không cần restart</p>
                         </div>
-                        <span id="aiProviderBadge" style="display:none;align-items:center;gap:0.4rem;font-size:0.72rem;font-weight:600;padding:0.3rem 0.8rem;background:rgba(99,102,241,0.12);color:#6366f1;border-radius:20px;border:1px solid rgba(99,102,241,0.25);"></span>
+                        <button class="btn btn-primary btn-sm" onclick="showProviderModal()">+ Thêm provider</button>
                     </div>
-
-                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem;margin-bottom:1.25rem;">
-                        <div class="form-group" style="margin:0;">
-                            <label>Tên provider</label>
-                            <input id="aiProviderName" class="form-input" placeholder="h2cloud, trollllm, openai..." style="max-width:100%;">
-                        </div>
-                        <div class="form-group" style="margin:0;">
-                            <label>Base URL</label>
-                            <input id="aiBaseUrl" class="form-input" placeholder="https://api.loadip.com/v1" style="max-width:100%;">
-                        </div>
-                        <div class="form-group" style="margin:0;">
-                            <label>API Key</label>
-                            <div style="display:flex;gap:0.5rem;">
-                                <input id="aiApiKeyInput" class="form-input" type="password" placeholder="sk-..." style="flex:1;font-family:monospace;font-size:0.8rem;">
-                                <button id="toggleApiKeyBtn" onclick="toggleApiKeyVisibility()" class="btn btn-sm btn-ghost" style="flex-shrink:0;padding:0.4rem 0.6rem;">👁</button>
-                            </div>
-                        </div>
-                        <div class="form-group" style="margin:0;">
-                            <label>Giao thức (Protocol)</label>
-                            <select id="aiSdkTypeSel" class="form-input" style="max-width:100%;">
-                                <option value="openai">🟢 OpenAI-compatible (h2cloud, together, openrouter...)</option>
-                                <option value="anthropic">🔶 Anthropic (trollllm.xyz...)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem;">
-                        <div class="form-group" style="margin:0;">
-                            <label>Danh sách Models <span style="font-weight:400;color:var(--text-muted);">(mỗi dòng 1 model ID)</span></label>
-                            <textarea id="aiModelsTextarea" class="form-input" rows="6"
-                                style="font-family:monospace;font-size:0.82rem;resize:vertical;width:100%;"
-                                oninput="updateDefaultModelOptions()"
-                                placeholder="cx/gpt-5.3-codex&#10;cx/gpt-5.4&#10;cx/auto&#10;&#10;# hoặc trollllm:&#10;claude-sonnet-4.6&#10;claude-haiku-4.5"></textarea>
-                        </div>
-                        <div class="form-group" style="margin:0;">
-                            <label>Model mặc định</label>
-                            <select id="aiDefaultModelSel" class="form-input" style="max-width:100%;margin-bottom:1rem;">
-                                <option value="">— chọn sau khi điền models —</option>
-                            </select>
-                            <p style="font-size:0.78rem;color:var(--text-muted);line-height:1.5;">
-                                Model này sẽ được dùng khi không có override cụ thể.<br>
-                                Sau khi lưu, tất cả tab AI sẽ tự cập nhật.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:0.75rem;">
-                        <button id="saveAIProviderBtn" class="btn btn-primary" onclick="saveAIProvider()">💾 Lưu &amp; áp dụng ngay</button>
-                        <button id="testAIBtn" class="btn btn-ghost" onclick="testAIConnection()">🔌 Test kết nối</button>
-                        <div id="aiTestResult" style="display:none;"></div>
+                    <div id="providerProfilesList">
+                        <div style="text-align:center;padding:1rem;color:var(--text-muted);font-size:0.875rem;">Đang tải...</div>
                     </div>
                 </div>
 
@@ -330,26 +280,21 @@
                 <div class="glass-panel" style="padding:2rem;margin-bottom:1.5rem;">
                     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.5rem;">
                         <h3 style="font-size:1.1rem;font-weight:700;">🤖 Override Model theo tính năng</h3>
+                        <span id="aiProviderBadge" style="display:none;align-items:center;gap:0.4rem;font-size:0.72rem;font-weight:600;padding:0.3rem 0.8rem;background:rgba(99,102,241,0.12);color:#6366f1;border-radius:20px;border:1px solid rgba(99,102,241,0.25);"></span>
                     </div>
-                    <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1.5rem;">Tuỳ chọn — để trống sẽ dùng model mặc định ở trên.</p>
+                    <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1.5rem;">Tuỳ chọn — để trống sẽ dùng model mặc định của provider đang hoạt động.</p>
                     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.25rem;">
                         <div class="form-group" style="margin:0;">
-                            <label>🚀 Tạo đề thi (Tab AI Tạo Đề)</label>
-                            <select id="settingsGenerateModel" class="form-input" style="max-width:100%;">
-                                <option value="">Đang tải...</option>
-                            </select>
+                            <label>🚀 Tạo đề thi</label>
+                            <select id="settingsGenerateModel" class="form-input" style="max-width:100%;"><option value="">Đang tải...</option></select>
                         </div>
                         <div class="form-group" style="margin:0;">
-                            <label>✍️ Chấm điểm tự luận (Essay &amp; Free-form)</label>
-                            <select id="settingsGradeModel" class="form-input" style="max-width:100%;">
-                                <option value="">Đang tải...</option>
-                            </select>
+                            <label>✍️ Chấm tự luận</label>
+                            <select id="settingsGradeModel" class="form-input" style="max-width:100%;"><option value="">Đang tải...</option></select>
                         </div>
                         <div class="form-group" style="margin:0;">
-                            <label>🔍 Đọc ảnh OCR (Paste ảnh → điền form)</label>
-                            <select id="settingsOcrModel" class="form-input" style="max-width:100%;">
-                                <option value="">Đang tải...</option>
-                            </select>
+                            <label>🔍 OCR ảnh</label>
+                            <select id="settingsOcrModel" class="form-input" style="max-width:100%;"><option value="">Đang tải...</option></select>
                         </div>
                     </div>
                 </div>
@@ -1206,6 +1151,56 @@
     <script src="/admin/js/activation.js"></script>
     <!-- 4. Entry point: auth, tabs, init (must be last) -->
     <script src="/admin/js/admin-main.js"></script>
+
+    <!-- ── Provider Add/Edit Modal ── -->
+    <div id="providerModal" style="display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);" onclick="if(event.target===this)closeProviderModal()">
+        <div style="background:var(--color-bg);border:1px solid var(--color-border);border-radius:16px;padding:2rem;width:min(560px,96vw);max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,0.4);">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+                <h3 id="providerModalTitle" style="font-size:1.1rem;font-weight:700;margin:0;">+ Thêm Provider</h3>
+                <button onclick="closeProviderModal()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text-muted);padding:0.2rem 0.4rem;">×</button>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:1rem;">
+                <div class="form-group" style="margin:0;">
+                    <label>Tên provider <span style="color:#ef4444;">*</span></label>
+                    <input id="pmName" class="form-input" placeholder="trollllm, h2cloud, openai...">
+                </div>
+                <div class="form-group" style="margin:0;">
+                    <label>Base URL <span style="color:#ef4444;">*</span></label>
+                    <input id="pmBaseUrl" class="form-input" placeholder="https://chat.trollllm.xyz">
+                </div>
+                <div class="form-group" style="margin:0;">
+                    <label>API Key <span style="color:#ef4444;">*</span></label>
+                    <div style="display:flex;gap:0.5rem;">
+                        <input id="pmApiKey" class="form-input" type="password" placeholder="sk-..." style="flex:1;font-family:monospace;font-size:0.82rem;">
+                        <button id="pmToggleKey" onclick="toggleApiKeyVisibility()" class="btn btn-sm btn-ghost" style="flex-shrink:0;">👁</button>
+                    </div>
+                </div>
+                <div class="form-group" style="margin:0;">
+                    <label>Giao thức</label>
+                    <select id="pmSdkType" class="form-input">
+                        <option value="openai">🟢 OpenAI-compatible</option>
+                        <option value="anthropic">🔶 Anthropic</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin:0;">
+                    <label>Models <span style="font-weight:400;color:var(--text-muted);">(mỗi dòng 1 ID · # để comment)</span></label>
+                    <textarea id="pmModels" class="form-input" rows="5"
+                        style="font-family:monospace;font-size:0.82rem;resize:vertical;"
+                        placeholder="# h2cloud:&#10;cx/gpt-5.3-codex&#10;cx/gpt-5.4&#10;cx/auto&#10;&#10;# trollllm:&#10;claude-sonnet-4.6&#10;claude-haiku-4.5"></textarea>
+                </div>
+                <div class="form-group" style="margin:0;">
+                    <label>Model mặc định</label>
+                    <input id="pmDefaultModel" class="form-input" placeholder="cx/gpt-5.3-codex">
+                </div>
+                <div id="pmTestResult" style="display:none;"></div>
+                <div style="display:flex;gap:0.75rem;justify-content:flex-end;padding-top:0.5rem;border-top:1px solid var(--color-border);">
+                    <button id="pmTestBtn" class="btn btn-ghost" onclick="testProviderModal()">🔌 Test</button>
+                    <button class="btn btn-ghost" onclick="closeProviderModal()">Huỷ</button>
+                    <button id="pmSaveBtn" class="btn btn-primary" onclick="saveProviderModal()">💾 Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
