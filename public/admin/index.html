@@ -264,12 +264,74 @@
                         <input id="settingsSiteDesc" class="form-input" placeholder="Hệ thống ôn tập...">
                     </div>
                 </div>
+                <!-- ── AI Provider Panel ── -->
+                <div class="glass-panel" style="padding:2rem;margin-bottom:1.5rem;border:1px solid rgba(99,102,241,0.2);">
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1rem;">
+                        <div>
+                            <h3 style="font-size:1.1rem;font-weight:700;margin:0 0 0.2rem;">🔌 AI Provider</h3>
+                            <p style="font-size:0.8rem;color:var(--text-muted);margin:0;">Thay đổi ngay — không cần restart server</p>
+                        </div>
+                        <span id="aiProviderBadge" style="display:none;align-items:center;gap:0.4rem;font-size:0.72rem;font-weight:600;padding:0.3rem 0.8rem;background:rgba(99,102,241,0.12);color:#6366f1;border-radius:20px;border:1px solid rgba(99,102,241,0.25);"></span>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.25rem;margin-bottom:1.25rem;">
+                        <div class="form-group" style="margin:0;">
+                            <label>Tên provider</label>
+                            <input id="aiProviderName" class="form-input" placeholder="h2cloud, trollllm, openai..." style="max-width:100%;">
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <label>Base URL</label>
+                            <input id="aiBaseUrl" class="form-input" placeholder="https://api.loadip.com/v1" style="max-width:100%;">
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <label>API Key</label>
+                            <div style="display:flex;gap:0.5rem;">
+                                <input id="aiApiKeyInput" class="form-input" type="password" placeholder="sk-..." style="flex:1;font-family:monospace;font-size:0.8rem;">
+                                <button id="toggleApiKeyBtn" onclick="toggleApiKeyVisibility()" class="btn btn-sm btn-ghost" style="flex-shrink:0;padding:0.4rem 0.6rem;">👁</button>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <label>Giao thức (Protocol)</label>
+                            <select id="aiSdkTypeSel" class="form-input" style="max-width:100%;">
+                                <option value="openai">🟢 OpenAI-compatible (h2cloud, together, openrouter...)</option>
+                                <option value="anthropic">🔶 Anthropic (trollllm.xyz...)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem;">
+                        <div class="form-group" style="margin:0;">
+                            <label>Danh sách Models <span style="font-weight:400;color:var(--text-muted);">(mỗi dòng 1 model ID)</span></label>
+                            <textarea id="aiModelsTextarea" class="form-input" rows="6"
+                                style="font-family:monospace;font-size:0.82rem;resize:vertical;width:100%;"
+                                oninput="updateDefaultModelOptions()"
+                                placeholder="cx/gpt-5.3-codex&#10;cx/gpt-5.4&#10;cx/auto&#10;&#10;# hoặc trollllm:&#10;claude-sonnet-4.6&#10;claude-haiku-4.5"></textarea>
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <label>Model mặc định</label>
+                            <select id="aiDefaultModelSel" class="form-input" style="max-width:100%;margin-bottom:1rem;">
+                                <option value="">— chọn sau khi điền models —</option>
+                            </select>
+                            <p style="font-size:0.78rem;color:var(--text-muted);line-height:1.5;">
+                                Model này sẽ được dùng khi không có override cụ thể.<br>
+                                Sau khi lưu, tất cả tab AI sẽ tự cập nhật.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:0.75rem;">
+                        <button id="saveAIProviderBtn" class="btn btn-primary" onclick="saveAIProvider()">💾 Lưu &amp; áp dụng ngay</button>
+                        <button id="testAIBtn" class="btn btn-ghost" onclick="testAIConnection()">🔌 Test kết nối</button>
+                        <div id="aiTestResult" style="display:none;"></div>
+                    </div>
+                </div>
+
+                <!-- ── Per-feature model overrides ── -->
                 <div class="glass-panel" style="padding:2rem;margin-bottom:1.5rem;">
                     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.5rem;">
-                        <h3 style="font-size:1.1rem;font-weight:700;">🤖 Cấu hình Model AI</h3>
-                        <span id="aiProviderBadge" style="display:none;align-items:center;gap:0.4rem;font-size:0.72rem;font-weight:600;padding:0.25rem 0.75rem;background:rgba(99,102,241,0.1);color:#6366f1;border-radius:20px;border:1px solid rgba(99,102,241,0.2);"></span>
+                        <h3 style="font-size:1.1rem;font-weight:700;">🤖 Override Model theo tính năng</h3>
                     </div>
-                    <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1.5rem;">Chọn model riêng cho từng tính năng. Danh sách được tải từ cấu hình provider trong <code>.env</code>.</p>
+                    <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1.5rem;">Tuỳ chọn — để trống sẽ dùng model mặc định ở trên.</p>
                     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.25rem;">
                         <div class="form-group" style="margin:0;">
                             <label>🚀 Tạo đề thi (Tab AI Tạo Đề)</label>
@@ -291,9 +353,9 @@
                         </div>
                     </div>
                 </div>
-                <button class="btn btn-primary" onclick="saveSettings()">💾 Lưu cài đặt</button>
-                <span id="settingsSaveStatus"
-                    style="margin-left:1rem;font-size:0.85rem;color:var(--success);display:none;">✅ Đã lưu!</span>
+
+                <button class="btn btn-primary" onclick="saveSettings()">💾 Lưu cài đặt chung</button>
+                <span id="settingsSaveStatus" style="margin-left:1rem;font-size:0.85rem;color:var(--success);display:none;">✅ Đã lưu!</span>
             </div>
 
             <!-- TAB: Media Library -->
