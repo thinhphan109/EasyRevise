@@ -6,6 +6,7 @@ const router = express.Router();
 const sharp = require('sharp');
 const { readData, writeData, readSettings } = require('../lib/data');
 const { adminOnly } = require('../lib/auth');
+const { chatCompletion, getConfig } = require('../lib/ai-client');
 
 // GET /api/admin/submissions
 router.get('/submissions', adminOnly, (req, res) => {
@@ -121,14 +122,12 @@ router.post('/ai-grade-essay', adminOnly, async (req, res) => {
     try {
         const { examId, code, userId, questionId, studentAnswer, attachments, sampleAnswer, prompt } = req.body;
 
-        const apiKey = process.env.CLAUDE_API_KEY;
-        if (!apiKey) return res.status(500).json({ error: 'CLAUDE_API_KEY chưa cấu hình' });
+        const cfg = getConfig();
+        if (!cfg.apiKey) return res.status(500).json({ error: 'API_KEY_FIXED chưa cấu hình' });
 
-        const sdkType = process.env.CLAUDE_SDK_TYPE || 'anthropic';
-        const baseUrl = (process.env.CLAUDE_API_URL || 'https://chat.trollllm.xyz').replace(/\/+$/, '');
+        const sdkType = cfg.sdkType;
         const settings = readSettings();
-        const model = settings.gradeModel || process.env.CLAUDE_MODEL || 'claude-sonnet-4.6';
-        const CUSTOM_HEADERS = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' };
+        const model = settings.gradeModel || cfg.defaultModel;
 
         const userContent = [];
 
@@ -169,24 +168,10 @@ Hãy chấm điểm và trả về JSON với format sau (KHÔNG có text nào b
 
         userContent.push({ type: 'text', text: gradingPrompt });
 
-        let aiText = '';
-        if (sdkType === 'openai') {
-            const OpenAI = require('openai');
-            const openai = new OpenAI({ baseURL: `${baseUrl}/v1`, apiKey, timeout: 60000, defaultHeaders: CUSTOM_HEADERS });
-            const completion = await openai.chat.completions.create({
-                model, max_tokens: 2048,
-                messages: [{ role: 'user', content: userContent }]
-            });
-            aiText = completion.choices?.[0]?.message?.content || '';
-        } else {
-            const Anthropic = require('@anthropic-ai/sdk');
-            const client = new Anthropic({ baseURL: baseUrl, apiKey, timeout: 60000, defaultHeaders: CUSTOM_HEADERS });
-            const msg = await client.messages.create({
-                model, max_tokens: 2048,
-                messages: [{ role: 'user', content: userContent }]
-            });
-            aiText = msg.content?.[0]?.text || '';
-        }
+        const aiText = await chatCompletion({
+            model, maxTokens: 2048,
+            messages: [{ role: 'user', content: userContent }]
+        });
 
         // Parse JSON
         let jsonStr = aiText;

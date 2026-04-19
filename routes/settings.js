@@ -1,11 +1,24 @@
-// routes/settings.js — Settings + Site Info
+// routes/settings.js — Settings + Site Info + AI provider info
 const express = require('express');
 const router = express.Router();
 const { readSettings, writeSettings } = require('../lib/data');
 const { adminOnly } = require('../lib/auth');
+const { getAvailableModels, getConfig } = require('../lib/ai-client');
 
 // GET /api/settings
 router.get('/settings', adminOnly, (req, res) => { res.json(readSettings()); });
+
+// GET /api/ai-models — list available models from provider config
+router.get('/ai-models', adminOnly, (req, res) => {
+    const models = getAvailableModels();
+    const cfg = getConfig();
+    res.json({
+        provider: cfg.providerName,
+        baseUrl: cfg.baseUrl,
+        defaultModel: cfg.defaultModel,
+        models
+    });
+});
 
 // PUT /api/settings
 router.put('/settings', adminOnly, (req, res) => {

@@ -10,6 +10,7 @@ const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
 const { readSettings, readQuestionBank, writeQuestionBank, uuidv4 } = require('../lib/data');
 const { adminOnly } = require('../lib/auth');
+const { chatCompletion, getConfig, getAvailableModels, imageContent } = require('../lib/ai-client');
 
 // Multer for AI files (PDF, images, DOCX)
 const aiUpload = multer({
@@ -221,68 +222,47 @@ SCHEMA:
         }
         userContent.push({ type: 'text', text: textPrompt });
 
-        const sdkType = reqSdkType || process.env.CLAUDE_SDK_TYPE || 'anthropic';
-        const baseUrl = (process.env.CLAUDE_API_URL || 'https://chat.trollllm.xyz').replace(/\/+$/, '');
-        const apiKey = process.env.CLAUDE_API_KEY;
+        const cfg = getConfig();
         const settingsData = readSettings();
-        const model = reqModel || settingsData.generateModel || process.env.CLAUDE_MODEL || 'claude-sonnet-4.6';
-        const CUSTOM_HEADERS = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' };
+        const model = reqModel || settingsData.generateModel || cfg.defaultModel;
 
-        if (!apiKey) {
-            return res.status(500).json({ error: 'CLAUDE_API_KEY chưa được cấu hình trong .env' });
+        if (!cfg.apiKey) {
+            return res.status(500).json({ error: 'API_KEY_FIXED (hoặc CLAUDE_API_KEY) chưa được cấu hình trong .env' });
         }
 
-        console.log(`Using ${sdkType.toUpperCase()} SDK | Model: ${model}`);
+        console.log(`[AI] Provider: ${cfg.providerName} | Model: ${model} | SDK: ${cfg.sdkType}`);
+
+        // Convert imageParts from Anthropic format → OpenAI format for new provider
+        const convertedContent = userContent.map(p => {
+            if (p.type === 'image') {
+                return { type: 'image_url', image_url: { url: `data:${p.source.media_type};base64,${p.source.data}` } };
+            }
+            return p;
+        });
 
         // Retry logic (3 attempts)
         let aiText = '';
         const MAX_RETRIES = 3;
         for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
             try {
-                console.log(`AI API attempt ${attempt}/${MAX_RETRIES} (${sdkType})...`);
-
-                if (sdkType === 'openai') {
-                    const OpenAI = require('openai');
-                    const openai = new OpenAI({
-                        baseURL: `${baseUrl}/v1`, apiKey: apiKey,
-                        timeout: 5 * 60 * 1000, defaultHeaders: CUSTOM_HEADERS
-                    });
-                    const openaiContent = userContent.map(p => {
-                        if (p.type === 'image') {
-                            return { type: 'image_url', image_url: { url: `data:${p.source.media_type};base64,${p.source.data}` } };
-                        }
-                        return p;
-                    });
-                    const completion = await openai.chat.completions.create({
-                        model, max_tokens: 64000,
-                        messages: [
-                            { role: 'system', content: systemPrompt },
-                            { role: 'user', content: openaiContent }
-                        ]
-                    });
-                    aiText = completion.choices?.[0]?.message?.content || '';
-                } else {
-                    const Anthropic = require('@anthropic-ai/sdk');
-                    const client = new Anthropic({
-                        baseURL: baseUrl, apiKey: apiKey,
-                        timeout: 10 * 60 * 1000, defaultHeaders: CUSTOM_HEADERS
-                    });
-                    const stream = client.messages.stream({
-                        model, max_tokens: 64000,
-                        system: systemPrompt,
-                        messages: [{ role: 'user', content: userContent }]
-                    });
-                    const finalMessage = await stream.finalMessage();
-                    aiText = finalMessage.content?.[0]?.text || '';
-                }
-                break; // success
+                console.log(`[AI] Attempt ${attempt}/${MAX_RETRIES}...`);
+                aiText = await chatCompletion({
+                    model,
+                    maxTokens: 64000,
+                    timeout: 10 * 60 * 1000,
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: convertedContent }
+                    ]
+                });
+                break;
             } catch (apiErr) {
-                console.error(`Claude API error (attempt ${attempt}):`, apiErr.message);
+                console.error(`[AI] Error (attempt ${attempt}):`, apiErr.message);
                 if (attempt < MAX_RETRIES) {
-                    console.log('Retrying in 2s...');
+                    console.log('[AI] Retrying in 2s...');
                     await new Promise(r => setTimeout(r, 2000));
                 } else {
-                    return res.status(502).json({ error: `Lỗi từ AI API sau ${MAX_RETRIES} lần thử (${sdkType})`, detail: apiErr.message });
+                    return res.status(502).json({ error: `Lỗi từ AI API sau ${MAX_RETRIES} lần thử`, detail: apiErr.message });
                 }
             }
         }
@@ -439,30 +419,28 @@ Trả về JSON THUẦN TÚY (không markdown, không \`\`\`json):
         imageParts.forEach(img => userContent.push(img));
         userContent.push({ type: 'text', text: 'Hãy tách tất cả câu hỏi trong đề thi trên thành JSON array.' });
 
-        const sdkType = process.env.AI_SDK_TYPE || 'anthropic';
-        let result;
-        if (sdkType === 'openrouter') {
-            const openrouterRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-                method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}` },
-                body: JSON.stringify({
-                    model: process.env.AI_MODEL || 'anthropic/claude-sonnet-4',
-                    messages: [{ role: 'system', content: extractPrompt }, { role: 'user', content: userContent.map(p => p.type === 'text' ? p : { type: 'image_url', image_url: { url: `data:${p.source.media_type};base64,${p.source.data}` } }) }],
-                    max_tokens: 8000, temperature: 0.2
-                })
-            });
-            const orData = await openrouterRes.json();
-            result = orData.choices?.[0]?.message?.content || '';
-        } else {
-            const Anthropic = require('@anthropic-ai/sdk');
-            const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-            const response = await anthropic.messages.create({
-                model: process.env.AI_MODEL || 'claude-sonnet-4-20250514',
-                max_tokens: 8000, temperature: 0.2,
-                system: extractPrompt,
-                messages: [{ role: 'user', content: userContent }]
-            });
-            result = response.content?.[0]?.text || '';
-        }
+        const cfg = getConfig();
+        const settingsData2 = readSettings();
+        const extractModel = settingsData2.generateModel || cfg.defaultModel;
+
+        // Convert to OpenAI image_url format
+        const extractContent = userContent.map(p => {
+            if (p.type === 'image') {
+                return { type: 'image_url', image_url: { url: `data:${p.source.media_type};base64,${p.source.data}` } };
+            }
+            return p;
+        });
+
+        console.log(`[AI Extract] Provider: ${cfg.providerName} | Model: ${extractModel}`);
+        const result = await chatCompletion({
+            model: extractModel,
+            maxTokens: 8000,
+            temperature: 0.2,
+            messages: [
+                { role: 'system', content: extractPrompt },
+                { role: 'user', content: extractContent }
+            ]
+        });
 
         // Parse JSON
         let cleaned = result.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
