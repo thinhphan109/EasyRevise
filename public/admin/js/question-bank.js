@@ -19,35 +19,82 @@ async function loadQuestionBank() {
     if (subjectSelect && subjectSelect.options.length <= 1) {
         try { const subjects = await api('/api/subjects'); subjects.forEach(s => { const opt = document.createElement('option'); opt.value = s.name; opt.textContent = s.name; subjectSelect.appendChild(opt); }); } catch (e) { }
     }
-    if (!data.questions.length) { c.innerHTML = `<div class="empty-state"><div class="emoji">📚</div><p>${data.total === 0 ? 'Chưa có câu hỏi. Bấm <strong>"Import từ đề"</strong> để bắt đầu.' : 'Không tìm thấy câu phù hợp.'}</p></div>`; document.getElementById('qbPagination').innerHTML = ''; return; }
+    if (!data.questions.length) {
+        c.innerHTML = `<div class="empty-state"><div class="emoji">📚</div><p>${data.total === 0 ? 'Chưa có câu hỏi. Bấm <strong>"Import từ đề"</strong> để bắt đầu.' : 'Không tìm thấy câu phù hợp.'}</p></div>`;
+        document.getElementById('qbPagination').innerHTML = '';
+        return;
+    }
 
-    const typeLabels = { 'multiple-choice': ['🔘', 'Trắc nghiệm', '#3b82f6'], 'fill-in-blank': ['✏️', 'Điền khuyết', '#f59e0b'], 'writing-essay': ['📝', 'Tự luận', '#8b5cf6'], 'free-form': ['💬', 'Tự do', '#ec4899'], 'reading': ['📖', 'Đọc hiểu', '#06b6d4'] };
-    const diffLabels = { 'easy': ['Dễ', '#10b981', 'rgba(16,185,129,0.12)'], 'medium': ['TB', '#f59e0b', 'rgba(245,158,11,0.12)'], 'hard': ['Khó', '#ef4444', 'rgba(239,68,68,0.12)'] };
+    const TYPE = {
+        'multiple-choice': { icon: '⊙', label: 'Trắc nghiệm', color: '#3b82f6', bg: 'rgba(59,130,246,0.08)' },
+        'fill-in-blank':   { icon: '✏', label: 'Điền khuyết',  color: '#f59e0b', bg: 'rgba(245,158,11,0.08)' },
+        'writing-essay':   { icon: '✍', label: 'Tự luận',      color: '#8b5cf6', bg: 'rgba(139,92,246,0.08)' },
+        'free-form':       { icon: '💬', label: 'Tự do',        color: '#ec4899', bg: 'rgba(236,72,153,0.08)' },
+        'reading':         { icon: '📖', label: 'Đọc hiểu',     color: '#06b6d4', bg: 'rgba(6,182,212,0.08)'  }
+    };
+    const DIFF = {
+        'easy':   { label: 'Dễ',  color: '#10b981', bg: 'rgba(16,185,129,0.1)' },
+        'medium': { label: 'TB',  color: '#f59e0b', bg: 'rgba(245,158,11,0.1)' },
+        'hard':   { label: 'Khó', color: '#ef4444', bg: 'rgba(239,68,68,0.1)'  }
+    };
 
-    c.innerHTML = `<table class="exam-table qb-table"><thead><tr>
-        <th style="width:30px;"><input type="checkbox" id="qbCheckAll" onchange="toggleQBCheckAll(this.checked)"></th>
-        <th>Câu hỏi</th><th style="width:100px;">Loại</th><th style="width:100px;">Môn</th><th style="width:60px;">Độ khó</th><th style="width:80px;">Nguồn</th><th style="width:40px;"></th>
-    </tr></thead><tbody>
-    ${data.questions.map(q => {
-        const shortQ = escapeHtml((q.question || '').substring(0, 80)) + ((q.question || '').length > 80 ? '...' : '');
-        const tl = typeLabels[q.sectionType] || ['📋', q.sectionType || '—', '#6b7280'];
-        const dl = diffLabels[q.difficulty] || diffLabels['medium'];
-        const sourceLabel = q.source === 'exam'
-            ? '<span style="display:inline-flex;align-items:center;gap:0.2rem;font-size:0.75rem;color:#3b82f6;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>Import</span>'
-            : '<span style="display:inline-flex;align-items:center;gap:0.2rem;font-size:0.75rem;color:#8b5cf6;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>Tạo tay</span>';
-        return `<tr class="qb-row">
-            <td><input type="checkbox" class="qb-check" value="${q.id}"></td>
-            <td class="qb-question-cell" title="${escapeHtml(q.question || '')}">${shortQ}</td>
-            <td><span class="qb-type-badge" style="color:${tl[2]};background:${tl[2]}14;">${tl[0]} ${tl[1]}</span></td>
-            <td class="qb-subject-cell">${escapeHtml(q.subject || '—')}</td>
-            <td><span class="qb-diff-badge" style="color:${dl[0]};background:${dl[2]};">${dl[1]}</span></td>
-            <td>${sourceLabel}</td>
-            <td><button class="btn btn-sm btn-ghost qb-delete-btn" onclick="event.stopPropagation();deleteQBQuestion('${q.id}')" title="Xóa">🗑</button></td>
-        </tr>`;
-    }).join('')}</tbody></table>`;
+    // Select-all header row
+    const checkAllRow = `<div class="qb-grid-header">
+        <label class="qb-check-label">
+            <input type="checkbox" id="qbCheckAll" onchange="toggleQBCheckAll(this.checked)">
+            <span>Chọn tất cả (${data.questions.length})</span>
+        </label>
+        <span style="font-size:0.8rem;color:var(--text-muted);">${data.total} câu · Trang ${data.page}/${data.pages || 1}</span>
+    </div>`;
+
+    const cards = data.questions.map(q => {
+        const t = TYPE[q.sectionType] || { icon: '📋', label: q.sectionType || '—', color: '#6b7280', bg: 'rgba(107,114,128,0.08)' };
+        const d = DIFF[q.difficulty] || DIFF['medium'];
+        const preview = escapeHtml((q.question || '').substring(0, 120)) + ((q.question || '').length > 120 ? '…' : '');
+        const optionPreview = q.options && q.options.length
+            ? `<div class="qb-card-options">${q.options.slice(0, 2).map((o, i) =>
+                `<span class="${i === q.correctAnswer ? 'qb-opt-correct' : 'qb-opt'}">${String.fromCharCode(65+i)}. ${escapeHtml((o||'').substring(0,40))}</span>`
+              ).join('')}${q.options.length > 2 ? `<span class="qb-opt-more">+${q.options.length - 2}</span>` : ''}</div>`
+            : '';
+        const sourceChip = q.source === 'exam'
+            ? `<span class="qb-chip" style="color:#3b82f6;background:rgba(59,130,246,0.08);">↓ Import</span>`
+            : `<span class="qb-chip" style="color:#8b5cf6;background:rgba(139,92,246,0.08);">✦ Tạo tay</span>`;
+        const subjectChip = q.subject
+            ? `<span class="qb-chip" style="color:var(--text-muted);background:var(--color-surface);">${escapeHtml(q.subject)}</span>`
+            : '';
+
+        return `<div class="qb-card" style="--qb-accent:${t.color};">
+            <div class="qb-card-select">
+                <input type="checkbox" class="qb-check" value="${q.id}">
+            </div>
+            <div class="qb-card-body">
+                <div class="qb-card-meta">
+                    <span class="qb-type-pill" style="color:${t.color};background:${t.bg};">${t.icon} ${t.label}</span>
+                    <span class="qb-diff-pill" style="color:${d.color};background:${d.bg};">${d.label}</span>
+                    ${subjectChip}
+                    ${sourceChip}
+                    <div style="flex:1;"></div>
+                    <button class="qb-del-btn" onclick="event.stopPropagation();deleteQBQuestion('${q.id}')" title="Xóa câu hỏi">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                    </button>
+                </div>
+                <p class="qb-card-text">${preview}</p>
+                ${optionPreview}
+            </div>
+        </div>`;
+    }).join('');
+
+    c.innerHTML = checkAllRow + `<div class="qb-grid">${cards}</div>`;
 
     const pg = document.getElementById('qbPagination');
-    if (data.pages > 1) { let pgHtml = ''; for (let i = 1; i <= data.pages; i++) { pgHtml += `<button class="btn btn-sm ${i === data.page ? 'btn-primary' : 'btn-ghost'}" onclick="_qbPage=${i};loadQuestionBank()">${i}</button>`; } pg.innerHTML = pgHtml; } else { pg.innerHTML = ''; }
+    if (data.pages > 1) {
+        let pgHtml = '';
+        const start = Math.max(1, data.page - 2), end = Math.min(data.pages, data.page + 2);
+        if (start > 1) pgHtml += `<button class="btn btn-sm btn-ghost" onclick="_qbPage=1;loadQuestionBank()">1</button><span style="padding:0 0.25rem;color:var(--text-muted);">…</span>`;
+        for (let i = start; i <= end; i++) pgHtml += `<button class="btn btn-sm ${i === data.page ? 'btn-primary' : 'btn-ghost'}" onclick="_qbPage=${i};loadQuestionBank()">${i}</button>`;
+        if (end < data.pages) pgHtml += `<span style="padding:0 0.25rem;color:var(--text-muted);">…</span><button class="btn btn-sm btn-ghost" onclick="_qbPage=${data.pages};loadQuestionBank()">${data.pages}</button>`;
+        pg.innerHTML = pgHtml;
+    } else { pg.innerHTML = ''; }
 }
 
 function toggleQBCheckAll(checked) { document.querySelectorAll('.qb-check').forEach(cb => cb.checked = checked); }
