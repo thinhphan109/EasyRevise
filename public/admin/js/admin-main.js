@@ -89,6 +89,7 @@ function switchTab(tab) {
     if (tab === 'settings') loadSettings();
     if (tab === 'media') { loadMedia(); setupMediaDropZone(); }
     if (tab === 'aiGen') {
+        loadAITabModels(); // populate #aiModel from /api/ai-models
         const btn = document.getElementById('aiGenerateBtn'); const loading = document.getElementById('aiLoading');
         if (btn && btn.disabled) {
             const list = NotificationManager.load(); const lastSuccess = list.find(n => n.status === 'success' && n.data);

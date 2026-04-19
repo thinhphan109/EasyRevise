@@ -42,12 +42,13 @@ async function generateWithAI() {
     const subject = document.getElementById('aiSubject').value.trim();
     const year = document.getElementById('aiYear').value.trim();
     const subjectType = document.getElementById('aiSubjectType').value;
-    const sdkType = document.getElementById('aiSdkType')?.value || 'anthropic';
+    const sdkType = document.getElementById('aiSdkType')?.value || '';
     const aiModel = document.getElementById('aiModel')?.value || '';
     if (title) formData.append('title', title);
     if (subject) formData.append('subject', subject);
     if (year) formData.append('year', year);
-    formData.append('subjectType', subjectType); formData.append('sdkType', sdkType);
+    formData.append('subjectType', subjectType);
+    // sdkType is determined server-side from .env — do not override
     if (aiModel) formData.append('model', aiModel);
     const examLabel = title || subject || 'Đề thi mới';
     const pendingId = 'notif_' + Date.now();
@@ -108,3 +109,22 @@ function renderAIPreview(data) {
 function deleteAIQuestion(sectionIdx, qIdx) { if (!aiGeneratedData) return; const section = aiGeneratedData.exam.sections[sectionIdx]; if (!section || !section.questions) return; section.questions.splice(qIdx, 1); renderAIPreview(aiGeneratedData); }
 
 function deleteAISection(sectionIdx) { if (!aiGeneratedData) return; aiGeneratedData.exam.sections.splice(sectionIdx, 1); renderAIPreview(aiGeneratedData); }
+
+// ── Load models from provider config ─────────────────────────────
+async function loadAITabModels() {
+    try {
+        const info = await api('/api/ai-models');
+        const sel = document.getElementById('aiModel');
+        if (!sel || !info?.models?.length) return;
+        sel.innerHTML = info.models.map(m =>
+            `<option value="${m.id}">${m.name}</option>`
+        ).join('');
+        // Default to first model
+        if (info.defaultModel) sel.value = info.defaultModel;
+        // Show provider badge
+        const badge = document.getElementById('aiTabProviderBadge');
+        if (badge) badge.textContent = `⚡ ${info.provider || 'AI'}`;
+    } catch (e) {
+        console.warn('[AI Tab] Failed to load models:', e.message);
+    }
+}
