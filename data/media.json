@@ -541,6 +541,19 @@
       "mimeType": "application/pdf",
       "createdAt": "2026-04-08T14:22:45.456Z",
       "status": "ready"
+    },
+    {
+      "id": "9b35ebab-8ab4-4042-994b-6135f9eb2652",
+      "name": "Nhóm4-9a7.pptx",
+      "type": "pptx",
+      "folderId": null,
+      "driveFileId": null,
+      "url": null,
+      "size": 12315834,
+      "mimeType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "createdAt": "2026-04-24T18:52:29.488Z",
+      "status": "ready",
+      "protection": "downloadable"
     }
   ]
 }

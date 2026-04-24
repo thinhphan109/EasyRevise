@@ -4,7 +4,7 @@
    notifications, toggle switches, responsive
    ======================================== */
 
-/* ── Admin Header ── */
+/* ── Admin Header (legacy — kept for compat) ── */
 .admin-header {
     display: flex;
     justify-content: space-between;
@@ -13,10 +13,20 @@
     border-bottom: 1px solid var(--color-border);
     margin-bottom: 0;
 }
+.admin-header h1 { font-size: 1.75rem; margin-bottom: 0; }
 
-.admin-header h1 {
-    font-size: 1.75rem;
-    margin-bottom: 0;
+/* ── Login Gate — default hidden, flex-centered when shown ── */
+.login-gate {
+    display: none;
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+.login-gate.active,
+.login-gate[style*="block"],
+.login-gate[style*="flex"] {
+    display: flex !important;
 }
 
 .admin-badge {
@@ -107,13 +117,14 @@
 .tab-item--ai.active { color: white; border-bottom-color: transparent; }
 
 /* ── View Panels ── */
-.view {
-    display: none;
-}
-
+.view { display: none; }
 .view.active {
     display: block;
-    animation: fadeIn 0.4s ease;
+    animation: fadeSlideIn 0.25s ease;
+}
+@keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ── Exam Table ── */
@@ -798,7 +809,8 @@
 
 /* ── Help Tab ── */
 @media print {
-    .tab-bar, .admin-header button, #notifBellBtn { display: none !important; }
+    .admin-sidebar, .admin-topbar, #notifBellBtn { display: none !important; }
+    .admin-main-area { margin-left: 0 !important; }
     #tabHelp { display: block !important; }
     .help-section-body { display: block !important; max-height: none !important; }
     .help-chevron { display: none !important; }

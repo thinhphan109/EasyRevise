@@ -27,9 +27,9 @@
     <div id="adminToastContainer" class="admin-toast-container"></div>
     <!-- Mobile sidebar overlay -->
     <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
-    <div class="container" style="max-width:none;padding:0;">
+    <div class="container" style="max-width:none;padding:0;margin:0;">
         <!-- Login Gate -->
-        <div id="loginGate" class="login-gate" style="display:none;">
+        <div id="loginGate" class="login-gate">
             <div class="glass-panel" style="padding:2.5rem;">
                 <h2>🔐 Đăng nhập Admin</h2>
                 <div id="loginError" style="color:var(--error);font-size:0.85rem;margin-bottom:1rem;display:none;">
@@ -74,8 +74,11 @@
             <aside id="adminSidebar" class="admin-sidebar">
                 <!-- Brand -->
                 <a href="/" class="sidebar-brand" title="Về trang chủ">
-                    <div class="sidebar-brand-icon">✦</div>
-                    <span class="sidebar-brand-text">EasyRevise</span>
+                    <div class="sidebar-brand-icon">ER</div>
+                    <div class="sidebar-brand-name">
+                        <strong>EasyRevise</strong>
+                        <small>Admin Panel</small>
+                    </div>
                 </a>
 
                 <!-- Nav -->

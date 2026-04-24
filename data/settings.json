@@ -4,7 +4,21 @@
   "siteName": "*Sivuong.vn*",
   "siteDescription": "**Học để tô lên độ sĩ của mình**",
   "codeExpireHours": 1,
-  "generateModel": "",
-  "gradeModel": "",
-  "ocrModel": ""
+  "generateModel": "cx/gpt-5.5",
+  "gradeModel": "cx/gpt-5.5",
+  "ocrModel": "cx/gpt-5.5",
+  "aiProviders": [
+    {
+      "id": "9e9813d9-f5e2-4d5f-8629-aa5faf5507a1",
+      "name": "h2cloud",
+      "baseUrl": "https://api.loadip.com/v1",
+      "apiKey": "sk-80c6f26e1d3336a7-5ahrqn-6975d32c",
+      "sdkType": "openai",
+      "models": "cx/gpt-5.5\ncx/gpt-5.4\ncx/gpt-5.3-codex-xhigh\ncx/gpt-5.3-codex-high\ncx/gpt-5.3",
+      "defaultModel": "cx/gpt-5.5",
+      "createdAt": "2026-04-24T18:55:28.336Z",
+      "updatedAt": "2026-04-24T18:55:37.878Z"
+    }
+  ],
+  "aiActiveProviderId": "9e9813d9-f5e2-4d5f-8629-aa5faf5507a1"
 }
