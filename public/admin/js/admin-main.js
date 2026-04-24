@@ -59,18 +59,62 @@ async function adminLogin() {
 
 function adminLogout() { localStorage.removeItem('easyrevise_token'); localStorage.removeItem('easyrevise_user'); localStorage.removeItem('easyrevise_admin_pin_session'); adminToken = null; window.location.href = '/'; }
 
-// Tabs
+// ── Sidebar toggle ─────────────────────────────────────────
+function toggleSidebar() {
+    const sidebar = document.getElementById('adminSidebar');
+    const mainArea = document.getElementById('adminMainArea');
+    const overlay = document.getElementById('sidebarOverlay');
+    const isMobile = window.innerWidth <= 768;
+
+    if (isMobile) {
+        // Mobile: slide in/out overlay
+        sidebar.classList.toggle('mobile-open');
+        overlay.classList.toggle('visible', sidebar.classList.contains('mobile-open'));
+    } else {
+        // Desktop: collapse/expand
+        const collapsed = sidebar.classList.toggle('collapsed');
+        mainArea.classList.toggle('sidebar-collapsed', collapsed);
+        localStorage.setItem('easyrevise_sidebar_collapsed', collapsed ? '1' : '0');
+    }
+}
+
+function initSidebar() {
+    const collapsed = localStorage.getItem('easyrevise_sidebar_collapsed') === '1';
+    if (collapsed && window.innerWidth > 768) {
+        document.getElementById('adminSidebar')?.classList.add('collapsed');
+        document.getElementById('adminMainArea')?.classList.add('sidebar-collapsed');
+    }
+}
+
+// ── Tabs (sidebar-aware) ──────────────────────────────────
+const TAB_TITLES = {
+    exams: 'Đề thi', users: 'Tài khoản', subjects: 'Môn học',
+    codeLogs: 'Log mã KH', submissions: 'Bài nộp', questionBank: 'Ngân hàng đề',
+    settings: 'Cài đặt', help: 'Hướng dẫn', media: 'Kho Media',
+    activation: 'Mã kích hoạt', aiGen: 'AI Tạo Đề'
+};
+
 function switchTab(tab) {
     const tabs = ['exams', 'users', 'subjects', 'codeLogs', 'submissions', 'questionBank', 'settings', 'help', 'media', 'activation', 'aiGen'];
-    // Clear all tab-item active states (including AI button outside tab-bar)
-    document.querySelectorAll('.tab-bar .tab-item, .tab-ai-btn').forEach(el => el.classList.remove('active'));
-    // Set active on the right tab item by index within .tab-bar
-    const tabItems = document.querySelectorAll('.tab-bar .tab-item');
-    const idx = tabs.indexOf(tab);
-    if (idx >= 0 && idx < tabItems.length) tabItems[idx].classList.add('active');
-    // Handle AI button separately
-    if (tab === 'aiGen') { const aiBtn = document.querySelector('.tab-ai-btn'); if (aiBtn) aiBtn.classList.add('active'); }
+
+    // Update sidebar active item
+    document.querySelectorAll('.sidebar-item').forEach(el => {
+        el.classList.toggle('active', el.dataset.tab === tab);
+    });
+
+    // Update topbar title
+    const titleEl = document.getElementById('topbarTitle');
+    if (titleEl) titleEl.textContent = TAB_TITLES[tab] || tab;
+
+    // Show/hide tab panels
     tabs.forEach(t => { const el = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)); if (el) el.classList.toggle('active', t === tab); });
+
+    // Close mobile sidebar on nav
+    if (window.innerWidth <= 768) {
+        document.getElementById('adminSidebar')?.classList.remove('mobile-open');
+        document.getElementById('sidebarOverlay')?.classList.remove('visible');
+    }
+
     if (tab === 'exams') { showView('viewExamList'); loadExamList(); }
     if (tab === 'users') loadUsers();
     if (tab === 'subjects') loadSubjects();
@@ -89,7 +133,7 @@ function switchTab(tab) {
     if (tab === 'settings') loadSettings();
     if (tab === 'media') { loadMedia(); setupMediaDropZone(); }
     if (tab === 'aiGen') {
-        loadAITabModels(); // populate #aiModel from /api/ai-models
+        loadAITabModels();
         const btn = document.getElementById('aiGenerateBtn'); const loading = document.getElementById('aiLoading');
         if (btn && btn.disabled) {
             const list = NotificationManager.load(); const lastSuccess = list.find(n => n.status === 'success' && n.data);
@@ -123,3 +167,4 @@ document.addEventListener('DOMContentLoaded', () => {
 // Init
 checkAdminAuth();
 NotificationManager.init();
+initSidebar();

@@ -14,6 +14,7 @@
     <!-- CSS: Modular system + Admin page -->
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/pages/admin.css">
+    <link rel="stylesheet" href="/css/pages/admin-sidebar.css">
 
     <!-- Vendors: KaTeX + QRCode -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
@@ -24,7 +25,9 @@
 
 <body>
     <div id="adminToastContainer" class="admin-toast-container"></div>
-    <div class="container" style="max-width:1100px;">
+    <!-- Mobile sidebar overlay -->
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div class="container" style="max-width:none;padding:0;">
         <!-- Login Gate -->
         <div id="loginGate" class="login-gate" style="display:none;">
             <div class="glass-panel" style="padding:2.5rem;">
@@ -65,51 +68,124 @@
 
         <!-- Main Admin -->
         <div id="adminMain" style="display:none;">
-            <div class="admin-header">
-                <div style="display:flex;align-items:center;gap:1rem;">
-                    <a href="/" style="color:var(--text-muted);text-decoration:none;font-size:1.25rem;">←</a>
-                    <h1>Admin Panel</h1>
-                    <span class="admin-badge">Quản trị</span>
+            <div class="admin-layout">
+
+            <!-- ══ SIDEBAR ══ -->
+            <aside id="adminSidebar" class="admin-sidebar">
+                <!-- Brand -->
+                <a href="/" class="sidebar-brand" title="Về trang chủ">
+                    <div class="sidebar-brand-icon">✦</div>
+                    <span class="sidebar-brand-text">EasyRevise</span>
+                </a>
+
+                <!-- Nav -->
+                <nav class="sidebar-nav">
+                    <!-- Main -->
+                    <div class="sidebar-section-label">Quản lý</div>
+                    <div class="sidebar-item active" data-tab="exams" data-label="Đề thi" onclick="switchTab('exams')">
+                        <span class="sidebar-item-icon">📝</span>
+                        <span class="sidebar-item-label">Đề thi</span>
+                    </div>
+                    <div class="sidebar-item" data-tab="questionBank" data-label="Ngân hàng đề" onclick="switchTab('questionBank')">
+                        <span class="sidebar-item-icon">🗃</span>
+                        <span class="sidebar-item-label">Ngân hàng đề</span>
+                    </div>
+                    <div class="sidebar-item" data-tab="submissions" data-label="Bài nộp" onclick="switchTab('submissions')">
+                        <span class="sidebar-item-icon">📋</span>
+                        <span class="sidebar-item-label">Bài nộp</span>
+                    </div>
+
+                    <div class="sidebar-divider"></div>
+
+                    <!-- AI -->
+                    <div class="sidebar-section-label">AI</div>
+                    <div class="sidebar-item sidebar-ai" data-tab="aiGen" data-label="AI Tạo Đề" onclick="switchTab('aiGen')">
+                        <span class="sidebar-item-icon">🤖</span>
+                        <span class="sidebar-item-label">AI Tạo Đề</span>
+                    </div>
+
+                    <div class="sidebar-divider"></div>
+
+                    <!-- Resources -->
+                    <div class="sidebar-section-label">Hệ thống</div>
+                    <div class="sidebar-item" data-tab="users" data-label="Tài khoản" onclick="switchTab('users')">
+                        <span class="sidebar-item-icon">👥</span>
+                        <span class="sidebar-item-label">Tài khoản</span>
+                    </div>
+                    <div class="sidebar-item" data-tab="subjects" data-label="Môn học" onclick="switchTab('subjects')">
+                        <span class="sidebar-item-icon">📚</span>
+                        <span class="sidebar-item-label">Môn học</span>
+                    </div>
+                    <div class="sidebar-item" data-tab="activation" data-label="Mã kích hoạt" onclick="switchTab('activation')">
+                        <span class="sidebar-item-icon">🔑</span>
+                        <span class="sidebar-item-label">Mã kích hoạt</span>
+                    </div>
+                    <div class="sidebar-item" data-tab="codeLogs" data-label="Log mã KH" onclick="switchTab('codeLogs')">
+                        <span class="sidebar-item-icon">📊</span>
+                        <span class="sidebar-item-label">Log mã KH</span>
+                    </div>
+                    <div class="sidebar-item" data-tab="media" data-label="Kho Media" onclick="switchTab('media')">
+                        <span class="sidebar-item-icon">📁</span>
+                        <span class="sidebar-item-label">Kho Media</span>
+                    </div>
+
+                    <div class="sidebar-divider"></div>
+
+                    <div class="sidebar-item" data-tab="settings" data-label="Cài đặt" onclick="switchTab('settings')">
+                        <span class="sidebar-item-icon">⚙️</span>
+                        <span class="sidebar-item-label">Cài đặt</span>
+                    </div>
+                    <div class="sidebar-item" data-tab="help" data-label="Hướng dẫn" onclick="switchTab('help')">
+                        <span class="sidebar-item-icon">📖</span>
+                        <span class="sidebar-item-label">Hướng dẫn</span>
+                    </div>
+                </nav>
+
+                <!-- Collapse toggle -->
+                <div class="sidebar-footer">
+                    <button class="sidebar-collapse-btn" onclick="toggleSidebar()" title="Thu gọn">
+                        <span class="sidebar-collapse-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+                        </span>
+                        <span class="sidebar-collapse-label">Thu gọn</span>
+                    </button>
                 </div>
-                <div style="display:flex;align-items:center;gap:0.75rem;">
-                    <span id="adminAvatar" class="facehash-inline" data-name="admin" data-size="32" style="display:none;"></span>
-                    <span id="adminName" style="font-size:0.85rem;color:var(--text-muted);"></span>
-                    <!-- Notification Bell -->
-                    <div style="position:relative;">
-                        <button id="notifBellBtn" class="notif-btn" onclick="NotificationManager.togglePanel()"
-                            title="Thông báo">
-                            🔔<span id="notifBadge" class="notif-badge" style="display:none;">0</span>
+            </aside>
+
+            <!-- ══ MAIN AREA ══ -->
+            <div id="adminMainArea" class="admin-main-area">
+
+                <!-- Topbar -->
+                <header class="admin-topbar">
+                    <div class="admin-topbar-left">
+                        <!-- Mobile toggle -->
+                        <button class="sidebar-mobile-toggle" onclick="toggleSidebar()" aria-label="Menu">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
                         </button>
-                        <div id="notifPanel" class="notif-panel">
-                            <div class="notif-panel-header">
-                                <span style="font-weight:700;font-size:0.9rem;">🔔 Thông báo</span>
-                                <button class="btn btn-sm btn-ghost" onclick="NotificationManager.markAllRead()"
-                                    style="font-size:0.75rem;padding:0.2rem 0.5rem;">Đọc tất cả</button>
-                            </div>
-                            <div id="notifList">
-                                <div class="notif-empty">Chưa có thông báo</div>
+                        <span id="topbarTitle" class="topbar-page-title">Đề thi</span>
+                    </div>
+                    <div class="admin-topbar-right">
+                        <span id="adminAvatar" class="facehash-inline" data-name="admin" data-size="32" style="display:none;"></span>
+                        <span id="adminName" style="font-size:0.82rem;color:var(--text-muted);"></span>
+                        <!-- Notifications -->
+                        <div style="position:relative;">
+                            <button id="notifBellBtn" class="notif-btn" onclick="NotificationManager.togglePanel()" title="Thông báo">
+                                🔔<span id="notifBadge" class="notif-badge" style="display:none;">0</span>
+                            </button>
+                            <div id="notifPanel" class="notif-panel">
+                                <div class="notif-panel-header">
+                                    <span style="font-weight:700;font-size:0.9rem;">🔔 Thông báo</span>
+                                    <button class="btn btn-sm btn-ghost" onclick="NotificationManager.markAllRead()" style="font-size:0.75rem;padding:0.2rem 0.5rem;">Đọc tất cả</button>
+                                </div>
+                                <div id="notifList"><div class="notif-empty">Chưa có thông báo</div></div>
                             </div>
                         </div>
+                        <button class="btn btn-sm btn-ghost" onclick="adminLogout()">Đăng xuất</button>
                     </div>
-                    <button class="btn btn-sm btn-ghost" onclick="adminLogout()">Đăng xuất</button>
-                </div>
-            </div>
+                </header>
 
-            <div class="tab-bar-wrapper">
-                <div class="tab-bar">
-                    <div class="tab-item active" onclick="switchTab('exams')">📝 Đề thi</div>
-                    <div class="tab-item" onclick="switchTab('users')">👥 Tài khoản</div>
-                    <div class="tab-item" onclick="switchTab('subjects')">📚 Môn học</div>
-                    <div class="tab-item" onclick="switchTab('codeLogs')">📊 Mã kích hoạt</div>
-                    <div class="tab-item" onclick="switchTab('submissions')">📋 Bài nộp</div>
-                    <div class="tab-item" onclick="switchTab('questionBank')" style="color:#059669;">📚 Ngân hàng</div>
-                    <div class="tab-item" onclick="switchTab('settings')">⚙️ Cài đặt</div>
-                    <div class="tab-item" onclick="switchTab('help')" style="color:#0369a1;">📖 Hướng dẫn</div>
-                    <div class="tab-item" onclick="switchTab('media')" style="color:#0891b2;">📁 Kho Media</div>
-                    <div class="tab-item" onclick="switchTab('activation')" style="color:#7c3aed;">🔑 Mã KH</div>
-                </div>
-                <div class="tab-item tab-ai-btn" onclick="switchTab('aiGen')">🤖 AI Tạo Đề</div>
-            </div>
+                <!-- Tab content -->
+                <div class="admin-view-container">
 
             <!-- TAB: Exams -->
             <div id="tabExams" class="view active">
@@ -1200,7 +1276,12 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div><!-- /providerModal -->
+    </div><!-- /admin-view-container -->
+    </div><!-- /admin-main-area -->
+    </div><!-- /admin-layout -->
+    </div><!-- /adminMain -->
+    </div><!-- /container -->
 </body>
 
 </html>
