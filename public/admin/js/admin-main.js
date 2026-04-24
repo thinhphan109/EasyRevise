@@ -17,6 +17,7 @@ async function checkAdminAuth() {
         const avEl = document.getElementById('adminAvatar'); if (avEl) { avEl.dataset.name = encodeURIComponent(user.username); avEl.style.display = 'inline-flex'; avEl.removeAttribute('data-loaded'); loadFacehashAvatars(); }
         document.getElementById('loginGate').style.display = 'none';
         document.getElementById('adminMain').style.display = 'block';
+        initMobileNav();
         loadExamList();
     } catch { showLoginGate(); }
 }
@@ -39,7 +40,7 @@ function submitAdminPin() {
 }
 
 function redirectToMain() { window.location.href = '/'; }
-function showLoginGate() { document.getElementById('loginGate').style.display = 'block'; document.getElementById('adminMain').style.display = 'none'; }
+function showLoginGate() { document.getElementById('loginGate').style.display = 'block'; document.getElementById('adminMain').style.display = 'none'; const nav = document.getElementById('mobileBottomNav'); if (nav) nav.style.display = 'none'; }
 
 async function adminLogin() {
     const username = document.getElementById('adminUsername').value;
@@ -85,6 +86,23 @@ function initSidebar() {
         document.getElementById('adminMainArea')?.classList.add('sidebar-collapsed');
     }
 }
+
+// ── Theme toggle ─────────────────────────────────────────
+function toggleTheme() {
+    const html = document.documentElement;
+    const current = html.getAttribute('data-theme') || 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('easyrevise_theme', next);
+}
+
+// ── User dropdown — close on click outside ──────────────
+document.addEventListener('click', (e) => {
+    const dd = document.getElementById('userDropdown');
+    if (dd && !dd.contains(e.target)) {
+        dd.classList.remove('open');
+    }
+});
 
 // ── Tabs (sidebar-aware) ──────────────────────────────────
 const TAB_TITLES = {
@@ -164,7 +182,40 @@ document.addEventListener('DOMContentLoaded', () => {
     if (passInput) passInput.addEventListener('keydown', e => { if (e.key === 'Enter') adminLogin(); });
 });
 
+// ── Mobile Bottom Nav ─────────────────────────────────────
+function mobileNavSwitch(tab) {
+    switchTab(tab);
+    // Sync bottom nav active state
+    document.querySelectorAll('.bottom-nav-item').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+    });
+    // Close More menu if open
+    document.getElementById('mobileMoreMenu')?.classList.remove('open');
+}
+
+function toggleMobileMore() {
+    document.getElementById('mobileMoreMenu')?.classList.toggle('open');
+}
+
+// Show bottom nav only when admin panel is visible
+function initMobileNav() {
+    const nav = document.getElementById('mobileBottomNav');
+    const main = document.getElementById('adminMain');
+    if (nav && main && main.style.display !== 'none') {
+        nav.style.display = '';
+    }
+}
+
+// Sync bottom nav active with sidebar on switchTab
+const _origSwitchTab = switchTab;
+// Override already handled by sidebar — we just need to sync bottom nav in switchTab
+// This is done inside mobileNavSwitch, which wraps switchTab for mobile use.
+// Desktop sidebar switchTab remains unchanged.
+
 // Init
 checkAdminAuth();
 NotificationManager.init();
 initSidebar();
+// Show mobile bottom nav after auth
+const _origCheckAuth = checkAdminAuth;
+setTimeout(() => initMobileNav(), 500);

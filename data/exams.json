@@ -24,7 +24,7 @@
               "correctAnswer": 0,
               "explanation": "'location' có trọng âm rơi vào âm tiết thứ 2 (lo-CA-tion /ləʊˈkeɪʃən/), trong khi 'paradise', 'natural', 'tropical' đều có trọng âm rơi vào âm tiết thứ 1.",
               "expansion": "Quy tắc: Các từ có đuôi -tion, -sion thường có trọng âm rơi vào âm tiết ngay trước đuôi. Ví dụ: education (e-du-CA-tion), information (in-for-MA-tion).",
-              "image": "/uploads/1774351568871-c99a.jpg",
+              "image": null,
               "video": null,
               "mediaAsHint": false,
               "explanationImage": null,
@@ -916,7 +916,7 @@
         }
       ],
       "createdAt": "2026-03-23T11:42:15.249Z",
-      "updatedAt": "2026-04-15T00:31:34.924Z",
+      "updatedAt": "2026-04-24T19:48:51.814Z",
       "accessCodes": [
         {
           "code": "J3J9C3",

@@ -916,16 +916,8 @@ function previewMediaFile(fileId) {
     const isProtected = file.protection === 'view-only';
     let contentHtml = '';
     if (file.type === 'image') {
-        if (isProtected) {
-            contentHtml = `<div style="position:relative;display:inline-block;max-width:100%;">
-                <img src="${file.url}" style="max-width:100%;max-height:70vh;border-radius:12px;object-fit:contain;pointer-events:none;user-select:none;" loading="lazy" draggable="false">
-                <div style="position:absolute;inset:0;cursor:default;" oncontextmenu="event.preventDefault()"></div>
-            </div>`;
-        } else {
-            contentHtml = `<img src="${file.url}" style="max-width:100%;max-height:70vh;border-radius:12px;object-fit:contain;" loading="lazy">`;
-        }
+        contentHtml = `<img src="${file.url}" style="max-width:100%;max-height:70vh;border-radius:12px;object-fit:contain;" loading="lazy">`;
     } else if (file.type === 'video') {
-        // UX-19: aspect ratio aware
         const ratio = file.aspectRatio || '16:9';
         let wrapperStyle = 'position:relative;overflow:hidden;border-radius:12px;';
         if (ratio === '16:9') wrapperStyle += 'width:100%;aspect-ratio:16/9;';
@@ -936,12 +928,10 @@ function previewMediaFile(fileId) {
             <iframe src="${file.url}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allow="autoplay" allowfullscreen></iframe>
         </div>`;
     } else if (file.type === 'pdf') {
-        if (isProtected && file.driveFileId) {
-            contentHtml = `<iframe src="https://drive.google.com/file/d/${file.driveFileId}/preview" style="width:100%;height:70vh;border:none;border-radius:12px;"></iframe>`;
-        } else {
-            contentHtml = `<iframe src="${file.url}" style="width:100%;height:70vh;border:none;border-radius:12px;"></iframe>`;
-        }
-    } else if (file.driveFileId) {
+        // Dùng proxy nội bộ để trình duyệt tự mở PDF (Không cần Google Cookie)
+        contentHtml = `<iframe src="${file.url}" style="width:100%;height:70vh;border:none;border-radius:12px;"></iframe>`;
+    } else if (['docx', 'pptx', 'xlsx'].includes(file.type) || file.driveFileId) {
+        // Word/Excel/PowerPoint bắt buộc dùng Google Viewer vì trình duyệt không đọc được
         contentHtml = `<iframe src="https://drive.google.com/file/d/${file.driveFileId}/preview" style="width:100%;height:70vh;border:none;border-radius:12px;" allow="autoplay"></iframe>`;
     } else {
         contentHtml = `<div style="text-align:center;padding:3rem;color:var(--text-muted);">

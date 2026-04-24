@@ -543,17 +543,16 @@
       "status": "ready"
     },
     {
-      "id": "9b35ebab-8ab4-4042-994b-6135f9eb2652",
+      "id": "13b858ff-ea76-43e3-b623-2c0918c8e845",
       "name": "Nhóm4-9a7.pptx",
       "type": "pptx",
       "folderId": null,
-      "driveFileId": null,
-      "url": null,
+      "driveFileId": "1hGlFOLpU4J0DcHKsgrs8u-z0eyvJet42",
+      "url": "/api/media/1hGlFOLpU4J0DcHKsgrs8u-z0eyvJet42",
       "size": 12315834,
       "mimeType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-      "createdAt": "2026-04-24T18:52:29.488Z",
-      "status": "ready",
-      "protection": "downloadable"
+      "createdAt": "2026-04-24T19:37:06.322Z",
+      "status": "ready"
     }
   ]
 }

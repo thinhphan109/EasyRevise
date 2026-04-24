@@ -454,6 +454,7 @@ router.get('/media/:fileId', async (req, res) => {
         const mimeType = fileRecord?.mimeType || 'application/octet-stream';
         const isViewOnly = fileRecord?.protection === 'view-only';
 
+        res.setHeader('X-Content-Type-Options', 'nosniff');
         // Video: stream directly (don't cache in RAM)
         if (mimeType.startsWith('video/')) {
             res.setHeader('Content-Type', mimeType);
@@ -485,7 +486,12 @@ router.get('/media/:fileId', async (req, res) => {
         const buf = { buffer: Buffer.from(driveRes.data), mimeType: driveRes.headers['content-type'] || mimeType };
         mediaRamCache.set(fileId, buf);
         setTimeout(() => mediaRamCache.delete(fileId), 60 * 60 * 1000); // clear after 1h
-        res.setHeader('Content-Type', buf.mimeType);
+        let finalMime = buf.mimeType;
+        if (fileRecord?.type === 'pdf') finalMime = 'application/pdf';
+
+        res.setHeader('Content-Type', finalMime);
+        res.setHeader('Content-Length', buf.buffer.length);
+        res.setHeader('Accept-Ranges', 'bytes');
         res.send(buf.buffer);
     } catch (err) {
         console.error('[Media] Proxy error:', err.message);

@@ -462,6 +462,51 @@ Trả về JSON THUẦN TÚY (không markdown, không \`\`\`json):
     }
 });
 
+// POST /api/admin/ai-ocr — single page OCR via configured AI provider
+router.post('/ai-ocr', adminOnly, express.json({ limit: '10mb' }), async (req, res) => {
+    try {
+        const { imageBase64, mimeType } = req.body;
+        if (!imageBase64) return res.status(400).json({ error: 'Thiếu imageBase64' });
+
+        const cfg = getConfig();
+        const settingsData = readSettings();
+        const ocrModel = settingsData.generateModel || cfg.defaultModel;
+
+        const ocrPrompt = `Hãy chuyển đổi toàn bộ nội dung trong hình ảnh này thành văn bản có cấu trúc. YÊU CẦU ĐẶC BIỆT:
+1. Bảng biểu: BẮT BUỘC chuyển đổi thành mã LaTeX.
+2. Công thức toán học: Sử dụng mã LaTeX chuẩn để tương thích hoàn toàn với tính năng Toggle TeX của MathType trong Word. Dùng đúng 1 dấu $ cho công thức trên cùng dòng và 2 dấu $$ cho công thức đứng riêng. TUYỆT ĐỐI KHÔNG thêm khoảng trắng ở sát bên trong dấu $. Không dùng dư dấu $.
+3. Định dạng: Các Tiêu đề, Số thứ tự Câu phải in đậm bằng Markdown (ví dụ: **Câu 1:**).
+4. Hình ảnh minh hoạ/Sơ đồ: BẮT BUỘC phát hiện hộp bao quanh (bounding box) của từng hình ảnh thật và xuất ra thẻ [IMG_BBOX: ymin, xmin, ymax, xmax] chuẩn hóa thang 1000.
+5. QUAN TRỌNG: TUYỆT ĐỐI BỎ QUA CÁC HÌNH ẢNH WATERMARK. KHÔNG trích xuất bounding box cho watermark.
+Chỉ trả về nội dung văn bản kết quả.`;
+
+        console.log(`[AI OCR] Provider: ${cfg.providerName} | Model: ${ocrModel}`);
+
+        const result = await chatCompletion({
+            model: ocrModel,
+            maxTokens: 6000,
+            temperature: 0.1,
+            messages: [
+                { role: 'user', content: [
+                    { type: 'text', text: ocrPrompt },
+                    { type: 'image_url', image_url: { url: `data:${mimeType || 'image/jpeg'};base64,${imageBase64}` } }
+                ]}
+            ]
+        });
+
+        // Clean up markdown code blocks
+        let cleaned = result
+            .replace(/```(?:latex|tex|math)?\n?/g, '')
+            .replace(/```/g, '')
+            .replace(/\${3,}/g, '$$');
+
+        res.json({ success: true, text: cleaned });
+    } catch (err) {
+        console.error('AI OCR error:', err);
+        res.status(500).json({ error: err.message || 'Lỗi AI OCR' });
+    }
+});
+
 // GET /api/admin/ai-last-result — cache recovery
 const AI_CACHE_FILE_PATH = path.join(__dirname, '..', 'data', 'ai-gen-cache.json');
 

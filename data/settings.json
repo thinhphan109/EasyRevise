@@ -4,9 +4,9 @@
   "siteName": "*Sivuong.vn*",
   "siteDescription": "**Học để tô lên độ sĩ của mình**",
   "codeExpireHours": 1,
-  "generateModel": "cx/gpt-5.5",
-  "gradeModel": "cx/gpt-5.5",
-  "ocrModel": "cx/gpt-5.5",
+  "generateModel": "",
+  "gradeModel": "",
+  "ocrModel": "",
   "aiProviders": [
     {
       "id": "9e9813d9-f5e2-4d5f-8629-aa5faf5507a1",
@@ -18,6 +18,16 @@
       "defaultModel": "cx/gpt-5.5",
       "createdAt": "2026-04-24T18:55:28.336Z",
       "updatedAt": "2026-04-24T18:55:37.878Z"
+    },
+    {
+      "id": "05aa25fd-11d5-4890-b40b-c279b66d56ab",
+      "name": "openai",
+      "baseUrl": "test",
+      "apiKey": "1",
+      "sdkType": "openai",
+      "models": "",
+      "defaultModel": "",
+      "createdAt": "2026-04-24T19:42:47.442Z"
     }
   ],
   "aiActiveProviderId": "9e9813d9-f5e2-4d5f-8629-aa5faf5507a1"

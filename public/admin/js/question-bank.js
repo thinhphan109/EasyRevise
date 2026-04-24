@@ -15,6 +15,8 @@ async function loadQuestionBank() {
     const c = document.getElementById('questionBankContainer');
     const badge = document.getElementById('qbCountBadge');
     if (badge) badge.textContent = `${data.total} câu`;
+    const subtitle = document.getElementById('qbSubtitle');
+    if (subtitle) subtitle.textContent = `${data.total} câu hỏi • Trang ${data.page || 1}/${data.pages || 1}`;
     const subjectSelect = document.getElementById('qbFilterSubject');
     if (subjectSelect && subjectSelect.options.length <= 1) {
         try { const subjects = await api('/api/subjects'); subjects.forEach(s => { const opt = document.createElement('option'); opt.value = s.name; opt.textContent = s.name; subjectSelect.appendChild(opt); }); } catch (e) { }
@@ -124,23 +126,17 @@ async function showGenerateExamFromBankModal() {
 
 async function doGenerateExamFromBank() { const ids = getSelectedQBIds(); const title = document.getElementById('genExamTitle').value.trim() || 'Đề từ Ngân hàng'; const subject = document.getElementById('genExamSubject').value.trim(); const timeLimit = parseInt(document.getElementById('genExamTime').value) || 60; const res = await api('/api/admin/questions/generate-exam', 'POST', { questionIds: ids, title, subject, timeLimit }); document.getElementById('genExamModal')?.remove(); if (res.success) { showToast(`Đã tạo đề "${res.title}"!`, 'success'); switchTab('exams'); } else { showToast('Lỗi: ' + (res.error || 'Không rõ'), 'error'); } }
 
-// AI Extract Questions from PDF/Images
-function showAIExtractModal() {
-    document.getElementById('aiExtractModal')?.remove();
-    const m = document.createElement('div'); m.id = 'aiExtractModal'; m.className = 'modal-overlay active'; m.style.cssText = 'display:flex;';
-    m.innerHTML = `<div class="glass-panel modal-content" style="max-width:600px;"><h3 style="margin-bottom:1rem;">🤖 AI Bóc tách câu hỏi từ đề thi</h3><div style="display:flex;flex-direction:column;gap:0.75rem;"><label style="font-size:0.85rem;font-weight:600;">Upload đề thi (PDF/ảnh):</label><input type="file" id="aiExtractFiles" accept=".pdf,.jpg,.jpeg,.png" multiple class="form-input"><div style="display:flex;gap:0.5rem;"><input id="aiExtractSubject" class="form-input" placeholder="Môn học" style="flex:1;"><input id="aiExtractTags" class="form-input" placeholder="Tags (phân cách bởi dấu phẩy)" style="flex:1;"></div></div><div id="aiExtractStatus" style="margin-top:0.75rem;font-size:0.85rem;color:var(--text-muted);"></div><div id="aiExtractPreview" style="display:none;margin-top:1rem;max-height:400px;overflow-y:auto;"></div><div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1rem;"><button class="btn btn-sm btn-ghost" onclick="document.getElementById('aiExtractModal').remove()">Đóng</button><button id="aiExtractBtn" class="btn btn-sm btn-primary" onclick="doAIExtract()">🤖 Bóc tách</button><button id="aiExtractImportBtn" class="btn btn-sm btn-success" style="display:none;" onclick="importExtractedQuestions()">📥 Import vào kho</button></div></div>`;
-    document.body.appendChild(m); m.addEventListener('click', e => { if (e.target === m) m.remove(); });
-}
-
+// AI Extract — showAIExtractModal() is now in ai-extract-ocr.js
+// Legacy: doAIExtract + importExtractedQuestions kept for /api/admin/ai-extract-questions
 async function doAIExtract() {
-    const files = document.getElementById('aiExtractFiles').files;
-    if (!files.length) { showToast('Vui lòng chọn file!', 'warning'); return; }
-    const subject = document.getElementById('aiExtractSubject').value.trim();
-    const tags = document.getElementById('aiExtractTags').value.trim();
+    const files = document.getElementById('aiExtractFiles')?.files;
+    if (!files || !files.length) { showToast('Vui lòng chọn file!', 'warning'); return; }
+    const subject = document.getElementById('aiExtractSubject')?.value.trim();
+    const tags = document.getElementById('aiExtractTags')?.value.trim();
     const status = document.getElementById('aiExtractStatus');
     const btn = document.getElementById('aiExtractBtn');
-    btn.disabled = true; btn.textContent = '⏳ Đang xử lý...';
-    status.textContent = '🔄 AI đang đọc và tách câu hỏi... (có thể mất 30-60s)'; status.style.color = 'var(--primary)';
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Đang xử lý...'; }
+    if (status) { status.textContent = '🔄 AI đang đọc và tách câu hỏi...'; status.style.color = 'var(--primary)'; }
     const fd = new FormData();
     for (const f of files) fd.append('files', f);
     if (subject) fd.append('subject', subject); if (tags) fd.append('tags', tags);
@@ -150,12 +146,9 @@ async function doAIExtract() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Lỗi');
         _extractedQuestions = data.questions;
-        status.textContent = `✅ Đã tách ${data.count} câu hỏi! Review bên dưới rồi nhấn Import.`; status.style.color = 'var(--success)';
-        const preview = document.getElementById('aiExtractPreview'); preview.style.display = 'block';
-        preview.innerHTML = `<table class="exam-table" style="font-size:0.82rem;"><thead><tr><th><input type="checkbox" checked onchange="document.querySelectorAll('.extract-check').forEach(c=>c.checked=this.checked)"></th><th>Câu hỏi</th><th>Loại</th><th>Độ khó</th></tr></thead><tbody>${_extractedQuestions.map((q, i) => `<tr><td><input type="checkbox" class="extract-check" value="${i}" checked></td><td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(q.question || '')}">${escapeHtml((q.question || '').substring(0, 60))}...</td><td>${q.sectionType === 'multiple-choice' ? '🔘' : q.sectionType === 'fill-in-blank' ? '✏️' : '📝'}</td><td>${q.difficulty === 'easy' ? '🟢' : q.difficulty === 'hard' ? '🔴' : '🟡'}</td></tr>`).join('')}</tbody></table>`;
-        document.getElementById('aiExtractImportBtn').style.display = '';
-    } catch (err) { status.textContent = '❌ Lỗi: ' + err.message; status.style.color = 'var(--danger)'; }
-    btn.disabled = false; btn.textContent = '🤖 Bóc tách';
+        if (status) { status.textContent = `✅ Đã tách ${data.count} câu hỏi!`; status.style.color = 'var(--success)'; }
+    } catch (err) { if (status) { status.textContent = '❌ Lỗi: ' + err.message; status.style.color = 'var(--danger)'; } }
+    if (btn) { btn.disabled = false; btn.textContent = '🤖 Bóc tách'; }
 }
 
 async function importExtractedQuestions() {
