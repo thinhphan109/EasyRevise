@@ -1241,10 +1241,14 @@ function openMediaPicker(mode, callback) {
     const existing = document.getElementById('mediaPickerModal');
     if (existing) existing.remove();
 
-    const typeFilter = mode === 'question-images' ? 'image' : mode === 'video' ? 'video' : mode === 'attachment' ? 'pdf' : null;
+    const typeFilter = mode === 'question-images' ? 'image' : mode === 'video' ? 'video' : mode === 'attachment' ? 'document' : null;
     const multiSelect = mode === 'question-images';
     const title = mode === 'question-images' ? 'Chọn ảnh từ kho' : mode === 'video' ? 'Chọn video từ kho' : 'Chọn tài liệu từ kho';
-    const files = _mediaData.files.filter(f => f.status === 'ready' && (!typeFilter || f.type === typeFilter));
+    const DOCUMENT_TYPES = ['pdf', 'docx', 'pptx', 'xlsx', 'other'];
+    const files = _mediaData.files.filter(f => f.status === 'ready' && (
+        !typeFilter ||
+        (typeFilter === 'document' ? DOCUMENT_TYPES.includes(f.type) : f.type === typeFilter)
+    ));
 
     const modal = document.createElement('div');
     modal.id = 'mediaPickerModal';
@@ -1259,7 +1263,7 @@ function openMediaPicker(mode, callback) {
         <div style="margin-bottom:1rem;">
             <label class="btn btn-sm btn-info" style="cursor:pointer;">
                 ${_mi('upload')} Upload thêm
-                <input type="file" ${typeFilter === 'image' ? 'accept="image/*"' : typeFilter === 'video' ? 'accept="video/*"' : 'accept=".pdf,.docx,.doc"'} ${multiSelect ? 'multiple' : ''} style="display:none;" onchange="uploadMediaInPicker(this)">
+                <input type="file" ${typeFilter === 'image' ? 'accept="image/*"' : typeFilter === 'video' ? 'accept="video/*"' : 'accept=".pdf,.docx,.doc,.pptx,.ppt,.xlsx,.xls"'} ${multiSelect ? 'multiple' : ''} style="display:none;" onchange="uploadMediaInPicker(this)">
             </label>
             <span style="font-size:0.78rem;color:var(--text-muted);margin-left:0.5rem;">${multiSelect ? 'Chọn nhiều' : 'Chọn 1 file'}</span>
         </div>
@@ -1347,9 +1351,13 @@ async function uploadMediaInPicker(inputEl) {
     }
     _mediaData = await api('/api/admin/media');
     if (!_mediaData.folders) _mediaData = { folders: [], files: [] };
-    const typeFilter = _mediaPickerMode === 'question-images' ? 'image' : _mediaPickerMode === 'video' ? 'video' : _mediaPickerMode === 'attachment' ? 'pdf' : null;
+    const DOCUMENT_TYPES2 = ['pdf', 'docx', 'pptx', 'xlsx', 'other'];
+    const typeFilter2 = _mediaPickerMode === 'question-images' ? 'image' : _mediaPickerMode === 'video' ? 'video' : _mediaPickerMode === 'attachment' ? 'document' : null;
     const multiSelect = _mediaPickerMode === 'question-images';
-    const filteredFiles = _mediaData.files.filter(f => f.status === 'ready' && (!typeFilter || f.type === typeFilter));
+    const filteredFiles = _mediaData.files.filter(f => f.status === 'ready' && (
+        !typeFilter2 ||
+        (typeFilter2 === 'document' ? DOCUMENT_TYPES2.includes(f.type) : f.type === typeFilter2)
+    ));
     const grid = document.getElementById('pickerFileGrid');
     if (grid) grid.innerHTML = filteredFiles.length ? filteredFiles.map(f => renderPickerCard(f, multiSelect)).join('') : '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">Chưa có file phù hợp</div>';
     inputEl.value = '';
