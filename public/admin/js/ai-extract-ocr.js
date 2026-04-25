@@ -1,12 +1,14 @@
 // ========================
 // ai-extract-ocr.js — AI Bóc tách: PDF/Image → Text → Word
 // Converted from React to Vanilla JS for EasyRevise Admin Panel
+// v2: Fixed UTF-8 Vietnamese in Word, drag-drop PDF, auto PDF→image
 // ========================
 
 const PDF_JS_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js';
 const PDF_WORKER_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
 let _ocrPdfReady = false;
+let _ocrPdfLoading = false;
 let _ocrPreviewUrls = [];
 let _ocrFileNames = [];
 let _ocrExtractedImages = {};
@@ -14,23 +16,45 @@ let _ocrResultText = '';
 let _ocrIsProcessing = false;
 let _ocrAbortController = null;
 
-// ── Load PDF.js lazily ──────────────────────────────────
+// ── Load PDF.js lazily (returns Promise) ────────────────
 function loadPdfJs() {
-    if (_ocrPdfReady || document.getElementById('pdfjsScript')) return;
-    const s = document.createElement('script');
-    s.id = 'pdfjsScript';
-    s.src = PDF_JS_CDN;
-    s.onload = () => {
-        window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDF_WORKER_CDN;
-        _ocrPdfReady = true;
-        console.log('[AI OCR] PDF.js loaded');
-    };
-    document.head.appendChild(s);
+    if (_ocrPdfReady) return Promise.resolve();
+    if (_ocrPdfLoading) {
+        return new Promise(resolve => {
+            const check = setInterval(() => {
+                if (_ocrPdfReady) { clearInterval(check); resolve(); }
+            }, 100);
+        });
+    }
+    _ocrPdfLoading = true;
+    return new Promise((resolve, reject) => {
+        if (document.getElementById('pdfjsScript')) {
+            _ocrPdfReady = true;
+            _ocrPdfLoading = false;
+            resolve();
+            return;
+        }
+        const s = document.createElement('script');
+        s.id = 'pdfjsScript';
+        s.src = PDF_JS_CDN;
+        s.onload = () => {
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDF_WORKER_CDN;
+            _ocrPdfReady = true;
+            _ocrPdfLoading = false;
+            console.log('[AI OCR] PDF.js loaded');
+            resolve();
+        };
+        s.onerror = () => {
+            _ocrPdfLoading = false;
+            reject(new Error('Failed to load PDF.js'));
+        };
+        document.head.appendChild(s);
+    });
 }
 
 // ── Show the AI Extract Modal ──────────────────────────
 function showAIExtractModal() {
-    loadPdfJs();
+    loadPdfJs(); // start loading early
     document.getElementById('aiOcrModal')?.remove();
 
     // Reset state
@@ -116,7 +140,7 @@ function showAIExtractModal() {
                     </div>
 
                     <!-- Textarea output -->
-                    <textarea id="ocrResultTextarea" class="ocr-result-textarea" placeholder="Văn bản sẽ xuất hiện tại đây sau khi chuyển đổi..." readonly></textarea>
+                    <textarea id="ocrResultTextarea" class="ocr-result-textarea" placeholder="Văn bản sẽ xuất hiện tại đây sau khi chuyển đổi..."></textarea>
 
                     <div id="ocrImageHint" style="display:none;margin-top:0.5rem;padding:0.5rem 0.75rem;background:var(--color-warning-bg, #fef3c7);border:1px solid var(--color-warning, #f59e0b);border-radius:var(--radius-md);font-size:0.72rem;color:var(--color-warning-text, #92400e);">
                         💡 Thẻ [HÌNH ẢNH MINH HOẠ: IMG_...] sẽ biến thành ảnh thật khi Xuất Word.
@@ -129,12 +153,22 @@ function showAIExtractModal() {
     document.body.appendChild(modal);
     modal.addEventListener('click', e => { if (e.target === modal) ocrSafeClose(); });
 
-    // Setup drag & drop
+    // Setup drag & drop on BOTH dropzone and the entire modal body
     const dz = document.getElementById('ocrDropZone');
-    dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragging'); });
+
+    // Prevent browser default for drag over the entire modal
+    const modalContent = modal.querySelector('.modal-content');
+    modalContent.addEventListener('dragover', e => { e.preventDefault(); e.stopPropagation(); });
+    modalContent.addEventListener('drop', e => {
+        e.preventDefault(); e.stopPropagation();
+        if (!_ocrIsProcessing) ocrHandleFiles(e.dataTransfer.files);
+    });
+
+    // Visual feedback on drop zone specifically
+    dz.addEventListener('dragover', e => { e.preventDefault(); e.stopPropagation(); dz.classList.add('dragging'); });
     dz.addEventListener('dragleave', e => { e.preventDefault(); dz.classList.remove('dragging'); });
     dz.addEventListener('drop', e => {
-        e.preventDefault(); dz.classList.remove('dragging');
+        e.preventDefault(); e.stopPropagation(); dz.classList.remove('dragging');
         if (!_ocrIsProcessing) ocrHandleFiles(e.dataTransfer.files);
     });
 
@@ -183,26 +217,41 @@ async function ocrHandleFiles(fileList) {
             });
             _ocrPreviewUrls.push(url);
         } else if (file.type === 'application/pdf') {
-            if (!_ocrPdfReady) { ocrSetStatus('error', 'PDF.js chưa tải xong, vui lòng thử lại.'); continue; }
+            // Wait for PDF.js to be fully loaded before processing
             try {
+                await loadPdfJs();
+            } catch (e) {
+                ocrSetStatus('error', 'Không thể tải PDF.js. Vui lòng tải lại trang.');
+                continue;
+            }
+            try {
+                ocrSetStatus('info', `Đang render PDF: ${file.name}...`);
                 const buf = await file.arrayBuffer();
                 const pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
                 for (let i = 1; i <= pdf.numPages; i++) {
+                    ocrSetStatus('info', `Đang render PDF trang ${i}/${pdf.numPages}: ${file.name}`);
                     const pg = await pdf.getPage(i);
                     const vp = pg.getViewport({ scale: 1.5 });
                     const cv = document.createElement('canvas');
                     cv.width = vp.width; cv.height = vp.height;
                     await pg.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
-                    _ocrPreviewUrls.push(cv.toDataURL('image/jpeg', 0.8));
+                    _ocrPreviewUrls.push(cv.toDataURL('image/jpeg', 0.85));
                     cv.width = 0; // free memory
                 }
-            } catch (e) { console.error('PDF parse error:', e); }
+            } catch (e) {
+                console.error('PDF parse error:', e);
+                ocrSetStatus('error', `Lỗi đọc PDF "${file.name}": ${e.message}`);
+            }
+        } else {
+            console.warn('Bỏ qua file không hỗ trợ:', file.name);
         }
     }
 
     _ocrIsProcessing = false;
     ocrUpdateUI();
-    ocrSetStatus('success', `Đã tải ${_ocrPreviewUrls.length} trang/ảnh. Nhấn "Chuyển đổi" để bắt đầu.`);
+    if (_ocrPreviewUrls.length > 0) {
+        ocrSetStatus('success', `Đã tải ${_ocrPreviewUrls.length} trang/ảnh. Nhấn "Chuyển đổi" để bắt đầu.`);
+    }
 
     // Reset file input
     const fi = document.getElementById('ocrFileInput');
@@ -320,6 +369,8 @@ async function ocrProcessOCR() {
 
     try {
         for (let i = 0; i < _ocrPreviewUrls.length; i += BATCH) {
+            if (signal.aborted) break;
+
             const batch = _ocrPreviewUrls.slice(i, i + BATCH);
             const endIdx = Math.min(i + BATCH, _ocrPreviewUrls.length);
             ocrSetStatus('info', `Đang xử lý trang ${i + 1}–${endIdx} / ${_ocrPreviewUrls.length}...`);
@@ -390,8 +441,12 @@ async function ocrProcessOCR() {
 
         ocrSetStatus('success', `✅ Hoàn tất! Đã xử lý ${_ocrPreviewUrls.length} trang.`);
     } catch (err) {
-        console.error('OCR error:', err);
-        ocrSetStatus('error', 'Lỗi: ' + err.message);
+        if (err.name === 'AbortError') {
+            ocrSetStatus('info', 'Đã hủy xử lý.');
+        } else {
+            console.error('OCR error:', err);
+            ocrSetStatus('error', 'Lỗi: ' + err.message);
+        }
     }
 
     _ocrIsProcessing = false;
@@ -420,28 +475,67 @@ function ocrCopyResult() {
     }
 }
 
-// ── Download as Word (.doc) ────────────────────────────
+// ── Download as Word (.doc) — FIX UTF-8 Vietnamese ─────
 function ocrDownloadWord() {
     const text = document.getElementById('ocrResultTextarea')?.value;
     if (!text) return;
 
+    // UTF-8 BOM is critical for Word to detect encoding correctly
+    const BOM = '\uFEFF';
+
+    // Word HTML format with proper Vietnamese font support
     const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-    <head><meta charset='utf-8'><title>Export Word</title>
-    <style>body{font-family:'Times New Roman',serif;font-size:13pt;line-height:1.6;margin:2cm;}
-    b{font-weight:bold;}hr{page-break-after:always;border:none;}</style>
-    </head><body>`;
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta charset="utf-8">
+<title>EasyRevise OCR Export</title>
+<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml><![endif]-->
+<style>
+    @page { mso-page-orientation:portrait; margin:2cm; }
+    body {
+        font-family: 'Times New Roman', Times, serif;
+        mso-ascii-font-family: 'Times New Roman';
+        mso-hansi-font-family: 'Times New Roman';
+        mso-bidi-font-family: 'Times New Roman';
+        font-size: 13pt;
+        line-height: 1.6;
+        color: #000000;
+    }
+    p { margin: 0 0 6pt 0; mso-pagination: none; }
+    b, strong { font-weight: bold; }
+    table { border-collapse: collapse; margin: 6pt 0; }
+    td, th { border: 1px solid #000; padding: 4pt 8pt; }
+    hr { page-break-after: always; border: none; margin: 0; padding: 0; }
+    img { max-width: 100%; }
+    .page-break { page-break-after: always; }
+</style>
+</head>
+<body>`;
+
     const footer = '</body></html>';
 
-    let formatted = text
-        .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-        .replace(/--- PAGE BREAK ---/g, '<hr style="page-break-after:always;border:none;">')
-        .replace(/\n\n/g, '</p><p>')
-        .replace(/\n/g, '<br>');
+    let formatted = text;
+
+    // Convert markdown bold to HTML
+    formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+
+    // Convert LaTeX inline math $...$ to keep as-is (Word + MathType Toggle TeX)
+    // No conversion needed — just preserve $ delimiters
+
+    // Page breaks
+    formatted = formatted.replace(/---\s*PAGE BREAK\s*---/g, '<hr>');
+
+    // Convert double newlines to paragraph breaks, single to <br>
+    formatted = formatted.replace(/\n\n+/g, '</p>\n<p>');
+    formatted = formatted.replace(/\n/g, '<br>\n');
 
     // Wrap in paragraphs
     formatted = '<p>' + formatted + '</p>';
 
-    // Replace image placeholders with actual images
+    // Clean up empty paragraphs
+    formatted = formatted.replace(/<p>\s*<\/p>/g, '');
+
+    // Replace image placeholders with actual base64 images
     formatted = formatted.replace(/\[HÌNH ẢNH MINH HOẠ:\s*(IMG_[^\]]+)\]/g, (match, id) => {
         if (_ocrExtractedImages[id]) {
             return `</p><div style="text-align:center;margin:12pt 0;"><img src="${_ocrExtractedImages[id]}" style="max-width:100%;border:1px solid #ccc;" /></div><p>`;
@@ -449,7 +543,13 @@ function ocrDownloadWord() {
         return match;
     });
 
-    const blob = new Blob([header + formatted + footer], { type: 'application/msword' });
+    // Build final HTML with BOM
+    const fullHtml = BOM + header + formatted + footer;
+
+    // Create Blob with explicit UTF-8 charset
+    const blob = new Blob([fullHtml], {
+        type: 'application/msword;charset=utf-8'
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;

@@ -473,12 +473,18 @@ router.post('/ai-ocr', adminOnly, express.json({ limit: '10mb' }), async (req, r
         const ocrModel = settingsData.generateModel || cfg.defaultModel;
 
         const ocrPrompt = `Hãy chuyển đổi toàn bộ nội dung trong hình ảnh này thành văn bản có cấu trúc. YÊU CẦU ĐẶC BIỆT:
-1. Bảng biểu: BẮT BUỘC chuyển đổi thành mã LaTeX.
-2. Công thức toán học: Sử dụng mã LaTeX chuẩn để tương thích hoàn toàn với tính năng Toggle TeX của MathType trong Word. Dùng đúng 1 dấu $ cho công thức trên cùng dòng và 2 dấu $$ cho công thức đứng riêng. TUYỆT ĐỐI KHÔNG thêm khoảng trắng ở sát bên trong dấu $. Không dùng dư dấu $.
+1. Bảng biểu: BẮT BUỘC chuyển đổi thành mã LaTeX dùng \\begin{tabular}...\\end{tabular}.
+2. Công thức toán học: Sử dụng mã LaTeX chuẩn để tương thích hoàn toàn với tính năng Toggle TeX của MathType trong Word.
+   - Dùng đúng 1 dấu $ cho công thức trên cùng dòng (VD: $x^2+y^2=r^2$).
+   - Dùng 2 dấu $$ cho công thức đứng riêng (VD: $$\\frac{a}{b}$$).
+   - TUYỆT ĐỐI KHÔNG thêm khoảng trắng ở sát bên trong dấu $ (SAI: $ x^2 $ — ĐÚNG: $x^2$).
+   - Không dùng dư dấu $. Không bọc text thuần trong $.
+   - QUAN TRỌNG: Giữ nguyên tiếng Việt có dấu bên ngoài dấu $. Chỉ có công thức toán nằm trong $.
 3. Định dạng: Các Tiêu đề, Số thứ tự Câu phải in đậm bằng Markdown (ví dụ: **Câu 1:**).
 4. Hình ảnh minh hoạ/Sơ đồ: BẮT BUỘC phát hiện hộp bao quanh (bounding box) của từng hình ảnh thật và xuất ra thẻ [IMG_BBOX: ymin, xmin, ymax, xmax] chuẩn hóa thang 1000.
 5. QUAN TRỌNG: TUYỆT ĐỐI BỎ QUA CÁC HÌNH ẢNH WATERMARK. KHÔNG trích xuất bounding box cho watermark.
-Chỉ trả về nội dung văn bản kết quả.`;
+6. Text tiếng Việt: Giữ NGUYÊN tất cả ký tự có dấu (ă, â, ê, ô, ơ, ư, đ, v.v.). KHÔNG chuyển sang ASCII.
+Chỉ trả về nội dung văn bản kết quả, KHÔNG bọc trong code block.`;
 
         console.log(`[AI OCR] Provider: ${cfg.providerName} | Model: ${ocrModel}`);
 
@@ -494,11 +500,14 @@ Chỉ trả về nội dung văn bản kết quả.`;
             ]
         });
 
-        // Clean up markdown code blocks
+        // Clean up markdown code blocks that AI might wrap output in
         let cleaned = result
-            .replace(/```(?:latex|tex|math)?\n?/g, '')
-            .replace(/```/g, '')
-            .replace(/\${3,}/g, '$$');
+            .replace(/^```(?:latex|tex|math|markdown|md)?\s*\n?/gm, '')
+            .replace(/```\s*$/gm, '')
+            .replace(/\${3,}/g, '$$')       // Fix excessive $ signs
+            .replace(/\$\s+\$/g, '$$')       // Fix $ $ → $$
+            .replace(/\$ ([^$]+) \$/g, '$$$1$$')  // Fix $ x^2 $ → $x^2$ (spaces inside)
+            .trim();
 
         res.json({ success: true, text: cleaned });
     } catch (err) {
