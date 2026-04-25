@@ -516,16 +516,41 @@ function ocrDownloadWord() {
 
     let formatted = text;
 
-    // Convert markdown bold to HTML
+    // ── 1. Convert LaTeX tables to HTML tables for Word ──
+    formatted = formatted.replace(
+        /\\begin\{tabular\}\{[^}]*\}([\s\S]*?)\\end\{tabular\}/g,
+        (match, tableBody) => {
+            let html = '<table border="1" cellpadding="4" cellspacing="0" style="border-collapse:collapse;margin:6pt 0;">';
+            // Split rows by \\ (row separator in LaTeX)
+            const rows = tableBody.split('\\\\').filter(r => r.trim());
+            for (const row of rows) {
+                const trimmed = row.replace(/\\hline/g, '').trim();
+                if (!trimmed) continue;
+                html += '<tr>';
+                const cells = trimmed.split('&');
+                for (const cell of cells) {
+                    const cellText = cell.trim();
+                    html += `<td style="border:1px solid #000;padding:4pt 8pt;">${cellText}</td>`;
+                }
+                html += '</tr>';
+            }
+            html += '</table>';
+            return html;
+        }
+    );
+
+    // ── 2. Ensure spaces around $ delimiters (Toggle TeX compatibility) ──
+    // "$AB$và" → "$AB$ và"  |  "điểm$M$" → "điểm $M$"
+    formatted = formatted.replace(/\$([^$\n]+)\$([^\s\n,.:;!?\)}\]$"'])/g, '$$$1$$ $2');
+    formatted = formatted.replace(/([^\s\n(\[{$"'])\$([^$\n]+)\$/g, '$1 $$$2$$');
+
+    // ── 3. Convert markdown bold to HTML ──
     formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
 
-    // Convert LaTeX inline math $...$ to keep as-is (Word + MathType Toggle TeX)
-    // No conversion needed — just preserve $ delimiters
-
-    // Page breaks
+    // ── 4. Page breaks ──
     formatted = formatted.replace(/---\s*PAGE BREAK\s*---/g, '<hr>');
 
-    // Convert double newlines to paragraph breaks, single to <br>
+    // ── 5. Convert newlines to HTML ──
     formatted = formatted.replace(/\n\n+/g, '</p>\n<p>');
     formatted = formatted.replace(/\n/g, '<br>\n');
 
@@ -535,7 +560,7 @@ function ocrDownloadWord() {
     // Clean up empty paragraphs
     formatted = formatted.replace(/<p>\s*<\/p>/g, '');
 
-    // Replace image placeholders with actual base64 images
+    // ── 6. Replace image placeholders with actual base64 images ──
     formatted = formatted.replace(/\[HÌNH ẢNH MINH HOẠ:\s*(IMG_[^\]]+)\]/g, (match, id) => {
         if (_ocrExtractedImages[id]) {
             return `</p><div style="text-align:center;margin:12pt 0;"><img src="${_ocrExtractedImages[id]}" style="max-width:100%;border:1px solid #ccc;" /></div><p>`;

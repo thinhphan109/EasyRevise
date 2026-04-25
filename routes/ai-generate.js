@@ -472,19 +472,29 @@ router.post('/ai-ocr', adminOnly, express.json({ limit: '10mb' }), async (req, r
         const settingsData = readSettings();
         const ocrModel = settingsData.generateModel || cfg.defaultModel;
 
-        const ocrPrompt = `Hãy chuyển đổi toàn bộ nội dung trong hình ảnh này thành văn bản có cấu trúc. YÊU CẦU ĐẶC BIỆT:
-1. Bảng biểu: BẮT BUỘC chuyển đổi thành mã LaTeX dùng \\begin{tabular}...\\end{tabular}.
-2. Công thức toán học: Sử dụng mã LaTeX chuẩn để tương thích hoàn toàn với tính năng Toggle TeX của MathType trong Word.
-   - Dùng đúng 1 dấu $ cho công thức trên cùng dòng (VD: $x^2+y^2=r^2$).
-   - Dùng 2 dấu $$ cho công thức đứng riêng (VD: $$\\frac{a}{b}$$).
-   - TUYỆT ĐỐI KHÔNG thêm khoảng trắng ở sát bên trong dấu $ (SAI: $ x^2 $ — ĐÚNG: $x^2$).
-   - Không dùng dư dấu $. Không bọc text thuần trong $.
-   - QUAN TRỌNG: Giữ nguyên tiếng Việt có dấu bên ngoài dấu $. Chỉ có công thức toán nằm trong $.
-3. Định dạng: Các Tiêu đề, Số thứ tự Câu phải in đậm bằng Markdown (ví dụ: **Câu 1:**).
-4. Hình ảnh minh hoạ/Sơ đồ: BẮT BUỘC phát hiện hộp bao quanh (bounding box) của từng hình ảnh thật và xuất ra thẻ [IMG_BBOX: ymin, xmin, ymax, xmax] chuẩn hóa thang 1000.
-5. QUAN TRỌNG: TUYỆT ĐỐI BỎ QUA CÁC HÌNH ẢNH WATERMARK. KHÔNG trích xuất bounding box cho watermark.
-6. Text tiếng Việt: Giữ NGUYÊN tất cả ký tự có dấu (ă, â, ê, ô, ơ, ư, đ, v.v.). KHÔNG chuyển sang ASCII.
-Chỉ trả về nội dung văn bản kết quả, KHÔNG bọc trong code block.`;
+        const ocrPrompt = `Hãy chuyển đổi toàn bộ nội dung trong hình ảnh này thành văn bản có cấu trúc.
+
+QUY TẮC BẮT BUỘC:
+
+1. BẢNG BIỂU: Chuyển thành LaTeX dùng \\begin{tabular}...\\end{tabular}. Dùng |c|c|... cho cột, \\hline cho dòng kẻ.
+
+2. CÔNG THỨC TOÁN:
+   - Inline: dùng $...$. Display: dùng $$...$$.
+   - KHÔNG có khoảng trắng SÁT TRONG dấu $. Đúng: $x^2$ — Sai: $ x^2 $
+   - BẮT BUỘC có DẤU CÁCH trước và sau mỗi cặp $...$, $$...$$ khi nó nằm cạnh chữ.
+     VD đúng: đường kính $AB$ và điểm $M$ là trung điểm
+     VD sai:  đường kính $AB$và điểm$M$là trung điểm
+   - Chỉ bọc CÔNG THỨC TOÁN trong $. KHÔNG bọc text/tên biến đơn lẻ nếu không cần thiết.
+
+3. ĐỊNH DẠNG: Tiêu đề, số thứ tự câu in đậm Markdown: **Câu 1:**
+
+4. HÌNH ẢNH/SƠ ĐỒ: Phát hiện bounding box → [IMG_BBOX: ymin, xmin, ymax, xmax] (thang 1000). BỎ QUA watermark.
+
+5. TIẾNG VIỆT: Giữ NGUYÊN mọi ký tự có dấu. TUYỆT ĐỐI không để mất dấu thành ký tự "?".
+
+6. DÒNG TRỐNG: KHÔNG xuất dòng trống liên tiếp. Mỗi câu/phần cách nhau đúng 1 dòng trống.
+
+7. KHÔNG bọc kết quả trong code block. Trả về text thuần.`;
 
         console.log(`[AI OCR] Provider: ${cfg.providerName} | Model: ${ocrModel}`);
 
@@ -500,13 +510,21 @@ Chỉ trả về nội dung văn bản kết quả, KHÔNG bọc trong code bloc
             ]
         });
 
-        // Clean up markdown code blocks that AI might wrap output in
+        // ── Clean up AI response ──
         let cleaned = result
+            // Remove code block wrappers
             .replace(/^```(?:latex|tex|math|markdown|md)?\s*\n?/gm, '')
             .replace(/```\s*$/gm, '')
-            .replace(/\${3,}/g, '$$')       // Fix excessive $ signs
-            .replace(/\$\s+\$/g, '$$')       // Fix $ $ → $$
-            .replace(/\$ ([^$]+) \$/g, '$$$1$$')  // Fix $ x^2 $ → $x^2$ (spaces inside)
+            // Fix LaTeX delimiter issues
+            .replace(/\${3,}/g, '$$')
+            .replace(/\$\s+\$/g, '$$')
+            .replace(/\$\s+([^$]+?)\s+\$/g, (m, inner) => '$' + inner.trim() + '$')
+            // CRITICAL: Add space around $ when touching non-space chars
+            // "$AB$và" → "$AB$ và"  |  "điểm$M$" → "điểm $M$"
+            .replace(/\$([^$\n]+)\$([^\s\n,.:;!?\)}\]$"'])/g, '$$$1$$ $2')
+            .replace(/([^\s\n(\[{$"'])\$([^$\n]+)\$/g, '$1 $$$2$$')
+            // Clean consecutive blank lines → max 1
+            .replace(/\n{3,}/g, '\n\n')
             .trim();
 
         res.json({ success: true, text: cleaned });
