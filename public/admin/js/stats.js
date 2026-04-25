@@ -1,11 +1,11 @@
 // ========================
 // stats.js — Code logs, exam stats
 // ========================
-
 async function loadCodeLogs() {
-    const logs = await api('/api/code-logs');
     const c = document.getElementById('codeLogsContainer');
-    if (!logs.length) { c.innerHTML = '<div class="empty-state"><div class="emoji">📊</div><p>Chưa có mã nào được sử dụng</p></div>'; return; }
+    c.innerHTML = renderSkeletonRows(5, 'table');
+    const logs = await api('/api/code-logs');
+    if (!logs.length) { c.innerHTML = renderEmptyState('chart', 'Chưa có mã nào được sử dụng', 'Khi học sinh sử dụng mã kích hoạt, lịch sử sẽ hiển thị ở đây'); return; }
 
     const grouped = {};
     logs.forEach(l => {
@@ -14,7 +14,7 @@ async function loadCodeLogs() {
         grouped[key].entries.push(l);
     });
 
-    const cards = Object.values(grouped).map((group, gi) => {
+    const cards = Object.values(grouped).map(group => {
         const usedCount = group.entries.filter(e => e.completed).length;
         const total = group.entries.length;
         const full = usedCount >= group.maxUses;
@@ -25,20 +25,20 @@ async function loadCodeLogs() {
             const time = l.usedAt ? new Date(l.usedAt).toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' }) : '-';
             const user = l.displayName || l.userId || 'Ẩn danh';
             const score = (l.score !== null && l.score !== undefined && !isNaN(l.score)) ? l.score + '/10' : '-';
-            return `<div style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem 1rem;border-bottom:1px solid var(--border);">
-                <span style="flex:1;font-weight:500;">${escapeHtml(user)}</span>
-                <span style="font-size:0.8rem;color:var(--text-muted);min-width:130px;">${time}</span>
-                <span style="color:${statusColor};font-weight:600;font-size:0.82rem;min-width:100px;">${status}</span>
-                <span style="font-weight:700;min-width:50px;text-align:right;">${score}</span>
+            return `<div class="code-log-row">
+                <span class="code-log-user">${escapeHtml(user)}</span>
+                <span class="code-log-time">${time}</span>
+                <span class="code-log-status" style="color:${statusColor}">${status}</span>
+                <span class="code-log-score">${score}</span>
             </div>`;
         }).join('');
 
-        return `<div style="border:1px solid var(--border);border-radius:12px;margin-bottom:0.75rem;overflow:hidden;">
-            <div onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.chevron').textContent=this.nextElementSibling.style.display==='none'?'▶':'▼'" style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;background:var(--bg-card);cursor:pointer;user-select:none;">
-                <span class="chevron" style="font-size:0.7rem;color:var(--text-muted);">▼</span>
-                <span style="font-family:monospace;font-weight:700;font-size:1rem;color:var(--primary);cursor:pointer;" onclick="event.stopPropagation();navigator.clipboard.writeText('${group.code}');this.style.color='#16a34a';this.textContent='\u2705 Copied!';setTimeout(()=>{this.textContent='${group.code}';this.style.color='var(--primary)';},1000)" title="Click để copy">${group.code}</span>
-                <span style="font-size:0.85rem;color:var(--text-muted);flex:1;">${escapeHtml(group.examTitle)}</span>
-                <span style="font-size:0.75rem;padding:0.15rem 0.5rem;border-radius:6px;font-weight:600;${full ? 'background:#fee2e2;color:#dc2626;' : 'background:#f0fdf4;color:#16a34a;'}">${usedCount}/${group.maxUses} lần</span>
+        return `<div class="code-log-card">
+            <div class="code-log-header" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none';this.querySelector('.code-log-chevron').classList.toggle('open')">
+                <span class="code-log-chevron open">▶</span>
+                <span class="code-log-code" onclick="event.stopPropagation();navigator.clipboard.writeText('${group.code}');showToast('Đã copy: ${group.code}','success')" title="Click để copy">${group.code}</span>
+                <span class="code-log-title">${escapeHtml(group.examTitle)}</span>
+                <span class="code-log-badge ${full ? 'code-log-badge--full' : 'code-log-badge--ok'}">${usedCount}/${group.maxUses} lần</span>
                 <span style="font-size:0.8rem;color:var(--text-muted);">${total} lượt</span>
             </div>
             <div style="display:block;">${rows}</div>
@@ -103,22 +103,22 @@ function renderExamStats(stats, examTitle) {
             <button class="btn btn-sm btn-ghost" onclick="document.getElementById('statsModal').style.display='none'">✕ Đóng</button>
         </div>
 
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;">
-            <div style="text-align:center;padding:1rem;background:var(--bg-input);border-radius:12px;">
-                <div style="font-size:1.8rem;font-weight:900;color:var(--primary);">${stats.totalAttempts}</div>
-                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Lần làm bài</div>
+        <div class="stats-grid">
+            <div class="stats-metric">
+                <div class="stats-metric-value" style="color:var(--primary);">${stats.totalAttempts}</div>
+                <div class="stats-metric-label">Lần làm bài</div>
             </div>
-            <div style="text-align:center;padding:1rem;background:var(--bg-input);border-radius:12px;">
-                <div style="font-size:1.8rem;font-weight:900;color:${avgColor};">${stats.avgScore ?? '—'}</div>
-                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Điểm TB</div>
+            <div class="stats-metric">
+                <div class="stats-metric-value" style="color:${avgColor};">${stats.avgScore ?? '—'}</div>
+                <div class="stats-metric-label">Điểm TB</div>
             </div>
-            <div style="text-align:center;padding:1rem;background:var(--bg-input);border-radius:12px;">
-                <div style="font-size:1.8rem;font-weight:900;color:#16a34a;">${stats.maxScore ?? '—'}</div>
-                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Cao nhất</div>
+            <div class="stats-metric">
+                <div class="stats-metric-value" style="color:#16a34a;">${stats.maxScore ?? '—'}</div>
+                <div class="stats-metric-label">Cao nhất</div>
             </div>
-            <div style="text-align:center;padding:1rem;background:var(--bg-input);border-radius:12px;">
-                <div style="font-size:1.8rem;font-weight:900;color:#dc2626;">${stats.minScore ?? '—'}</div>
-                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Thấp nhất</div>
+            <div class="stats-metric">
+                <div class="stats-metric-value" style="color:#dc2626;">${stats.minScore ?? '—'}</div>
+                <div class="stats-metric-label">Thấp nhất</div>
             </div>
         </div>
 

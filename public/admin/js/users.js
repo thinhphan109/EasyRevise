@@ -3,9 +3,10 @@
 // ========================
 
 async function loadUsers() {
-    const users = await api('/api/users');
     const c = document.getElementById('userListContainer');
-    if (!users.length) { c.innerHTML = '<div class="empty-state"><div class="emoji">👥</div><p>Chưa có tài khoản</p></div>'; return; }
+    c.innerHTML = renderSkeletonRows(5, 'table');
+    const users = await api('/api/users');
+    if (!users.length) { c.innerHTML = renderEmptyState('users', 'Chưa có tài khoản', 'Tạo tài khoản đầu tiên để bắt đầu', '<button class="btn btn-sm btn-primary" onclick="showCreateUserModal()">+ Tạo tài khoản</button>'); return; }
     c.innerHTML = `<table class="exam-table"><thead><tr><th>Tên</th><th>Username</th><th>Role</th><th>Lịch sử</th><th>Ngày tạo</th><th></th></tr></thead><tbody>
     ${users.map(u => `<tr class="exam-row user-row">
         <td style="font-weight:600;"><div style="display:flex;align-items:center;gap:0.5rem;"><span class="facehash-inline" data-name="${encodeURIComponent(u.username)}" data-size="32"></span>${escapeHtml(u.displayName)}</div></td><td>${escapeHtml(u.username)}</td>

@@ -22,7 +22,9 @@ async function loadQuestionBank() {
         try { const subjects = await api('/api/subjects'); subjects.forEach(s => { const opt = document.createElement('option'); opt.value = s.name; opt.textContent = s.name; subjectSelect.appendChild(opt); }); } catch (e) { }
     }
     if (!data.questions.length) {
-        c.innerHTML = `<div class="empty-state"><div class="emoji">📚</div><p>${data.total === 0 ? 'Chưa có câu hỏi. Bấm <strong>"Import từ đề"</strong> để bắt đầu.' : 'Không tìm thấy câu phù hợp.'}</p></div>`;
+        c.innerHTML = data.total === 0
+            ? renderEmptyState('folder', 'Chưa có câu hỏi', 'Bấm "Import từ đề" hoặc "AI Bóc tách" để bắt đầu', '<button class="btn btn-sm btn-primary" onclick="showImportFromExamModal()">Import từ đề</button>')
+            : renderEmptyState('search', 'Không tìm thấy', 'Thử thay đổi bộ lọc');
         document.getElementById('qbPagination').innerHTML = '';
         return;
     }
@@ -160,4 +162,30 @@ async function importExtractedQuestions() {
     document.getElementById('aiExtractModal')?.remove();
     _extractedQuestions = [];
     loadQuestionBank();
+}
+
+// #10: Export Question Bank to JSON
+async function exportQuestionBank() {
+    showToast('Đang xuất ngân hàng câu hỏi...', 'info');
+    try {
+        const data = await api('/api/admin/questions?limit=99999');
+        const questions = data.questions || data;
+        if (!questions.length) { showToast('Ngân hàng trống!', 'warning'); return; }
+        const exportData = {
+            _format: 'easyrevise-questionbank-v1',
+            exportedAt: new Date().toISOString(),
+            count: questions.length,
+            questions: questions
+        };
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `NganHangCauHoi_${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast(`Đã xuất ${questions.length} câu hỏi!`, 'success');
+    } catch (e) {
+        showToast('Lỗi xuất: ' + e.message, 'error');
+    }
 }

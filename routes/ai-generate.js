@@ -484,8 +484,8 @@ Chỉ trả về nội dung văn bản kết quả.`;
 
         const result = await chatCompletion({
             model: ocrModel,
-            maxTokens: 6000,
-            temperature: 0.1,
+            maxTokens: 12000,
+            temperature: 0.05,
             messages: [
                 { role: 'user', content: [
                     { type: 'text', text: ocrPrompt },

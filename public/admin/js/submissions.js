@@ -5,7 +5,7 @@
 async function loadSubmissions() {
     const examId = document.getElementById('submissionsExamFilter')?.value || '';
     const c = document.getElementById('submissionsContainer');
-    c.innerHTML = '<div class="empty-state"><div class="emoji">⏳</div><p>Đang tải...</p></div>';
+    c.innerHTML = renderSkeletonRows(4, 'table');
 
     const filterEl = document.getElementById('submissionsExamFilter');
     if (filterEl && filterEl.options.length <= 1) {
@@ -24,7 +24,7 @@ async function loadSubmissions() {
     const submissions = await api(url);
     const countEl = document.getElementById('submissionsCount');
     if (!submissions || !submissions.length) {
-        c.innerHTML = '<div class="empty-state"><div class="emoji">📭</div><p>Chưa có bài nộp tự luận nào</p></div>';
+        c.innerHTML = renderEmptyState('inbox', 'Chưa có bài nộp tự luận', 'Bài nộp sẽ xuất hiện khi học sinh hoàn thành');
         if (countEl) countEl.textContent = '0 bài nộp';
         return;
     }
@@ -164,4 +164,74 @@ async function reviewSubmission(examId, code, userId, questionId, key) {
     } catch (err) {
         showToast('Lỗi lưu điểm: ' + (err.message || err), 'error');
     }
+}
+
+// #11: Batch AI grade all ungraded essays
+async function batchAiGradeAll() {
+    const examId = document.getElementById('submissionsExamFilter')?.value || '';
+    const url = examId ? `/api/admin/submissions?examId=${examId}` : '/api/admin/submissions';
+    const btn = document.getElementById('batchAiGradeBtn');
+
+    if (btn) { btn.disabled = true; btn.innerHTML = '⏳ Đang tải bài nộp...'; }
+
+    try {
+        const submissions = await api(url);
+        if (!submissions || !submissions.length) {
+            showToast('Không có bài nộp nào!', 'warning');
+            if (btn) { btn.disabled = false; btn.innerHTML = 'AI Chấm tất cả'; }
+            return;
+        }
+
+        // Collect ungraded essays
+        const jobs = [];
+        for (const sub of submissions) {
+            for (const essay of (sub.essays || [])) {
+                if (essay.aiScore === null || essay.aiScore === undefined) {
+                    jobs.push({ sub, essay });
+                }
+            }
+        }
+
+        if (!jobs.length) {
+            showToast('Tất cả bài đã được AI chấm rồi!', 'success');
+            if (btn) { btn.disabled = false; btn.innerHTML = 'AI Chấm tất cả'; }
+            return;
+        }
+
+        const ok = await customConfirm(
+            'AI Chấm tất cả',
+            `Tìm thấy <strong>${jobs.length}</strong> bài tự luận chưa chấm. AI sẽ chấm lần lượt (có thể mất vài phút).`,
+            'Bắt đầu chấm'
+        );
+        if (!ok) { if (btn) { btn.disabled = false; btn.innerHTML = 'AI Chấm tất cả'; } return; }
+
+        let done = 0, errors = 0;
+        for (const { sub, essay } of jobs) {
+            done++;
+            if (btn) btn.innerHTML = `⏳ ${done}/${jobs.length}...`;
+
+            try {
+                await api('/api/admin/ai-grade-essay', 'POST', {
+                    examId: sub.examId,
+                    code: sub.code,
+                    userId: sub.userId,
+                    questionId: essay.questionId,
+                    studentAnswer: essay.studentAnswer,
+                    attachments: essay.attachments || [],
+                    sampleAnswer: essay.sampleAnswer,
+                    prompt: essay.prompt
+                });
+            } catch (e) {
+                errors++;
+                console.warn(`Batch grade error (${sub.userId}/${essay.questionId}):`, e);
+            }
+        }
+
+        showToast(`Hoàn tất! ${done - errors}/${jobs.length} bài đã chấm.${errors ? ` (${errors} lỗi)` : ''}`, errors ? 'warning' : 'success');
+        loadSubmissions();
+    } catch (err) {
+        showToast('Lỗi: ' + (err.message || err), 'error');
+    }
+
+    if (btn) { btn.disabled = false; btn.innerHTML = 'AI Chấm tất cả'; }
 }

@@ -168,7 +168,7 @@ function switchTab(tab) {
 // Section type change listener
 document.getElementById('inputSectionType').addEventListener('change', toggleSectionType);
 
-// DOMContentLoaded — drag & drop, key listeners
+// DOMContentLoaded — drag & drop, key listeners, keyboard shortcuts
 document.addEventListener('DOMContentLoaded', () => {
     const dz = document.getElementById('aiDropZone');
     if (dz) {
@@ -180,6 +180,29 @@ document.addEventListener('DOMContentLoaded', () => {
     if (pinInput) pinInput.addEventListener('keydown', e => { if (e.key === 'Enter') submitAdminPin(); });
     const passInput = document.getElementById('adminPassword');
     if (passInput) passInput.addEventListener('keydown', e => { if (e.key === 'Enter') adminLogin(); });
+
+    // #9: Global keyboard shortcuts
+    document.addEventListener('keydown', e => {
+        // Esc — close topmost modal
+        if (e.key === 'Escape') {
+            const modals = document.querySelectorAll('.modal-overlay.active, #statsModal[style*="flex"], #aiOcrModal');
+            if (modals.length) {
+                const top = modals[modals.length - 1];
+                top.remove ? top.remove() : (top.style.display = 'none');
+                e.preventDefault();
+                return;
+            }
+            // Close mobile more menu
+            document.getElementById('mobileMoreMenu')?.classList.remove('open');
+        }
+
+        // Ctrl+K — focus search
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            const search = document.getElementById('examSearchInput') || document.getElementById('qbSearchInput');
+            if (search) { search.focus(); search.select(); }
+        }
+    });
 });
 
 // ── Mobile Bottom Nav ─────────────────────────────────────

@@ -55,6 +55,46 @@ async function api(url, method = 'GET', body = null) {
     return data;
 }
 
+// #5: Reusable empty state with SVG icon
+function renderEmptyState(icon, title, desc, actionBtn) {
+    const icons = {
+        'document': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+        'users': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>',
+        'folder': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>',
+        'inbox': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>',
+        'chart': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
+        'search': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+    };
+    const svgIcon = icons[icon] || icons['document'];
+    return `<div class="empty-state">
+        <div class="empty-state-icon">${svgIcon}</div>
+        <div class="empty-state-title">${title}</div>
+        ${desc ? `<div class="empty-state-desc">${desc}</div>` : ''}
+        ${actionBtn || ''}
+    </div>`;
+}
+
+// #6: Skeleton loading generator
+function renderSkeletonRows(count, type) {
+    if (type === 'table') {
+        return `<div>${Array(count).fill(`<div class="skeleton-row">
+            <div class="skeleton skeleton-avatar"></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+                <div class="skeleton skeleton-line skeleton-line--long"></div>
+                <div class="skeleton skeleton-line skeleton-line--short"></div>
+            </div>
+        </div>`).join('')}</div>`;
+    }
+    if (type === 'cards') {
+        return `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;">${Array(count).fill(`
+            <div class="skeleton skeleton-card"></div>
+        `).join('')}</div>`;
+    }
+    return Array(count).fill(`<div class="skeleton-row">
+        <div class="skeleton skeleton-line skeleton-line--long"></div>
+    </div>`).join('');
+}
+
 // Alias used in switchTab auto-refresh
 async function apiFetch(url) {
     return api(url);

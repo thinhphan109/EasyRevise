@@ -6,6 +6,71 @@ async function loadExamList() {
     _allExams = await api('/api/exams');
     document.getElementById('examFilterBar')?.remove();
     renderFilteredExams();
+    loadDashboardStats();
+}
+
+// #4: Dashboard stat cards — overview metrics
+async function loadDashboardStats() {
+    let container = document.getElementById('dashboardStats');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'dashboardStats';
+        container.className = 'dashboard-stats';
+        const examTab = document.getElementById('examListContainer');
+        if (examTab) examTab.parentNode.insertBefore(container, examTab.previousElementSibling || examTab);
+    }
+
+    // Show skeleton while loading
+    container.innerHTML = Array(4).fill(`
+        <div class="stat-card">
+            <div class="skeleton skeleton-avatar" style="width:40px;height:40px;border-radius:8px;margin-bottom:0.75rem;"></div>
+            <div class="skeleton skeleton-line skeleton-line--short" style="height:24px;margin-bottom:0.4rem;"></div>
+            <div class="skeleton skeleton-line skeleton-line--medium" style="height:10px;"></div>
+        </div>`).join('');
+
+    try {
+        const [users, qb] = await Promise.all([
+            api('/api/users').catch(() => []),
+            api('/api/admin/questions').catch(() => [])
+        ]);
+
+        const totalExams = _allExams.length;
+        const totalUsers = Array.isArray(users) ? users.length : 0;
+        const totalQuestions = Array.isArray(qb) ? qb.length : 0;
+        const totalSections = _allExams.reduce((s, e) => s + (e.sectionCount || 0), 0);
+
+        container.innerHTML = `
+            <div class="stat-card stat-card--primary">
+                <div class="stat-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </div>
+                <div class="stat-card-value">${totalExams}</div>
+                <div class="stat-card-label">Đề thi</div>
+            </div>
+            <div class="stat-card stat-card--info">
+                <div class="stat-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <div class="stat-card-value">${totalQuestions}</div>
+                <div class="stat-card-label">Câu hỏi trong kho</div>
+            </div>
+            <div class="stat-card stat-card--success">
+                <div class="stat-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <div class="stat-card-value">${totalUsers}</div>
+                <div class="stat-card-label">Tài khoản</div>
+            </div>
+            <div class="stat-card stat-card--warning">
+                <div class="stat-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                </div>
+                <div class="stat-card-value">${totalSections}</div>
+                <div class="stat-card-label">Phần thi</div>
+            </div>`;
+    } catch (e) {
+        container.innerHTML = '';
+    }
 }
 
 function renderFilteredExams() {

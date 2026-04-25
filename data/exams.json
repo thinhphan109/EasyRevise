@@ -3067,7 +3067,16 @@
                 "timeSpent": 31,
                 "autoSubmitted": false
               },
-              "essayGrades": []
+              "essayGrades": [
+                {
+                  "questionId": "writing-essay-2a",
+                  "aiScore": 0,
+                  "aiMaxScore": 10,
+                  "aiFeedback": "Học sinh không viết bài nên không đáp ứng yêu cầu của đề. Bài làm không có nội dung, không có đoạn văn, không sử dụng các gợi ý, không thể hiện vốn từ vựng, ngữ pháp hay khả năng diễn đạt bằng tiếng Anh.",
+                  "aiBreakdown": "Nội dung và ý tưởng: 0 điểm - Không có nội dung. Bố cục đoạn văn: 0 điểm - Không viết đoạn văn. Từ vựng: 0 điểm - Không có từ vựng để đánh giá. Ngữ pháp: 0 điểm - Không có câu để đánh giá. Hoàn thành yêu cầu đề bài: 0 điểm - Không thực hiện yêu cầu viết đoạn văn.",
+                  "aiGradedAt": "2026-04-25T11:03:21.048Z"
+                }
+              ]
             }
           ],
           "createdAt": "2026-04-14T13:47:57.934Z",
@@ -7070,6 +7079,35 @@
             "autoSubmitted": false
           },
           "essayGrades": []
+        },
+        {
+          "userId": "f57f790f-b615-4a2f-bb6f-4d8042312e05",
+          "displayName": "admin",
+          "completedAt": "2026-04-25T05:52:19.798Z",
+          "score": "—",
+          "result": {
+            "examId": "b599524f-0afb-4d46-a6d1-2b1eac935fff",
+            "score": "—",
+            "correct": 0,
+            "incorrect": 0,
+            "skipped": 1,
+            "total": 0,
+            "results": [
+              {
+                "id": "93409898-8d12-49d1-a6ec-9c27ce0fc8d5",
+                "userAnswer": "Phần 1: (chưa điền)\nPhần 2: (chưa điền)\nPhần 3: (chưa điền)\nPhần 4: (chưa điền)\nPhần 5: (chưa điền)\nPhần 6: (chưa điền)\nPhần 7: (chưa điền)",
+                "attachments": [],
+                "isCorrect": null,
+                "isEssay": true,
+                "isFreeFormOrigin": true
+              }
+            ],
+            "examTitle": "KỲ THI TUYỂN SINH VÀO LỚP 10 THPT - ĐỀ MINH HỌA 01",
+            "timestamp": "12:52:19 25/4/2026",
+            "timeSpent": 11,
+            "autoSubmitted": false
+          },
+          "essayGrades": []
         }
       ]
     },
@@ -7482,6 +7520,80 @@
             "examTitle": "TEST",
             "timestamp": "01:08:39 8/4/2026",
             "timeSpent": 19,
+            "autoSubmitted": false
+          },
+          "essayGrades": []
+        },
+        {
+          "userId": "f57f790f-b615-4a2f-bb6f-4d8042312e05",
+          "displayName": "admin",
+          "completedAt": "2026-04-25T16:26:35.201Z",
+          "score": "—",
+          "result": {
+            "examId": "87e1b929-2b47-4f06-91b5-f4cbb0be22a3",
+            "score": "—",
+            "correct": 0,
+            "incorrect": 0,
+            "skipped": 1,
+            "total": 0,
+            "results": [
+              {
+                "id": "959d5a3c-bba2-4b3c-ae48-8fe1a29c4494",
+                "userAnswer": "Phần 1: 2\nPhần 2: 6\nPhần 3: (chưa điền)\nPhần 4: (chưa điền)",
+                "attachments": [],
+                "isCorrect": null,
+                "isEssay": true,
+                "isFreeFormOrigin": true
+              },
+              {
+                "id": "45c66961-1a99-48ee-87bf-f49113a8d3e6",
+                "userAnswer": "",
+                "attachments": [],
+                "isCorrect": null,
+                "isEssay": true,
+                "isFreeFormOrigin": true
+              }
+            ],
+            "examTitle": "TEST",
+            "timestamp": "23:26:36 25/4/2026",
+            "timeSpent": 12,
+            "autoSubmitted": false
+          },
+          "essayGrades": []
+        },
+        {
+          "userId": "f57f790f-b615-4a2f-bb6f-4d8042312e05",
+          "displayName": "admin",
+          "completedAt": "2026-04-25T16:37:17.314Z",
+          "score": "—",
+          "result": {
+            "examId": "87e1b929-2b47-4f06-91b5-f4cbb0be22a3",
+            "score": "—",
+            "correct": 0,
+            "incorrect": 0,
+            "skipped": 2,
+            "total": 0,
+            "results": [
+              {
+                "id": "959d5a3c-bba2-4b3c-ae48-8fe1a29c4494",
+                "userAnswer": "Phần 1: (chưa điền)\nPhần 2: (chưa điền)\nPhần 3: (chưa điền)\nPhần 4: (chưa điền)",
+                "attachments": [],
+                "isCorrect": null,
+                "isEssay": true,
+                "isFreeFormOrigin": true
+              },
+              {
+                "id": "45c66961-1a99-48ee-87bf-f49113a8d3e6",
+                "userAnswer": "",
+                "attachments": [],
+                "isCorrect": null,
+                "isEssay": true,
+                "isFreeFormOrigin": true
+              }
+            ],
+            "examTitle": "TEST",
+            "timestamp": "23:37:18 25/4/2026",
+            "timeSpent": 7,
             "autoSubmitted": false
           },
           "essayGrades": []
@@ -9476,6 +9588,34 @@
       "timeLimit": 0,
       "createdAt": "2026-04-14T05:26:09.923Z",
       "updatedAt": "2026-04-14T05:26:22.473Z"
+    },
+    {
+      "id": "a11f4a41-1045-4513-ab58-6dcc708dfc91",
+      "title": "TEST",
+      "subject": "Tiếng Anh 9",
+      "year": "2026",
+      "sections": [
+        {
+          "id": "720b440b-d906-4e5a-b307-ce54ff5215ae",
+          "title": "ĐỀ BÀI",
+          "instruction": "",
+          "type": "multiple-choice",
+          "passage": null,
+          "questions": [],
+          "prompt": null,
+          "context": null,
+          "cues": [],
+          "sampleAnswer": null,
+          "explanation": null,
+          "showInstruction": true,
+          "showCues": true
+        }
+      ],
+      "requireCode": false,
+      "accessCodes": [],
+      "timeLimit": 0,
+      "createdAt": "2026-04-25T11:48:45.925Z",
+      "updatedAt": "2026-04-25T11:48:53.664Z"
     }
   ],
   "activationCodes": [

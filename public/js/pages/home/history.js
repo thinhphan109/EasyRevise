@@ -69,7 +69,7 @@ function _loadLocalHistory() {
 function _renderHistoryItems(items, source) {
     return items.slice(0, 10).map((h, i) => {
         const score = parseFloat(h.score);
-        const color = score >= 8 ? 'var(--color-success)' : score >= 5 ? 'var(--color-warning)' : 'var(--color-error)';
+        const scoreClass = score >= 8 ? 'history-score--high' : score >= 5 ? 'history-score--mid' : 'history-score--low';
         const label = score >= 8
             ? '<span class="badge badge-success">Xuất sắc</span>'
             : score >= 5
@@ -77,20 +77,21 @@ function _renderHistoryItems(items, source) {
                 : '<span class="badge badge-error">Cần cố gắng</span>';
         const timeMin = Math.floor((h.timeSpent || 0) / 60);
         const autoTag = h.autoSubmitted ? ' · <span class="text-warning text-xs">⏰ Hết giờ</span>' : '';
+        const timeDisplay = h.timestamp ? (typeof getTimeAgo === 'function' ? getTimeAgo(new Date(h.timestamp).getTime()) : h.timestamp) : '';
         return `
-            <div class="history-item" onclick="reviewResult(${i}, '${source}')">
+            <div class="home-history-item" onclick="reviewResult(${i}, '${source}')">
                 <div>
                     <div class="font-semibold">${h.examTitle || 'Đề thi'}</div>
                     <div class="text-sm text-muted">
-                        ${h.timestamp || ''} · ${h.correct}/${h.total} đúng · ${timeMin} phút${autoTag}
+                        ${timeDisplay} · ${h.correct}/${h.total} đúng · ${timeMin} phút${autoTag}
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
                     <div class="text-center">
-                        <div class="history-score" style="color: ${color};">${h.score}</div>
+                        <div class="history-score ${scoreClass}">${h.score}</div>
                         ${label}
                     </div>
-                    <span class="text-sm text-primary">Xem lại →</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" style="opacity:0.6;"><polyline points="9 18 15 12 9 6"/></svg>
                 </div>
             </div>`;
     }).join('');

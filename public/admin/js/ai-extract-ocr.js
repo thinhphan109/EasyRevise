@@ -12,6 +12,7 @@ let _ocrFileNames = [];
 let _ocrExtractedImages = {};
 let _ocrResultText = '';
 let _ocrIsProcessing = false;
+let _ocrAbortController = null;
 
 // ── Load PDF.js lazily ──────────────────────────────────
 function loadPdfJs() {
@@ -51,7 +52,7 @@ function showAIExtractModal() {
                 <h3 style="font-size:1.1rem;font-weight:700;margin:0;">Chuyển đổi PDF/Ảnh sang Word</h3>
                 <p style="font-size:0.78rem;color:var(--text-muted);margin:0.25rem 0 0;">AI đọc ảnh → văn bản có cấu trúc (LaTeX, bảng, hình ảnh)</p>
             </div>
-            <button class="btn btn-sm btn-ghost" onclick="document.getElementById('aiOcrModal').remove()" style="font-size:1.2rem;padding:0.25rem 0.5rem;">✕</button>
+            <button class="btn btn-sm btn-ghost" onclick="ocrSafeClose()" style="font-size:1.2rem;padding:0.25rem 0.5rem;">✕</button>
         </div>
 
         <!-- Body -->
@@ -126,7 +127,7 @@ function showAIExtractModal() {
     </div>`;
 
     document.body.appendChild(modal);
-    modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+    modal.addEventListener('click', e => { if (e.target === modal) ocrSafeClose(); });
 
     // Setup drag & drop
     const dz = document.getElementById('ocrDropZone');
@@ -188,7 +189,7 @@ async function ocrHandleFiles(fileList) {
                 const pdf = await window.pdfjsLib.getDocument({ data: buf }).promise;
                 for (let i = 1; i <= pdf.numPages; i++) {
                     const pg = await pdf.getPage(i);
-                    const vp = pg.getViewport({ scale: 1.2 });
+                    const vp = pg.getViewport({ scale: 1.5 });
                     const cv = document.createElement('canvas');
                     cv.width = vp.width; cv.height = vp.height;
                     await pg.render({ canvasContext: cv.getContext('2d'), viewport: vp }).promise;
@@ -314,6 +315,8 @@ async function ocrProcessOCR() {
     const BATCH = 2; // concurrent pages
     const results = new Array(_ocrPreviewUrls.length).fill('');
     let completed = 0;
+    _ocrAbortController = new AbortController();
+    const signal = _ocrAbortController.signal;
 
     try {
         for (let i = 0; i < _ocrPreviewUrls.length; i += BATCH) {
@@ -331,7 +334,8 @@ async function ocrProcessOCR() {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({ imageBase64: base64, mimeType: 'image/jpeg' })
+                    body: JSON.stringify({ imageBase64: base64, mimeType: 'image/jpeg' }),
+                    signal
                 });
 
                 if (!resp.ok) {
@@ -391,9 +395,20 @@ async function ocrProcessOCR() {
     }
 
     _ocrIsProcessing = false;
+    _ocrAbortController = null;
     convertBtn.disabled = false;
     convertBtn.textContent = 'Chuyển đổi';
     progressBar.style.display = 'none';
+}
+
+// ── Safe close (abort if processing) ───────────────────
+function ocrSafeClose() {
+    if (_ocrIsProcessing && _ocrAbortController) {
+        _ocrAbortController.abort();
+        _ocrIsProcessing = false;
+        _ocrAbortController = null;
+    }
+    document.getElementById('aiOcrModal')?.remove();
 }
 
 // ── Copy result to clipboard ───────────────────────────
@@ -419,13 +434,17 @@ function ocrDownloadWord() {
 
     let formatted = text
         .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
-        .replace(/\n/g, '<br>')
-        .replace(/--- PAGE BREAK ---/g, '<hr>');
+        .replace(/--- PAGE BREAK ---/g, '<hr style="page-break-after:always;border:none;">')
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>');
+
+    // Wrap in paragraphs
+    formatted = '<p>' + formatted + '</p>';
 
     // Replace image placeholders with actual images
     formatted = formatted.replace(/\[HÌNH ẢNH MINH HOẠ:\s*(IMG_[^\]]+)\]/g, (match, id) => {
         if (_ocrExtractedImages[id]) {
-            return `<br><div style="text-align:center;"><img src="${_ocrExtractedImages[id]}" style="max-width:100%;border:1px solid #ccc;border-radius:8px;"></div><br>`;
+            return `</p><div style="text-align:center;margin:12pt 0;"><img src="${_ocrExtractedImages[id]}" style="max-width:100%;border:1px solid #ccc;" /></div><p>`;
         }
         return match;
     });

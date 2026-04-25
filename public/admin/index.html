@@ -295,8 +295,12 @@
                     <div class="page-header-actions">
                         <button class="btn btn-sm" onclick="showImportFromExamModal()" style="background:#10b981;color:white;border:none;">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><path d="M12 5v14M5 12l7 7 7-7"/></svg>Import từ đề</button>
-                        <button class="btn btn-sm btn-outline" onclick="showAIExtractModal()" style="border-color:#8b5cf6;color:#8b5cf6;">🤖 AI Bóc tách</button>
-                        <button class="btn btn-sm" onclick="showGenerateExamFromBankModal()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border:none;">🎲 Tạo đề từ kho</button>
+                        <button class="btn btn-sm btn-outline" onclick="showAIExtractModal()" style="border-color:#8b5cf6;color:#8b5cf6;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><path d="M12 2a4 4 0 0 1 4 4v2H8V6a4 4 0 0 1 4-4z"/><rect x="3" y="8" width="18" height="14" rx="2"/><circle cx="9" cy="15" r="1.5"/><circle cx="15" cy="15" r="1.5"/></svg>AI Bóc tách</button>
+                        <button class="btn btn-sm" onclick="showGenerateExamFromBankModal()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border:none;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M16 8h.01M8 8h.01M8 16h.01M16 16h.01M12 12h.01"/></svg>Tạo đề từ kho</button>
+                        <button class="btn btn-sm btn-ghost" onclick="exportQuestionBank()" title="Xuất ngân hàng câu hỏi">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export</button>
                     </div>
                 </div>
                 <div class="page-filter-bar">
@@ -333,7 +337,10 @@
                         <p class="page-subtitle">Theo dõi và chấm điểm bài nộp</p>
                     </div>
                     <div class="page-header-actions">
-                        <button class="btn btn-sm btn-ghost" onclick="loadSubmissions()">🔄 Tải lại</button>
+                        <button class="btn btn-sm btn-info" id="batchAiGradeBtn" onclick="batchAiGradeAll()" title="AI chấm tất cả bài chưa chấm">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z"/></svg>AI Chấm tất cả</button>
+                        <button class="btn btn-sm btn-ghost" onclick="loadSubmissions()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Tải lại</button>
                     </div>
                 </div>
                 <div class="page-filter-bar">
@@ -1221,14 +1228,14 @@
 
     <div id="modalSubject" class="modal-overlay">
         <div class="glass-panel modal-content" style="max-width:400px;">
-            <h3 style="font-size:1.25rem;font-weight:700;margin-bottom:2rem;">Thêm môn học</h3>
+            <h3 id="modalSubjectTitle" style="font-size:1.25rem;font-weight:700;margin-bottom:2rem;">Thêm môn học</h3>
             <div class="form-group"><label>Tên môn</label><input id="inputSubjectName" class="form-input"
                     placeholder="VD: Tiếng Anh 9"></div>
             <div class="form-group"><label>Icon</label><input id="inputSubjectIcon" class="form-input" placeholder="📚"
                     value="📚" style="max-width:100px;"></div>
             <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:2rem;">
                 <button class="btn btn-ghost" onclick="closeModal('modalSubject')">Hủy</button>
-                <button class="btn btn-primary" onclick="saveSubject()">Lưu</button>
+                <button id="modalSubjectSaveBtn" class="btn btn-primary" onclick="saveSubject()">Lưu</button>
             </div>
         </div>
     </div>

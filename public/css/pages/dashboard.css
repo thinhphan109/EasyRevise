@@ -38,6 +38,16 @@
     box-shadow: var(--shadow-sm);
     margin-bottom: var(--space-6);
     animation: slideUp 0.4s var(--ease-out);
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
 }
 
 .profile-info {
@@ -112,11 +122,9 @@
 .stat-card:nth-child(4) { animation-delay: 180ms; }
 
 .stat-card:hover {
-    background: var(--glass-bg);
-    backdrop-filter: var(--glass-blur);
-    -webkit-backdrop-filter: var(--glass-blur);
     box-shadow: var(--shadow-md);
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+    border-color: var(--color-primary-50);
 }
 
 .stat-icon {
@@ -310,6 +318,7 @@
 .dashboard-empty-icon {
     font-size: 3rem;
     margin-bottom: var(--space-4);
+    opacity: 0.4;
 }
 
 .dashboard-empty p {
