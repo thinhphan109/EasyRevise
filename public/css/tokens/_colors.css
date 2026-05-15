@@ -1,0 +1,118 @@
+/* ===========================================================
+   Design Tokens — Colors
+   Apple HIG / Liquid Glass palette
+   Light + Dark via [data-theme="dark"] on <html>
+   =========================================================== */
+
+:root {
+    /* Surfaces */
+    --bg:           #f5f5f7;
+    --surface:      #ffffff;
+    --surface-2:    #f5f5f7;
+    --surface-3:    #ebebed;
+    --surface-glass: rgba(255, 255, 255, 0.72);
+
+    /* Borders */
+    --border:        rgba(0, 0, 0, 0.08);
+    --border-strong: rgba(0, 0, 0, 0.16);
+
+    /* Text */
+    --text:    #1d1d1f;
+    --text-2:  #515154;
+    --text-3:  #86868b;
+    --text-4:  #a1a1a6;
+
+    /* Accent — Apple Blue */
+    --accent:        #0071e3;
+    --accent-hover:  #0077ed;
+    --accent-soft:   rgba(0, 113, 227, 0.12);
+    --accent-text:   #0071e3;
+
+    /* Semantic */
+    --success:        #248a3d;
+    --success-soft:   rgba(36, 138, 61, 0.12);
+    --warning:        #c93400;
+    --warning-soft:   rgba(201, 52, 0, 0.10);
+    --error:          #ff3b30;
+    --error-soft:     rgba(255, 59, 48, 0.12);
+    --info:           #0071e3;
+    --info-soft:      rgba(0, 113, 227, 0.10);
+
+    /* Subject accent palette (used for icon containers, tags) */
+    --subject-math:       #5856d6;
+    --subject-english:    #0071e3;
+    --subject-physics:    #ff9500;
+    --subject-chemistry:  #34c759;
+    --subject-biology:    #00c7be;
+    --subject-history:    #a2845e;
+    --subject-geography:  #cc4c8a;
+    --subject-literature: #ff3b30;
+    --subject-it:         #5ac8fa;
+    --subject-ielts:      #5856d6;
+}
+
+[data-theme="dark"] {
+    --bg:           #000000;
+    --surface:      #1c1c1e;
+    --surface-2:    #2c2c2e;
+    --surface-3:    #3a3a3c;
+    --surface-glass: rgba(28, 28, 30, 0.72);
+
+    --border:        rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.16);
+
+    --text:    #f5f5f7;
+    --text-2:  #a8a8ad;
+    --text-3:  #6e6e73;
+    --text-4:  #48484a;
+
+    --accent:        #0a84ff;
+    --accent-hover:  #409cff;
+    --accent-soft:   rgba(10, 132, 255, 0.18);
+    --accent-text:   #0a84ff;
+
+    --success:        #30d158;
+    --success-soft:   rgba(48, 209, 88, 0.16);
+    --warning:        #ff9f0a;
+    --warning-soft:   rgba(255, 159, 10, 0.16);
+    --error:          #ff453a;
+    --error-soft:     rgba(255, 69, 58, 0.16);
+    --info:           #0a84ff;
+    --info-soft:      rgba(10, 132, 255, 0.16);
+
+    --subject-math:       #5e5ce6;
+    --subject-english:    #0a84ff;
+    --subject-physics:    #ff9f0a;
+    --subject-chemistry:  #30d158;
+    --subject-biology:    #40c8e0;
+    --subject-history:    #bf8d4f;
+    --subject-geography:  #ff375f;
+    --subject-literature: #ff453a;
+    --subject-it:         #64d2ff;
+    --subject-ielts:      #5e5ce6;
+}
+
+/* Auto dark mode if no manual preference */
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --bg:           #000000;
+        --surface:      #1c1c1e;
+        --surface-2:    #2c2c2e;
+        --surface-3:    #3a3a3c;
+        --surface-glass: rgba(28, 28, 30, 0.72);
+        --border:        rgba(255, 255, 255, 0.08);
+        --border-strong: rgba(255, 255, 255, 0.16);
+        --text:    #f5f5f7;
+        --text-2:  #a8a8ad;
+        --text-3:  #6e6e73;
+        --text-4:  #48484a;
+        --accent:        #0a84ff;
+        --accent-hover:  #409cff;
+        --accent-soft:   rgba(10, 132, 255, 0.18);
+        --success:        #30d158;
+        --success-soft:   rgba(48, 209, 88, 0.16);
+        --warning:        #ff9f0a;
+        --error:          #ff453a;
+        --error-soft:     rgba(255, 69, 58, 0.16);
+    }
+}

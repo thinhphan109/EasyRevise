@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EasyRevise — Minimal Academic Demo</title>
+  <meta name="description" content="Demo giao diện ngoài EasyRevise theo phong cách tối giản, sáng, sạch và không gradient." />
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-soft: #f1f5f9;
+      --text: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --accent: #0f766e;
+      --accent-soft: #ccfbf1;
+      --blue: #2563eb;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --shadow: 0 10px 24px rgba(15, 23, 42, 0.055);
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+      font-family: Inter, "Be Vietnam Pro", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input, select { font: inherit; }
+
+    .page {
+      min-height: 100vh;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(248, 250, 252, 0.88);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .container {
+      width: min(1160px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .nav {
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 850;
+      letter-spacing: -0.03em;
+    }
+
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 13px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+      color: var(--accent);
+      font-weight: 900;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+    }
+
+    .nav-links a {
+      padding: 9px 14px;
+      border-radius: 999px;
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .nav-links a.active {
+      color: var(--text);
+      background: var(--surface-soft);
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .16s ease, border-color .16s ease, background .16s ease;
+    }
+
+    .btn:hover { transform: translateY(-1px); border-color: #cbd5e1; }
+    .btn.primary { background: var(--text); color: #fff; border-color: var(--text); }
+    .btn.accent { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    .hero {
+      padding: 36px 0 22px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 34px;
+      align-items: stretch;
+    }
+
+    .hero-copy {
+      padding: 26px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 11px;
+      border: 1px solid #99f6e4;
+      background: var(--accent-soft);
+      color: #115e59;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 850;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(32px, 4.4vw, 52px);
+      line-height: .98;
+      letter-spacing: -0.065em;
+    }
+
+    .lead {
+      margin: 18px 0 0;
+      color: var(--muted);
+      font-size: 16px;
+      max-width: 620px;
+    }
+
+    .hero-actions {
+      margin-top: 28px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .code-card {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 100%;
+    }
+
+    .code-title {
+      font-size: 22px;
+      letter-spacing: -0.03em;
+      font-weight: 850;
+      margin-bottom: 8px;
+    }
+
+    .code-subtitle { color: var(--muted); margin-bottom: 22px; }
+
+    .code-form {
+      display: flex;
+      gap: 10px;
+      background: var(--surface-soft);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 8px;
+    }
+
+    .code-form input {
+      flex: 1;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      padding: 12px;
+      color: var(--text);
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .mini-stats {
+      margin-top: 26px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .mini-stat {
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      padding: 14px;
+      background: #fff;
+    }
+
+    .mini-stat strong { display: block; font-size: 20px; letter-spacing: -0.04em; }
+    .mini-stat span { color: var(--muted); font-size: 12px; font-weight: 750; }
+
+    .section-head {
+      margin: 26px 0 12px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 26px;
+      letter-spacing: -0.045em;
+    }
+
+    .section-head p {
+      margin: 5px 0 0;
+      color: var(--muted);
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+      padding: 10px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: 0 10px 28px rgba(15, 23, 42, .04);
+    }
+
+    .filters input, .filters select {
+      border: 1px solid var(--line);
+      background: var(--bg);
+      border-radius: 14px;
+      padding: 12px 14px;
+      outline: 0;
+      color: var(--text);
+      min-height: 46px;
+    }
+
+    .exam-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      padding: 14px 0 44px;
+    }
+
+    .exam-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      min-height: 198px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+    }
+
+    .exam-card:hover {
+      transform: translateY(-3px);
+      border-color: #cbd5e1;
+      box-shadow: var(--shadow);
+    }
+
+    .exam-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .subject {
+      font-size: 12px;
+      font-weight: 850;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-radius: 999px;
+      padding: 6px 10px;
+      white-space: nowrap;
+    }
+
+    .exam-title {
+      margin: 12px 0 8px;
+      font-size: 17px;
+      line-height: 1.25;
+      letter-spacing: -0.035em;
+      font-weight: 850;
+    }
+
+    .exam-desc {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0;
+    }
+
+    .exam-meta {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 9px;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 750;
+      background: var(--bg);
+    }
+
+    .exam-bottom {
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status {
+      font-size: 13px;
+      font-weight: 850;
+      color: var(--success);
+    }
+
+    .status.locked { color: var(--warning); }
+
+    .footer {
+      border-top: 1px solid var(--line);
+      background: var(--surface);
+      padding: 26px 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .exam-grid { grid-template-columns: repeat(2, 1fr); }
+      .nav-links { display: none; }
+      .filters { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 620px) {
+      .container { width: min(100% - 20px, 1160px); }
+      .hero { padding-top: 24px; }
+      .hero-copy, .code-card { padding: 22px; }
+      .exam-grid { grid-template-columns: 1fr; }
+      .nav-actions .btn:not(.primary) { display: none; }
+      .code-form { flex-direction: column; }
+      .mini-stats { grid-template-columns: 1fr; }
+      .section-head { align-items: flex-start; flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar">
+      <div class="container nav">
+        <a class="brand" href="#">
+          <span class="brand-mark">ER</span>
+          <span>EasyRevise</span>
+        </a>
+
+        <nav class="nav-links" aria-label="Điều hướng chính">
+          <a class="active" href="#">Trang chủ</a>
+          <a href="#">Dashboard</a>
+          <a href="#">Xem lại</a>
+          <a href="#">Hỗ trợ</a>
+        </nav>
+
+        <div class="nav-actions">
+          <button class="btn">Đăng nhập</button>
+          <button class="btn primary">Bắt đầu</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container hero-grid">
+          <div class="hero-copy">
+            <div class="eyebrow">Tối giản hơn · Tập trung hơn</div>
+            <h1>Ôn luyện gọn gàng, làm bài rõ ràng.</h1>
+            <p class="lead">
+              Một không gian học tập sạch, dễ đọc và ít xao nhãng. Làm đề,
+              xem kết quả, theo dõi tiến độ và nhận chấm bài tự động khi cần.
+            </p>
+            <div class="hero-actions">
+              <button class="btn primary">Xem đề đang mở</button>
+              <button class="btn">Xem lại bằng mã</button>
+            </div>
+          </div>
+
+          <aside class="code-card" aria-label="Nhập mã kích hoạt">
+            <div>
+              <div class="code-title">Có mã kích hoạt?</div>
+              <div class="code-subtitle">Nhập mã giáo viên cung cấp để mở đề riêng.</div>
+              <form class="code-form">
+                <input aria-label="Mã kích hoạt" placeholder="ABC123" maxlength="12" />
+                <button type="button" class="btn accent">Mở đề</button>
+              </form>
+            </div>
+            <div class="mini-stats">
+              <div class="mini-stat"><strong>24</strong><span>Đề đang mở</span></div>
+              <div class="mini-stat"><strong>1.2k</strong><span>Lượt làm</span></div>
+              <div class="mini-stat"><strong>8.1</strong><span>Điểm TB</span></div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="container" aria-label="Danh sách đề thi">
+        <div class="section-head">
+          <div>
+            <h2>Đề thi nổi bật</h2>
+            <p>Chọn đề phù hợp và bắt đầu làm bài trong vài giây.</p>
+          </div>
+          <button class="btn">Tất cả đề</button>
+        </div>
+
+        <div class="filters">
+          <input placeholder="Tìm kiếm đề, môn học hoặc từ khóa..." />
+          <select aria-label="Môn học">
+            <option>Tất cả môn</option>
+            <option>Toán</option>
+            <option>Tiếng Anh</option>
+            <option>Vật lý</option>
+          </select>
+          <select aria-label="Năm học">
+            <option>Tất cả năm</option>
+            <option>2025</option>
+            <option>2024</option>
+          </select>
+        </div>
+
+        <div class="exam-grid">
+          <article class="exam-card">
+            <div>
+              <div class="exam-top">
+                <span class="subject">Tiếng Anh</span>
+                <span class="chip">2025</span>
+              </div>
+              <h3 class="exam-title">Từ vựng và đọc hiểu — Unit Review</h3>
+              <p class="exam-desc">Luyện đọc hiểu, chọn đáp án và điền từ theo ngữ cảnh.</p>
+              <div class="exam-meta">
+                <span class="chip">45 câu</span>
+                <span class="chip">50 phút</span>
+                <span class="chip">Có giải thích</span>
+              </div>
+            </div>
+            <div class="exam-bottom">
+              <span class="status">● Đang mở</span>
+              <button class="btn primary">Làm bài</button>
+            </div>
+          </article>
+
+          <article class="exam-card">
+            <div>
+              <div class="exam-top">
+                <span class="subject">Toán</span>
+                <span class="chip">2025</span>
+              </div>
+              <h3 class="exam-title">Hàm số và ứng dụng đạo hàm</h3>
+              <p class="exam-desc">Kết hợp trắc nghiệm, điền đáp số và bài tự luận ngắn.</p>
+              <div class="exam-meta">
+                <span class="chip">32 câu</span>
+                <span class="chip">75 phút</span>
+                <span class="chip">Tự luận</span>
+              </div>
+            </div>
+            <div class="exam-bottom">
+              <span class="status locked">● Cần mã</span>
+              <button class="btn">Nhập mã</button>
+            </div>
+          </article>
+
+          <article class="exam-card">
+            <div>
+              <div class="exam-top">
+                <span class="subject">Vật lý</span>
+                <span class="chip">2024</span>
+              </div>
+              <h3 class="exam-title">Dao động cơ — kiểm tra nhanh</h3>
+              <p class="exam-desc">Ôn công thức, nhận biết dạng bài và phân tích lỗi sai.</p>
+              <div class="exam-meta">
+                <span class="chip">25 câu</span>
+                <span class="chip">35 phút</span>
+                <span class="chip">AI hỗ trợ</span>
+              </div>
+            </div>
+            <div class="exam-bottom">
+              <span class="status">● Đang mở</span>
+              <button class="btn primary">Làm bài</button>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container">EasyRevise · Demo giao diện tối giản, không gradient, tập trung vào trải nghiệm làm bài.</div>
+    </footer>
+  </div>
+</body>
+</html>

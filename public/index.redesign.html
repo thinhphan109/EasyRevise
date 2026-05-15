@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EasyRevise — Luyện đề thông minh</title>
+<meta name="description" content="Hệ thống ôn tập với AI tạo đề và chấm điểm tự động.">
+<meta name="theme-color" content="#0071e3">
+
+<!-- No-flicker theme apply -->
+<script>
+(function(){
+    try {
+        var v = localStorage.getItem('easyrevise_theme');
+        var t = (v === 'light' || v === 'dark')
+            ? v
+            : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+})();
+</script>
+
+<link rel="stylesheet" href="/css/main.css">
+
+<!-- KaTeX (only loaded if formulas present — defer) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],throwOnError:false})"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js" defer></script>
+</head>
+
+<body class="home-page">
+
+<a href="#main" class="skip-link">Bỏ qua nội dung</a>
+
+<!-- ── Glass header ─────────────────────────────────── -->
+<header class="home-header">
+    <div class="home-container home-header-inner">
+        <a href="/" class="home-brand" aria-label="EasyRevise">
+            <span class="home-brand-mark">E</span>
+            <span>EasyRevise</span>
+        </a>
+
+        <nav class="home-nav" aria-label="Điều hướng chính">
+            <a href="/" class="home-nav-link active">Đề thi</a>
+            <a href="#history" class="home-nav-link">Lịch sử</a>
+        </nav>
+
+        <div class="home-header-actions">
+            <div id="themeToggleSlot"></div>
+            <button id="qrScanBtn" class="btn btn-ghost btn-icon" onclick="openQRScanner()" title="Quét mã QR" aria-label="Quét mã QR">
+                <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#qr-code"/></svg>
+            </button>
+            <button class="btn btn-ghost btn-icon" onclick="openReviewByCodeModal()" title="Xem lại bài" aria-label="Xem lại bài làm">
+                <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#refresh-cw"/></svg>
+            </button>
+            <div id="authArea">
+                <button class="btn btn-secondary btn-sm" onclick="openAuthModal()">Đăng nhập</button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main id="main">
+
+<!-- ── Hero (code entry) ────────────────────────────── -->
+<section class="home-container home-hero">
+    <div class="home-hero-eyebrow">Tham gia bài thi</div>
+    <h1 class="home-hero-title">Nhập mã kích hoạt</h1>
+    <p class="home-hero-desc">Mã do giáo viên cung cấp, gồm 6-8 ký tự chữ và số. Hoặc chọn đề thi mở bên dưới để bắt đầu ngay.</p>
+
+    <div class="home-code-row">
+        <input id="quickCodeInput"
+               class="form-input form-input-code form-input-lg"
+               placeholder="ABC12345"
+               maxlength="10"
+               autocomplete="off"
+               aria-label="Mã kích hoạt">
+        <button class="btn btn-primary btn-lg btn-pill" onclick="submitQuickCode()">
+            Vào thi
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#arrow-right"/></svg>
+        </button>
+    </div>
+</section>
+
+<!-- ── In-progress section ──────────────────────────── -->
+<section id="inProgressSection" class="home-container home-section" style="display:none;">
+    <div class="home-section-header">
+        <h2 class="home-section-title">
+            <svg class="icon" style="color:var(--warning);" aria-hidden="true"><use href="/assets/icons/sprite.svg#clock"/></svg>
+            Bài đang làm dở
+        </h2>
+    </div>
+    <div id="inProgressList" class="home-inprogress-list"></div>
+</section>
+
+<!-- ── Exam list ────────────────────────────────────── -->
+<section class="home-container home-section">
+    <div class="home-section-header">
+        <h2 class="home-section-title">Đề thi mở</h2>
+    </div>
+    <div id="examList" class="home-exam-grid">
+        <!-- Skeleton loaders -->
+        <div class="card card-raised">
+            <div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-line skeleton-line-medium"></div>
+            <div class="skeleton skeleton-line skeleton-line-short"></div>
+        </div>
+        <div class="card card-raised">
+            <div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-line skeleton-line-medium"></div>
+            <div class="skeleton skeleton-line skeleton-line-short"></div>
+        </div>
+        <div class="card card-raised">
+            <div class="skeleton skeleton-title"></div>
+            <div class="skeleton skeleton-line skeleton-line-medium"></div>
+            <div class="skeleton skeleton-line skeleton-line-short"></div>
+        </div>
+    </div>
+</section>
+
+<!-- ── History section ──────────────────────────────── -->
+<section id="historySection" class="home-container home-section" style="display:none;">
+    <div class="home-section-header">
+        <h2 class="home-section-title" id="history">Lịch sử của bạn</h2>
+    </div>
+    <div id="historyList" class="home-history-list"></div>
+</section>
+
+</main>
+
+<!-- ── Footer ───────────────────────────────────────── -->
+<footer class="home-footer">
+    <div class="home-container">
+        <strong>EasyRevise</strong> · Luyện đề thông minh
+    </div>
+</footer>
+
+
+<!-- ── Code Entry Modal (FR-S2) ──────────────────────── -->
+<div id="codeModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal modal-sm" role="dialog" aria-labelledby="codeModalTitle">
+        <div class="modal-header">
+            <div class="modal-eyebrow">Đề thi yêu cầu mã</div>
+            <h3 class="modal-title" id="codeModalTitle">Nhập mã kích hoạt</h3>
+            <p class="modal-subtitle" id="codeExamTitle"></p>
+        </div>
+        <div class="modal-body">
+            <div id="codeError" class="form-error" style="display:none;"></div>
+            <input id="codeInput" class="form-input form-input-code" placeholder="ABC12345" maxlength="10" autocomplete="off">
+        </div>
+        <div class="modal-actions modal-actions-stretch">
+            <button class="btn btn-ghost" data-modal-close>Hủy</button>
+            <button class="btn btn-primary" onclick="submitCode()">Mở khóa</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Auth Modal (FR-AU1) ───────────────────────────── -->
+<div id="authModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal modal-sm" role="dialog" aria-labelledby="authModalTitle">
+        <div class="modal-header">
+            <h3 class="modal-title" id="authModalTitle">Tài khoản</h3>
+        </div>
+        <div class="modal-body">
+            <div class="tabs-pill" role="tablist" style="margin: 0 auto var(--space-4); display: flex; width: fit-content;">
+                <button id="tabLogin" class="tab" role="tab" aria-selected="true" onclick="switchTab('login')">Đăng nhập</button>
+                <button id="tabRegister" class="tab" role="tab" onclick="switchTab('register')">Đăng ký</button>
+            </div>
+
+            <div id="authError" class="form-error" style="display:none;"></div>
+
+            <div id="loginForm">
+                <div class="form-group">
+                    <label class="form-label" for="loginUsername">Tên đăng nhập</label>
+                    <input id="loginUsername" class="form-input" placeholder="username" autocomplete="username"
+                        onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('loginPassword').focus();}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="loginPassword">Mật khẩu</label>
+                    <input id="loginPassword" class="form-input" type="password" placeholder="••••••••"
+                        autocomplete="current-password"
+                        onkeydown="if(event.key==='Enter'){event.preventDefault();doLogin();}">
+                </div>
+                <button class="btn btn-primary btn-block btn-lg" onclick="doLogin()">Đăng nhập</button>
+            </div>
+
+            <div id="registerForm" style="display:none;">
+                <div class="form-group">
+                    <label class="form-label" for="regDisplayName">Tên hiển thị</label>
+                    <input id="regDisplayName" class="form-input" placeholder="Nguyễn Văn A"
+                        onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('regUsername').focus();}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="regUsername">Tên đăng nhập (≥3 ký tự)</label>
+                    <input id="regUsername" class="form-input" placeholder="username" autocomplete="username"
+                        onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('regPassword').focus();}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="regPassword">Mật khẩu (≥4 ký tự)</label>
+                    <input id="regPassword" class="form-input" type="password" placeholder="••••••••" autocomplete="new-password"
+                        onkeydown="if(event.key==='Enter'){event.preventDefault();doRegister();}">
+                </div>
+                <button class="btn btn-primary btn-block btn-lg" onclick="doRegister()">Tạo tài khoản</button>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-ghost" data-modal-close>Đóng</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Admin PIN Modal (FR-AU2) ──────────────────────── -->
+<div id="pinModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal modal-sm" role="dialog" aria-labelledby="pinModalTitle">
+        <div class="modal-header">
+            <div class="modal-eyebrow">Bảo mật</div>
+            <h3 class="modal-title" id="pinModalTitle">PIN Quản trị</h3>
+            <p class="modal-subtitle">Nhập PIN 6 chữ số để truy cập Admin</p>
+        </div>
+        <div class="modal-body">
+            <div id="pinError" class="form-error" style="display:none;text-align:center;justify-content:center;"></div>
+            <div class="pin-input-row" id="pinInputRow">
+                <input class="pin-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+                <input class="pin-input" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                <input class="pin-input" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                <input class="pin-input" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                <input class="pin-input" maxlength="1" inputmode="numeric" pattern="[0-9]">
+                <input class="pin-input" maxlength="1" inputmode="numeric" pattern="[0-9]">
+            </div>
+            <!-- Hidden combined input for legacy submitPin() compat -->
+            <input id="pinInput" type="hidden">
+        </div>
+        <div class="modal-actions modal-actions-stretch">
+            <button class="btn btn-ghost" data-modal-close>Hủy</button>
+            <button class="btn btn-primary" onclick="submitPin()">Xác nhận</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Review by Code Modal (FR-S2 alt) ──────────────── -->
+<div id="reviewCodeModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal modal-sm" role="dialog" aria-labelledby="reviewCodeModalTitle">
+        <div class="modal-header">
+            <div class="modal-eyebrow">Tra cứu</div>
+            <h3 class="modal-title" id="reviewCodeModalTitle">Xem lại bài làm</h3>
+            <p class="modal-subtitle">Nhập mã kích hoạt để xem kết quả</p>
+        </div>
+        <div class="modal-body">
+            <div id="reviewCodeError" class="form-error" style="display:none;"></div>
+            <input id="reviewCodeInput" class="form-input form-input-code" placeholder="ABC12345" maxlength="10" autocomplete="off">
+            <div id="reviewResultsList" style="display:none;margin-top:var(--space-3);max-height:300px;overflow-y:auto;"></div>
+        </div>
+        <div class="modal-actions modal-actions-stretch">
+            <button class="btn btn-ghost" data-modal-close>Hủy</button>
+            <button class="btn btn-primary" onclick="submitReviewCode()">Xem kết quả</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── QR Scanner Modal (FR-S3) ──────────────────────── -->
+<div id="qrScannerModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal modal-md" role="dialog" aria-labelledby="qrScannerTitle" style="overflow:hidden;padding:0;">
+        <div class="qr-scanner-header">
+            <div>
+                <div class="qr-scanner-header-label">Quét mã QR</div>
+                <div class="qr-scanner-header-title" id="qrScannerTitle">Hướng camera vào mã</div>
+            </div>
+            <button id="qrScanCloseBtn" class="btn btn-icon btn-ghost" data-modal-close aria-label="Đóng">
+                <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#x"/></svg>
+            </button>
+        </div>
+        <div class="qr-scanner-viewport">
+            <video id="qrVideo" style="width:100%;height:100%;object-fit:cover;" playsinline muted></video>
+            <div class="qr-scanner-overlay">
+                <div class="qr-scanner-frame">
+                    <div class="qr-scanner-corner qr-corner-tl"></div>
+                    <div class="qr-scanner-corner qr-corner-tr"></div>
+                    <div class="qr-scanner-corner qr-corner-bl"></div>
+                    <div class="qr-scanner-corner qr-corner-br"></div>
+                    <div class="qr-scan-line"></div>
+                </div>
+            </div>
+            <canvas id="qrCanvas2" style="display:none;"></canvas>
+        </div>
+        <div id="qrScanStatus" class="qr-scanner-status">Đang khởi động camera...</div>
+    </div>
+</div>
+
+
+<!-- ── Bottom navigation (mobile only) ───────────────── -->
+<nav class="bottom-nav" aria-label="Điều hướng dưới">
+    <a href="/" class="bottom-nav-item active" aria-current="page">
+        <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#home"/></svg>
+        <span class="bottom-nav-item-label">Trang chủ</span>
+    </a>
+    <button class="bottom-nav-item" onclick="openReviewByCodeModal()">
+        <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#search"/></svg>
+        <span class="bottom-nav-item-label">Tìm</span>
+    </button>
+    <a href="#history" class="bottom-nav-item">
+        <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#clock"/></svg>
+        <span class="bottom-nav-item-label">Lịch sử</span>
+    </a>
+    <button class="bottom-nav-item" onclick="goDashboard()">
+        <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#user"/></svg>
+        <span class="bottom-nav-item-label">Tài khoản</span>
+    </button>
+</nav>
+
+
+<!-- ── New ESM modules (theme + components) ──────────── -->
+<script type="module">
+import { mountThemeToggle } from '/js/components/theme-toggle.js';
+import { preloadSprite, Icon } from '/js/core/icons.js';
+import { initPinInput } from '/js/components/pin-input.js';
+import { openModal as openModalLib } from '/js/components/modal.js';
+
+await preloadSprite();
+mountThemeToggle('#themeToggleSlot', { size: 'md' });
+
+// PIN inputs auto-advance + sync to hidden input for legacy submitPin()
+const pinHandle = initPinInput('#pinInputRow', {
+    numeric: true,
+    onChange: (v) => {
+        const hidden = document.getElementById('pinInput');
+        if (hidden) hidden.value = v;
+    },
+    onComplete: (v) => {
+        const hidden = document.getElementById('pinInput');
+        if (hidden) hidden.value = v;
+        if (typeof submitPin === 'function') setTimeout(submitPin, 100);
+    }
+});
+window._pinHandle = pinHandle;
+
+// Bridge: legacy `.classList.add('active')` opens modal — wire close buttons
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    // backdrop click
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            overlay.classList.remove('active');
+            overlay.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+    });
+    // Close buttons inside (data-modal-close)
+    overlay.querySelectorAll('[data-modal-close]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            overlay.classList.remove('active');
+            overlay.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        });
+    });
+});
+// Esc closes top-most active modal
+document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    const open = Array.from(document.querySelectorAll('.modal-overlay.active')).pop();
+    if (open) {
+        open.classList.remove('active');
+        open.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+});
+// Lock body scroll when any modal opens (observer)
+const lockObserver = new MutationObserver(() => {
+    const anyOpen = document.querySelector('.modal-overlay.active');
+    document.body.style.overflow = anyOpen ? 'hidden' : '';
+});
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    lockObserver.observe(overlay, { attributes: true, attributeFilter: ['class'] });
+});
+</script>
+
+
+<!-- ── Render-override script (must run before legacy modules) ── -->
+<script>
+// Quick-code submit (header hero entry)
+window.submitQuickCode = async function () {
+    const input = document.getElementById('quickCodeInput');
+    const code = (input.value || '').trim().toUpperCase();
+    if (!code) { input.focus(); return; }
+    // Fetch all exams; find matching code via /api/review-by-code (returns examId+title even on first try)
+    try {
+        const res = await fetch('/api/review-by-code', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code })
+        });
+        if (res.ok) {
+            const data = await res.json();
+            // Code already used; navigate to result review
+            const first = data.results && data.results[0];
+            if (first) {
+                sessionStorage.setItem('easyrevise_final_result', JSON.stringify({ ...first.result, examTitle: data.examTitle, examId: data.examId }));
+                window.location.href = 'result.html';
+                return;
+            }
+        }
+    } catch {}
+    // Fallback: try to find via exam list & open code modal
+    try {
+        const res = await fetch('/api/exams');
+        const exams = await res.json();
+        // Try each exam preview
+        for (const ex of exams) {
+            const r = await fetch(`/api/exams/${ex.id}/preview-code`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code })
+            });
+            if (r.ok) {
+                const d = await r.json();
+                // Show preview popup if available
+                if (typeof showQREntryPopup === 'function') {
+                    showQREntryPopup(code, d.exam.id);
+                    return;
+                }
+                // Else open code modal directly
+                if (typeof openCodeModal === 'function') {
+                    openCodeModal(d.exam.id, d.exam.title);
+                    document.getElementById('codeInput').value = code;
+                    return;
+                }
+            }
+        }
+    } catch {}
+    // Not found — error feedback
+    input.classList.add('is-error');
+    setTimeout(() => input.classList.remove('is-error'), 2000);
+};
+
+// Override exam list render to use new card style
+(function patchLegacyRenderers() {
+    const onReady = () => {
+        // Replace loadExams with Apple-styled version
+        if (typeof window.loadExams !== 'function') return;
+        const _origLoad = window.loadExams;
+        window.loadExams = async function () {
+            try {
+                const res = await fetch('/api/exams');
+                const exams = await res.json();
+                const container = document.getElementById('examList');
+                if (!exams.length) {
+                    container.innerHTML = `
+                        <div class="empty-state" style="grid-column: 1 / -1;">
+                            <div class="empty-state-icon">
+                                <svg class="icon"><use href="/assets/icons/sprite.svg#file-text"/></svg>
+                            </div>
+                            <h3 class="empty-state-title">Chưa có đề thi nào</h3>
+                            <p class="empty-state-desc">Hãy nhập mã kích hoạt từ giáo viên hoặc liên hệ để được hỗ trợ.</p>
+                        </div>`;
+                    return;
+                }
+                const SUBJECT_ICONS = {
+                    'toán': 'function-square', 'math': 'function-square', 'mathematics': 'function-square',
+                    'tiếng anh': 'globe', 'english': 'globe', 'anh': 'globe', 'ielts': 'globe',
+                    'vật lý': 'atom', 'physics': 'atom',
+                    'hóa': 'atom', 'chemistry': 'atom',
+                    'sinh': 'sparkles', 'biology': 'sparkles',
+                    'văn': 'pen-line', 'literature': 'pen-line',
+                    'sử': 'book-open', 'history': 'book-open',
+                    'địa': 'globe', 'geography': 'globe',
+                    'tin': 'function-square', 'it': 'function-square'
+                };
+                const SUBJECT_COLORS = {
+                    'toán': 'math', 'math': 'math',
+                    'tiếng anh': 'english', 'english': 'english', 'anh': 'english', 'ielts': 'ielts',
+                    'vật lý': 'physics', 'physics': 'physics',
+                    'hóa': 'chemistry', 'chemistry': 'chemistry',
+                    'sinh': 'biology',
+                    'văn': 'literature',
+                    'sử': 'history',
+                    'địa': 'geography',
+                    'tin': 'it', 'it': 'it'
+                };
+                const escapeHtml = (s) => String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+                container.innerHTML = exams.map((exam, idx) => {
+                    const unlocked = JSON.parse(localStorage.getItem('easyrevise_unlocked') || '{}');
+                    const isLocked = exam.requireCode && !unlocked[exam.id];
+                    const subjLow = (exam.subject || '').toLowerCase();
+                    const iconKey = Object.keys(SUBJECT_ICONS).find(k => subjLow.includes(k)) || 'toán';
+                    const colorKey = Object.keys(SUBJECT_COLORS).find(k => subjLow.includes(k)) || 'math';
+                    const icon = SUBJECT_ICONS[iconKey];
+                    const colorVar = SUBJECT_COLORS[colorKey];
+                    const clickAction = isLocked
+                        ? `openCodeModal('${exam.id}', '${(exam.title || '').replace(/'/g, "\\'")}')`
+                        : `window.location.href='exam.html?id=${exam.id}'`;
+                    return `
+                        <div class="card card-raised card-interactive home-exam-card" onclick="${clickAction}" style="animation: stagger-in ${360 + idx*60}ms var(--ease-apple) both;">
+                            <div class="home-exam-card-top">
+                                <div class="card-icon-wrap card-icon-${colorVar}">
+                                    <svg class="icon"><use href="/assets/icons/sprite.svg#${icon}"/></svg>
+                                </div>
+                                ${isLocked ? `<span class="badge badge-warning"><svg class="icon icon-sm" style="width:11px;height:11px;"><use href="/assets/icons/sprite.svg#key"/></svg> Cần mã</span>` : ''}
+                            </div>
+                            <div>
+                                <h3 class="home-exam-card-title">${escapeHtml(exam.title)}</h3>
+                                <div class="home-exam-card-meta" style="margin-top: var(--space-2);">
+                                    <span><svg class="icon icon-sm"><use href="/assets/icons/sprite.svg#file-text"/></svg> ${exam.totalQuestions} câu</span>
+                                    ${exam.timeLimit ? `<span><svg class="icon icon-sm"><use href="/assets/icons/sprite.svg#timer"/></svg> ${exam.timeLimit} phút</span>` : ''}
+                                    ${exam.totalEssays > 0 ? `<span><svg class="icon icon-sm"><use href="/assets/icons/sprite.svg#pen-line"/></svg> ${exam.totalEssays} luận</span>` : ''}
+                                </div>
+                            </div>
+                            <div class="home-exam-card-footer">
+                                <span style="font-size: var(--text-xs); color: var(--text-3);">${escapeHtml(exam.subject || '')} · ${escapeHtml(exam.year || '')}</span>
+                                <span style="color: var(--accent); font-size: var(--text-sm); font-weight: var(--weight-medium); display: inline-flex; align-items: center; gap: 4px;">
+                                    ${isLocked ? 'Mở khóa' : 'Bắt đầu'}
+                                    <svg class="icon icon-sm"><use href="/assets/icons/sprite.svg#arrow-right"/></svg>
+                                </span>
+                            </div>
+                        </div>`;
+                }).join('');
+            } catch (err) {
+                console.error('loadExams error:', err);
+            }
+        };
+
+        // Replace history renderer
+        if (typeof window._renderHistoryItems === 'function') {
+            const _origRender = window._renderHistoryItems;
+            window._renderHistoryItems = function(items, source) {
+                const escapeHtml = (s) => String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+                return items.slice(0, 10).map((h, i) => {
+                    const score = parseFloat(h.score);
+                    const scoreClass = score >= 8 ? 'score-pill-high' : score >= 5 ? 'score-pill-mid' : 'score-pill-low';
+                    const timeMin = Math.floor((h.timeSpent || 0) / 60);
+                    const autoTag = h.autoSubmitted ? ' · ⏰ Hết giờ' : '';
+                    const timeDisplay = h.timestamp ? (typeof getTimeAgo === 'function' ? getTimeAgo(new Date(h.timestamp).getTime()) : '') : '';
+                    return `
+                        <a class="home-history-item" onclick="event.preventDefault();reviewResult(${i}, '${source}')" href="#" role="button">
+                            <div class="home-history-info">
+                                <div class="home-history-title">${escapeHtml(h.examTitle || 'Đề thi')}</div>
+                                <div class="home-history-meta">${timeDisplay} · ${h.correct}/${h.total} đúng · ${timeMin} phút${autoTag}</div>
+                            </div>
+                            <span class="score-pill ${scoreClass}">${h.score}</span>
+                        </a>`;
+                }).join('');
+            };
+        }
+
+        // Replace in-progress renderer
+        if (typeof window.loadInProgress === 'function') {
+            window.loadInProgress = function() {
+                const inProgress = JSON.parse(localStorage.getItem('easyrevise_in_progress') || '{}');
+                const section = document.getElementById('inProgressSection');
+                const container = document.getElementById('inProgressList');
+                const entries = Object.entries(inProgress).filter(([id, data]) => data.answeredCount < data.totalQuestions);
+                if (!entries.length) { section.style.display = 'none'; return; }
+                section.style.display = 'block';
+                const escapeHtml = (s) => String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+                container.innerHTML = entries.map(([id, data]) => {
+                    const percent = Math.round((data.answeredCount / data.totalQuestions) * 100);
+                    const timeAgo = typeof getTimeAgo === 'function' ? getTimeAgo(data.lastAccessed) : '';
+                    return `
+                        <div class="home-inprogress-item" onclick="window.location.href='exam.html?id=${id}'" style="cursor:pointer;">
+                            <div style="flex:1;min-width:0;">
+                                <div style="display:flex;align-items:center;gap:var(--space-2);margin-bottom:2px;">
+                                    <span class="badge badge-warning">Đang làm</span>
+                                    <span style="font-weight:var(--weight-semi);color:var(--text);">${escapeHtml(data.examTitle)}</span>
+                                </div>
+                                <div style="font-size:var(--text-xs);color:var(--text-3);">${data.answeredCount}/${data.totalQuestions} câu · ${percent}% · ${timeAgo}</div>
+                            </div>
+                            <button class="btn btn-primary btn-sm">
+                                Tiếp tục
+                                <svg class="icon icon-sm"><use href="/assets/icons/sprite.svg#arrow-right"/></svg>
+                            </button>
+                        </div>`;
+                }).join('');
+            };
+        }
+
+        // Update auth area UI
+        const _origUpdateAuthUI = window.updateAuthUI;
+        window.updateAuthUI = function() {
+            const area = document.getElementById('authArea');
+            if (!area) return;
+            const user = (typeof getUser === 'function') ? getUser() : null;
+            if (user) {
+                const avatarName = encodeURIComponent(user.username || user.displayName || 'anonymous');
+                const isAdmin = user.role === 'admin';
+                area.innerHTML = `
+                    <div style="display:flex;align-items:center;gap:var(--space-2);">
+                        ${isAdmin ? `<button class="btn btn-ghost btn-icon btn-sm" onclick="goAdmin()" title="Admin Panel" aria-label="Admin">
+                            <svg class="icon"><use href="/assets/icons/sprite.svg#shield-check"/></svg>
+                        </button>` : ''}
+                        <button type="button" onclick="goDashboard()" class="avatar avatar-sm" title="${(user.displayName || user.username || '').replace(/"/g, '&quot;')}" style="border:none;background:none;padding:0;cursor:pointer;">
+                            <img src="/api/avatar?name=${avatarName}&size=64" alt="${(user.displayName || user.username || '?').charAt(0).toUpperCase()}">
+                        </button>
+                        <button class="btn btn-ghost btn-sm" onclick="logout()">Thoát</button>
+                    </div>`;
+            } else {
+                area.innerHTML = `<button class="btn btn-secondary btn-sm" onclick="openAuthModal()">Đăng nhập</button>`;
+            }
+        };
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', onReady);
+    } else {
+        onReady();
+    }
+})();
+
+// Switch tab in auth modal — sync aria-selected
+window.switchTab = function(tab) {
+    document.getElementById('authError').style.display = 'none';
+    const isLogin = tab === 'login';
+    document.getElementById('loginForm').style.display = isLogin ? 'block' : 'none';
+    document.getElementById('registerForm').style.display = isLogin ? 'none' : 'block';
+    document.getElementById('tabLogin').setAttribute('aria-selected', String(isLogin));
+    document.getElementById('tabRegister').setAttribute('aria-selected', String(!isLogin));
+};
+
+// Open code modal — set IDs + show
+window.openCodeModal = function(examId, title) {
+    window._pendingCodeExamId = examId;
+    document.getElementById('codeExamTitle').textContent = title || '';
+    document.getElementById('codeInput').value = '';
+    const err = document.getElementById('codeError'); if (err) err.style.display = 'none';
+    document.getElementById('codeModal').classList.add('active');
+    document.getElementById('codeModal').setAttribute('aria-hidden', 'false');
+    setTimeout(() => document.getElementById('codeInput').focus(), 100);
+};
+
+// Open review code modal
+window.openReviewByCodeModal = function() {
+    document.getElementById('reviewCodeInput').value = '';
+    document.getElementById('reviewCodeError').style.display = 'none';
+    document.getElementById('reviewResultsList').style.display = 'none';
+    document.getElementById('reviewCodeModal').classList.add('active');
+    document.getElementById('reviewCodeModal').setAttribute('aria-hidden', 'false');
+    setTimeout(() => document.getElementById('reviewCodeInput').focus(), 100);
+};
+
+// Open auth modal
+window.openAuthModal = function() {
+    document.getElementById('authModal').classList.add('active');
+    document.getElementById('authModal').setAttribute('aria-hidden', 'false');
+    setTimeout(() => document.getElementById('loginUsername').focus(), 100);
+};
+window.closeAuthModal = function() {
+    document.getElementById('authModal').classList.remove('active');
+    document.getElementById('authModal').setAttribute('aria-hidden', 'true');
+};
+
+// Submit review code
+window.submitReviewCode = async function() {
+    const input = document.getElementById('reviewCodeInput');
+    const errEl = document.getElementById('reviewCodeError');
+    const code = (input.value || '').trim().toUpperCase();
+    errEl.style.display = 'none';
+    if (!code) { input.focus(); return; }
+    try {
+        const res = await fetch('/api/review-by-code', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            errEl.textContent = data.error || 'Không tìm thấy';
+            errEl.style.display = 'block';
+            return;
+        }
+        if (data.results && data.results.length > 0) {
+            const first = data.results[0];
+            sessionStorage.setItem('easyrevise_final_result', JSON.stringify({
+                ...first.result,
+                examTitle: data.examTitle,
+                examId: data.examId
+            }));
+            window.location.href = 'result.html';
+        }
+    } catch (err) {
+        errEl.textContent = 'Lỗi kết nối';
+        errEl.style.display = 'block';
+    }
+};
+
+// Quick-code Enter key handler
+window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('quickCodeInput')?.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); window.submitQuickCode(); }
+    });
+    document.getElementById('codeInput')?.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); if (typeof submitCode === 'function') submitCode(); }
+    });
+    document.getElementById('reviewCodeInput')?.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); window.submitReviewCode(); }
+    });
+});
+</script>
+
+
+<!-- ── Legacy core + page modules (preserve global functions) ── -->
+<script src="/js/core/utils.js"></script>
+<script src="/js/core/api.js"></script>
+<script src="/js/core/store.js"></script>
+<script src="/js/core/auth.js"></script>
+<script src="/js/components/theme.js"></script>
+<script src="/js/components/toast.js"></script>
+<script src="/js/pages/home/exam-list.js"></script>
+<script src="/js/pages/home/history.js"></script>
+<script src="/js/pages/home/code-entry.js"></script>
+<script src="/js/pages/home/review-code.js"></script>
+<script src="/js/pages/home/qr-scanner.js"></script>
+<script src="/js/pages/home/qr-popup.js"></script>
+<script src="/js/pages/home/init.js"></script>
+
+</body>
+</html>

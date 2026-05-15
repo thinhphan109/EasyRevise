@@ -62,40 +62,55 @@ function renderSubmissions(submissions) {
             const key = `${si}_${ei}`;
             const aiScore = essay.aiScore !== null && essay.aiScore !== undefined;
             const teacherScore = essay.teacherScore !== null && essay.teacherScore !== undefined;
+            const aiStatus = essay.status || (aiScore ? 'graded' : 'pending');
+            const statusMeta = aiStatus === 'graded'
+                ? { cls: 'grade-ai', text: `🤖 AI: ${essay.aiScore}/${essay.aiMaxScore || 10}` }
+                : aiStatus === 'error'
+                    ? { cls: 'grade-pending', text: `⚠️ AI lỗi` }
+                    : aiStatus === 'skipped'
+                        ? { cls: 'grade-pending', text: `ℹ️ AI bỏ qua` }
+                        : { cls: 'grade-pending', text: `⏳ Chờ AI chấm` };
             const attachImgs = (essay.attachments || []).map(url =>
                 url.endsWith('.pdf')
                     ? `<a href="${url}" target="_blank" style="font-size:0.82rem;color:var(--primary);">📄 PDF bài làm</a>`
                     : `<img src="${url}" onclick="window.open('${url}','_blank')" title="Xem ảnh lớn" alt="Ảnh bài làm">`
             ).join('');
 
+            const typeMeta = essay.gradingType === 'fill-in-blank'
+                ? { icon: '🔤', label: 'Điền chỗ trống', canAiGrade: false }
+                : essay.gradingType === 'free-form'
+                    ? { icon: '🧩', label: 'Bài tự luận theo ý', canAiGrade: true }
+                    : { icon: '📝', label: 'Tự luận', canAiGrade: true };
+
             return `<div class="essay-review-box">
-                <h4>📝 ${escapeHtml(essay.sectionTitle) || 'Bài tự luận'}</h4>
+                <h4>${typeMeta.icon} ${escapeHtml(essay.sectionTitle) || typeMeta.label} <span style="font-size:.72rem;font-weight:800;color:var(--text-muted);background:rgba(148,163,184,.13);border-radius:999px;padding:.14rem .48rem;margin-left:.35rem;">${typeMeta.label}</span></h4>
                 ${essay.prompt ? `<p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.5rem;">📌 ${escapeHtml(essay.prompt)}</p>` : ''}
                 <div class="essay-student-text">${escapeHtml(essay.studentAnswer) || '<em style="color:var(--text-muted);">Không có nội dung gõ</em>'}</div>
                 ${attachImgs ? `<div class="essay-attach-grid">${attachImgs}</div>` : ''}
                 ${essay.sampleAnswer ? `<details style="margin-top:0.5rem;"><summary style="font-size:0.82rem;color:var(--text-muted);cursor:pointer;">📖 Xem đáp án mẫu</summary><div style="font-size:0.85rem;padding:0.75rem;background:#f0fdf4;border-radius:8px;margin-top:0.4rem;">${escapeHtml(essay.sampleAnswer)}</div></details>` : ''}
 
                 <div style="margin-top:0.75rem;display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center;">
-                    ${aiScore ? `<span class="grade-badge grade-ai">🤖 AI: ${essay.aiScore}/${essay.aiMaxScore || 10}</span>` : '<span class="grade-badge grade-pending">⏳ Chưa AI chấm</span>'}
+                    <span class="grade-badge ${statusMeta.cls}">${statusMeta.text}</span>
                     ${teacherScore ? `<span class="grade-badge grade-teacher">✅ GV: ${essay.teacherScore}/10</span>` : ''}
                 </div>
-                ${aiScore && essay.aiFeedback ? `<div style="margin-top:0.5rem;padding:0.75rem;background:#eef2ff;border-radius:8px;font-size:0.85rem;line-height:1.5;"><strong>AI nhận xét:</strong> ${renderMarkdown(essay.aiFeedback)}</div>` : ''}
-                ${essay.teacherFeedback ? `<div style="margin-top:0.5rem;padding:0.75rem;background:#f0fdf4;border-radius:8px;font-size:0.85rem;line-height:1.5;"><strong>GV nhận xét:</strong> ${renderMarkdown(essay.teacherFeedback)}</div>` : ''}
+                ${essay.aiError ? `<div style="margin-top:0.5rem;padding:0.65rem 0.75rem;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;font-size:0.82rem;color:#9a3412;"><strong>Trạng thái AI:</strong> ${escapeHtml(essay.aiError === 'NO_API_KEY' ? 'Chưa cấu hình API key chấm AI' : essay.aiError)}</div>` : ''}
+                ${aiScore && essay.aiFeedback ? `<div style="margin-top:0.5rem;padding:0.75rem;background:#eef2ff;border-radius:8px;font-size:0.85rem;line-height:1.5;"><strong>AI nhận xét:</strong> ${renderMarkdown(escapeHtml(essay.aiFeedback))}${essay.aiBreakdown ? `<div style="margin-top:0.5rem;color:var(--text-muted);">${renderMarkdown(escapeHtml(essay.aiBreakdown))}</div>` : ''}</div>` : ''}
+                ${essay.teacherFeedback ? `<div style="margin-top:0.5rem;padding:0.75rem;background:#f0fdf4;border-radius:8px;font-size:0.85rem;line-height:1.5;"><strong>GV nhận xét:</strong> ${renderMarkdown(escapeHtml(essay.teacherFeedback))}</div>` : ''}
 
                 <div class="review-actions">
-                    <button class="btn btn-sm btn-info" id="aiGradeBtn_${key}"
-                        onclick="aiGradeEssay('${sub.examId}','${sub.code}','${sub.userId}','${essay.questionId}',${si},${ei})">
-                        🤖 ${aiScore ? 'Chấm lại AI' : 'AI chấm điểm'}
-                    </button>
+                    ${typeMeta.canAiGrade ? `<button class="btn btn-sm btn-info" id="aiGradeBtn_${key}"
+                        onclick="aiGradeEssay('${sub.examId}','${sub.code || ''}','${sub.userId}','${essay.questionId}',${si},${ei},'${sub.completedAt || ''}')">
+                        🤖 ${aiScore ? 'Chấm lại AI' : (aiStatus === 'error' || aiStatus === 'skipped' ? 'Thử lại AI' : 'AI chấm điểm')}
+                    </button>` : `<span class="grade-badge grade-ai" title="Loại này đã được chấm tự động theo đáp án">⚙️ Tự chấm theo đáp án</span>`}
                     <input type="number" id="tscore_${key}" min="0" max="10" step="0.5"
                         placeholder="Điểm GV (0-10)"
                         value="${essay.teacherScore !== null && essay.teacherScore !== undefined ? essay.teacherScore : ''}"
                         style="width:120px;padding:0.4rem 0.6rem;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;">
                     <input type="text" id="tfb_${key}" placeholder="Nhận xét của GV (tuỳ chọn)"
-                        value="${essay.teacherFeedback || ''}"
+                        value="${escapeHtml(essay.teacherFeedback || '')}"
                         style="flex:1;min-width:160px;padding:0.4rem 0.6rem;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;">
                     <button class="btn btn-sm btn-success"
-                        onclick="reviewSubmission('${sub.examId}','${sub.code}','${sub.userId}','${essay.questionId}','${key}')">
+                        onclick="reviewSubmission('${sub.examId}','${sub.code || ''}','${sub.userId}','${essay.questionId}','${key}','${sub.completedAt || ''}')">
                         💾 Lưu điểm GV
                     </button>
                 </div>
@@ -113,7 +128,7 @@ function renderSubmissions(submissions) {
                     <div class="submission-meta">🎫 ${sub.code ? `Mã: <strong>${escapeHtml(sub.code)}</strong>` : '<span style="color:var(--success);">🔓 Đề mở (không cần mã)</span>'} &nbsp;|&nbsp; 📝 ${escapeHtml(sub.examTitle)}</div>
                     <div class="submission-meta">⏰ Nộp: ${time} &nbsp;|&nbsp; 📊 MC: ${sub.mcScore !== null ? sub.mcScore + '/10' : '—'}</div>
                 </div>
-                <span style="font-size:0.75rem;color:var(--text-muted);flex-shrink:0;margin-top:0.2rem;">${sub.essays.length} câu tự luận</span>
+                <span style="font-size:0.75rem;color:var(--text-muted);flex-shrink:0;margin-top:0.2rem;">${sub.essays.length} mục cần chấm</span>
             </div>
             <div id="${cardId}" style="display:none;border-top:1px solid var(--border);margin-top:0.75rem;padding-top:0.75rem;">
                 ${essayBlocks}
@@ -122,13 +137,13 @@ function renderSubmissions(submissions) {
     }).join('');
 }
 
-async function aiGradeEssay(examId, code, userId, questionId, si, ei) {
+async function aiGradeEssay(examId, code, userId, questionId, si, ei, completedAt = '') {
     const key = `${si}_${ei}`;
     const btn = document.getElementById(`aiGradeBtn_${key}`);
     if (btn) { btn.disabled = true; btn.textContent = '⏳ AI đang chấm...'; }
     try {
         const subs = await api(`/api/admin/submissions?examId=${examId}`);
-        const sub = subs.find(s => s.code === code && s.userId === userId);
+        const sub = subs.find(s => (s.code || '') === (code || '') && s.userId === userId && (!completedAt || s.completedAt === completedAt));
         const essay = sub ? sub.essays.find(e => e.questionId === questionId) : null;
         if (!essay) throw new Error('Không tìm thấy bài nộp');
         const result = await api('/api/admin/ai-grade-essay', 'POST', {
@@ -136,7 +151,8 @@ async function aiGradeEssay(examId, code, userId, questionId, si, ei) {
             studentAnswer: essay.studentAnswer,
             attachments: essay.attachments || [],
             sampleAnswer: essay.sampleAnswer,
-            prompt: essay.prompt
+            prompt: essay.prompt,
+            completedAt
         });
         await loadSubmissions();
         const statusEl = document.getElementById(`reviewStatus_${key}`);
@@ -147,7 +163,7 @@ async function aiGradeEssay(examId, code, userId, questionId, si, ei) {
     }
 }
 
-async function reviewSubmission(examId, code, userId, questionId, key) {
+async function reviewSubmission(examId, code, userId, questionId, key, completedAt = '') {
     const scoreEl = document.getElementById(`tscore_${key}`);
     const fbEl = document.getElementById(`tfb_${key}`);
     const statusEl = document.getElementById(`reviewStatus_${key}`);
@@ -157,7 +173,8 @@ async function reviewSubmission(examId, code, userId, questionId, key) {
         await api('/api/admin/submissions/review', 'POST', {
             examId, code, userId, questionId,
             teacherScore: teacherScore !== '' ? parseFloat(teacherScore) : null,
-            teacherFeedback
+            teacherFeedback,
+            completedAt
         });
         if (statusEl) { statusEl.style.display = 'block'; statusEl.textContent = '✅ Đã lưu điểm giáo viên!'; }
         setTimeout(() => { if (statusEl) statusEl.style.display = 'none'; }, 3000);
@@ -186,7 +203,8 @@ async function batchAiGradeAll() {
         const jobs = [];
         for (const sub of submissions) {
             for (const essay of (sub.essays || [])) {
-                if (essay.aiScore === null || essay.aiScore === undefined) {
+                if (essay.gradingType === 'fill-in-blank') continue;
+                if (essay.aiScore === null || essay.aiScore === undefined || essay.status === 'error' || essay.status === 'skipped') {
                     jobs.push({ sub, essay });
                 }
             }
@@ -219,7 +237,8 @@ async function batchAiGradeAll() {
                     studentAnswer: essay.studentAnswer,
                     attachments: essay.attachments || [],
                     sampleAnswer: essay.sampleAnswer,
-                    prompt: essay.prompt
+                    prompt: essay.prompt,
+                    completedAt: sub.completedAt
                 });
             } catch (e) {
                 errors++;

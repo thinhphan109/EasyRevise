@@ -18,7 +18,7 @@ async function checkAdminAuth() {
         document.getElementById('loginGate').style.display = 'none';
         document.getElementById('adminMain').style.display = 'block';
         initMobileNav();
-        loadExamList();
+        switchTab('dashboard');
     } catch { showLoginGate(); }
 }
 
@@ -106,6 +106,7 @@ document.addEventListener('click', (e) => {
 
 // ── Tabs (sidebar-aware) ──────────────────────────────────
 const TAB_TITLES = {
+    dashboard: 'Bảng điều khiển',
     exams: 'Đề thi', users: 'Tài khoản', subjects: 'Môn học',
     codeLogs: 'Log mã KH', submissions: 'Bài nộp', questionBank: 'Ngân hàng đề',
     settings: 'Cài đặt', help: 'Hướng dẫn', media: 'Kho Media',
@@ -113,7 +114,7 @@ const TAB_TITLES = {
 };
 
 function switchTab(tab) {
-    const tabs = ['exams', 'users', 'subjects', 'codeLogs', 'submissions', 'questionBank', 'settings', 'help', 'media', 'activation', 'aiGen'];
+    const tabs = ['dashboard', 'exams', 'users', 'subjects', 'codeLogs', 'submissions', 'questionBank', 'settings', 'help', 'media', 'activation', 'aiGen'];
 
     // Update sidebar active item
     document.querySelectorAll('.sidebar-item').forEach(el => {
@@ -132,6 +133,8 @@ function switchTab(tab) {
         document.getElementById('adminSidebar')?.classList.remove('mobile-open');
         document.getElementById('sidebarOverlay')?.classList.remove('visible');
     }
+
+    if (tab === 'dashboard' && typeof loadAdminDashboard === 'function') loadAdminDashboard();
 
     if (tab === 'exams') { showView('viewExamList'); loadExamList(); }
     if (tab === 'users') loadUsers();
@@ -154,9 +157,10 @@ function switchTab(tab) {
         loadAITabModels();
         const btn = document.getElementById('aiGenerateBtn'); const loading = document.getElementById('aiLoading');
         if (btn && btn.disabled) {
+            if (_aiGenerating) return;
             const list = NotificationManager.load(); const lastSuccess = list.find(n => n.status === 'success' && n.data);
             if (lastSuccess) { btn.disabled = false; btn.textContent = '🚀 Tạo đề bằng AI'; if (loading) loading.style.display = 'none'; if (!aiGeneratedData) { aiGeneratedData = lastSuccess.data; renderAIPreview(aiGeneratedData); document.getElementById('aiPreview').style.display = 'block'; const status = document.getElementById('aiStatus'); if (status) { status.textContent = '✅ Đã khôi phục kết quả từ lần tạo trước!'; status.style.color = 'var(--success)'; } } }
-            else { btn.disabled = false; btn.textContent = '🚀 Tạo đề bằng AI'; if (loading) loading.style.display = 'none'; const status = document.getElementById('aiStatus'); if (status) { status.textContent = '⚠️ Phiên trước bị gián đoạn. Vui lòng thử lại.'; status.style.color = 'var(--warning)'; } }
+            else { btn.disabled = false; btn.textContent = '🚀 Tạo đề bằng AI'; if (loading) loading.style.display = 'none'; const status = document.getElementById('aiStatus'); if (status) { status.textContent = '⚠️ Phiên trước bị gián đoạn. Nhấn Khôi phục hoặc thử lại.'; status.style.color = 'var(--warning)'; } document.getElementById('aiRecoverBtn').style.display = 'inline-flex'; }
         } else if (!aiGeneratedData) {
             const list = NotificationManager.load(); const lastSuccess = list.find(n => n.status === 'success' && n.data);
             if (lastSuccess) { aiGeneratedData = lastSuccess.data; renderAIPreview(aiGeneratedData); document.getElementById('aiPreview').style.display = 'block'; }
@@ -180,6 +184,30 @@ document.addEventListener('DOMContentLoaded', () => {
     if (pinInput) pinInput.addEventListener('keydown', e => { if (e.key === 'Enter') submitAdminPin(); });
     const passInput = document.getElementById('adminPassword');
     if (passInput) passInput.addEventListener('keydown', e => { if (e.key === 'Enter') adminLogin(); });
+
+    // Paste ảnh trực tiếp vào tab AI Tạo Đề
+    window.addEventListener('paste', async (e) => {
+        const aiTab = document.getElementById('tabAiGen');
+        if (!aiTab || !aiTab.classList.contains('active')) return;
+        if (e.target && ['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+        if (_aiGenerating) return;
+        const items = e.clipboardData?.items;
+        if (!items) return;
+        const files = [];
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type?.startsWith('image/')) {
+                const file = items[i].getAsFile();
+                if (file) {
+                    const ext = file.type.split('/')[1] || 'png';
+                    files.push(new File([file], `Anh_dan_tu_clipboard_${Date.now()}_${i}.${ext}`, { type: file.type }));
+                }
+            }
+        }
+        if (files.length) {
+            e.preventDefault();
+            await handleAIFiles(files);
+        }
+    });
 
     // #9: Global keyboard shortcuts
     document.addEventListener('keydown', e => {

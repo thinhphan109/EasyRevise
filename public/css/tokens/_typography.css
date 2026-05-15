@@ -1,0 +1,41 @@
+/* ===========================================================
+   Design Tokens — Typography
+   System fonts (Apple-first), modular scale 1.125
+   =========================================================== */
+
+:root {
+    /* Font stacks */
+    --font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+                 'Inter', 'Segoe UI', system-ui, sans-serif;
+    --font-mono: 'SF Mono', 'Menlo', 'JetBrains Mono', 'Geist Mono', monospace;
+
+    /* Sizes */
+    --text-xs:   12px;
+    --text-sm:   13px;
+    --text-base: 15px;
+    --text-md:   16px;   /* mobile inputs (prevents iOS zoom) */
+    --text-lg:   17px;
+    --text-xl:   20px;
+    --text-2xl:  22px;
+    --text-3xl:  28px;
+    --text-4xl:  34px;
+    --text-5xl:  44px;
+
+    /* Weights */
+    --weight-regular: 400;
+    --weight-medium:  500;
+    --weight-semi:    600;
+    --weight-bold:    700;
+
+    /* Line heights */
+    --leading-tight:   1.15;
+    --leading-snug:    1.3;
+    --leading-normal:  1.47;
+    --leading-relaxed: 1.6;
+
+    /* Letter spacing */
+    --tracking-tight:  -0.04em;
+    --tracking-snug:   -0.02em;
+    --tracking-normal: -0.01em;
+    --tracking-loose:   0.04em;
+}

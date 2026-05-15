@@ -1,39 +1,37 @@
-/* ========================================
-   EasyRevise — CSS Reset
-   Box-sizing, margin reset, smooth scroll
-   ======================================== */
+/* ===========================================================
+   Base — Modern CSS Reset (Josh Comeau baseline + Apple HIG)
+   =========================================================== */
 
-*, *::before, *::after {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+
+html, body {
+    height: 100%;
 }
 
 html {
-    scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
-    -moz-text-size-adjust: 100%;
     text-size-adjust: 100%;
-    tab-size: 4;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body {
-    min-height: 100vh;
-    text-rendering: optimizeLegibility;
+    line-height: var(--leading-normal);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
 }
 
-/* Remove default list styling */
-ul, ol { list-style: none; }
-
-/* Responsive media */
 img, picture, video, canvas, svg {
     display: block;
     max-width: 100%;
+    height: auto;
 }
 
-/* Form element reset */
 input, button, textarea, select {
     font: inherit;
     color: inherit;
@@ -41,62 +39,45 @@ input, button, textarea, select {
 
 button {
     cursor: pointer;
-    border: none;
     background: none;
+    border: none;
+    padding: 0;
 }
 
-/* Remove textarea resize handle on some browsers */
-textarea {
-    resize: vertical;
+a { color: inherit; text-decoration: none; }
+
+p, h1, h2, h3, h4, h5, h6 {
+    overflow-wrap: break-word;
+    text-wrap: pretty;
 }
 
-/* Link reset */
-a {
-    color: inherit;
-    text-decoration: none;
+ul, ol {
+    list-style: none;
+    padding: 0;
 }
 
-/* Table */
-table {
-    border-collapse: collapse;
-    border-spacing: 0;
+/* Touch device: disable default tap highlight, prevent double-tap zoom */
+button, a, [role="button"], input, label, summary {
+    touch-action: manipulation;
 }
 
-/* Prevent iOS tap highlight */
-* {
-    -webkit-tap-highlight-color: transparent;
+/* iOS no-zoom on form focus */
+input, textarea, select {
+    font-size: max(var(--text-md), 16px);
 }
 
-/* Safe area for mobile notch */
-body {
-    padding-bottom: env(safe-area-inset-bottom, 0);
-    background: var(--color-bg);
+@media (min-width: 1024px) {
+    input, textarea, select { font-size: var(--text-base); }
 }
 
-/* ── Custom Selection ── */
+/* Disable user-select on UI chrome (icons, badges) but allow text */
+.no-select, .icon, button .icon {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Custom selection */
 ::selection {
-    background: var(--color-primary);
-    color: #fff;
-}
-
-/* ── Custom Scrollbar ── */
-::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-}
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-::-webkit-scrollbar-thumb {
-    background: var(--color-border);
-    border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-    background: var(--color-text-muted);
-}
-
-/* Firefox scrollbar */
-* {
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-border) transparent;
+    background: var(--accent-soft);
+    color: var(--text);
 }

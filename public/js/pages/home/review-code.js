@@ -36,7 +36,10 @@ async function submitReviewCode() {
 
         if (data.count === 1) {
             // Single result - go directly
-            sessionStorage.setItem('easyrevise_final_result', JSON.stringify(data.results[0].result));
+            const picked = data.results[0];
+            picked.result.examId = picked.result.examId || data.examId;
+            sessionStorage.setItem('easyrevise_final_result', JSON.stringify(picked.result));
+            sessionStorage.setItem('easyrevise_result_code', JSON.stringify({ examId: data.examId, code: data.code }));
             document.getElementById('reviewCodeModal').classList.remove('active');
             window.location.href = 'result.html';
         } else {
@@ -56,6 +59,7 @@ async function submitReviewCode() {
                     </div>`;
                 }).join('');
             window._reviewResults = data.results;
+            window._reviewMeta = { examId: data.examId, code: data.code };
         }
     } catch {
         document.getElementById('reviewCodeError').textContent = 'Lỗi kết nối';
@@ -70,7 +74,10 @@ async function submitReviewCode() {
 function pickReviewResult(index) {
     const r = window._reviewResults[index];
     if (!r) return;
+    const meta = window._reviewMeta || {};
+    r.result.examId = r.result.examId || meta.examId;
     sessionStorage.setItem('easyrevise_final_result', JSON.stringify(r.result));
+    if (meta.examId && meta.code) sessionStorage.setItem('easyrevise_result_code', JSON.stringify({ examId: meta.examId, code: meta.code }));
     document.getElementById('reviewCodeModal').classList.remove('active');
     window.location.href = 'result.html';
 }

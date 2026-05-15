@@ -214,8 +214,102 @@
                 <!-- Tab content -->
                 <div class="admin-view-container">
 
+            <!-- TAB: Dashboard (overview - Bento layout) -->
+            <div id="tabDashboard" class="view active">
+                <div class="page-header">
+                    <div class="page-header-info">
+                        <h1 class="page-header-title">Bảng điều khiển</h1>
+                        <p class="page-header-desc">Tổng quan hoạt động hệ thống và bài nộp gần đây.</p>
+                    </div>
+                    <div class="page-header-actions">
+                        <button class="btn btn-secondary btn-sm" onclick="loadAdminDashboard()" title="Làm mới">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
+                            Làm mới
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stat row -->
+                <div class="admin-bento" id="adminDashboardStats">
+                    <div class="admin-stat-card">
+                        <div class="admin-stat-icon" style="background: var(--accent-soft); color: var(--accent);">
+                            <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#file-text"/></svg>
+                        </div>
+                        <div class="admin-stat-value" id="adminDashExamCount">—</div>
+                        <div class="admin-stat-label">Đề thi</div>
+                    </div>
+                    <div class="admin-stat-card">
+                        <div class="admin-stat-icon" style="background: color-mix(in srgb, var(--success) 12%, var(--surface-2)); color: var(--success);">
+                            <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#users"/></svg>
+                        </div>
+                        <div class="admin-stat-value" id="adminDashUserCount">—</div>
+                        <div class="admin-stat-label">Học sinh</div>
+                    </div>
+                    <div class="admin-stat-card">
+                        <div class="admin-stat-icon" style="background: color-mix(in srgb, var(--warning) 12%, var(--surface-2)); color: var(--warning);">
+                            <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#send"/></svg>
+                        </div>
+                        <div class="admin-stat-value" id="adminDashSubCount">—</div>
+                        <div class="admin-stat-label">Bài nộp</div>
+                    </div>
+                    <div class="admin-stat-card">
+                        <div class="admin-stat-icon" style="background: color-mix(in srgb, var(--subject-math) 12%, var(--surface-2)); color: var(--subject-math);">
+                            <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#key"/></svg>
+                        </div>
+                        <div class="admin-stat-value" id="adminDashCodeCount">—</div>
+                        <div class="admin-stat-label">Mã kích hoạt</div>
+                    </div>
+                </div>
+
+                <!-- Bottom: chart + activity -->
+                <div class="admin-dash-row">
+                    <!-- Submissions chart (7-day bar chart) -->
+                    <div class="admin-card admin-dash-chart-card">
+                        <div class="admin-dash-card-header">
+                            <h3 class="admin-dash-card-title">
+                                <svg class="icon icon-sm" style="color:var(--accent);" aria-hidden="true"><use href="/assets/icons/sprite.svg#bar-chart-3"/></svg>
+                                Bài nộp 7 ngày
+                            </h3>
+                        </div>
+                        <div class="admin-dash-chart" id="adminDashChart" aria-label="Biểu đồ bài nộp 7 ngày">
+                            <!-- Bars rendered by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Activity feed -->
+                    <div class="admin-card admin-dash-activity-card">
+                        <div class="admin-dash-card-header">
+                            <h3 class="admin-dash-card-title">
+                                <svg class="icon icon-sm" style="color:var(--accent);" aria-hidden="true"><use href="/assets/icons/sprite.svg#clock"/></svg>
+                                Hoạt động gần đây
+                            </h3>
+                        </div>
+                        <ul class="admin-dash-activity" id="adminDashActivity">
+                            <li class="admin-dash-activity-empty">Đang tải...</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Recent submissions table -->
+                <div class="admin-card admin-dash-recent-card">
+                    <div class="admin-dash-card-header">
+                        <h3 class="admin-dash-card-title">
+                            <svg class="icon icon-sm" style="color:var(--accent);" aria-hidden="true"><use href="/assets/icons/sprite.svg#send"/></svg>
+                            Bài nộp mới nhất
+                        </h3>
+                        <button class="btn btn-ghost btn-sm" onclick="switchTab('submissions')">
+                            Xem tất cả
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                    <div class="admin-dash-recent" id="adminDashRecent">
+                        <div class="admin-dash-activity-empty">Đang tải...</div>
+                    </div>
+                </div>
+            </div>
+
             <!-- TAB: Exams -->
-            <div id="tabExams" class="view active">
+            <div id="tabExams" class="view">
                 <div id="viewExamList" class="view active">
                     <div class="page-header">
                         <div class="page-header-info">
@@ -843,16 +937,21 @@
                         <div style="font-size:3rem;margin-bottom:1rem;">📄</div>
                         <p style="font-weight:600;color:var(--text-main);margin-bottom:0.5rem;">Kéo thả file vào đây
                             hoặc click để chọn</p>
-                        <p style="font-size:0.82rem;color:var(--text-muted);">Hỗ trợ: PDF, JPG, PNG, DOCX — Tối đa 10
-                            file, 20MB/file</p>
-                        <input type="file" id="aiFileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.docx"
+                        <p style="font-size:0.82rem;color:var(--text-muted);">Hỗ trợ: PDF, JPG, PNG, DOCX — PDF sẽ được chuyển thành ảnh ngay trên trình duyệt</p>
+                        <input type="file" id="aiFileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,.docx"
                             style="display:none;" onchange="handleAIFiles(this.files)">
                     </div>
                     <div id="aiFileList" style="margin-top:1rem;"></div>
 
-                    <div style="display:flex;gap:1rem;margin-top:1.5rem;align-items:center;">
-                        <button id="aiGenerateBtn" class="btn btn-primary" onclick="generateWithAI()"
+                    <div style="display:flex;gap:0.75rem;margin-top:1.5rem;align-items:center;flex-wrap:wrap;">
+                        <button id="aiGenerateBtn" class="btn btn-primary" onclick="generateWithAI(false)"
                             style="padding:0.75rem 2rem;font-size:1rem;">🚀 Tạo đề bằng AI</button>
+                        <button type="button" class="btn btn-outline" onclick="stitchAIImages()"
+                            style="padding:0.75rem 1rem;font-size:0.95rem;">🧩 Dàn ảnh dọc</button>
+                        <button type="button" class="btn btn-info" onclick="generateWithAI(true)"
+                            style="padding:0.75rem 1rem;font-size:0.95rem;">🔍 OCR rồi tạo đề</button>
+                        <button type="button" class="btn btn-ghost" onclick="clearAIFiles()"
+                            style="padding:0.75rem 1rem;font-size:0.95rem;">🗑️ Xóa file</button>
                         <span id="aiStatus" style="font-size:0.85rem;color:var(--text-muted);"></span>
                     </div>
                 </div>
@@ -1054,8 +1153,19 @@
                 </div>
             </div>
             <div id="freeformAnswerGroup" style="display:none;">
-                <div class="form-group"><label>Đáp án</label><textarea id="inputFreeformAnswer" class="form-textarea"
-                        placeholder="Đáp án chi tiết..."></textarea></div>
+                <div class="form-group"><label>Đáp án mẫu / gợi ý chấm</label><textarea id="inputFreeformAnswer" class="form-textarea"
+                        placeholder="Đáp án chi tiết hoặc rubric chấm điểm..."></textarea></div>
+                <div class="form-group">
+                    <label style="display:flex;align-items:center;gap:0.5rem;justify-content:space-between;">
+                        <span>Các ý nhỏ của câu tự luận</span>
+                        <button type="button" class="btn btn-sm btn-outline" onclick="addFreeformSubPart()"
+                            style="padding:0.2rem 0.6rem;font-size:0.75rem;">+ Thêm ý</button>
+                    </label>
+                    <p style="font-size:0.76rem;color:var(--text-muted);margin:-0.25rem 0 0.5rem;">
+                        Mỗi ý sẽ hiện thành một ô trả lời riêng cho học sinh. Nếu để trống, câu tự luận sẽ có một ô trả lời chung.
+                    </p>
+                    <div id="freeformSubPartList"></div>
+                </div>
             </div>
             <!-- Fill-in-blank Group -->
             <div id="fillBlankGroup" style="display:none;">
@@ -1347,13 +1457,13 @@
 
     <!-- Mobile Bottom Nav (≤768px only) -->
     <nav id="mobileBottomNav" class="mobile-bottom-nav" style="display:none;">
-        <button class="bottom-nav-item active" data-tab="exams" onclick="mobileNavSwitch('exams')">
+        <button class="bottom-nav-item active" data-tab="dashboard" onclick="mobileNavSwitch('dashboard')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+            <span>Tổng quan</span>
+        </button>
+        <button class="bottom-nav-item" data-tab="exams" onclick="mobileNavSwitch('exams')">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             <span>Đề thi</span>
-        </button>
-        <button class="bottom-nav-item" data-tab="questionBank" onclick="mobileNavSwitch('questionBank')">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
-            <span>Ngân hàng</span>
         </button>
         <button class="bottom-nav-item" data-tab="submissions" onclick="mobileNavSwitch('submissions')">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
@@ -1374,6 +1484,10 @@
         <div class="mobile-more-overlay" onclick="toggleMobileMore()"></div>
         <div class="mobile-more-sheet">
             <div class="mobile-more-handle"></div>
+            <button class="mobile-more-item" onclick="mobileNavSwitch('questionBank')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
+                <span>Ngân hàng đề</span>
+            </button>
             <button class="mobile-more-item" onclick="mobileNavSwitch('users')">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
                 <span>Tài khoản</span>

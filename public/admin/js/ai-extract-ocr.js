@@ -117,9 +117,11 @@ function showAIExtractModal() {
 
                 <!-- Right: Results -->
                 <div style="display:flex;flex-direction:column;min-height:400px;">
-                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;gap:0.75rem;flex-wrap:wrap;">
                         <span style="font-weight:600;font-size:0.82rem;">Kết quả</span>
-                        <div style="display:flex;gap:0.4rem;">
+                        <div style="display:flex;gap:0.4rem;align-items:center;flex-wrap:wrap;">
+                            <input id="ocrWordFileName" class="form-input" placeholder="Tên file Word (tùy chọn)"
+                                style="width:190px;padding:0.35rem 0.6rem;font-size:0.78rem;">
                             <button class="btn btn-sm btn-ghost" onclick="ocrCopyResult()" id="ocrCopyBtn" disabled title="Sao chép">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                             </button>
@@ -341,6 +343,120 @@ function ocrCreateStitchedCanvas(images) {
     return url;
 }
 
+function ocrClamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+
+function ocrLoadImage(url) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = url;
+    });
+}
+
+function ocrNormalizeBBox(values, img, order) {
+    let xmin, ymin, xmax, ymax;
+    if (order === 'yxyx') [ymin, xmin, ymax, xmax] = values;
+    else [xmin, ymin, xmax, ymax] = values;
+
+    const maxVal = Math.max(xmin, ymin, xmax, ymax);
+    if (maxVal <= 1000) {
+        xmin = (xmin / 1000) * img.width;
+        xmax = (xmax / 1000) * img.width;
+        ymin = (ymin / 1000) * img.height;
+        ymax = (ymax / 1000) * img.height;
+    }
+
+    const x1 = ocrClamp(Math.min(xmin, xmax), 0, img.width - 1);
+    const y1 = ocrClamp(Math.min(ymin, ymax), 0, img.height - 1);
+    const x2 = ocrClamp(Math.max(xmin, xmax), x1 + 1, img.width);
+    const y2 = ocrClamp(Math.max(ymin, ymax), y1 + 1, img.height);
+    return { x: x1, y: y1, w: x2 - x1, h: y2 - y1 };
+}
+
+function ocrExpandRect(rect, img, padRatio = 0.14) {
+    const padX = Math.max(12, rect.w * padRatio);
+    const padY = Math.max(12, rect.h * padRatio);
+    const x = ocrClamp(rect.x - padX, 0, img.width - 1);
+    const y = ocrClamp(rect.y - padY, 0, img.height - 1);
+    const x2 = ocrClamp(rect.x + rect.w + padX, x + 1, img.width);
+    const y2 = ocrClamp(rect.y + rect.h + padY, y + 1, img.height);
+    return { x, y, w: x2 - x, h: y2 - y };
+}
+
+function ocrCropToCanvas(img, rect) {
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.max(1, Math.ceil(rect.w));
+    canvas.height = Math.max(1, Math.ceil(rect.h));
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, rect.x, rect.y, rect.w, rect.h, 0, 0, canvas.width, canvas.height);
+    return canvas;
+}
+
+function ocrRefineCanvasByContent(canvas, padding = 14) {
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const { width, height } = canvas;
+    if (width < 20 || height < 20) return { canvas, score: 0 };
+
+    const data = ctx.getImageData(0, 0, width, height).data;
+    let minX = width, minY = height, maxX = 0, maxY = 0, content = 0;
+
+    for (let y = 0; y < height; y += 2) {
+        for (let x = 0; x < width; x += 2) {
+            const idx = (y * width + x) * 4;
+            const r = data[idx], g = data[idx + 1], b = data[idx + 2];
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            const ink = max < 235 || (max - min > 28 && max < 250);
+            if (ink) {
+                content++;
+                if (x < minX) minX = x;
+                if (y < minY) minY = y;
+                if (x > maxX) maxX = x;
+                if (y > maxY) maxY = y;
+            }
+        }
+    }
+
+    const sampled = Math.max(1, Math.ceil(width / 2) * Math.ceil(height / 2));
+    const density = content / sampled;
+    if (!content || density < 0.002) return { canvas, score: density };
+
+    minX = ocrClamp(minX - padding, 0, width - 1);
+    minY = ocrClamp(minY - padding, 0, height - 1);
+    maxX = ocrClamp(maxX + padding, minX + 1, width);
+    maxY = ocrClamp(maxY + padding, minY + 1, height);
+
+    const refinedW = maxX - minX;
+    const refinedH = maxY - minY;
+    if (refinedW < width * 0.25 || refinedH < height * 0.25) return { canvas, score: density };
+
+    const refined = document.createElement('canvas');
+    refined.width = Math.ceil(refinedW);
+    refined.height = Math.ceil(refinedH);
+    refined.getContext('2d').drawImage(canvas, minX, minY, refinedW, refinedH, 0, 0, refined.width, refined.height);
+    canvas.width = 0;
+    return { canvas: refined, score: density + (refinedW * refinedH) / (width * height) * 0.02 };
+}
+
+function ocrBuildBestCrop(img, values) {
+    const candidates = ['yxyx', 'xyxy'].map(order => {
+        const raw = ocrNormalizeBBox(values, img, order);
+        if (raw.w < 10 || raw.h < 10) return null;
+        const expanded = ocrExpandRect(raw, img, 0.14);
+        const canvas = ocrCropToCanvas(img, expanded);
+        const refined = ocrRefineCanvasByContent(canvas, 14);
+        const aspectPenalty = refined.canvas.width / Math.max(1, refined.canvas.height) > 12 ? -1 : 0;
+        return { canvas: refined.canvas, score: refined.score + aspectPenalty };
+    }).filter(Boolean);
+
+    if (!candidates.length) return null;
+    candidates.sort((a, b) => b.score - a.score);
+    candidates.slice(1).forEach(c => { c.canvas.width = 0; });
+    return candidates[0].canvas;
+}
+
 // ── Process OCR via server ─────────────────────────────
 async function ocrProcessOCR() {
     if (!_ocrPreviewUrls.length || _ocrIsProcessing) return;
@@ -397,25 +513,19 @@ async function ocrProcessOCR() {
                 const data = await resp.json();
                 let text = data.text || '';
 
-                // Extract bounding box images
+                // Extract bounding box images with robust crop refinement
                 const bboxRegex = /\[IMG_BBOX:\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+)\]/g;
-                const img = new Image();
-                img.src = url;
-                await new Promise(r => { img.onload = r; });
+                const img = await ocrLoadImage(url);
 
                 let match, imgCount = 0;
                 while ((match = bboxRegex.exec(text)) !== null) {
-                    const [, ymin, xmin, ymax, xmax] = match.map(Number);
-                    const sX = (xmin / 1000) * img.width, sY = (ymin / 1000) * img.height;
-                    const sW = ((xmax - xmin) / 1000) * img.width, sH = ((ymax - ymin) / 1000) * img.height;
-                    if (sW > 10 && sH > 10) {
-                        const tc = document.createElement('canvas');
-                        tc.width = sW; tc.height = sH;
-                        tc.getContext('2d').drawImage(img, sX, sY, sW, sH, 0, 0, sW, sH);
+                    const values = [Number(match[1]), Number(match[2]), Number(match[3]), Number(match[4])];
+                    const canvas = ocrBuildBestCrop(img, values);
+                    if (canvas && canvas.width > 10 && canvas.height > 10) {
                         const imageId = `IMG_P${globalIdx}_${imgCount}`;
-                        _ocrExtractedImages[imageId] = tc.toDataURL('image/jpeg', 0.9);
+                        _ocrExtractedImages[imageId] = canvas.toDataURL('image/jpeg', 0.94);
                         text = text.replace(match[0], `\n[HÌNH ẢNH MINH HOẠ: ${imageId}]\n`);
-                        tc.width = 0;
+                        canvas.width = 0;
                         imgCount++;
                     }
                 }
@@ -578,7 +688,13 @@ function ocrDownloadWord() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `TaiLieu_OCR_${new Date().toISOString().slice(0, 10)}.doc`;
+
+    const rawName = document.getElementById('ocrWordFileName')?.value?.trim();
+    const safeName = rawName
+        ? rawName.replace(/[\\/:*?"<>|]/g, '').replace(/\s+/g, ' ').trim()
+        : `TaiLieu_OCR_${new Date().toISOString().slice(0, 10)}`;
+    a.download = `${safeName || 'TaiLieu_OCR'}.doc`;
+
     a.click();
     URL.revokeObjectURL(url);
     showToast('Đã tải xuống file Word!', 'success');

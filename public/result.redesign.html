@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kết Quả — EasyRevise</title>
+<meta name="description" content="Kết quả bài làm và xem lại đáp án chi tiết.">
+<meta name="theme-color" content="#0071e3">
+
+<!-- No-flicker theme apply -->
+<script>
+(function(){
+    try {
+        var v = localStorage.getItem('easyrevise_theme');
+        var t = (v === 'light' || v === 'dark')
+            ? v
+            : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+})();
+</script>
+
+<link rel="stylesheet" href="/css/main.css">
+
+<!-- KaTeX (deferred — only rendered if needed) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+</head>
+
+<body class="result-page">
+
+<a href="#main" class="skip-link">Bỏ qua nội dung</a>
+
+<!-- ── Top bar (sticky) ─────────────────────────────── -->
+<div class="result-topbar">
+    <div class="result-container result-topbar-inner">
+        <a href="/" class="btn btn-ghost btn-sm" aria-label="Về trang chủ">
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#arrow-left"/></svg>
+            <span>Trang chủ</span>
+        </a>
+        <div style="display:flex;align-items:center;gap:var(--space-2);">
+            <div id="themeToggleSlot"></div>
+            <a id="retakeBtn" href="#" class="btn btn-secondary btn-sm">
+                <svg class="icon icon-sm" aria-hidden="true"><use href="/assets/icons/sprite.svg#refresh-cw"/></svg>
+                <span>Làm lại</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<main id="main" class="result-container">
+
+    <!-- ── Hero (score + summary) ───────────────────── -->
+    <section class="result-hero">
+        <div class="result-hero-eyebrow">Hoàn tất bài làm</div>
+        <h1 class="result-hero-title" id="examTitle">Kết Quả</h1>
+        <p class="result-hero-subtitle" id="examDate">Hoàn thành vào: --:--</p>
+
+        <div class="score-circle" role="img" aria-label="Tổng điểm">
+            <span id="scoreValue" class="score-value">0.0</span>
+            <span id="scoreLabel" class="score-label">/ 10</span>
+        </div>
+
+        <div class="result-hero-summary" id="resultSummary"></div>
+    </section>
+
+    <!-- ── Breakdown (4 stat cards) ─────────────────── -->
+    <section class="result-breakdown" aria-labelledby="breakdownTitle">
+        <h2 id="breakdownTitle" class="sr-only">Phân tích kết quả</h2>
+        <div class="result-stats-grid">
+            <div class="result-stat-item">
+                <div class="result-stat-value result-stat-value--success" id="correctCount">0</div>
+                <div class="result-stat-label">Câu đúng</div>
+            </div>
+            <div class="result-stat-item">
+                <div class="result-stat-value result-stat-value--error" id="incorrectCount">0</div>
+                <div class="result-stat-label">Câu sai</div>
+            </div>
+            <div class="result-stat-item">
+                <div class="result-stat-value result-stat-value--warning" id="skipCount">0</div>
+                <div class="result-stat-label">Bỏ qua</div>
+            </div>
+            <div class="result-stat-item">
+                <div class="result-stat-value result-stat-value--primary" id="timeSpent">--</div>
+                <div class="result-stat-label">Thời gian</div>
+            </div>
+        </div>
+
+        <div class="result-actions">
+            <a href="/" class="btn btn-ghost">
+                <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#home"/></svg>
+                Về trang chủ
+            </a>
+        </div>
+    </section>
+
+    <!-- ── AI Grading Banner ────────────────────────── -->
+    <div id="aiGradingBanner" style="display:none;">
+        <div class="ai-grading-banner" role="status" aria-live="polite">
+            <div id="aiGradingSpinner" class="ai-grading-spinner"></div>
+            <div class="ai-grading-text">
+                <div class="ai-grading-title">
+                    <svg class="icon icon-sm" style="display:inline-block;vertical-align:-3px;margin-right:4px;color:var(--accent);" aria-hidden="true"><use href="/assets/icons/sprite.svg#sparkles"/></svg>
+                    AI đang chấm bài...
+                </div>
+                <div id="aiGradingSubtext" class="ai-grading-subtitle">
+                    Điểm tự luận sẽ tự cập nhật khi có kết quả — bạn không cần làm gì. <em>(Khoảng 30-60 giây)</em>
+                </div>
+            </div>
+            <div id="aiGradingTimer" class="ai-grading-timer"></div>
+        </div>
+    </div>
+
+    <!-- ── Review section ───────────────────────────── -->
+    <section id="reviewSection" aria-labelledby="reviewTitle">
+        <h2 class="review-section-title" id="reviewTitle">
+            <svg class="icon" style="color:var(--accent);" aria-hidden="true"><use href="/assets/icons/sprite.svg#book-open"/></svg>
+            Xem lại đáp án &amp; giải thích
+        </h2>
+        <div id="reviewContainer"></div>
+    </section>
+
+</main>
+
+<footer class="result-footer">
+    <div class="result-container">
+        <strong>EasyRevise</strong> · Luyện đề thông minh
+    </div>
+</footer>
+
+
+<!-- ── New ESM modules (theme + icons) ──────────────── -->
+<script type="module">
+import { mountThemeToggle } from '/js/components/theme-toggle.js';
+import { preloadSprite } from '/js/core/icons.js';
+
+await preloadSprite();
+mountThemeToggle('#themeToggleSlot', { size: 'md' });
+</script>
+
+<!-- ── Score color enhancer + title injector ────────── -->
+<script>
+// Hook into result.js render via MutationObserver — runs once when score is set
+(function () {
+    // Pre-fill title from sessionStorage immediately
+    try {
+        const raw = sessionStorage.getItem('easyrevise_final_result');
+        if (raw) {
+            const data = JSON.parse(raw);
+            const titleEl = document.getElementById('examTitle');
+            if (titleEl && data.examTitle) titleEl.textContent = data.examTitle;
+            // Inline summary (correct / total)
+            const sumEl = document.getElementById('resultSummary');
+            if (sumEl) {
+                const correct = Number(data.correct) || 0;
+                const total = Number(data.total) || (Number(data.correct) + Number(data.incorrect) + Number(data.skipped)) || 0;
+                const skipped = Number(data.skipped) || 0;
+                const parts = [];
+                if (total) parts.push(`<span>Đúng <strong>${correct}/${total}</strong></span>`);
+                if (skipped) parts.push(`<span>Bỏ qua <strong>${skipped}</strong></span>`);
+                sumEl.innerHTML = parts.join(' · ');
+            }
+        }
+    } catch {}
+
+    function animateScore(sv, target) {
+        const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduced) {
+            sv.textContent = (Number.isInteger(target) ? target.toString() : target.toFixed(1));
+            return;
+        }
+        const start = performance.now();
+        const duration = 800;
+        sv.textContent = '0.0';
+        function tick(now) {
+            const t = Math.min(1, (now - start) / duration);
+            const eased = 1 - Math.pow(1 - t, 3);
+            const cur = (target * eased).toFixed(1);
+            sv.textContent = cur;
+            if (t < 1) requestAnimationFrame(tick);
+            else sv.textContent = (Number.isInteger(target) ? target.toString() : target.toFixed(1));
+        }
+        requestAnimationFrame(tick);
+    }
+
+    function applyScoreColor(sv, score) {
+        sv.classList.remove('score-high', 'score-mid', 'score-low');
+        if (score >= 8) sv.classList.add('score-high');
+        else if (score >= 5) sv.classList.add('score-mid');
+        else sv.classList.add('score-low');
+    }
+
+    function watchScoreElement() {
+        const sv = document.getElementById('scoreValue');
+        if (!sv) return;
+        let triggered = false;
+        const trigger = (val) => {
+            if (triggered) return;
+            const score = parseFloat(val);
+            if (isNaN(score) || score === 0) return;
+            triggered = true;
+            applyScoreColor(sv, score);
+            animateScore(sv, score);
+        };
+        // Check current value
+        trigger(sv.textContent);
+        if (triggered) return;
+        // Otherwise observe for change
+        const obs = new MutationObserver(() => {
+            // Strip inline color set by legacy result.js (we use class-based color)
+            if (sv.style.color) sv.style.color = '';
+            trigger(sv.textContent);
+            if (triggered) obs.disconnect();
+        });
+        obs.observe(sv, { childList: true, characterData: true, subtree: true });
+    }
+
+    function watchRetakeBtn() {
+        const retake = document.getElementById('retakeBtn');
+        if (!retake) return;
+        const obs = new MutationObserver(() => {
+            // result.js sets textContent = '🔑 Nhập mã để làm lại' (no SVG)
+            if (retake.textContent.trim() && !retake.querySelector('svg')) {
+                const raw = retake.textContent.trim();
+                const cleaned = raw.replace(/^🔑\s*/, '');
+                const iconId = raw.includes('🔑') || cleaned.toLowerCase().includes('mã') ? 'key' : 'refresh-cw';
+                retake.innerHTML = `<svg class="icon icon-sm" aria-hidden="true"><use href="/assets/icons/sprite.svg#${iconId}"/></svg><span>${cleaned}</span>`;
+            }
+        });
+        obs.observe(retake, { childList: true, characterData: true, subtree: true });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            watchScoreElement();
+            watchRetakeBtn();
+        });
+    } else {
+        watchScoreElement();
+        watchRetakeBtn();
+    }
+})();
+</script>
+
+<!-- ── Legacy result engine ──────────────────────────── -->
+<script src="/js/result.js"></script>
+
+</body>
+</html>

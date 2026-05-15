@@ -1,0 +1,42 @@
+/* ===========================================================
+   Base — Focus rings (accessibility)
+   Use :focus-visible to only show ring for keyboard users
+   =========================================================== */
+
+*:focus { outline: none; }
+
+*:focus-visible {
+    outline: var(--ring-width) solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-xs);
+}
+
+/* Components opt-in to soft ring + their own border */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 var(--ring-width) var(--ring-color);
+}
+
+/* Skip-to-main link (a11y) */
+.skip-link {
+    position: absolute;
+    top: -100px;
+    left: var(--space-4);
+    padding: var(--space-2) var(--space-4);
+    background: var(--accent);
+    color: white;
+    border-radius: var(--radius-sm);
+    z-index: var(--z-toast);
+    font-weight: var(--weight-medium);
+    transition: top var(--dur-fast) var(--ease-apple);
+}
+.skip-link:focus,
+.skip-link:focus-visible {
+    top: var(--space-2);
+}

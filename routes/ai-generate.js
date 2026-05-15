@@ -11,6 +11,7 @@ const mammoth = require('mammoth');
 const { readSettings, readQuestionBank, writeQuestionBank, uuidv4 } = require('../lib/data');
 const { adminOnly } = require('../lib/auth');
 const { chatCompletion, getConfig, getAvailableModels, imageContent } = require('../lib/ai-client');
+const { normalizeExam } = require('../lib/exam-normalizer');
 
 // Multer for AI files (PDF, images, DOCX)
 const aiUpload = multer({
@@ -40,7 +41,7 @@ const SUBJECT_PROMPTS = {
 // POST /api/admin/ai-generate
 router.post('/ai-generate', adminOnly, aiUpload.array('files', 10), async (req, res) => {
     try {
-        const { title, subject, year, subjectType, sdkType: reqSdkType, model: reqModel } = req.body;
+        const { title, subject, year, subjectType, sdkType: reqSdkType, model: reqModel, clientOcrText } = req.body;
         const files = req.files;
 
         if (!files || files.length === 0) {
@@ -112,6 +113,11 @@ router.post('/ai-generate', adminOnly, aiUpload.array('files', 10), async (req, 
             }
         }
 
+        if (clientOcrText && String(clientOcrText).trim()) {
+            contentParts.unshift(`[OCR_FRONTEND]\n${String(clientOcrText).trim()}`);
+            console.log(`[AI] Client OCR text received: ${String(clientOcrText).length} chars`);
+        }
+
         const extractedText = contentParts.join('\n\n---\n\n');
 
         if (!extractedText.trim() && imageParts.length === 0) {
@@ -131,10 +137,10 @@ QUY TẮC BẮT BUỘC:
 1. Phát hiện tự động loại section từ các loại sau:
    - "multiple-choice": câu trắc nghiệm 4 lựa chọn A/B/C/D
    - "reading": đọc hiểu, có đoạn văn (passage) kèm câu hỏi trắc nghiệm
-   - "writing-choice": viết có lựa chọn đáp án
    - "writing-essay": viết luận, tự do
    - "fill-in-blank": điền vào chỗ trống ___, dùng khi đề có dạng: điền từ, điền số, hoàn thành câu
    - "free-form": câu tự luận có nhiều phần a, b, c (yêu cầu lời giải)
+   - KHÔNG dùng "writing-choice"; nếu gặp dạng viết có lựa chọn, dùng "multiple-choice"
 2. Nếu đề CÓ đáp án → sử dụng đáp án đó
 3. Nếu đề KHÔNG CÓ đáp án → tự giải và cung cấp correctAnswer chính xác
 4. correctAnswer: 0=A, 1=B, 2=C, 3=D
@@ -182,7 +188,7 @@ SCHEMA:
       {
         "title": "Tên phần",
         "instruction": "Hướng dẫn",
-        "type": "multiple-choice|reading|writing-choice|writing-essay|fill-in-blank|free-form",
+        "type": "multiple-choice|reading|writing-essay|fill-in-blank|free-form",
         "passage": "(nếu reading)",
         "questions": [
           {
@@ -327,6 +333,8 @@ SCHEMA:
                                 const filename = `q${q.id}_${Date.now()}.jpg`;
                                 fs.writeFileSync(path.join(uploadsDir, filename), cropped);
                                 q.imageUrl = `/uploads/ai-images/${filename}`;
+                                if (!Array.isArray(q.images)) q.images = [];
+                                if (!q.images.includes(q.imageUrl)) q.images.push(q.imageUrl);
                                 console.log(`Cropped image for Q${q.id}: ${filename} (${(cropped.length / 1024).toFixed(0)}KB)`);
                             }
                         } catch (cropErr) {
@@ -336,6 +344,8 @@ SCHEMA:
                 }
             }
         }
+
+        parsed.exam = normalizeExam(parsed.exam);
 
         // Cache before sending
         const AI_CACHE_FILE = path.join(__dirname, '..', 'data', 'ai-gen-cache.json');

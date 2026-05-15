@@ -14,8 +14,10 @@ let questionImages = [];
 let optionImages = [null, null, null, null];
 let explanationImages = [];
 let fillBlanks = [];
+let freeformSubParts = [];
 let _allExams = [];
 let _dragSectionIdx = null;
+let _dragExamId = null;
 let _editingUserId = null;
 let aiSelectedFiles = [];
 let aiGeneratedData = null;
@@ -47,11 +49,18 @@ function renderMarkdown(text) {
 
 // API Helper
 async function api(url, method = 'GET', body = null) {
-    const opts = { method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` } };
+    adminToken = localStorage.getItem('easyrevise_token');
+    const opts = { method, headers: { 'Content-Type': 'application/json' } };
+    if (adminToken) opts.headers.Authorization = `Bearer ${adminToken}`;
     if (body) opts.body = JSON.stringify(body);
     const res = await fetch(url, opts);
-    const data = await res.json();
+    let data = {};
+    try { data = await res.json(); } catch { data = {}; }
     if (!res.ok && !data.error) data.error = `HTTP ${res.status}`;
+    if ((res.status === 401 || res.status === 403) && /token|unauthorized|forbidden|xác thực|đăng nhập|hợp lệ/i.test(data.error || '')) {
+        data.error = data.error || 'Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.';
+        showToast?.(data.error, 'error');
+    }
     return data;
 }
 

@@ -10,11 +10,10 @@ let currentUser = null;
  * @returns {object|null}
  */
 function getUser() {
-    if (currentUser) return currentUser;
     try {
         const saved = localStorage.getItem('easyrevise_user');
-        if (saved) currentUser = JSON.parse(saved);
-    } catch (e) { /* invalid JSON */ }
+        currentUser = saved ? JSON.parse(saved) : null;
+    } catch (e) { currentUser = null; }
     return currentUser;
 }
 
@@ -141,25 +140,34 @@ function logout() {
 function updateAuthUI() {
     const area = document.getElementById('authArea');
     if (!area) return;
-    if (currentUser) {
-        const initial = (currentUser.displayName || currentUser.username).charAt(0).toUpperCase();
-        const avatarName = encodeURIComponent(currentUser.username || currentUser.displayName || 'anonymous');
-        const isAdmin = currentUser.role === 'admin';
+    const user = getUser();
+    if (user) {
+        const initial = (user.displayName || user.username || '?').charAt(0).toUpperCase();
+        const avatarName = encodeURIComponent(user.username || user.displayName || 'anonymous');
+        const isAdmin = user.role === 'admin';
         const adminBtn = isAdmin
             ? `<a href="javascript:void(0)" onclick="goAdmin()" class="btn btn-sm" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-radius:10px;">⚙️ Admin</a>`
             : '';
         area.innerHTML = `
             <div class="flex items-center gap-3">
                 ${adminBtn}
-                <a href="/dashboard.html" class="user-avatar" title="Dashboard"><img src="/api/avatar?name=${avatarName}&size=40" style="width:100%;height:100%;border-radius:inherit;" alt="${initial}"></a>
+                <a href="javascript:void(0)" onclick="goDashboard()" class="user-avatar" title="Dashboard"><img src="/api/avatar?name=${avatarName}&size=40" style="width:100%;height:100%;border-radius:inherit;" alt="${initial}"></a>
                 <div>
-                    <a href="/dashboard.html" class="font-semibold text-sm" style="color:inherit;text-decoration:none;">${escapeHtml(currentUser.displayName)}</a>
+                    <a href="javascript:void(0)" onclick="goDashboard()" class="font-semibold text-sm" style="color:inherit;text-decoration:none;">${escapeHtml(user.displayName || user.username)}</a>
                     <button class="text-muted text-xs" style="background:none;border:none;cursor:pointer;padding:0;" onclick="logout()">Đăng xuất</button>
                 </div>
             </div>`;
     } else {
         area.innerHTML = `<button class="btn btn-ghost" onclick="openAuthModal()">Đăng nhập</button>`;
     }
+}
+
+function goDashboard() {
+    if (!getToken() || !getUser()) {
+        openAuthModal();
+        return;
+    }
+    window.location.href = '/dashboard.html';
 }
 
 /**

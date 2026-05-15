@@ -2,19 +2,28 @@
 const express = require('express');
 const router = express.Router();
 const { readData, writeData, readUsers, countQuestions, uuidv4 } = require('../lib/data');
-const { adminOnly } = require('../lib/auth');
+const { adminOnly, findUserByToken } = require('../lib/auth');
 const { validateExam } = require('../lib/validate');
+const { normalizeExam } = require('../lib/exam-normalizer');
 
 // GET /api/exams
 router.get('/', (req, res) => {
     const data = readData();
-    res.json(data.exams.map(exam => ({
+    const authHeader = req.headers.authorization;
+    let isAdmin = false;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        const user = findUserByToken(authHeader.split(' ')[1]);
+        if (user && user.role === 'admin') isAdmin = true;
+    }
+    const exams = isAdmin ? data.exams : data.exams.filter(exam => exam.visible !== false);
+    res.json(exams.map(exam => ({
         id: exam.id, title: exam.title, subject: exam.subject, year: exam.year,
         createdAt: exam.createdAt, updatedAt: exam.updatedAt,
         totalQuestions: countQuestions(exam),
         totalEssays: exam.sections.filter(s => s.type === 'writing-essay').length,
         sectionCount: exam.sections.length,
-        requireCode: exam.requireCode || false
+        requireCode: exam.requireCode || false,
+        visible: exam.visible !== false
     })));
 });
 
@@ -53,12 +62,14 @@ router.post('/batch-import', adminOnly, (req, res) => {
     const imported = [];
     for (const ex of importData.exams) {
         if (!ex.title && !ex.sections) continue;
+        const normalizedImport = normalizeExam(ex);
         const newExam = {
             id: uuidv4(), title: ex.title || 'Đề nhập',
             subject: ex.subject || 'Tiếng Anh', year: ex.year || new Date().getFullYear().toString(),
-            sections: ex.sections || [], requireCode: false, accessCodes: [],
+            sections: normalizedImport.sections || [], requireCode: false, accessCodes: [],
             timeLimit: ex.timeLimit || 0, autoGrade: ex.autoGrade !== false,
             aiExplainLimit: ex.aiExplainLimit ?? -1,
+            visible: ex.visible !== false,
             createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
         };
         data.exams.push(newExam);
@@ -75,15 +86,39 @@ router.post('/import', adminOnly, (req, res) => {
     if (!importData || (!importData.sections && !importData.title)) {
         return res.status(400).json({ error: 'Invalid format' });
     }
+    const normalizedImport = normalizeExam(importData);
     const newExam = {
         id: uuidv4(), title: importData.title || 'Đề nhập',
         subject: importData.subject || 'Tiếng Anh', year: importData.year || new Date().getFullYear().toString(),
-        sections: importData.sections || [], requireCode: false, accessCodes: [],
+        sections: normalizedImport.sections || [], requireCode: false, accessCodes: [],
+        timeLimit: importData.timeLimit || 0,
+        autoGrade: importData.autoGrade !== false,
+        aiExplainLimit: importData.aiExplainLimit ?? -1,
+        visible: importData.visible !== false,
         createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
     };
     data.exams.push(newExam);
     writeData(data);
     res.status(201).json(newExam);
+});
+
+// PATCH /api/exams/reorder
+router.patch('/reorder', adminOnly, (req, res) => {
+    const order = Array.isArray(req.body.order) ? req.body.order.map(String) : [];
+    if (!order.length) return res.status(400).json({ error: 'Missing order array' });
+    const data = readData();
+    const byId = new Map(data.exams.map(exam => [String(exam.id), exam]));
+    const reordered = [];
+    order.forEach(id => {
+        const exam = byId.get(id);
+        if (exam) {
+            reordered.push(exam);
+            byId.delete(id);
+        }
+    });
+    data.exams = [...reordered, ...data.exams.filter(exam => byId.has(String(exam.id)))];
+    writeData(data);
+    res.json({ success: true, order: data.exams.map(exam => exam.id) });
 });
 
 // GET /api/exams/:id
@@ -98,7 +133,7 @@ router.get('/:id', (req, res) => {
         const authHeader = req.headers.authorization;
         let isAdmin = false;
         if (authHeader && authHeader.startsWith('Bearer ')) {
-            const user = readUsers().users.find(u => u.token === authHeader.split(' ')[1]);
+            const user = findUserByToken(authHeader.split(' ')[1]);
             if (user && user.role === 'admin') isAdmin = true;
         }
         if (!isAdmin && codeHeader) {
@@ -120,16 +155,31 @@ router.post('/', adminOnly, (req, res) => {
     const vErr = validateExam(req.body);
     if (vErr) return res.status(400).json({ error: vErr });
     const data = readData();
+    const normalizedBody = normalizeExam(req.body);
     const newExam = {
         id: uuidv4(), title: req.body.title || 'Đề mới',
         subject: req.body.subject || 'Tiếng Anh', year: req.body.year || new Date().getFullYear().toString(),
-        sections: req.body.sections || [], requireCode: false, accessCodes: [],
+        sections: normalizedBody.sections || [], requireCode: false, accessCodes: [],
         timeLimit: req.body.timeLimit || 0,
+        autoGrade: req.body.autoGrade !== false,
+        aiExplainLimit: req.body.aiExplainLimit ?? -1,
+        visible: req.body.visible !== false,
         createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
     };
     data.exams.push(newExam);
     writeData(data);
     res.status(201).json(newExam);
+});
+
+// PATCH /api/exams/:id/visibility
+router.patch('/:id/visibility', adminOnly, (req, res) => {
+    const data = readData();
+    const exam = data.exams.find(e => e.id === req.params.id);
+    if (!exam) return res.status(404).json({ error: 'Exam not found' });
+    exam.visible = req.body.visible !== false;
+    exam.updatedAt = new Date().toISOString();
+    writeData(data);
+    res.json({ success: true, id: exam.id, visible: exam.visible, updatedAt: exam.updatedAt });
 });
 
 // PUT /api/exams/:id
@@ -141,17 +191,19 @@ router.put('/:id', adminOnly, (req, res) => {
     const data = readData();
     const index = data.exams.findIndex(e => e.id === req.params.id);
     if (index === -1) return res.status(404).json({ error: 'Exam not found' });
+    const normalizedSections = req.body.sections !== undefined ? normalizeExam({ sections: req.body.sections }).sections : undefined;
     data.exams[index] = {
         ...data.exams[index],
         title: req.body.title ?? data.exams[index].title,
         subject: req.body.subject ?? data.exams[index].subject,
         year: req.body.year ?? data.exams[index].year,
-        sections: req.body.sections ?? data.exams[index].sections,
+        sections: normalizedSections ?? data.exams[index].sections,
         requireCode: req.body.requireCode ?? data.exams[index].requireCode,
         accessCodes: req.body.accessCodes ?? data.exams[index].accessCodes,
         timeLimit: req.body.timeLimit ?? data.exams[index].timeLimit ?? 0,
         autoGrade: req.body.autoGrade ?? data.exams[index].autoGrade ?? true,
         aiExplainLimit: req.body.aiExplainLimit !== undefined ? req.body.aiExplainLimit : (data.exams[index].aiExplainLimit ?? -1),
+        visible: req.body.visible !== undefined ? req.body.visible !== false : (data.exams[index].visible !== false),
         updatedAt: new Date().toISOString()
     };
     writeData(data);

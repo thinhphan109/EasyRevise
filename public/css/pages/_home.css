@@ -1,0 +1,414 @@
+/* ===========================================================
+   Page — Home (Task 24)
+   Apple HIG layout for student homepage
+   Mobile-first, scales to desktop
+   =========================================================== */
+
+/* ── Container & layout ─────────────────────────────── */
+.home-page {
+    min-height: 100vh;
+    padding-bottom: var(--space-12);
+}
+
+.home-container {
+    max-width: var(--container-lg);
+    margin: 0 auto;
+    padding: 0 var(--space-4);
+}
+
+@media (min-width: 768px) {
+    .home-container { padding: 0 var(--space-6); }
+}
+
+/* ── Glass header (sticky) ─────────────────────────── */
+.home-header {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+    background: var(--surface-glass);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--border);
+}
+.home-header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    gap: var(--space-3);
+}
+
+.home-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: var(--weight-bold);
+    font-size: var(--text-lg);
+    letter-spacing: var(--tracking-snug);
+    color: var(--text);
+    text-decoration: none;
+    flex-shrink: 0;
+}
+.home-brand-mark {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    background: linear-gradient(135deg, var(--text), var(--text-2));
+    color: var(--bg);
+    display: grid;
+    place-items: center;
+    font-weight: var(--weight-bold);
+    font-size: var(--text-sm);
+    box-shadow: var(--shadow-xs);
+}
+
+.home-nav {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+    margin-left: var(--space-4);
+}
+.home-nav-link {
+    padding: 6px var(--space-3);
+    font-size: var(--text-sm);
+    color: var(--text-2);
+    border-radius: var(--radius-sm);
+    font-weight: var(--weight-medium);
+    transition: all var(--dur-fast) var(--ease-apple);
+    text-decoration: none;
+}
+.home-nav-link:hover { color: var(--text); background: var(--surface-2); }
+.home-nav-link.active { color: var(--text); font-weight: var(--weight-semi); }
+
+@media (max-width: 767px) {
+    .home-nav { display: none; }
+}
+
+.home-header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+/* ── Hero section (code entry) ─────────────────────── */
+.home-hero {
+    padding: var(--space-10) 0 var(--space-6);
+}
+
+@media (min-width: 768px) {
+    .home-hero { padding: var(--space-12) 0 var(--space-8); }
+}
+
+.home-hero-eyebrow {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    color: var(--accent);
+    margin-bottom: var(--space-2);
+}
+
+.home-hero-title {
+    font-size: clamp(var(--text-3xl), 5vw, var(--text-5xl));
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--tracking-tight);
+    color: var(--text);
+    margin: 0 0 var(--space-3);
+    line-height: var(--leading-tight);
+}
+
+.home-hero-desc {
+    font-size: var(--text-md);
+    color: var(--text-2);
+    margin: 0 0 var(--space-6);
+    max-width: 480px;
+    line-height: var(--leading-relaxed);
+}
+
+@media (min-width: 768px) {
+    .home-hero-desc { font-size: var(--text-lg); }
+}
+
+.home-code-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    max-width: 480px;
+}
+@media (min-width: 480px) {
+    .home-code-row {
+        flex-direction: row;
+        align-items: center;
+    }
+    .home-code-row .form-input { flex: 1; }
+    .home-code-row .btn { flex-shrink: 0; }
+}
+
+.home-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+}
+
+/* ── Sections ──────────────────────────────────────── */
+.home-section {
+    padding: var(--space-6) 0;
+}
+
+.home-section-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: var(--space-4);
+}
+
+.home-section-title {
+    font-size: var(--text-2xl);
+    font-weight: var(--weight-bold);
+    color: var(--text);
+    letter-spacing: var(--tracking-snug);
+    margin: 0;
+}
+
+.home-section-link {
+    font-size: var(--text-sm);
+    color: var(--accent);
+    font-weight: var(--weight-medium);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+.home-section-link:hover { text-decoration: underline; }
+
+/* ── Exam grid ─────────────────────────────────────── */
+.home-exam-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+}
+
+@media (min-width: 640px) {
+    .home-exam-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1024px) {
+    .home-exam-grid { grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
+}
+
+.home-exam-card {
+    /* extends .card .card-raised .card-interactive */
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-5);
+}
+
+.home-exam-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-2);
+}
+
+.home-exam-card-title {
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semi);
+    color: var(--text);
+    letter-spacing: var(--tracking-snug);
+    margin: 0;
+    line-height: var(--leading-snug);
+}
+
+.home-exam-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    font-size: var(--text-sm);
+    color: var(--text-3);
+}
+.home-exam-card-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.home-exam-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border);
+}
+
+/* ── History list ──────────────────────────────────── */
+.home-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.home-history-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--space-3) var(--space-4);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    box-shadow: var(--shadow-xs);
+    transition: all var(--dur-fast) var(--ease-apple);
+    text-decoration: none;
+    color: inherit;
+}
+.home-history-item:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+    border-color: var(--border-strong);
+}
+
+.home-history-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.home-history-title {
+    font-size: var(--text-base);
+    font-weight: var(--weight-semi);
+    color: var(--text);
+    margin: 0 0 var(--space-1);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: var(--tracking-normal);
+}
+
+.home-history-meta {
+    font-size: var(--text-xs);
+    color: var(--text-3);
+}
+
+/* ── In-progress section ───────────────────────────── */
+.home-inprogress-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.home-inprogress-item {
+    background: var(--warning-soft);
+    border: 1px solid color-mix(in srgb, var(--warning) 25%, transparent);
+    border-radius: var(--radius);
+    padding: var(--space-3) var(--space-4);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+/* ── Footer ────────────────────────────────────────── */
+.home-footer {
+    padding: var(--space-8) 0 var(--space-4);
+    margin-top: var(--space-12);
+    border-top: 1px solid var(--border);
+    text-align: center;
+    color: var(--text-3);
+    font-size: var(--text-sm);
+}
+
+/* ── QR scanner modal (specific to home) ──────────── */
+.qr-scanner-viewport {
+    position: relative;
+    aspect-ratio: 1;
+    background: #000;
+    overflow: hidden;
+}
+
+.qr-scanner-overlay {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+}
+
+.qr-scanner-frame {
+    width: 70%;
+    aspect-ratio: 1;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: var(--radius-lg);
+    position: relative;
+    overflow: hidden;
+}
+
+.qr-scanner-corner {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    border: 3px solid var(--accent);
+}
+.qr-corner-tl { top: -2px; left: -2px; border-right: none; border-bottom: none; border-radius: var(--radius-lg) 0 0 0; }
+.qr-corner-tr { top: -2px; right: -2px; border-left: none; border-bottom: none; border-radius: 0 var(--radius-lg) 0 0; }
+.qr-corner-bl { bottom: -2px; left: -2px; border-right: none; border-top: none; border-radius: 0 0 0 var(--radius-lg); }
+.qr-corner-br { bottom: -2px; right: -2px; border-left: none; border-top: none; border-radius: 0 0 var(--radius-lg) 0; }
+
+.qr-scan-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: qr-scan 2.4s var(--ease-in-out) infinite;
+}
+@keyframes qr-scan {
+    0% { top: 0; }
+    50% { top: calc(100% - 2px); }
+    100% { top: 0; }
+}
+
+.qr-scanner-header {
+    padding: var(--space-4);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.qr-scanner-header-label {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-loose);
+    color: var(--accent);
+    font-weight: var(--weight-semi);
+}
+.qr-scanner-header-title {
+    font-size: var(--text-base);
+    font-weight: var(--weight-semi);
+    color: var(--text);
+    margin-top: 2px;
+}
+
+.qr-scanner-status {
+    font-size: var(--text-sm);
+    color: var(--text-2);
+    padding: var(--space-3);
+    background: var(--surface-2);
+}
+
+
+/* ── Stagger reveal animation (used by exam cards inline) ── */
+@keyframes stagger-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home-exam-card {
+        animation: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}

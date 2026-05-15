@@ -68,5 +68,12 @@ async function saveUser() {
 }
 
 async function toggleRole(id, current) { await api(`/api/users/${id}`, 'PUT', { role: current === 'admin' ? 'student' : 'admin' }); loadUsers(); }
-async function resetPw(id, name) { const pw = await customPrompt('Reset mật khẩu', `Mật khẩu mới cho ${name}:`, '1234'); if (!pw) return; const r = await api(`/api/users/${id}/reset-password`, 'PUT', { password: pw }); showToast(`Đã reset mật khẩu: ${r.newPassword}`, 'success'); }
+async function resetPw(id, name) {
+    const pw = await customPrompt('Reset mật khẩu', `Mật khẩu mới cho ${name} (tối thiểu 6 ký tự):`, '');
+    if (!pw) return;
+    if (pw.length < 6) { showToast('Mật khẩu phải từ 6 ký tự', 'error'); return; }
+    const r = await api(`/api/users/${id}/reset-password`, 'PUT', { password: pw });
+    if (r.error) { showToast('Lỗi: ' + r.error, 'error'); return; }
+    showToast(`Đã đặt lại mật khẩu cho ${name}. Người dùng cần đăng nhập lại.`, 'success');
+}
 async function deleteUser(id, name) { if (!(await customConfirm('Xóa người dùng', `Xóa "${name}"? Thao tác này không thể hoàn tác.`, 'Xóa', true))) return; await api(`/api/users/${id}`, 'DELETE'); loadUsers(); }

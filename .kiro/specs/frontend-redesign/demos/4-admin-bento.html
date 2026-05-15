@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demo 4 — Admin Bento Dashboard — Drill</title>
+<script>
+(function(){const t=localStorage.getItem('demo-theme')||'light';document.documentElement.dataset.theme=t;})();
+</script>
+<style>
+/* ===========================================
+   STYLE 4: ADMIN BENTO DASHBOARD
+   - Linear/Notion clean visual + Bento grid layout
+   - Sidebar navigation (collapsible)
+   - Card grid with varied sizes (info-dense)
+   - Designed for desktop ≥ 1024px
+   =========================================== */
+@import url('https://rsms.me/inter/inter.css');
+
+:root {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --surface-2: #f4f4f5;
+  --border: #e8e8ea;
+  --border-strong: #d4d4d6;
+  --text: #18181b;
+  --text-2: #52525b;
+  --text-3: #8b8b93;
+  --accent: #5e5af6;
+  --accent-soft: #efeefe;
+  --success: #16a34a;
+  --error: #dc2626;
+  --warning: #f59e0b;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.06);
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+
+[data-theme="dark"] {
+  --bg: #09090b;
+  --surface: #131316;
+  --surface-2: #1c1c20;
+  --border: #2a2a2f;
+  --border-strong: #3a3a40;
+  --text: #f4f4f5;
+  --text-2: #a1a1aa;
+  --text-3: #71717a;
+  --accent: #818cf8;
+  --accent-soft: #1e1d3d;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+a { color: inherit; text-decoration: none; }
+
+/* === Layout === */
+.app {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+}
+
+/* === Sidebar === */
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px 16px;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+}
+.logo-mark {
+  width: 24px; height: 24px;
+  background: var(--text);
+  border-radius: 6px;
+  display: grid; place-items: center;
+  color: var(--bg);
+  font-weight: 800;
+  font-size: 13px;
+}
+.sidebar-section {
+  padding: 12px 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding-left: 8px;
+}
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  color: var(--text-2);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.nav-item:hover { background: var(--surface-2); color: var(--text); }
+.nav-item.active { background: var(--accent-soft); color: var(--accent); }
+[data-theme="dark"] .nav-item.active { background: var(--accent-soft); color: #b4adff; }
+.nav-icon { width: 16px; height: 16px; flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto;
+  font-size: 11px;
+  background: var(--surface-2);
+  padding: 1px 7px;
+  border-radius: 999px;
+  color: var(--text-2);
+  font-weight: 600;
+}
+.nav-item.active .nav-badge { background: rgba(94,90,246,0.2); color: var(--accent); }
+
+.sidebar-bottom {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.user-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.user-card:hover { background: var(--surface-2); }
+.user-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  display: grid; place-items: center;
+  color: white;
+  font-weight: 700;
+  font-size: 12px;
+}
+.user-info { flex: 1; min-width: 0; }
+.user-name { font-size: 13px; font-weight: 600; }
+.user-role { font-size: 11.5px; color: var(--text-3); }
+
+/* === Main === */
+.main {
+  padding: 24px 32px;
+  overflow-y: auto;
+}
+
+/* === Topbar === */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.page-title-group h1 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 2px;
+}
+.breadcrumb {
+  font-size: 12.5px;
+  color: var(--text-3);
+}
+.topbar-actions { display: flex; gap: 8px; align-items: center; }
+
+/* === Buttons === */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  font-size: 13.5px;
+  font-weight: 500;
+  border-radius: 6px;
+  height: 32px;
+  transition: all 0.12s;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+.btn-primary { background: var(--text); color: var(--bg); }
+.btn-primary:hover { opacity: 0.88; }
+.btn-secondary {
+  background: var(--surface);
+  border-color: var(--border);
+}
+.btn-secondary:hover { border-color: var(--border-strong); }
+.btn-icon {
+  width: 32px; height: 32px;
+  padding: 0;
+  display: grid; place-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.btn-icon:hover { border-color: var(--border-strong); }
+.btn-accent { background: var(--accent); color: white; }
+.btn-accent:hover { opacity: 0.9; }
+
+/* === Bento Grid === */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 14px;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.card-action { font-size: 12px; color: var(--text-3); }
+.card-action:hover { color: var(--text); }
+
+/* Stats cards */
+.stat { grid-column: span 3; }
+@media (max-width: 1100px) { .stat { grid-column: span 6; } }
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  line-height: 1;
+}
+.stat-delta {
+  font-size: 12px;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.stat-delta.up { color: var(--success); }
+.stat-delta.down { color: var(--error); }
+
+/* Larger cards */
+.card-chart { grid-column: span 8; min-height: 220px; }
+.card-side { grid-column: span 4; min-height: 220px; }
+.card-table { grid-column: span 12; }
+.card-half { grid-column: span 6; }
+
+@media (max-width: 1100px) {
+  .card-chart, .card-side { grid-column: span 12; }
+  .card-half { grid-column: span 12; }
+}
+
+/* Chart placeholder (CSS-only bars) */
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 140px;
+  padding-top: 16px;
+}
+.bar {
+  flex: 1;
+  background: var(--surface-2);
+  border-radius: 4px 4px 0 0;
+  position: relative;
+  overflow: hidden;
+}
+.bar::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: var(--accent);
+  height: var(--h, 50%);
+  border-radius: 4px 4px 0 0;
+  transition: height 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.bar-labels {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-3);
+}
+.bar-labels span { flex: 1; text-align: center; }
+
+/* Activity list */
+.activity {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  overflow-y: auto;
+}
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+}
+.activity-dot {
+  width: 6px; height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+.activity-text { flex: 1; color: var(--text); }
+.activity-text strong { font-weight: 600; }
+.activity-time { font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
+
+/* Table */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.table th, .table td {
+  padding: 9px 12px;
+  text-align: left;
+  font-size: 13px;
+  border-bottom: 1px solid var(--border);
+}
+.table th {
+  background: var(--surface-2);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.table tr:last-child td { border-bottom: 0; }
+.table tr:hover td { background: var(--surface-2); }
+
+.tag {
+  display: inline-block;
+  font-size: 11px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-weight: 500;
+}
+.tag.success { background: rgba(22,163,74,0.1); color: var(--success); }
+.tag.warning { background: rgba(245,158,11,0.1); color: var(--warning); }
+.tag.error { background: rgba(220,38,38,0.1); color: var(--error); }
+
+/* Mobile fallback */
+@media (max-width: 768px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .main { padding: 16px; }
+  .bento { grid-template-columns: 1fr; }
+  .stat, .card-chart, .card-side, .card-table, .card-half { grid-column: span 1; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-mark">D</span>
+      <span>Drill <span style="font-weight:400;color:var(--text-3);font-size:12px;">/ admin</span></span>
+    </div>
+
+    <div class="sidebar-section">Tổng quan</div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Bảng điều khiển
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Đề thi
+        <span class="nav-badge">42</span>
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11H7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-2"/><circle cx="12" cy="7" r="4"/></svg>
+        Câu hỏi
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24"/></svg>
+        Bài nộp
+        <span class="nav-badge">7</span>
+      </div>
+    </nav>
+
+    <div class="sidebar-section">Quản lý</div>
+    <nav class="sidebar-nav">
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        Người dùng
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        Môn học
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3"/></svg>
+        Mã kích hoạt
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Thống kê
+      </div>
+    </nav>
+
+    <div class="sidebar-section">Hệ thống</div>
+    <nav class="sidebar-nav">
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Cài đặt
+      </div>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="user-card">
+        <div class="user-avatar">A</div>
+        <div class="user-info">
+          <div class="user-name">Admin</div>
+          <div class="user-role">Quản trị viên</div>
+        </div>
+        <button class="icon-btn" id="themeToggle" style="margin-left:auto;width:24px;height:24px;color:var(--text-3);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div class="page-title-group">
+        <h1>Bảng điều khiển</h1>
+        <div class="breadcrumb">Tổng quan / Hôm nay</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-secondary">📥 Xuất báo cáo</button>
+        <button class="btn btn-primary">+ Tạo đề mới</button>
+      </div>
+    </div>
+
+    <div class="bento">
+
+      <!-- Stat cards -->
+      <div class="card stat">
+        <div class="card-title">Đề thi</div>
+        <div class="stat-value">42</div>
+        <div class="stat-delta up">↑ 12% so với tuần trước</div>
+      </div>
+      <div class="card stat">
+        <div class="card-title">Học sinh</div>
+        <div class="stat-value">386</div>
+        <div class="stat-delta up">↑ 8 mới hôm nay</div>
+      </div>
+      <div class="card stat">
+        <div class="card-title">Bài nộp</div>
+        <div class="stat-value">1,842</div>
+        <div class="stat-delta up">↑ 24%</div>
+      </div>
+      <div class="card stat">
+        <div class="card-title">AI Token</div>
+        <div class="stat-value">$12.4</div>
+        <div class="stat-delta down">↓ 3% hôm nay</div>
+      </div>
+
+      <!-- Chart -->
+      <div class="card card-chart">
+        <div class="card-header">
+          <div class="card-title">Bài nộp 7 ngày</div>
+          <a href="#" class="card-action">Xem chi tiết →</a>
+        </div>
+        <div class="bar-chart">
+          <div class="bar" style="--h:35%"></div>
+          <div class="bar" style="--h:55%"></div>
+          <div class="bar" style="--h:48%"></div>
+          <div class="bar" style="--h:72%"></div>
+          <div class="bar" style="--h:65%"></div>
+          <div class="bar" style="--h:88%"></div>
+          <div class="bar" style="--h:76%"></div>
+        </div>
+        <div class="bar-labels">
+          <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>
+        </div>
+      </div>
+
+      <!-- Recent activity -->
+      <div class="card card-side">
+        <div class="card-header">
+          <div class="card-title">Hoạt động gần đây</div>
+        </div>
+        <div class="activity">
+          <div class="activity-item">
+            <div class="activity-dot"></div>
+            <div>
+              <div class="activity-text"><strong>Nguyễn Văn A</strong> hoàn thành <strong>Toán THPT</strong></div>
+              <div class="activity-time">5 phút trước · Điểm 8.5</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot" style="background:var(--success)"></div>
+            <div>
+              <div class="activity-text">AI đã chấm <strong>3 bài tự luận</strong></div>
+              <div class="activity-time">12 phút trước</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot" style="background:var(--warning)"></div>
+            <div>
+              <div class="activity-text">Mã <strong>X9K2P3</strong> sắp hết lượt</div>
+              <div class="activity-time">25 phút trước</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-dot"></div>
+            <div>
+              <div class="activity-text">Tạo đề <strong>IELTS Reading C18</strong></div>
+              <div class="activity-time">1 giờ trước</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent submissions table -->
+      <div class="card card-table">
+        <div class="card-header">
+          <div class="card-title">Bài nộp mới nhất</div>
+          <a href="#" class="card-action">Xem tất cả →</a>
+        </div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Học sinh</th>
+              <th>Đề thi</th>
+              <th>Loại</th>
+              <th>Thời gian</th>
+              <th>Trạng thái</th>
+              <th style="text-align:right">Điểm</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Nguyễn Văn A</td>
+              <td>Toán THPT — Hàm số</td>
+              <td><span class="tag">Trắc nghiệm</span></td>
+              <td>5 phút trước</td>
+              <td><span class="tag success">Đã chấm</span></td>
+              <td style="text-align:right;font-weight:600">8.5</td>
+            </tr>
+            <tr>
+              <td>Trần Thị B</td>
+              <td>English Reading 2024</td>
+              <td><span class="tag">Đọc hiểu</span></td>
+              <td>15 phút trước</td>
+              <td><span class="tag success">Đã chấm</span></td>
+              <td style="text-align:right;font-weight:600">9.0</td>
+            </tr>
+            <tr>
+              <td>Lê Văn C</td>
+              <td>Vật lý — Cơ học</td>
+              <td><span class="tag">Tự luận</span></td>
+              <td>22 phút trước</td>
+              <td><span class="tag warning">Chờ AI chấm</span></td>
+              <td style="text-align:right;color:var(--text-3)">—</td>
+            </tr>
+            <tr>
+              <td>Phạm Thị D</td>
+              <td>IELTS Reading C18 T2</td>
+              <td><span class="tag">Đọc hiểu</span></td>
+              <td>45 phút trước</td>
+              <td><span class="tag success">Đã chấm</span></td>
+              <td style="text-align:right;font-weight:600">7.5</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const cur = document.documentElement.dataset.theme;
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = next;
+  localStorage.setItem('demo-theme', next);
+});
+</script>
+</body>
+</html>

@@ -153,7 +153,23 @@ class ResultApp {
                 if (section.type === 'writing-essay') {
                     this.questionsList.push({ ...section, isEssay: true, sectionTitle: section.title });
                 } else if (section.type === 'free-form') {
-                    this.questionsList.push({ ...section, isFreeForm: true, sectionTitle: section.title });
+                    const freeQuestions = (section.questions && section.questions.length)
+                        ? section.questions
+                        : (section.subParts && section.subParts.length)
+                            ? [{ id: section.id, question: section.prompt || section.title || '', subParts: section.subParts, sampleAnswer: section.sampleAnswer || '' }]
+                            : [];
+                    freeQuestions.forEach(q => {
+                        this.questionsList.push({
+                            ...q,
+                            isFreeForm: true,
+                            isEssay: false,
+                            sectionTitle: section.title,
+                            instruction: section.instruction || '',
+                            sectionPrompt: section.prompt || '',
+                            sectionSampleAnswer: section.sampleAnswer || '',
+                            cues: q.cues || section.cues || []
+                        });
+                    });
                 } else if (section.type === 'fill-in-blank') {
                     (section.questions || []).forEach(q => {
                         this.questionsList.push({
@@ -175,30 +191,30 @@ class ResultApp {
             this.renderReviewItems();
 
             // Always try to load existing grades immediately (works even after page refresh)
-            const code = accessCode; // reuse resolved code
-            if (code) {
-                const hasGradeable = this.questionsList.some(q => q.isEssay || q.isFreeForm);
-                if (hasGradeable) {
-                    // Immediate fetch — show grades if already done
-                    try {
-                        const userId = JSON.parse(localStorage.getItem('easyrevise_user') || '{}').id;
-                        const params = new URLSearchParams({ code });
-                        if (userId) params.set('userId', userId);
-                        const gr = await fetch(`/api/exams/${this.results.examId}/my-grades?${params}`);
-                        if (gr.ok) {
-                            const grData = await gr.json();
-                            if (grData.grades && grData.grades.length > 0) {
-                                this.updateEssayGradeCards(grData.grades);
-                            }
-                            // If still pending, start polling loop
-                            if (grData.pending) {
-                                const pollCtx = sessionStorage.getItem('easyrevise_grade_poll');
-                                const ctx = pollCtx ? JSON.parse(pollCtx) : { examId: this.results.examId, code, userId: userId || null };
-                                this.startGradePolling(ctx);
-                            }
+            const pollCtxRaw = sessionStorage.getItem('easyrevise_grade_poll');
+            let pollCtx = null;
+            try { pollCtx = pollCtxRaw ? JSON.parse(pollCtxRaw) : null; } catch (e) { pollCtx = null; }
+            const code = accessCode || pollCtx?.code || null;
+            const hasGradeable = this.questionsList.some(q => q.isEssay || q.isFreeForm || q.isFillBlank);
+            if (hasGradeable) {
+                try {
+                    const userId = pollCtx?.userId || JSON.parse(localStorage.getItem('easyrevise_user') || '{}').id || null;
+                    const params = new URLSearchParams();
+                    if (code) params.set('code', code);
+                    if (userId) params.set('userId', userId);
+                    const gr = await fetch(`/api/exams/${this.results.examId}/my-grades?${params}`);
+                    if (gr.ok) {
+                        const grData = await gr.json();
+                        if (grData.grades && grData.grades.length > 0) {
+                            this.updateEssayGradeCards(grData.grades);
                         }
-                    } catch (e) { /* silent */ }
-                }
+                        // If still pending, start polling loop
+                        if (grData.pending) {
+                            const ctx = pollCtx || { examId: this.results.examId, code, userId: userId || null };
+                            this.startGradePolling(ctx);
+                        }
+                    }
+                } catch (e) { /* silent */ }
             }
 
 
@@ -301,7 +317,7 @@ class ResultApp {
             let responseRow = '';
             if (q.isFreeForm) {
                 // Render each sub-part answer
-                const subParts = q.subParts || q.questions || [];
+                const subParts = q.subParts || [];
                 const userAnswerText = resultEntry?.userAnswer || '';
                 const attachments = resultEntry?.attachments || [];
                 // Parse the serialized parts text back into lines for display
@@ -351,7 +367,7 @@ class ResultApp {
                             ${partExplHtml}
                         </div>`;
                     }).join('')
-                    : `<div style="color:var(--text-muted);font-size:0.9rem;">${userAnswerText || '(chưa làm bài)'}</div>`;
+                    : `<div style="color:var(--text-muted);font-size:0.9rem;white-space:pre-line;">${escapeHtml(userAnswerText || '(chưa làm bài)')}</div>`;
 
                 responseRow = `
                     <div style="margin-bottom:1rem;padding:0.75rem 1rem;background:rgba(255,255,255,0.03);border-radius:12px;">
@@ -415,9 +431,29 @@ class ResultApp {
                         <div style="margin-top:0.5rem;font-size:0.82rem;color:${allCorrect ? '#16a34a' : '#dc2626'};font-weight:600;">
                             ${allCorrect ? `✅ Tất cả ${blanks.length} ô đúng` : `❌ Sai ${wrongCount}/${blanks.length} ô`}
                         </div>
+                        <div id="grade-slot-${q.id}" class="grade-slot"></div>
+                    </div>`;
+            } else if (!q.isEssay) {
+                const letter = (idx) => ['A', 'B', 'C', 'D'][Number(idx)] || '?';
+                const optionText = (idx) => (q.options && q.options[Number(idx)] !== undefined) ? q.options[Number(idx)] : '';
+                const formatChoice = (idx) => {
+                    if (idx === undefined || idx === null || idx === '') return '<span style="color:var(--text-muted);">Chưa chọn</span>';
+                    return `<strong>${letter(idx)}.</strong> ${escapeHtml(optionText(idx) || '(không có nội dung)')}`;
+                };
+                const isCorrectChoice = userAnsId !== undefined && Number(userAnsId) === Number(q.correctAnswer);
+                responseRow = `
+                    <div style="margin-bottom:1.25rem;display:grid;gap:0.65rem;">
+                        <div style="padding:0.8rem 1rem;background:${isCorrectChoice ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)'};border:1px solid ${isCorrectChoice ? 'rgba(34,197,94,0.28)' : 'rgba(239,68,68,0.28)'};border-radius:12px;">
+                            <div style="font-size:0.78rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.25rem;">Bạn đã chọn</div>
+                            <div style="color:var(--text-main);font-size:0.95rem;">${formatChoice(userAnsId)}</div>
+                        </div>
+                        ${!isCorrectChoice ? `<div style="padding:0.8rem 1rem;background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.28);border-radius:12px;">
+                            <div style="font-size:0.78rem;font-weight:700;color:var(--success);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.25rem;">Đáp án đúng</div>
+                            <div style="color:var(--text-main);font-size:0.95rem;">${formatChoice(q.correctAnswer)}</div>
+                        </div>` : ''}
                     </div>`;
             } else {
-                // essay
+                // essay fallback
                 responseRow = `
                     <div style="margin-bottom: 1rem;">
                         <strong style="color: var(--text-main); font-size: 0.9rem;">Bài làm của bạn:</strong>
@@ -481,7 +517,7 @@ class ResultApp {
                     ${statusBadge}
                 </div>
                 <div style="font-size: 1.05rem; font-weight: 600; margin-bottom: 1.25rem; color: var(--text-main); line-height: 1.5;" class="katex-render">
-                    ${renderMarkdown(q.isEssay ? (q.prompt || '') : (q.isFreeForm ? (q.instruction || '') : (q.question || '')))}
+                    ${renderMarkdown(q.isEssay ? (q.prompt || '') : (q.isFreeForm ? (q.question || q.prompt || q.sectionPrompt || q.instruction || '') : (q.question || '')))}
                 </div>
                 ${questionMediaHtml}
                 ${responseRow}
@@ -524,17 +560,25 @@ class ResultApp {
             if (timerEl) timerEl.textContent = `${elapsed}s`;
         };
 
-        const finish = (success) => {
+        const finish = (state) => {
             clearInterval(this._pollTimer);
             clearInterval(this._timerTick);
             sessionStorage.removeItem('easyrevise_grade_poll');
             if (!banner) return;
-            if (success) {
+            if (state === 'graded') {
                 banner.innerHTML = `
                     <div style="display:flex;align-items:center;gap:0.75rem;padding:0.85rem 1.5rem;
                         background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);border-radius:16px;" class="ai-grade-done-banner">
                         <span style="font-size:1.3rem;">✅</span>
                         <div style="font-weight:700;color:#16a34a;">Chấm xong! Điểm đã được cập nhật bên dưới.</div>
+                    </div>`;
+                setTimeout(() => { banner.style.opacity = '0'; banner.style.transition = 'opacity 0.6s'; setTimeout(() => banner.remove(), 700); }, 4000);
+            } else if (state === 'resolved') {
+                banner.innerHTML = `
+                    <div style="display:flex;align-items:center;gap:0.75rem;padding:0.85rem 1.5rem;
+                        background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.25);border-radius:16px;">
+                        <span style="font-size:1.3rem;">ℹ️</span>
+                        <div style="font-weight:700;color:#2563eb;">Đã cập nhật trạng thái chấm bài bên dưới.</div>
                     </div>`;
                 setTimeout(() => { banner.style.opacity = '0'; banner.style.transition = 'opacity 0.6s'; setTimeout(() => banner.remove(), 700); }, 4000);
             } else {
@@ -549,7 +593,8 @@ class ResultApp {
             pollCount++;
             updateTimer();
             try {
-                const params = new URLSearchParams({ code });
+                const params = new URLSearchParams();
+                if (code) params.set('code', code);
                 if (userId) params.set('userId', userId);
                 const res = await fetch(`/api/exams/${examId}/my-grades?${params}`);
                 if (!res.ok) return;
@@ -560,10 +605,10 @@ class ResultApp {
                 }
 
                 if (!data.pending) {
-                    // All graded (or no essays)
-                    finish(true);
+                    const hasGraded = (data.grades || []).some(g => g.status === 'graded' || g.aiScore !== null && g.aiScore !== undefined || g.teacherScore !== null && g.teacherScore !== undefined);
+                    finish(hasGraded ? 'graded' : 'resolved');
                 } else if (Date.now() - startedAt > MAX_WAIT_MS) {
-                    finish(false);
+                    finish('timeout');
                 }
             } catch (e) { /* network hiccup, keep trying */ }
         };
@@ -578,6 +623,22 @@ class ResultApp {
         for (const grade of grades) {
             const slot = document.getElementById(`grade-slot-${grade.questionId}`);
             if (!slot) continue;
+            const status = grade.status || ((grade.aiScore !== null && grade.aiScore !== undefined) ? 'graded' : 'pending');
+            if (status === 'skipped' || status === 'error' || status === 'pending') {
+                const palette = status === 'error'
+                    ? { icon: '⚠️', title: 'AI chấm bài bị lỗi', color: '#dc2626', bg: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.25)', text: grade.aiError || 'Có lỗi khi gọi AI chấm bài.' }
+                    : status === 'skipped'
+                        ? { icon: 'ℹ️', title: 'Chưa chấm bằng AI', color: '#d97706', bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.25)', text: grade.aiError === 'NO_API_KEY' ? 'Server chưa cấu hình API key chấm AI. Bài đã được lưu để giáo viên xem/chấm sau.' : (grade.aiError || 'AI grading đã được bỏ qua.') }
+                        : { icon: '⏳', title: 'Đang chờ chấm AI', color: '#6366f1', bg: 'rgba(99,102,241,0.08)', border: 'rgba(99,102,241,0.22)', text: 'Bài tự luận đã được lưu. Điểm sẽ cập nhật khi AI hoặc giáo viên chấm xong.' };
+                slot.innerHTML = `
+                    <div style="margin-top:1rem;padding:0.9rem 1.1rem;border-radius:14px;border:1px solid ${palette.border};background:${palette.bg};">
+                        <div style="display:flex;align-items:center;gap:0.55rem;font-weight:800;color:${palette.color};font-size:0.9rem;">
+                            <span>${palette.icon}</span><span>${palette.title}</span>
+                        </div>
+                        <div style="margin-top:0.45rem;color:var(--text-secondary,#64748b);font-size:0.84rem;line-height:1.55;">${escapeHtml(palette.text)}</div>
+                    </div>`;
+                continue;
+            }
             if (grade.aiScore === null || grade.aiScore === undefined) continue;
 
             const maxScore = grade.aiMaxScore || 10;

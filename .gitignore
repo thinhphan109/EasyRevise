@@ -8,6 +8,8 @@ Thumbs.db
 # Data — chứa dữ liệu học sinh, không commit
 data/exams.json
 data/users.json
+data/easyrevise.db
+data/easyrevise.db.tmp.*
 data/subjects.json
 data/settings.json
 data/questions.json
@@ -30,3 +32,7 @@ _test_env.js
 *.zip
 
 service-account.json
+
+
+# Frontend bundles (generated)
+public/js/dist/

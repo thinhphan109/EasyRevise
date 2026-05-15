@@ -2,20 +2,50 @@
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '.env'), override: true });
 const express = require('express');
+const helmet = require('helmet');
 
 // ========================
-// Crash Guard — prevent server shutdown on unhandled errors
+// Crash Guard — H11: log + flush + exit để PM2/Vercel restart cleanly
 // ========================
 process.on('uncaughtException', (err) => {
-    console.error(`[CRASH PREVENTED] ${new Date().toISOString()}:`, err.message);
+    console.error(`[FATAL] ${new Date().toISOString()}:`, err.message);
     console.error(err.stack);
+    // Give logs time to flush, then exit so process supervisor restarts
+    setTimeout(() => process.exit(1), 1000).unref();
 });
 process.on('unhandledRejection', (reason) => {
-    console.error(`[CRASH PREVENTED] unhandledRejection:`, String(reason));
+    console.error(`[FATAL] unhandledRejection ${new Date().toISOString()}:`, String(reason));
+    if (reason && reason.stack) console.error(reason.stack);
+    setTimeout(() => process.exit(1), 1000).unref();
 });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// ── H2: Trust proxy header so req.ip = real client IP behind Vercel/CF/Nginx ──
+app.set('trust proxy', true);
+
+// ── H3: Security headers (CSP nới cho KaTeX, YouTube, Google Drive proxy) ──
+app.use(helmet({
+    contentSecurityPolicy: {
+        useDefaults: true,
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://cdn.jsdelivr.net'],
+            // ⚠️  Cho phép inline onclick="" — toàn bộ legacy UI dùng inline handlers.
+            //     Sprint UI sẽ refactor sang addEventListener và rút quy này về 'none'.
+            scriptSrcAttr: ["'unsafe-inline'"],
+            styleSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net', 'https://fonts.googleapis.com'],
+            imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+            fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com', 'https://cdn.jsdelivr.net'],
+            connectSrc: ["'self'", 'https:'],
+            mediaSrc: ["'self'", 'https:', 'blob:'],
+            frameSrc: ["'self'", 'https://www.youtube.com', 'https://youtube.com', 'https://drive.google.com']
+        }
+    },
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: 'cross-origin' }
+}));
 
 // Middleware — safe body parser
 app.use((req, res, next) => {
@@ -27,6 +57,34 @@ app.use((req, res, next) => {
         next();
     });
 });
+
+// ── C9: Gate /uploads/submissions/* with HMAC-signed URL ──
+// Prevents IDOR — chỉ ai có ?sig=...&exp=... hợp lệ mới đọc được file submission.
+// Admin token bypass: header Authorization: Bearer <admin-token>.
+const { verifySignature } = require('./lib/signed-url');
+const { findUserByToken: _findUser } = require('./lib/auth');
+
+// M4: Structured HTTP request logging (pino)
+const log = require('./lib/logger');
+if (log.httpLogger) app.use(log.httpLogger());
+
+app.use('/uploads/submissions', (req, res, next) => {
+    // Admin bypass — admin có thể mở trực tiếp khi review
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        const user = _findUser(authHeader.split(' ')[1]);
+        if (user && user.role === 'admin') return next();
+    }
+    // Otherwise require signed URL
+    const filename = req.path.replace(/^\//, '').split('/')[0];
+    if (!filename) return res.status(400).end();
+    const { sig, exp } = req.query;
+    if (!verifySignature(filename, sig, exp)) {
+        return res.status(403).json({ error: 'URL đã hết hạn hoặc không hợp lệ' });
+    }
+    next();
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ========================
@@ -94,6 +152,9 @@ app.use('/api', require('./routes/settings'));
 // Stats (Code logs at /api, CSV export + exam stats at /api)
 app.use('/api', require('./routes/stats'));
 
+// Health check (M4)
+app.use('/api', require('./routes/health'));
+
 // FaceHash Avatars (deterministic SVG avatars)
 app.use('/api', require('./routes/avatar'));
 
@@ -104,6 +165,9 @@ app.use('/api/admin', require('./routes/exams-admin'));
 const activationRouter = require('./routes/activation');
 app.use('/api/admin/activation', activationRouter);  // admin endpoints
 app.use('/api/activation', activationRouter);          // /api/activation/verify (public)
+
+// H12: Backup cron endpoint (Vercel cron schedules /api/admin/run-backup daily)
+app.use('/api/admin', require('./routes/backup-cron'));
 
 // ========================
 // SPA fallback
@@ -118,9 +182,17 @@ app.use((err, req, res, next) => {
 });
 
 // Start
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
     console.log(`\n  🚀 EasyRevise Server running at http://localhost:${PORT}`);
     console.log(`  📝 Student:  http://localhost:${PORT}/`);
     console.log(`  ⚙️  Admin:    http://localhost:${PORT}/admin\n`);
     require('./lib/backup').startDailyBackup();
+
+    // Sprint 3: Initialize SQLite (async, non-blocking)
+    try {
+        const { initDb } = require('./lib/db');
+        await initDb();
+    } catch (e) {
+        console.error('[DB] SQLite init failed (falling back to JSON):', e.message);
+    }
 });

@@ -1,143 +1,200 @@
-/* ========================================
-   EasyRevise — Form System
-   .input, .select, .textarea, .checkbox
-   ======================================== */
+/* ===========================================================
+   Components — Form inputs (Task 8)
+   Input, textarea, select, code-input, search-input
+   Mobile-safe font-size 16px (no iOS zoom)
+   =========================================================== */
 
-/* ── Base input ── */
-.input,
-.auth-input,
-input[type="text"],
-input[type="password"],
-input[type="email"],
-input[type="number"],
-input[type="search"],
-input[type="url"],
-input[type="tel"],
-select,
-textarea {
-    width: 100%;
-    padding: 0.85rem 1rem;
-    background: var(--color-input-bg);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    font-size: var(--text-base);
-    color: var(--color-text);
-    font-family: var(--font-sans);
-    transition: all var(--duration-fast);
-    outline: none;
-}
-
-.input:focus,
-.auth-input:focus,
-input:focus,
-select:focus,
-textarea:focus {
-    border-color: var(--color-primary);
-    box-shadow: 0 0 0 3px var(--color-primary-50);
-}
-
-.input::placeholder,
-.auth-input::placeholder,
-input::placeholder,
-textarea::placeholder {
-    color: var(--color-text-muted);
-}
-
-/* ── Input sizes ── */
-.input-sm {
-    padding: 0.5rem 0.75rem;
-    font-size: var(--text-sm);
-}
-
-.input-lg {
-    padding: 1rem 1.25rem;
-    font-size: var(--text-lg);
-}
-
-/* ── Input with error ── */
-.input-error,
-.input.error {
-    border-color: var(--color-error);
-}
-
-.input-error:focus,
-.input.error:focus {
-    box-shadow: 0 0 0 3px rgba(239,68,68,0.1);
-}
-
-/* ── Error message ── */
-.auth-error,
-.form-error {
-    color: var(--color-error);
-    font-size: var(--text-sm);
-    margin-bottom: var(--space-4);
-    display: none;
-}
-
-/* ── Label ── */
-.form-label,
-label {
-    display: block;
-    font-weight: 600;
-    font-size: var(--text-sm);
-    color: var(--color-text);
-    margin-bottom: var(--space-2);
-}
-
-/* ── Form group ── */
 .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
     margin-bottom: var(--space-4);
 }
 
-/* ── Helper text ── */
-.form-hint {
+.form-label {
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    color: var(--text);
+    margin-bottom: var(--space-1);
+}
+
+.form-label-required::after {
+    content: ' *';
+    color: var(--error);
+}
+
+.form-helper {
     font-size: var(--text-xs);
-    color: var(--color-text-muted);
+    color: var(--text-3);
     margin-top: var(--space-1);
 }
 
-/* ── Tab switch (auth modal) ── */
-.tab-switch {
+.form-error {
+    font-size: var(--text-xs);
+    color: var(--error);
+    margin-top: var(--space-1);
     display: flex;
-    background: var(--color-input-bg);
-    border-radius: var(--radius-md);
-    padding: 4px;
-    margin-bottom: var(--space-6);
+    align-items: center;
+    gap: var(--space-1);
 }
 
-.tab-switch button {
-    flex: 1;
-    padding: 0.6rem;
-    border-radius: calc(var(--radius-md) - 2px);
-    border: none;
-    font-weight: 600;
-    font-size: var(--text-sm);
+/* ── Base input ────────────────────────────────────────── */
+.form-input,
+.form-textarea,
+.form-select {
+    width: 100%;
+    height: 44px;
+    padding: 0 var(--space-4);
+    font-family: var(--font-sans);
+    font-size: var(--text-md); /* 16px to prevent iOS zoom */
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    transition:
+        border-color var(--dur-fast) var(--ease-apple),
+        box-shadow var(--dur-fast) var(--ease-apple),
+        background-color var(--dur-fast) var(--ease-apple);
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+@media (min-width: 1024px) {
+    .form-input,
+    .form-textarea,
+    .form-select {
+        font-size: var(--text-base);
+    }
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+    color: var(--text-4);
+}
+
+.form-input:hover,
+.form-textarea:hover,
+.form-select:hover {
+    border-color: var(--border-strong);
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 var(--ring-width) var(--ring-color);
+}
+
+.form-input:disabled,
+.form-textarea:disabled,
+.form-select:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background: var(--surface-2);
+}
+
+/* ── Sizes ─────────────────────────────────────────────── */
+.form-input-sm { height: 36px; padding: 0 var(--space-3); font-size: var(--text-sm); }
+.form-input-lg { height: 52px; padding: 0 var(--space-5); font-size: var(--text-md); border-radius: var(--radius-lg); }
+
+/* ── Textarea ──────────────────────────────────────────── */
+.form-textarea {
+    height: auto;
+    min-height: 88px;
+    padding: var(--space-3) var(--space-4);
+    line-height: var(--leading-normal);
+    resize: vertical;
+}
+
+/* ── Select ────────────────────────────────────────────── */
+.form-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2386868b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--space-3) center;
+    padding-right: var(--space-10);
     cursor: pointer;
-    background: transparent;
-    color: var(--color-text-muted);
-    transition: all var(--duration-fast);
 }
 
-.tab-switch button.active {
-    background: var(--color-surface);
-    color: var(--color-text);
-    box-shadow: var(--shadow-xs);
+/* ── Code input — uppercase, letter-spacing, monospace optional ─── */
+.form-input-code {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+.form-input-code::placeholder {
+    letter-spacing: 0.04em;
 }
 
-/* ── Focus indicators (accessibility) ── */
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 1px;
+/* ── Search input — leading icon ───────────────────────── */
+.form-search-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.form-search-wrap .icon {
+    position: absolute;
+    left: var(--space-3);
+    color: var(--text-3);
+    pointer-events: none;
+}
+.form-search-wrap .form-input {
+    padding-left: var(--space-10);
 }
 
-/* ── Checkbox + Radio ── */
-.checkbox,
-.radio {
+/* ── States ────────────────────────────────────────────── */
+.form-input.is-error,
+.form-input[aria-invalid="true"] {
+    border-color: var(--error);
+}
+.form-input.is-error:focus,
+.form-input[aria-invalid="true"]:focus {
+    box-shadow: 0 0 0 var(--ring-width) var(--error-soft);
+}
+
+.form-input.is-success {
+    border-color: var(--success);
+}
+
+/* ── Checkbox + radio ──────────────────────────────────── */
+.form-check {
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
-    cursor: pointer;
     font-size: var(--text-sm);
+    cursor: pointer;
+    user-select: none;
+}
+.form-check input[type="checkbox"],
+.form-check input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent);
+    cursor: pointer;
+}
+
+/* ── PIN input row (6 boxes) ───────────────────────────── */
+.pin-input-row {
+    display: flex;
+    gap: var(--space-2);
+    justify-content: center;
+}
+.pin-input {
+    width: 44px;
+    height: 52px;
+    padding: 0;
+    text-align: center;
+    font-size: var(--text-xl);
+    font-weight: var(--weight-semi);
+    font-variant-numeric: tabular-nums;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+}
+.pin-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 var(--ring-width) var(--ring-color);
 }

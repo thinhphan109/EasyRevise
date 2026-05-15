@@ -5,6 +5,7 @@
 function showAddQuestionModal() {
     editingQuestionId = null; questionImageUrl = null; explanationImageUrl = null; fillBlanks = [];
     questionImages = []; optionImages = [null, null, null, null]; explanationImages = [];
+    freeformSubParts = [];
     document.getElementById('modalQuestionTitle').textContent = 'Thêm câu hỏi';
     ['inputQuestionText', 'inputOptA', 'inputOptB', 'inputOptC', 'inputOptD', 'inputExplanation', 'inputExpansion', 'inputFreeformAnswer', 'inputQuestionVideo', 'inputExplanationVideo', 'inputQuestionAttachment'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     document.querySelector('input[name="correctOpt"][value="0"]').checked = true;
@@ -23,6 +24,7 @@ function showAddQuestionModal() {
     document.getElementById('freeformAnswerGroup').style.display = isFreeform ? 'block' : 'none';
     document.getElementById('fillBlankGroup').style.display = isFillBlank ? 'block' : 'none';
     if (isFillBlank) renderBlankAnswers();
+    if (isFreeform) renderFreeformSubParts();
     openModal('modalQuestion');
 }
 
@@ -39,7 +41,12 @@ function editQuestion(qId) {
     document.getElementById('freeformAnswerGroup').style.display = isFreeform ? 'block' : 'none';
     document.getElementById('fillBlankGroup').style.display = isFillBlank ? 'block' : 'none';
     if (isFillBlank) { fillBlanks = q.blanks ? JSON.parse(JSON.stringify(q.blanks)) : []; renderBlankAnswers(); }
-    else if (isFreeform) { document.getElementById('inputFreeformAnswer').value = q.answer || ''; fillBlanks = []; }
+    else if (isFreeform) {
+        document.getElementById('inputFreeformAnswer').value = q.sampleAnswer || q.answer || '';
+        freeformSubParts = Array.isArray(q.subParts) ? JSON.parse(JSON.stringify(q.subParts)) : [];
+        renderFreeformSubParts();
+        fillBlanks = [];
+    }
     else {
         fillBlanks = [];
         document.getElementById('inputOptA').value = (q.options || [])[0] || '';
@@ -127,6 +134,40 @@ function removeBlankAnswer(i) {
     fillBlanks.splice(i, 1);
     fillBlanks.forEach((b, idx) => b.index = idx);
     renderBlankAnswers();
+}
+
+function renderFreeformSubParts() {
+    const c = document.getElementById('freeformSubPartList');
+    if (!c) return;
+    if (!freeformSubParts.length) {
+        c.innerHTML = '<p style="color:var(--text-muted);font-size:0.82rem;">Chưa có ý nhỏ. Câu sẽ hiển thị một ô trả lời chung.</p>';
+        return;
+    }
+    c.innerHTML = freeformSubParts.map((part, i) => `
+        <div style="border:1px solid var(--border);border-radius:12px;padding:0.75rem;margin-bottom:0.7rem;background:var(--bg-input);">
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+                <span style="font-weight:800;color:var(--primary);font-size:0.82rem;min-width:36px;">Ý ${i + 1}</span>
+                <input class="form-input" value="${escapeHtml(part.label || '')}" placeholder="Nhãn: a), b), Câu 1..."
+                    oninput="freeformSubParts[${i}].label=this.value" style="max-width:150px;font-size:0.85rem;">
+                <input class="form-input" type="number" min="1" max="20" step="0.5" value="${part.maxScore || ''}" placeholder="Điểm"
+                    oninput="freeformSubParts[${i}].maxScore=parseFloat(this.value)||undefined" style="max-width:86px;font-size:0.85rem;">
+                <button type="button" class="btn btn-sm btn-danger" onclick="removeFreeformSubPart(${i})" style="padding:0.25rem 0.55rem;">✕</button>
+            </div>
+            <textarea class="form-textarea" rows="2" placeholder="Nội dung yêu cầu của ý này..."
+                oninput="freeformSubParts[${i}].prompt=this.value" style="font-size:0.86rem;min-height:70px;">${escapeHtml(part.prompt || part.question || '')}</textarea>
+            <textarea class="form-textarea" rows="2" placeholder="Đáp án mẫu / tiêu chí riêng cho ý này (tuỳ chọn)"
+                oninput="freeformSubParts[${i}].sampleAnswer=this.value" style="font-size:0.82rem;min-height:64px;margin-top:0.45rem;">${escapeHtml(part.sampleAnswer || '')}</textarea>
+        </div>`).join('');
+}
+
+function addFreeformSubPart() {
+    freeformSubParts.push({ label: '', prompt: '', sampleAnswer: '', maxScore: undefined });
+    renderFreeformSubParts();
+}
+
+function removeFreeformSubPart(i) {
+    freeformSubParts.splice(i, 1);
+    renderFreeformSubParts();
 }
 
 // Image helpers
@@ -302,6 +343,16 @@ async function saveQuestion() {
         }));
     } else if (currentSectionType === 'free-form') {
         body.answer = document.getElementById('inputFreeformAnswer').value;
+        body.sampleAnswer = body.answer;
+        body.subParts = freeformSubParts
+            .map((p, i) => ({
+                id: p.id || `part_${i + 1}`,
+                label: (p.label || '').trim(),
+                prompt: (p.prompt || p.question || '').trim(),
+                sampleAnswer: (p.sampleAnswer || '').trim(),
+                maxScore: p.maxScore || undefined
+            }))
+            .filter(p => p.label || p.prompt || p.sampleAnswer);
     } else {
         body.correctAnswer = parseInt(document.querySelector('input[name="correctOpt"]:checked').value);
         body.options = [document.getElementById('inputOptA').value, document.getElementById('inputOptB').value, document.getElementById('inputOptC').value, document.getElementById('inputOptD').value];

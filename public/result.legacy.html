@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kết Quả — EasyRevise</title>
+
+    <!-- Theme: apply before render to prevent flash -->
+    <script>
+        (function(){var t=localStorage.getItem('easyrevise_theme')||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();
+    </script>
+
+    <!-- CSS: Modular system -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/pages/result.css">
+
+    <!-- Vendors: KaTeX -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+</head>
+
+<body>
+    <div class="container" style="max-width: 900px;">
+        <header class="result-header">
+            <h1>Kết Quả Ôn Tập</h1>
+            <p class="subtitle" id="examDate">Hoàn thành vào: --:--</p>
+        </header>
+
+        <section class="glass-panel score-section">
+            <div class="score-circle">
+                <span id="scoreValue" class="score-value">0.0</span>
+                <span id="scoreLabel" class="score-label">Điểm (Thang 10)</span>
+            </div>
+
+            <div class="result-stats-grid">
+                <div class="result-stat-item result-stat-item--success">
+                    <div class="result-stat-value result-stat-value--success" id="correctCount">0</div>
+                    <div class="result-stat-label">Câu Đúng</div>
+                </div>
+                <div class="result-stat-item result-stat-item--error">
+                    <div class="result-stat-value result-stat-value--error" id="incorrectCount">0</div>
+                    <div class="result-stat-label">Câu Sai</div>
+                </div>
+                <div class="result-stat-item result-stat-item--warning">
+                    <div class="result-stat-value result-stat-value--warning" id="skipCount">0</div>
+                    <div class="result-stat-label">Bỏ Qua</div>
+                </div>
+                <div class="result-stat-item result-stat-item--primary">
+                    <div class="result-stat-value result-stat-value--primary" id="timeSpent">--</div>
+                    <div class="result-stat-label">Thời Gian</div>
+                </div>
+            </div>
+
+            <div class="result-actions">
+                <a href="/" class="btn btn-back">← Về trang chủ</a>
+                <a id="retakeBtn" href="#" class="btn btn-primary">Làm lại bài này</a>
+            </div>
+        </section>
+
+        <!-- AI Grading Status Banner (shown/hidden by result.js) -->
+        <div id="aiGradingBanner" style="display:none;">
+            <div class="ai-grading-banner">
+                <div id="aiGradingSpinner" class="ai-grading-spinner"></div>
+                <div class="ai-grading-text">
+                    <div class="ai-grading-title">📝 AI Đang chấm bài...</div>
+                    <div id="aiGradingSubtext" class="ai-grading-subtitle">
+                        Điểm tự luận sẽ tự cập nhật khi có kết quả — bạn không cần làm gì. <em>(Chờ khoảng 30-60
+                            giây)</em>
+                    </div>
+                </div>
+                <div id="aiGradingTimer" class="ai-grading-timer"></div>
+            </div>
+        </div>
+
+        <section id="reviewSection">
+            <h2 class="review-section-title">📚 Xem lại đáp án &amp; Giải thích chi tiết</h2>
+            <div id="reviewContainer"></div>
+        </section>
+
+        <footer class="result-footer">
+            &copy; 2026 EasyRevise — English Learning Companion
+        </footer>
+    </div>
+
+    <script src="js/result.js"></script>
+</body>
+
+</html>
