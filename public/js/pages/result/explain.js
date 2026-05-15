@@ -1,7 +1,7 @@
 // EasyRevise — "Tại sao tôi sai?" AI explain handler.
 // Sends user's wrong answer + correct answer to AI to explain why; renders inline.
 
-import { renderMarkdown } from './markdown.js';
+import { renderMarkdown } from '../shared/markdown.js';
 
 export async function askWhyWrong({ state, questionId, btnEl }) {
     const slot = document.getElementById(`explain-slot-${questionId}`);

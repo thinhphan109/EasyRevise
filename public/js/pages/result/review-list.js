@@ -1,8 +1,8 @@
 // EasyRevise — Review item renderer (per-question card).
 // Renders 4 question types: multiple-choice, fill-in-blank, free-form, essay.
 
-import { renderMarkdown } from './markdown.js';
-import { escapeHtml } from './escape.js';
+import { renderMarkdown } from '../shared/markdown.js';
+import { escapeHtml } from '../shared/escape.js';
 import { checkBlankMatch } from './blank-checker.js';
 import { buildMediaHtml, buildVideoHtml } from './media.js';
 import { buildStatusBadge } from './status-badge.js';

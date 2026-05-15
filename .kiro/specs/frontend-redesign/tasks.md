@@ -247,7 +247,7 @@ Medium complexity. Multiple UI variants depending on exam type.
   - **Acceptance:** Tokens-based, mobile-first.
   - _Validates: NFR-M1, NFR-R1_
 
-- [ ] 31. Split result.js into modules
+- [x] 31. Split result.js into modules
   - `pages/result/index.js` — entry, fetch result data
   - `pages/result/score-display.js` — circular score with count-up animation
   - `pages/result/breakdown.js` — type/time stats card
@@ -257,6 +257,7 @@ Medium complexity. Multiple UI variants depending on exam type.
   - `pages/result/polling.js` — poll my-grades when AI grading pending
   - **Acceptance:** Module sizes all < 300 lines. No regression vs current.
   - _Validates: FR-R1, FR-R2, FR-R3, FR-R5, NFR-M2_
+  - **Status (2026-05-15):** Done. Split into 11 modules: escape, blank-checker, markdown, media, status-badge, summary, state, polling, explain, review-list, index. Each < 240 lines. 81/82 integration tests pass.
 
 - [x] 32. Score count-up animation
   - Animate from 0 → final score in 800ms ease-out

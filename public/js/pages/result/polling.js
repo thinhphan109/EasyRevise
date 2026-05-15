@@ -1,8 +1,8 @@
 // EasyRevise — AI grading polling and grade card updates.
 // Polls /my-grades every 4s, max 3min, updates DOM slots `grade-slot-{questionId}`.
 
-import { renderMarkdown } from './markdown.js';
-import { escapeHtml } from './escape.js';
+import { renderMarkdown } from '../shared/markdown.js';
+import { escapeHtml } from '../shared/escape.js';
 
 export class GradePoller {
     constructor() {
