@@ -23,12 +23,13 @@ export function renderSummary(state) {
         timeEl.textContent = `${min} phút ${sec} giây`;
     }
 
-    // Score color
+    // Score color via class (CSS handles light/dark theme + contrast)
     if (scoreEl) {
         const s = parseFloat(results.score);
-        if (s >= 8) scoreEl.style.color = '#22c55e';
-        else if (s >= 5) scoreEl.style.color = '#f59e0b';
-        else scoreEl.style.color = '#ef4444';
+        scoreEl.classList.remove('score-high', 'score-mid', 'score-low');
+        if (s >= 8) scoreEl.classList.add('score-high');
+        else if (s >= 5) scoreEl.classList.add('score-mid');
+        else scoreEl.classList.add('score-low');
     }
 
     // Retake button

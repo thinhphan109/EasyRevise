@@ -1,0 +1,40 @@
+feat(result): apply Apple HIG / Liquid Glass design
+
+Visible visual change at last — result page now uses the design tokens
+imported in main.css (which were sitting unused because result.html
+still pointed at the legacy pages/result.css).
+
+What changed visually:
+- Background: Apple gray #f5f5f7 (light) / pure black (dark)
+- Sticky topbar with backdrop-filter blur(20px) + saturate(180%)
+- Score circle: 200-240px, radial gradient with soft accent glow shadow
+- Stats grid: hover-lift cards with subtle border, no flat soft bg
+- Review items: 18px radius, hover accent border, staggered reveal animation
+- Pill status badges with soft background + colored border ring
+- Typography: SF Pro / Inter with -0.015em letter-spacing (Apple feel)
+- Auto dark mode via prefers-color-scheme
+- Honors prefers-reduced-motion (disables stagger + spinner)
+
+Code changes:
+- public/result.html — rewrote markup to use new classes:
+  result-page, result-topbar, result-hero, result-breakdown.
+  Removed link to public/css/pages/result.css legacy.
+  Semantic HTML (header, main, footer, sections with aria-label).
+  Used `hidden` attribute on AI grading banner.
+- public/js/pages/result/summary.js — score color via
+  CSS classes (.score-high/.score-mid/.score-low) instead of
+  inline style.color. Tokens flow correctly into both themes.
+
+Cleanup:
+- Removed public/css/pages/result.css (legacy, replaced by _result.css)
+- Removed public/result.legacy.html (old backup)
+- Removed scripts/smoke-test-result.js (replaced by .mjs version)
+- Removed orphan demo HTML files in public/
+
+Verified:
+- Smoke test smoke-test-result.mjs: 9/9 PASS, 0 errors
+- Visual capture (Puppeteer) for both light + dark themes
+  (artifacts/result_apple_hig_*.png in conversation brain dir)
+
+Files: scripts/capture-visuals.mjs is a new helper for future
+       visual regression captures.
