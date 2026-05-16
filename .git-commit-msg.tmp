@@ -1,40 +1,41 @@
-feat(result): apply Apple HIG / Liquid Glass design
+feat(ui): apply Apple HIG to home + exam pages
 
-Visible visual change at last — result page now uses the design tokens
-imported in main.css (which were sitting unused because result.html
-still pointed at the legacy pages/result.css).
+Visible visual change for the two remaining student-facing pages.
+Result page was done in 4fcd359; this commit completes the trio.
 
-What changed visually:
-- Background: Apple gray #f5f5f7 (light) / pure black (dark)
-- Sticky topbar with backdrop-filter blur(20px) + saturate(180%)
-- Score circle: 200-240px, radial gradient with soft accent glow shadow
-- Stats grid: hover-lift cards with subtle border, no flat soft bg
-- Review items: 18px radius, hover accent border, staggered reveal animation
-- Pill status badges with soft background + colored border ring
-- Typography: SF Pro / Inter with -0.015em letter-spacing (Apple feel)
-- Auto dark mode via prefers-color-scheme
-- Honors prefers-reduced-motion (disables stagger + spinner)
+Home page:
+- index.html — switch to .home-page/.home-header/.home-hero/.home-section
+  markup. Removed legacy css/pages/home.css link (left only main.css).
+  Sections use `hidden` attribute for accessibility.
+- exam-list.js — exam cards now use .card.card-raised.card-interactive
+  with .home-exam-card structure (top header, meta badges, footer CTA).
+  Added tabindex + role=button + aria-label.
+- exam-list.js — in-progress card now uses semantic <a> with
+  .home-inprogress-item class (HIG warm accent variant).
+- history.js — replaced style.display='block'/'none' with hidden
+  attribute for a11y. Updated SVG arrow color to var(--accent).
 
-Code changes:
-- public/result.html — rewrote markup to use new classes:
-  result-page, result-topbar, result-hero, result-breakdown.
-  Removed link to public/css/pages/result.css legacy.
-  Semantic HTML (header, main, footer, sections with aria-label).
-  Used `hidden` attribute on AI grading banner.
-- public/js/pages/result/summary.js — score color via
-  CSS classes (.score-high/.score-mid/.score-low) instead of
-  inline style.color. Tokens flow correctly into both themes.
-
-Cleanup:
-- Removed public/css/pages/result.css (legacy, replaced by _result.css)
-- Removed public/result.legacy.html (old backup)
-- Removed scripts/smoke-test-result.js (replaced by .mjs version)
-- Removed orphan demo HTML files in public/
+Exam page:
+- public/css/pages/_exam.css (NEW, ~9 KB) — Apple HIG exam styles:
+  glass topbar, gradient progress bar, animated 3-state timer pill
+  (normal/warning/danger with pulse), question card with fade-in,
+  option-btn with hover translate + selected ring, sidebar grid
+  with status colors via tokens, mobile drawer with backdrop blur,
+  gradient submit button.
+- main.css — added _exam.css to imports.
+- exam.html — switch to .exam-page/.exam-topbar/.exam-question-card
+  semantic markup. Kept all IDs so app.js orchestrator runs unchanged.
+- Removed legacy public/css/pages/exam.css (replaced by _exam.css).
+- Removed legacy public/css/pages/home.css (replaced by _home.css).
+- Removed orphan public/minimal-exam-demo.html.
 
 Verified:
-- Smoke test smoke-test-result.mjs: 9/9 PASS, 0 errors
-- Visual capture (Puppeteer) for both light + dark themes
-  (artifacts/result_apple_hig_*.png in conversation brain dir)
+- Smoke test still passes (9/9, no behavioural break).
+- Visual capture-visuals.mjs renders both light + dark themes
+  for all 3 pages without errors.
 
-Files: scripts/capture-visuals.mjs is a new helper for future
-       visual regression captures.
+User-facing summary:
+- Apple gray #f5f5f7 background, glassmorphism headers
+- Subject-color accent palette in tokens
+- Stagger reveals + spring easing (cubic-bezier 0.2,0.8,0.2,1)
+- Auto dark mode + prefers-reduced-motion support throughout

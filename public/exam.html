@@ -5,15 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đang Làm Bài — EasyRevise</title>
+    <meta name="description" content="Làm bài thi với giao diện trực quan, đếm ngược và lưu tự động.">
 
     <!-- Theme: apply before render to prevent flash -->
     <script>
-        (function(){var t=localStorage.getItem('easyrevise_theme')||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();
+        (function () { var t = localStorage.getItem('easyrevise_theme') || (window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light'); document.documentElement.setAttribute('data-theme', t); })();
     </script>
 
-    <!-- CSS: Modular system -->
+    <!-- CSS: Apple HIG modular system (tokens + components + exam page) -->
     <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/pages/exam.css">
 
     <!-- Vendors: KaTeX -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
@@ -21,20 +21,27 @@
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 </head>
 
-<body>
-    <div class="container" style="max-width: 1100px;">
-        <header class="header-nav">
-            <div class="header-nav-left">
-                <button onclick="exitExam()" class="exit-btn" title="Thoát">✕ Thoát</button>
-                <div>
-                    <h1 id="examTitle" style="font-size: 1.25rem; margin-bottom: 0;">Nạp đề...</h1>
-                    <p id="sectionTitle" class="text-muted text-sm" style="margin: 0;">Section</p>
+<body class="exam-page">
+    <!-- Sticky glass topbar -->
+    <header class="exam-topbar">
+        <div class="exam-container exam-topbar-inner">
+            <button onclick="exitExam()" class="btn btn-ghost btn-sm" aria-label="Thoát bài thi">
+                <span aria-hidden="true">✕</span>
+                <span class="hide-mobile">Thoát</span>
+            </button>
+            <div class="exam-topbar-info">
+                <div style="min-width:0;">
+                    <h1 id="examTitle" class="exam-title">Nạp đề...</h1>
+                    <p id="sectionTitle" class="exam-section">Section</p>
                 </div>
             </div>
-            <div id="countdown" class="timer-badge">00:00</div>
-        </header>
+            <div id="countdown" class="timer-badge" aria-live="polite">00:00</div>
+        </div>
+    </header>
 
-        <div style="margin-bottom: 1rem;">
+    <main class="exam-container">
+        <!-- Progress bar -->
+        <section class="exam-progress" aria-label="Tiến độ">
             <div class="progress-container">
                 <div id="progressBar" class="progress-bar"></div>
             </div>
@@ -42,34 +49,36 @@
                 <span id="questionCount">Câu 0/0</span>
                 <span id="completionPercent">0% Hoàn thành</span>
             </div>
-        </div>
+        </section>
 
+        <!-- Layout: question + sidebar -->
         <div class="exam-layout">
-            <!-- Question Area -->
-            <main>
-                <div id="questionWrapper" class="glass-panel question-container">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <div id="questionNumber" class="question-number">Câu 1</div>
-                        <button id="flagBtn" class="flag-btn" onclick="toggleFlag()">⚑ Đánh dấu</button>
-                    </div>
-                    <div id="instruction" class="instruction-block">Instruction</div>
-                    <div id="passageContainer" class="passage-box" style="display: none;"></div>
-                    <div id="questionText" class="question-text">Question text</div>
-                    <div id="questionImageContainer" style="display:none;margin:0.75rem 0;"></div>
-                    <div id="questionHintContainer" style="display:none;margin:0.75rem 0;"></div>
-                    <div id="optionGrid" class="options-grid"></div>
-                    <div id="essayArea" style="display: none;">
-                        <div class="cues-box">
-                            <strong class="cues-label">Gợi ý:</strong>
-                            <ul id="cuesList" class="cues-list"></ul>
-                        </div>
-                        <textarea id="essayInput" class="essay-input" placeholder="Viết đoạn văn tại đây..."></textarea>
-                    </div>
+            <!-- Question card -->
+            <article id="questionWrapper" class="exam-question-card">
+                <div class="exam-question-header">
+                    <span id="questionNumber" class="question-number">Câu 1</span>
+                    <button id="flagBtn" class="flag-btn" onclick="toggleFlag()" aria-label="Đánh dấu câu hỏi">
+                        <span aria-hidden="true">⚑</span>
+                        <span>Đánh dấu</span>
+                    </button>
                 </div>
-            </main>
+                <div id="instruction" class="instruction-block">Instruction</div>
+                <div id="passageContainer" class="passage-box" style="display: none;"></div>
+                <div id="questionText" class="question-text">Question text</div>
+                <div id="questionImageContainer" style="display:none;margin:0.75rem 0;"></div>
+                <div id="questionHintContainer" style="display:none;margin:0.75rem 0;"></div>
+                <div id="optionGrid" class="options-grid"></div>
+                <div id="essayArea" style="display: none;">
+                    <div class="cues-box">
+                        <strong class="cues-label">Gợi ý:</strong>
+                        <ul id="cuesList" class="cues-list"></ul>
+                    </div>
+                    <textarea id="essayInput" class="essay-input" placeholder="Viết đoạn văn tại đây..."></textarea>
+                </div>
+            </article>
 
-            <!-- Right Sidebar (compact) -->
-            <aside class="sidebar sidebar-desktop">
+            <!-- Sidebar (desktop only) -->
+            <aside class="exam-sidebar">
                 <div class="sidebar-card">
                     <div class="sidebar-title">Câu hỏi</div>
                     <div id="answeredSummary" class="sidebar-summary">0/0</div>
@@ -81,29 +90,24 @@
                         <span><span class="ldot ldot-flagged"></span>Cờ</span>
                     </div>
                     <div class="sidebar-nav">
-                        <button id="prevBtn" class="btn" style="background: var(--color-input-bg); color: var(--color-text-secondary);">←</button>
-                        <button id="nextBtn" class="btn btn-primary">→</button>
-                        <button id="submitBtn" class="btn btn-primary"
-                            style="display: none; background: linear-gradient(135deg, var(--color-primary), var(--color-accent)); flex: 2;">Nộp
-                            bài</button>
+                        <button id="prevBtn" class="btn btn-secondary btn-sm" aria-label="Câu trước">←</button>
+                        <button id="nextBtn" class="btn btn-primary btn-sm" aria-label="Câu sau">→</button>
+                        <button id="submitBtn" class="btn btn-submit btn-sm" style="display:none;flex:2;">Nộp bài</button>
                     </div>
                 </div>
             </aside>
         </div>
-    </div>
+    </main>
 
-    <!-- Mobile Bottom Drawer -->
+    <!-- Mobile bottom drawer -->
     <div class="mobile-drawer" id="mobileDrawer">
-        <div class="drawer-handle" onclick="toggleDrawer()">
+        <div class="drawer-handle" onclick="toggleDrawer()" role="button" tabindex="0" aria-label="Mở rộng danh sách câu">
             <div class="drawer-handle-bar"></div>
         </div>
         <div class="drawer-nav-m">
-            <button id="prevBtnM" class="btn" style="background: var(--color-input-bg); color: var(--color-text-secondary);">←
-                Trước</button>
-            <button id="nextBtnM" class="btn btn-primary">Tiếp →</button>
-            <button id="submitBtnM" class="btn btn-primary"
-                style="display: none; background: linear-gradient(135deg, var(--color-primary), var(--color-accent));">Nộp
-                bài</button>
+            <button id="prevBtnM" class="btn btn-secondary btn-sm">← Trước</button>
+            <button id="nextBtnM" class="btn btn-primary btn-sm">Tiếp →</button>
+            <button id="submitBtnM" class="btn btn-submit btn-sm" style="display:none;">Nộp bài</button>
         </div>
         <div class="drawer-content" id="drawerContent">
             <div id="qGridM" class="q-grid" style="margin-bottom: 0.5rem;"></div>

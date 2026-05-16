@@ -66,7 +66,7 @@ function buildMockResult(exam) {
     };
 }
 
-async function capture(theme = 'light') {
+async function captureResult(theme = 'light') {
     const exam = await findExam(EXAM_ID);
     const mockResult = buildMockResult(exam);
 
@@ -74,14 +74,13 @@ async function capture(theme = 'light') {
     const page = await browser.newPage();
     await page.setViewport({ width: 1280, height: 900, deviceScaleFactor: 2 });
 
-    // Pre-set theme + mock result via initial navigation script
     await page.evaluateOnNewDocument((theme, result) => {
         localStorage.setItem('easyrevise_theme', theme);
         sessionStorage.setItem('easyrevise_final_result', JSON.stringify(result));
     }, theme, mockResult);
 
     await page.goto(`${HOST}/result.html`, { waitUntil: 'networkidle0', timeout: 15000 });
-    await new Promise(r => setTimeout(r, 1500)); // animations + KaTeX
+    await new Promise(r => setTimeout(r, 1500));
 
     const outDir = path.join(__dirname, '..', '_visual_captures');
     await page.screenshot({
@@ -89,15 +88,75 @@ async function capture(theme = 'light') {
         fullPage: true
     });
     console.log(`✓ Saved result_apple_hig_${theme}.png`);
+    await browser.close();
+}
 
+async function captureHome(theme = 'light') {
+    const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
+    const page = await browser.newPage();
+    await page.setViewport({ width: 1280, height: 900, deviceScaleFactor: 2 });
+
+    await page.evaluateOnNewDocument((theme) => {
+        localStorage.setItem('easyrevise_theme', theme);
+        // Seed in-progress + history mock to show all sections
+        localStorage.setItem('easyrevise_in_progress', JSON.stringify({
+            'demo-1': { examTitle: 'Đề minh hoạ Toán 9 - Tuyển sinh 10', answeredCount: 4, totalQuestions: 7, lastAccessed: Date.now() - 1000 * 60 * 30, currentQuestion: 3 }
+        }));
+        localStorage.setItem('easyrevise_history', JSON.stringify([
+            { examTitle: 'IELTS Reading - Section 1', score: '8.5', correct: 11, total: 13, timeSpent: 1234, timestamp: '14/05/2026 10:30' },
+            { examTitle: 'Đề kiểm tra HKII Vật Lí 9', score: '6.0', correct: 18, total: 30, timeSpent: 2400, timestamp: '13/05/2026 14:00' },
+            { examTitle: 'Đề minh hoạ HCM 2024', score: '4.5', correct: 9, total: 20, timeSpent: 3000, timestamp: '12/05/2026 09:15', autoSubmitted: true }
+        ]));
+    }, theme);
+
+    await page.goto(`${HOST}/`, { waitUntil: 'networkidle0', timeout: 15000 });
+    await new Promise(r => setTimeout(r, 2000)); // wait for exam list fetch + render
+
+    const outDir = path.join(__dirname, '..', '_visual_captures');
+    await page.screenshot({
+        path: path.join(outDir, `home_apple_hig_${theme}.png`),
+        fullPage: true
+    });
+    console.log(`✓ Saved home_apple_hig_${theme}.png`);
+    await browser.close();
+}
+
+async function captureExam(theme = 'light') {
+    // Resolve full UUID first (so exam.html?id=<full> works)
+    const exam = await findExam(EXAM_ID);
+
+    const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
+    const page = await browser.newPage();
+    page.on('console', msg => { if (msg.type() === 'error') console.log('  [browser-error]', msg.text()); });
+    await page.setViewport({ width: 1280, height: 900, deviceScaleFactor: 2 });
+
+    await page.evaluateOnNewDocument((theme) => {
+        localStorage.setItem('easyrevise_theme', theme);
+    }, theme);
+
+    await page.goto(`${HOST}/exam.html?id=${exam.id}`, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await new Promise(r => setTimeout(r, 4500)); // wait for app.js init + first question render
+
+    const outDir = path.join(__dirname, '..', '_visual_captures');
+    await page.screenshot({
+        path: path.join(outDir, `exam_apple_hig_${theme}.png`),
+        fullPage: false  // viewport only
+    });
+    console.log(`✓ Saved exam_apple_hig_${theme}.png`);
     await browser.close();
 }
 
 async function main() {
     const fs = await import('node:fs');
     fs.mkdirSync(path.join(__dirname, '..', '_visual_captures'), { recursive: true });
-    await capture('light');
-    await capture('dark');
+    const args = process.argv.slice(2);
+    const pages = args.length ? args : ['result', 'home', 'exam'];
+    const themes = ['light', 'dark'];
+    for (const t of themes) {
+        if (pages.includes('result')) await captureResult(t);
+        if (pages.includes('home')) await captureHome(t);
+        if (pages.includes('exam')) await captureExam(t);
+    }
     console.log('\nDone. Screenshots in _visual_captures/');
 }
 

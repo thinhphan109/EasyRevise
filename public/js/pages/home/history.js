@@ -28,11 +28,11 @@ async function loadHistory() {
         _serverHistory = allHistory;
 
         if (!allHistory.length) {
-            section.style.display = 'none';
+            section.hidden = true;
             return;
         }
 
-        section.style.display = 'block';
+        section.hidden = false;
         container.innerHTML = _renderHistoryItems(allHistory, 'server');
     } catch (err) {
         // Fallback to local
@@ -46,7 +46,7 @@ async function loadHistory() {
 function loadLocalHistory() {
     const localHistory = JSON.parse(localStorage.getItem('easyrevise_history') || '[]');
     if (localHistory.length) {
-        document.getElementById('historySection').style.display = 'block';
+        document.getElementById('historySection').hidden = false;
         document.getElementById('historyList').innerHTML = _renderHistoryItems(localHistory, 'local');
     }
 }
@@ -55,7 +55,7 @@ function loadLocalHistory() {
 function _loadLocalHistory() {
     const localHistory = JSON.parse(localStorage.getItem('easyrevise_history') || '[]');
     if (localHistory.length) {
-        document.getElementById('historySection').style.display = 'block';
+        document.getElementById('historySection').hidden = false;
         document.getElementById('historyList').innerHTML = _renderHistoryItems(localHistory, 'local');
     }
 }
@@ -91,7 +91,7 @@ function _renderHistoryItems(items, source) {
                         <div class="history-score ${scoreClass}">${h.score}</div>
                         ${label}
                     </div>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" style="opacity:0.6;"><polyline points="9 18 15 12 9 6"/></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" style="opacity:0.6;"><polyline points="9 18 15 12 9 6"/></svg>
                 </div>
             </div>`;
     }).join('');

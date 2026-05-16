@@ -10,12 +10,11 @@
 
     <!-- Theme: apply before render to prevent flash -->
     <script>
-        (function(){var t=localStorage.getItem('easyrevise_theme')||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();
+        (function () { var t = localStorage.getItem('easyrevise_theme') || (window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light'); document.documentElement.setAttribute('data-theme', t); })();
     </script>
 
-    <!-- CSS: Modular system -->
+    <!-- CSS: Apple HIG modular system (tokens + components + home page) -->
     <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/pages/home.css">
 
     <!-- Vendors: KaTeX + jsQR -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
@@ -25,47 +24,63 @@
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 </head>
 
-<body>
-    <div class="container container-page">
-        <header class="site-header">
-            <div>
-                <h1>EasyRevise</h1>
-                <p class="subtitle mb-0">Hệ thống ôn tập đề cương thông minh</p>
-            </div>
-            <div class="user-bar">
-                <button id="themeToggle" class="btn btn-icon btn-ghost" onclick="toggleTheme()" title="Đổi giao diện">
+<body class="home-page">
+    <!-- Sticky glass header -->
+    <header class="home-header">
+        <div class="home-container home-header-inner">
+            <a href="/" class="home-brand">
+                <span class="home-brand-mark" aria-hidden="true">E</span>
+                <span>EasyRevise</span>
+            </a>
+            <div class="home-header-actions">
+                <button id="themeToggle" class="btn btn-icon btn-ghost btn-sm" onclick="toggleTheme()" title="Đổi giao diện" aria-label="Đổi giao diện">
                     <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
                 </button>
-                <button id="qrScanBtn" class="btn btn-sm btn-ghost btn-qr"
-                    onclick="openQRScanner()">
+                <button id="qrScanBtn" class="btn btn-sm btn-ghost" onclick="openQRScanner()" aria-label="Quét QR">
                     <svg class="icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                    <span class="hide-mobile">Quét QR</span></button>
-                <button class="btn btn-sm btn-ghost btn-review"
-                    onclick="openReviewByCodeModal()">
+                    <span class="hide-mobile">Quét QR</span>
+                </button>
+                <button class="btn btn-sm btn-ghost" onclick="openReviewByCodeModal()" aria-label="Xem lại bài">
                     <svg class="icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                    <span class="hide-mobile">Xem lại</span></button>
+                    <span class="hide-mobile">Xem lại</span>
+                </button>
                 <div id="authArea">
-                    <button class="btn btn-ghost" onclick="openAuthModal()">Đăng nhập</button>
+                    <button class="btn btn-sm btn-secondary" onclick="openAuthModal()">Đăng nhập</button>
                 </div>
             </div>
-        </header>
+        </div>
+    </header>
 
-        <section class="section">
-            <h2>Chọn đề ôn tập</h2>
-            <div id="examList" class="exam-grid stagger">
-                <div class="skeleton-card">
+    <main class="home-container">
+        <!-- Hero -->
+        <section class="home-hero">
+            <div class="home-hero-eyebrow">Ôn tập thông minh</div>
+            <h1 class="home-hero-title">Sẵn sàng cho bài kiểm tra tiếp theo</h1>
+            <p class="home-hero-desc">
+                Chọn đề ôn tập bên dưới hoặc nhập mã kích hoạt từ giáo viên để bắt đầu.
+                Hệ thống chấm điểm tự động và đưa ra lời giải chi tiết cho từng câu.
+            </p>
+        </section>
+
+        <!-- Exam list -->
+        <section class="home-section" aria-label="Danh sách đề thi">
+            <div class="home-section-header">
+                <h2 class="home-section-title">Chọn đề ôn tập</h2>
+            </div>
+            <div id="examList" class="home-exam-grid stagger">
+                <div class="card card-raised home-exam-card skeleton-card">
                     <div class="skeleton-line w80"></div>
                     <div class="skeleton-line w60"></div>
                     <div class="skeleton-line w50"></div>
                     <div class="skeleton-btn"></div>
                 </div>
-                <div class="skeleton-card">
+                <div class="card card-raised home-exam-card skeleton-card">
                     <div class="skeleton-line w80"></div>
                     <div class="skeleton-line w60"></div>
                     <div class="skeleton-line w50"></div>
                     <div class="skeleton-btn"></div>
                 </div>
-                <div class="skeleton-card">
+                <div class="card card-raised home-exam-card skeleton-card">
                     <div class="skeleton-line w80"></div>
                     <div class="skeleton-line w60"></div>
                     <div class="skeleton-line w50"></div>
@@ -74,23 +89,34 @@
             </div>
         </section>
 
-        <!-- In-Progress Section -->
-        <section id="inProgressSection" class="section" style="display: none;">
-            <h2 class="inprogress-heading"><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#f59e0b"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Bài đang làm dở</h2>
-            <div id="inProgressList"></div>
+        <!-- In-Progress -->
+        <section id="inProgressSection" class="home-section" hidden>
+            <div class="home-section-header">
+                <h2 class="home-section-title">⏱ Bài đang làm dở</h2>
+            </div>
+            <div id="inProgressList" class="home-inprogress-list"></div>
         </section>
 
-        <!-- History Section -->
-        <section id="historySection" class="section" style="display: none;">
-            <h2><svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--color-primary)"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Lịch sử làm bài</h2>
-            <div id="historyList"></div>
+        <!-- History -->
+        <section id="historySection" class="home-section" hidden>
+            <div class="home-section-header">
+                <h2 class="home-section-title">📚 Lịch sử làm bài</h2>
+            </div>
+            <div id="historyList" class="home-history-list"></div>
         </section>
-    </div>
+    </main>
+
+    <footer class="home-footer">
+        <div class="home-container">
+            <strong style="background:linear-gradient(135deg,var(--accent),var(--subject-math));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">EasyRevise</strong>
+            &nbsp;·&nbsp; Hệ thống ôn tập thông minh
+        </div>
+    </footer>
 
     <!-- Code Entry Modal -->
     <div id="codeModal" class="auth-modal">
         <div class="card auth-box modal-box-sm">
-            <div style="text-align:center;margin-bottom:0.5rem;"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+            <div style="text-align:center;margin-bottom:0.5rem;"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
             <h3 class="mb-2" style="text-align:center;">Đề thi yêu cầu mã</h3>
             <p id="codeExamTitle" class="text-muted text-sm mb-6"></p>
             <div id="codeError" class="auth-error"></div>
@@ -140,7 +166,7 @@
     <!-- PIN Modal -->
     <div id="pinModal" class="auth-modal">
         <div class="card auth-box modal-box-sm" style="text-align:center;">
-            <div style="margin-bottom:0.75rem;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="1.5"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></div>
+            <div style="margin-bottom:0.75rem;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></div>
             <h3 class="mb-2">Nhập PIN Admin</h3>
             <p class="text-muted text-sm mb-6">Nhập mã PIN 6 số để truy cập Admin Panel</p>
             <div id="pinError" class="auth-error"></div>
@@ -155,7 +181,7 @@
     <!-- Review by Code Modal -->
     <div id="reviewCodeModal" class="auth-modal">
         <div class="card auth-box modal-box-sm" style="text-align:center;">
-            <div style="margin-bottom:0.75rem;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+            <div style="margin-bottom:0.75rem;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
             <h3 class="mb-2">Xem lại bài làm</h3>
             <p class="text-muted text-sm mb-6">Nhập mã kích hoạt để xem lại kết quả</p>
             <div id="reviewCodeError" class="auth-error"></div>
@@ -175,7 +201,7 @@
                     <div class="qr-scanner-header-label">Quét mã QR</div>
                     <div class="qr-scanner-header-title">Hướng camera vào mã QR</div>
                 </div>
-                <button id="qrScanCloseBtn" class="btn btn-icon qr-scanner-close">✕</button>
+                <button id="qrScanCloseBtn" class="btn btn-icon btn-sm">✕</button>
             </div>
             <div class="qr-scanner-viewport">
                 <video id="qrVideo" style="width:100%;height:100%;object-fit:cover;" playsinline muted></video>
@@ -190,7 +216,7 @@
                 </div>
                 <canvas id="qrCanvas2" style="display:none;"></canvas>
             </div>
-            <div id="qrScanStatus" class="text-sm text-center p-4 qr-scanner-status">
+            <div id="qrScanStatus" class="qr-scanner-status">
                 Đang khởi động camera...
             </div>
         </div>
@@ -214,15 +240,6 @@
     <script src="/js/pages/home/qr-scanner.js"></script>
     <script src="/js/pages/home/qr-popup.js"></script>
     <script src="/js/pages/home/init.js"></script>
-
-    <!-- Footer -->
-    <footer class="site-footer">
-        <div class="container">
-            <span style="font-weight:700;background:linear-gradient(135deg,var(--color-primary),var(--color-accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">EasyRevise</span>
-            &nbsp;·&nbsp; Hệ thống ôn tập thông minh
-        </div>
-    </footer>
-
 </body>
 
 </html>
