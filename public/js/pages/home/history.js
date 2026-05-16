@@ -34,6 +34,12 @@ async function loadHistory() {
 
         section.hidden = false;
         container.innerHTML = _renderHistoryItems(allHistory, 'server');
+        if (typeof updateSectionCount === 'function') {
+            updateSectionCount('historyCount', allHistory.length, 'bài');
+        }
+        if (typeof checkListOverflow === 'function') {
+            checkListOverflow('historyReveal', 'historyFooter', 'historyToggleCount', allHistory.length);
+        }
     } catch (err) {
         // Fallback to local
         _loadLocalHistory();
@@ -48,6 +54,12 @@ function loadLocalHistory() {
     if (localHistory.length) {
         document.getElementById('historySection').hidden = false;
         document.getElementById('historyList').innerHTML = _renderHistoryItems(localHistory, 'local');
+        if (typeof updateSectionCount === 'function') {
+            updateSectionCount('historyCount', localHistory.length, 'bài');
+        }
+        if (typeof checkListOverflow === 'function') {
+            checkListOverflow('historyReveal', 'historyFooter', 'historyToggleCount', localHistory.length);
+        }
     }
 }
 
@@ -57,6 +69,12 @@ function _loadLocalHistory() {
     if (localHistory.length) {
         document.getElementById('historySection').hidden = false;
         document.getElementById('historyList').innerHTML = _renderHistoryItems(localHistory, 'local');
+        if (typeof updateSectionCount === 'function') {
+            updateSectionCount('historyCount', localHistory.length, 'bài');
+        }
+        if (typeof checkListOverflow === 'function') {
+            checkListOverflow('historyReveal', 'historyFooter', 'historyToggleCount', localHistory.length);
+        }
     }
 }
 
@@ -67,7 +85,7 @@ function _loadLocalHistory() {
  * @returns {string}
  */
 function _renderHistoryItems(items, source) {
-    return items.slice(0, 10).map((h, i) => {
+    return items.map((h, i) => {
         const score = parseFloat(h.score);
         const scoreClass = score >= 8 ? 'history-score--high' : score >= 5 ? 'history-score--mid' : 'history-score--low';
         const label = score >= 8

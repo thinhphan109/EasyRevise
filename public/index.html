@@ -36,11 +36,7 @@
                 <button id="themeToggle" class="btn btn-icon btn-ghost btn-sm" onclick="toggleTheme()" title="Đổi giao diện" aria-label="Đổi giao diện">
                     <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
                 </button>
-                <button id="qrScanBtn" class="btn btn-sm btn-ghost" onclick="openQRScanner()" aria-label="Quét QR">
-                    <svg class="icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                    <span class="hide-mobile">Quét QR</span>
-                </button>
-                <button class="btn btn-sm btn-ghost" onclick="openReviewByCodeModal()" aria-label="Xem lại bài">
+                <button class="btn btn-sm btn-ghost" onclick="openReviewByCodeModal()" aria-label="Xem lại bài" title="Xem lại bài đã làm">
                     <svg class="icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                     <span class="hide-mobile">Xem lại</span>
                 </button>
@@ -51,41 +47,83 @@
         </div>
     </header>
 
+    <div class="home-orb-3" aria-hidden="true"></div>
+
     <main class="home-container">
-        <!-- Hero -->
-        <section class="home-hero">
-            <div class="home-hero-eyebrow">Ôn tập thông minh</div>
-            <h1 class="home-hero-title">Sẵn sàng cho bài kiểm tra tiếp theo</h1>
-            <p class="home-hero-desc">
-                Chọn đề ôn tập bên dưới hoặc nhập mã kích hoạt từ giáo viên để bắt đầu.
-                Hệ thống chấm điểm tự động và đưa ra lời giải chi tiết cho từng câu.
-            </p>
+        <!-- Compact hero + command bar -->
+        <section class="home-hero" aria-label="Khu vực bắt đầu">
+            <h1 class="home-hero-title">
+                Sẵn sàng cho <span class="home-hero-title-accent">bài kiểm tra</span> tiếp theo
+            </h1>
+            <p class="home-hero-sub">Chọn đề bên dưới hoặc nhập mã kích hoạt để bắt đầu.</p>
+
+            <div class="home-command-bar" role="search">
+                <div class="home-command-input-wrap">
+                    <svg class="icon-prefix" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <input id="heroCodeInput"
+                        class="home-command-input"
+                        type="text"
+                        name="activation-code"
+                        placeholder="Nhập mã kích hoạt (vd. ABC123)"
+                        aria-label="Mã kích hoạt"
+                        autocomplete="one-time-code"
+                        autocorrect="off"
+                        autocapitalize="characters"
+                        spellcheck="false"
+                        inputmode="latin"
+                        data-1p-ignore
+                        data-lpignore="true"
+                        data-form-type="other"
+                        onkeydown="if(event.key==='Enter'){event.preventDefault();submitHeroCode();}">
+                </div>
+                <button class="btn btn-ghost btn-icon" type="button" onclick="openQRScanner()" aria-label="Quét mã QR" title="Quét QR">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                </button>
+                <span class="home-command-divider" aria-hidden="true"></span>
+                <button class="btn btn-primary" type="button" onclick="submitHeroCode()">Mở khoá</button>
+            </div>
+            <div class="home-hero-secondary">
+                <button type="button" class="home-hero-link" onclick="openReviewByCodeModal()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    Đã có mã để xem lại bài đã làm?
+                </button>
+            </div>
         </section>
 
         <!-- Exam list -->
         <section class="home-section" aria-label="Danh sách đề thi">
             <div class="home-section-header">
                 <h2 class="home-section-title">Chọn đề ôn tập</h2>
+                <span id="examCount" class="home-section-count" aria-live="polite"></span>
             </div>
-            <div id="examList" class="home-exam-grid stagger">
-                <div class="card card-raised home-exam-card skeleton-card">
-                    <div class="skeleton-line w80"></div>
-                    <div class="skeleton-line w60"></div>
-                    <div class="skeleton-line w50"></div>
-                    <div class="skeleton-btn"></div>
+            <div id="examListReveal" class="home-list-reveal" data-limit="6">
+                <div id="examList" class="home-exam-grid stagger">
+                    <div class="card card-raised home-exam-card skeleton-card">
+                        <div class="skeleton-line w80"></div>
+                        <div class="skeleton-line w60"></div>
+                        <div class="skeleton-line w50"></div>
+                        <div class="skeleton-btn"></div>
+                    </div>
+                    <div class="card card-raised home-exam-card skeleton-card">
+                        <div class="skeleton-line w80"></div>
+                        <div class="skeleton-line w60"></div>
+                        <div class="skeleton-line w50"></div>
+                        <div class="skeleton-btn"></div>
+                    </div>
+                    <div class="card card-raised home-exam-card skeleton-card">
+                        <div class="skeleton-line w80"></div>
+                        <div class="skeleton-line w60"></div>
+                        <div class="skeleton-line w50"></div>
+                        <div class="skeleton-btn"></div>
+                    </div>
                 </div>
-                <div class="card card-raised home-exam-card skeleton-card">
-                    <div class="skeleton-line w80"></div>
-                    <div class="skeleton-line w60"></div>
-                    <div class="skeleton-line w50"></div>
-                    <div class="skeleton-btn"></div>
-                </div>
-                <div class="card card-raised home-exam-card skeleton-card">
-                    <div class="skeleton-line w80"></div>
-                    <div class="skeleton-line w60"></div>
-                    <div class="skeleton-line w50"></div>
-                    <div class="skeleton-btn"></div>
-                </div>
+            </div>
+            <div id="examListFooter" class="home-list-footer" hidden>
+                <button type="button" class="home-list-toggle" data-target="examListReveal" data-unit="đề" aria-expanded="false">
+                    <span class="home-list-toggle-label">Xem tất cả</span>
+                    <span class="home-list-toggle-count" id="examListToggleCount"></span>
+                    <svg class="home-list-toggle-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
             </div>
         </section>
 
@@ -93,16 +131,36 @@
         <section id="inProgressSection" class="home-section" hidden>
             <div class="home-section-header">
                 <h2 class="home-section-title">⏱ Bài đang làm dở</h2>
+                <span id="inProgressCount" class="home-section-count"></span>
             </div>
-            <div id="inProgressList" class="home-inprogress-list"></div>
+            <div id="inProgressReveal" class="home-list-reveal" data-limit="4">
+                <div id="inProgressList" class="home-inprogress-list"></div>
+            </div>
+            <div id="inProgressFooter" class="home-list-footer" hidden>
+                <button type="button" class="home-list-toggle" data-target="inProgressReveal" data-unit="bài" aria-expanded="false">
+                    <span class="home-list-toggle-label">Xem tất cả</span>
+                    <span class="home-list-toggle-count" id="inProgressToggleCount"></span>
+                    <svg class="home-list-toggle-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+            </div>
         </section>
 
         <!-- History -->
         <section id="historySection" class="home-section" hidden>
             <div class="home-section-header">
                 <h2 class="home-section-title">📚 Lịch sử làm bài</h2>
+                <span id="historyCount" class="home-section-count"></span>
             </div>
-            <div id="historyList" class="home-history-list"></div>
+            <div id="historyReveal" class="home-list-reveal" data-limit="4">
+                <div id="historyList" class="home-history-list"></div>
+            </div>
+            <div id="historyFooter" class="home-list-footer" hidden>
+                <button type="button" class="home-list-toggle" data-target="historyReveal" data-unit="bài" aria-expanded="false">
+                    <span class="home-list-toggle-label">Xem tất cả</span>
+                    <span class="home-list-toggle-count" id="historyToggleCount"></span>
+                    <svg class="home-list-toggle-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+            </div>
         </section>
     </main>
 
@@ -233,6 +291,7 @@
     <script src="/js/components/toast.js"></script>
 
     <!-- JS: Home page modules -->
+    <script src="/js/pages/home/list-helpers.js"></script>
     <script src="/js/pages/home/exam-list.js"></script>
     <script src="/js/pages/home/history.js"></script>
     <script src="/js/pages/home/code-entry.js"></script>

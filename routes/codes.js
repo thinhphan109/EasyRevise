@@ -231,4 +231,28 @@ router.post('/:id/release-code', adminOnly, (req, res) => {
     res.json({ success: true, released: removed });
 });
 
+// POST /api/exams/lookup-by-code — find which exam a code belongs to (public)
+router.post('/lookup-by-code', (req, res) => {
+    const ip = req.ip || req.connection?.remoteAddress || 'unknown';
+    if (!checkVerifyRateLimit(ip, 'lookup')) {
+        return res.status(429).json({ error: 'Quá nhiều lần thử. Đợi 1 phút.' });
+    }
+    const inputCode = (req.body.code || '').toUpperCase().trim();
+    if (!inputCode || inputCode.length < 4) {
+        return res.status(400).json({ error: 'Mã quá ngắn' });
+    }
+    const data = readData();
+    for (const exam of (data.exams || [])) {
+        const found = (exam.accessCodes || []).find(c => c.code === inputCode);
+        if (found) {
+            return res.json({
+                examId: exam.id,
+                examTitle: exam.title,
+                code: inputCode
+            });
+        }
+    }
+    return res.status(404).json({ error: 'Mã không tồn tại trên đề nào' });
+});
+
 module.exports = router;

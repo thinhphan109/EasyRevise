@@ -46,6 +46,14 @@ async function loadExams() {
                     </div>
                 </article>`;
         }).join('');
+
+        // Update count + check if list overflows clamp
+        if (typeof updateSectionCount === 'function') {
+            updateSectionCount('examCount', exams.length, 'đề');
+        }
+        if (typeof checkListOverflow === 'function') {
+            checkListOverflow('examListReveal', 'examListFooter', 'examListToggleCount', exams.length);
+        }
     } catch (err) {
         console.error('loadExams error:', err);
     }
@@ -78,4 +86,11 @@ function loadInProgress() {
                 <span class="btn btn-primary btn-sm" style="pointer-events:none;">Tiếp tục →</span>
             </a>`;
     }).join('');
+
+    if (typeof updateSectionCount === 'function') {
+        updateSectionCount('inProgressCount', entries.length, 'bài');
+    }
+    if (typeof checkListOverflow === 'function') {
+        checkListOverflow('inProgressReveal', 'inProgressFooter', 'inProgressToggleCount', entries.length);
+    }
 }

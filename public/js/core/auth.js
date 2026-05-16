@@ -149,13 +149,25 @@ function updateAuthUI() {
             ? `<a href="javascript:void(0)" onclick="goAdmin()" class="btn btn-sm" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-radius:10px;">⚙️ Admin</a>`
             : '';
         area.innerHTML = `
-            <div class="flex items-center gap-3">
+            <div class="home-auth-menu">
                 ${adminBtn}
-                <a href="javascript:void(0)" onclick="goDashboard()" class="user-avatar" title="Dashboard"><img src="/api/avatar?name=${avatarName}&size=40" style="width:100%;height:100%;border-radius:inherit;" alt="${initial}"></a>
-                <div>
-                    <a href="javascript:void(0)" onclick="goDashboard()" class="font-semibold text-sm" style="color:inherit;text-decoration:none;">${escapeHtml(user.displayName || user.username)}</a>
-                    <button class="text-muted text-xs" style="background:none;border:none;cursor:pointer;padding:0;" onclick="logout()">Đăng xuất</button>
-                </div>
+                <details class="home-auth-details">
+                    <summary class="home-auth-trigger" aria-label="Tài khoản của tôi" title="${escapeHtml(user.displayName || user.username)}">
+                        <img src="/api/avatar?name=${avatarName}&size=64" alt="${initial}" />
+                        <span class="home-auth-name hide-mobile">${escapeHtml(user.displayName || user.username)}</span>
+                        <svg class="home-auth-chevron hide-mobile" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </summary>
+                    <div class="home-auth-dropdown" role="menu">
+                        <button type="button" role="menuitem" class="home-auth-item" onclick="goDashboard()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                            Dashboard
+                        </button>
+                        <button type="button" role="menuitem" class="home-auth-item home-auth-item--danger" onclick="logout()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            Đăng xuất
+                        </button>
+                    </div>
+                </details>
             </div>`;
     } else {
         area.innerHTML = `<button class="btn btn-ghost" onclick="openAuthModal()">Đăng nhập</button>`;

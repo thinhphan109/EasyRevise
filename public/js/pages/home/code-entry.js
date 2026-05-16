@@ -50,3 +50,39 @@ async function submitCode() {
         document.getElementById('codeError').style.display = 'block';
     }
 }
+
+/**
+ * Submit access code from the home hero command bar.
+ * Looks up which exam owns the code, then opens the standard unlock flow.
+ */
+async function submitHeroCode() {
+    const input = document.getElementById('heroCodeInput');
+    const code = (input?.value || '').trim().toUpperCase();
+    if (!code || code.length < 4) {
+        if (typeof showToast === 'function') showToast('Vui lòng nhập mã hợp lệ', 'warning');
+        input?.focus();
+        return;
+    }
+    try {
+        const res = await fetch('/api/exams/lookup-by-code', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            if (typeof showToast === 'function') showToast(data.error || 'Mã không hợp lệ', 'error');
+            input?.focus();
+            input?.select?.();
+            return;
+        }
+        // Pre-populate the standard code modal then auto-submit
+        _pendingCodeExamId = data.examId;
+        document.getElementById('codeExamTitle').textContent = data.examTitle || '';
+        document.getElementById('codeInput').value = code;
+        document.getElementById('codeError').style.display = 'none';
+        await submitCode();
+    } catch {
+        if (typeof showToast === 'function') showToast('Lỗi kết nối', 'error');
+    }
+}

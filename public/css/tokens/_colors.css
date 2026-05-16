@@ -51,68 +51,74 @@
     --subject-ielts:      #5856d6;
 }
 
+/* ============================================================
+   DARK MODE — "Twilight"
+   Charcoal navy with subtle indigo undertone (not pitch black)
+   Designed to feel premium under low light, screenshot-friendly.
+   ============================================================ */
 [data-theme="dark"] {
-    --bg:           #000000;
-    --surface:      #1c1c1e;
-    --surface-2:    #2c2c2e;
-    --surface-3:    #3a3a3c;
-    --surface-glass: rgba(28, 28, 30, 0.72);
+    --bg:           #10131c;
+    --surface:      #1b1e29;
+    --surface-2:    #242838;
+    --surface-3:    #2e3247;
+    --surface-glass: rgba(27, 30, 41, 0.74);
 
-    --border:        rgba(255, 255, 255, 0.08);
-    --border-strong: rgba(255, 255, 255, 0.16);
+    --border:        rgba(160, 170, 200, 0.10);
+    --border-strong: rgba(160, 170, 200, 0.20);
 
     --text:    #f5f5f7;
-    --text-2:  #a8a8ad;
-    --text-3:  #98989d;
-    --text-4:  #6e6e73;
+    --text-2:  #b8bac8;
+    --text-3:  #8e92a4;
+    --text-4:  #5f637a;
 
-    --accent:        #0a6dd8;
-    --accent-hover:  #1a82ff;
-    --accent-soft:   rgba(10, 132, 255, 0.18);
-    --accent-text:   #58a6ff;
+    --accent:        #4f8cff;
+    --accent-hover:  #6ba1ff;
+    --accent-soft:   rgba(79, 140, 255, 0.20);
+    --accent-text:   #82b1ff;
 
     --success:        #30d158;
-    --success-soft:   rgba(48, 209, 88, 0.16);
+    --success-soft:   rgba(48, 209, 88, 0.18);
     --warning:        #ff9f0a;
-    --warning-soft:   rgba(255, 159, 10, 0.16);
+    --warning-soft:   rgba(255, 159, 10, 0.18);
     --error:          #ff453a;
-    --error-soft:     rgba(255, 69, 58, 0.16);
-    --info:           #0a84ff;
-    --info-soft:      rgba(10, 132, 255, 0.16);
+    --error-soft:     rgba(255, 69, 58, 0.18);
+    --info:           #4f8cff;
+    --info-soft:      rgba(79, 140, 255, 0.18);
 
-    --subject-math:       #5e5ce6;
-    --subject-english:    #0a84ff;
-    --subject-physics:    #ff9f0a;
-    --subject-chemistry:  #30d158;
-    --subject-biology:    #40c8e0;
-    --subject-history:    #bf8d4f;
-    --subject-geography:  #ff375f;
-    --subject-literature: #ff453a;
-    --subject-it:         #64d2ff;
-    --subject-ielts:      #5e5ce6;
+    --subject-math:       #7c7cf5;
+    --subject-english:    #4f8cff;
+    --subject-physics:    #ffb340;
+    --subject-chemistry:  #4ade80;
+    --subject-biology:    #5dd6ed;
+    --subject-history:    #d4a371;
+    --subject-geography:  #ff5778;
+    --subject-literature: #ff6b60;
+    --subject-it:         #82dbff;
+    --subject-ielts:      #7c7cf5;
 }
 
 /* Auto dark mode if no manual preference */
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-        --bg:           #000000;
-        --surface:      #1c1c1e;
-        --surface-2:    #2c2c2e;
-        --surface-3:    #3a3a3c;
-        --surface-glass: rgba(28, 28, 30, 0.72);
-        --border:        rgba(255, 255, 255, 0.08);
-        --border-strong: rgba(255, 255, 255, 0.16);
+        --bg:           #10131c;
+        --surface:      #1b1e29;
+        --surface-2:    #242838;
+        --surface-3:    #2e3247;
+        --surface-glass: rgba(27, 30, 41, 0.74);
+        --border:        rgba(160, 170, 200, 0.10);
+        --border-strong: rgba(160, 170, 200, 0.20);
         --text:    #f5f5f7;
-        --text-2:  #a8a8ad;
-        --text-3:  #98989d;
-        --text-4:  #6e6e73;
-        --accent:        #0a6dd8;
-        --accent-hover:  #1a82ff;
-        --accent-soft:   rgba(10, 132, 255, 0.18);
+        --text-2:  #b8bac8;
+        --text-3:  #8e92a4;
+        --text-4:  #5f637a;
+        --accent:        #4f8cff;
+        --accent-hover:  #6ba1ff;
+        --accent-soft:   rgba(79, 140, 255, 0.20);
+        --accent-text:   #82b1ff;
         --success:        #30d158;
-        --success-soft:   rgba(48, 209, 88, 0.16);
+        --success-soft:   rgba(48, 209, 88, 0.18);
         --warning:        #ff9f0a;
         --error:          #ff453a;
-        --error-soft:     rgba(255, 69, 58, 0.16);
+        --error-soft:     rgba(255, 69, 58, 0.18);
     }
 }

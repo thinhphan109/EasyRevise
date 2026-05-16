@@ -13,9 +13,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
         const res = await fetch('/api/dashboard', {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+            headers: { 'Authorization': `Bearer ${token}` },
+            signal: controller.signal
+        }).finally(() => clearTimeout(timeoutId));
 
         if (res.status === 401 || res.status === 403) {
             document.getElementById('dashboardLoading').hidden = true;
@@ -37,12 +40,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderHistory(data.recentHistory);
 
     } catch (err) {
+        const isTimeout = err.name === 'AbortError';
         console.error('Dashboard load error:', err);
         document.getElementById('dashboardLoading').innerHTML = `
             <div class="dash-section" style="text-align:center;padding:var(--space-10) 0;">
-                <div style="font-size:48px;margin-bottom:var(--space-3);">⚠️</div>
-                <p style="color:var(--text-2);margin-bottom:var(--space-4);">Không thể tải dữ liệu. Vui lòng thử lại.</p>
+                <div style="font-size:48px;margin-bottom:var(--space-3);">${isTimeout ? '⏱️' : '⚠️'}</div>
+                <p style="color:var(--text-2);margin-bottom:var(--space-4);">
+                    ${isTimeout ? 'Yêu cầu mất quá lâu. Máy chủ có thể đang bận.' : 'Không thể tải dữ liệu. Vui lòng thử lại.'}
+                </p>
                 <button class="btn btn-primary" onclick="location.reload()">Tải lại</button>
+                <a href="/" class="btn btn-ghost" style="margin-left:var(--space-2);">Về trang chủ</a>
             </div>`;
     }
 });
