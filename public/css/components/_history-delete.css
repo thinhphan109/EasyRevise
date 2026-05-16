@@ -1,0 +1,105 @@
+/* ============================================================
+   History list delete buttons — single source of truth
+   for both user dashboard and home page.
+   ============================================================ */
+
+/* ── Row container: link + delete button ───────────── */
+.history-list .history-item.history-item--row {
+    display: flex !important;             /* override grid in _dashboard.css */
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
+    grid-template-columns: none;
+    grid-template-rows: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: border-color 150ms ease, background 150ms ease, transform 200ms ease;
+}
+.history-list .history-item.history-item--row:hover {
+    border-color: var(--border-strong, var(--border));
+    background: var(--surface-2);
+    transform: translateY(-1px);
+}
+
+/* The clickable area inside the row */
+.history-list .history-item.history-item--row .history-item-link {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: var(--space-3);
+    align-items: center;
+    flex: 1;
+    padding: var(--space-3) var(--space-4);
+    text-decoration: none;
+    color: inherit;
+    min-width: 0;
+}
+
+/* ── Delete button — perfectly centered ─────────────── */
+.history-list .history-item.history-item--row .history-item-delete {
+    align-self: stretch;          /* fill row height */
+    display: flex;                /* flex centers without padding skew */
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    margin: 0;
+    padding: 0;
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    border-left: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+    color: var(--text-3);
+    cursor: pointer;
+    transition: background 150ms ease, color 150ms ease;
+    line-height: 0;               /* eliminate baseline misalignment from inline SVG */
+}
+.history-list .history-item.history-item--row .history-item-delete svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+    margin: auto;
+}
+.history-list .history-item.history-item--row .history-item-delete:hover,
+.history-list .history-item.history-item--row .history-item-delete:focus-visible {
+    background: var(--error-soft);
+    color: var(--error);
+    outline: none;
+}
+.history-list .history-item.history-item--row .history-item-delete:active {
+    background: color-mix(in srgb, var(--error) 14%, var(--surface));
+}
+
+@media (max-width: 479px) {
+    .history-list .history-item.history-item--row .history-item-link {
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto auto;
+    }
+    .history-list .history-item.history-item--row .history-time { grid-column: 1 / -1; }
+    .history-list .history-item.history-item--row .history-item-delete { width: 44px; }
+}
+
+/* ── Home page variant (smaller, no border-left) ────── */
+.home-history-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-3);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+    line-height: 0;
+}
+.home-history-delete svg { display: block; margin: auto; }
+.home-history-delete:hover,
+.home-history-delete:focus-visible {
+    background: var(--error-soft);
+    color: var(--error);
+    border-color: color-mix(in srgb, var(--error) 30%, transparent);
+    outline: none;
+}

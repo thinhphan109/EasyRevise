@@ -1,0 +1,267 @@
+/* ========================================
+   EasyRevise — Cross-Platform Enhancements
+   Touch targets, safe-area, landscape,
+   iOS keyboard, scroll snap, swipe hints
+   ======================================== */
+
+/* ── Enhanced Touch Targets (48px min per WCAG) ── */
+@media (hover: none) and (pointer: coarse) {
+    .btn {
+        min-height: 48px;
+        min-width: 48px;
+    }
+
+    .btn-sm {
+        min-height: 40px;
+        min-width: 40px;
+    }
+
+    .btn-icon {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    .option-btn {
+        min-height: 52px;
+        padding: var(--space-4) var(--space-5);
+    }
+
+    .q-cell {
+        min-height: 36px;
+        min-width: 36px;
+        font-size: 0.75rem;
+    }
+
+    /* Larger close buttons on touch */
+    .modal-close,
+    .qr-scanner-close {
+        min-width: 44px;
+        min-height: 44px;
+    }
+}
+
+/* ── iOS Safe-Area Support ── */
+@supports (padding: env(safe-area-inset-bottom)) {
+    /* Bottom drawer respects safe area */
+    .mobile-drawer {
+        padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+
+    /* Container respects notch on sides (landscape iPhone) */
+    .container,
+    .container-page {
+        padding-left: max(var(--space-4), env(safe-area-inset-left));
+        padding-right: max(var(--space-4), env(safe-area-inset-right));
+    }
+
+    /* Fixed bottom elements need safe-area */
+    .exam-footer-fixed {
+        padding-bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+    }
+}
+
+/* ── Landscape Exam Layout ── */
+@media (max-height: 500px) and (orientation: landscape) {
+    /* Compact header in landscape */
+    .header-nav {
+        margin-bottom: 0.25rem;
+    }
+
+    /* Reduce question container padding */
+    .question-container {
+        padding: var(--space-4);
+    }
+
+    .question-text {
+        font-size: var(--text-lg);
+        margin-bottom: var(--space-4);
+    }
+
+    /* Compact timer */
+    .timer-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+
+    /* Scrollable options in landscape */
+    .options-grid {
+        max-height: 40vh;
+        overflow-y: auto;
+    }
+
+    /* Reduce score circle in landscape result */
+    .score-circle {
+        width: 120px;
+        height: 120px;
+        border-width: 5px;
+    }
+
+    .score-value {
+        font-size: 2rem;
+    }
+
+    .score-section {
+        padding: 1rem;
+    }
+
+    /* Compact result stats */
+    .result-stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.5rem;
+    }
+}
+
+/* ── Tablet Landscape: Two-column exam ── */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+    .exam-layout {
+        grid-template-columns: 1fr 220px;
+    }
+}
+
+/* ── Touch Scroll Enhancements ── */
+.options-grid {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+.passage-box {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+.drawer-content {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+/* ── Prevent Double-Tap Zoom on Buttons ── */
+.btn,
+.option-btn,
+.q-cell,
+.exit-btn,
+.flag-btn {
+    touch-action: manipulation;
+}
+
+/* ── Swipe Visual Hint for Exam ── */
+@keyframes swipeHint {
+    0%, 100% { transform: translateX(0); opacity: 0; }
+    20% { opacity: 0.6; }
+    50% { transform: translateX(-12px); opacity: 0.6; }
+    80% { opacity: 0; }
+}
+
+.swipe-hint {
+    position: fixed;
+    bottom: 80px;
+    right: 16px;
+    background: var(--color-text);
+    color: var(--color-surface);
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    opacity: 0;
+    animation: swipeHint 3s ease 2s 2; /* delay 2s, play 2x */
+    pointer-events: none;
+    z-index: 50;
+}
+
+/* Only show swipe hint on touch devices */
+@media (hover: hover) {
+    .swipe-hint { display: none; }
+}
+
+/* ── iOS Keyboard Push Fix ── */
+@media (max-width: 767px) {
+    .essay-input:focus,
+    .auth-input:focus {
+        /* Prevent iOS from hiding content behind keyboard */
+        scroll-margin-bottom: 200px;
+    }
+}
+
+/* ── Print: Hide interactive elements, show content ── */
+@media print {
+    .mobile-drawer,
+    .sidebar-desktop,
+    .site-header .user-bar,
+    .btn-qr,
+    .btn-review,
+    #themeToggle,
+    .exit-btn,
+    .flag-btn,
+    .exam-footer { display: none !important; }
+
+    .exam-layout { grid-template-columns: 1fr; }
+
+    .question-container {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    body {
+        background: white !important;
+        color: black !important;
+        font-size: 12pt;
+    }
+
+    .card, .glass-panel {
+        border: 1px solid #ddd !important;
+        box-shadow: none !important;
+    }
+}
+
+/* ── Reduced Motion: Respect user preference ── */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .swipe-hint { display: none; }
+}
+
+/* ── Dark/Light Transitions ── */
+html {
+    color-scheme: light dark;
+}
+
+[data-theme="dark"] {
+    color-scheme: dark;
+}
+
+[data-theme="light"] {
+    color-scheme: light;
+}
+
+/* ── High Contrast Mode ── */
+@media (prefers-contrast: high) {
+    :root {
+        --color-border: #6b7280;
+        --color-text-muted: #4b5563;
+    }
+
+    .option-btn {
+        border-width: 3px;
+    }
+
+    .q-cell {
+        border-width: 2px;
+    }
+}
+
+/* ── Focus Visible for Keyboard Navigation ── */
+*:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+}
+
+/* Remove focus ring for pointer interaction */
+*:focus:not(:focus-visible) {
+    outline: none;
+}

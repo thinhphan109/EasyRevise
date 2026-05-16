@@ -1,0 +1,161 @@
+/* ============================================================
+   QR Activation Popup — token-based, dark-mode safe.
+   Replaces hardcoded indigo gradient + light-mode-only colors.
+   ============================================================ */
+
+.qr-popup-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Gradient header — uses accent + subject palette so dark mode adapts */
+.qr-popup-header {
+    padding: 1.5rem 1.75rem;
+    color: #fff;
+    background: linear-gradient(135deg,
+        var(--accent),
+        color-mix(in srgb, var(--accent) 65%, var(--subject-math, #af52de) 35%));
+}
+
+.qr-popup-eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.72rem;
+    font-weight: 700;
+    opacity: 0.85;
+    margin-bottom: 0.35rem;
+}
+
+.qr-popup-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    line-height: 1.3;
+    color: #fff;
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+.qr-popup-meta {
+    font-size: 0.88rem;
+    opacity: 0.85;
+    margin-top: 0.35rem;
+}
+
+.qr-popup-code {
+    margin-top: 0.85rem;
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 8px;
+    padding: 0.3rem 0.85rem;
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    backdrop-filter: blur(4px);
+}
+
+.qr-popup-body {
+    padding: 1.5rem 1.75rem;
+    color: var(--text);
+}
+
+/* ── History row ── */
+.qr-history-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.4rem;
+    padding: 0.6rem 0.85rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    transition: background 150ms ease, border-color 150ms ease;
+}
+
+.qr-history-item:hover {
+    background: var(--surface-3, var(--surface-2));
+    border-color: var(--border-strong, var(--border));
+}
+
+.qr-history-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.qr-history-score {
+    font-weight: 800;
+    font-size: 1.05rem;
+    color: var(--text-3);
+}
+.qr-history-score.is-success { color: var(--success); }
+.qr-history-score.is-warning { color: var(--warning); }
+.qr-history-score.is-error   { color: var(--error); }
+.qr-history-score.is-muted   { color: var(--text-3); }
+
+/* Delete icon button */
+.qr-history-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--text-3);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.qr-history-delete:hover,
+.qr-history-delete:focus-visible {
+    background: var(--error-soft);
+    color: var(--error);
+    border-color: color-mix(in srgb, var(--error) 30%, transparent);
+    outline: none;
+}
+
+/* ── Pills (in-progress, info) ── */
+.qr-pill {
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+}
+
+.qr-pill-eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.qr-pill-warning {
+    background: var(--warning-soft);
+    border-color: color-mix(in srgb, var(--warning) 25%, transparent);
+}
+.qr-pill-warning .qr-pill-eyebrow,
+.qr-pill-warning .text-sm { color: var(--warning); }
+
+.qr-pill-info {
+    background: var(--info-soft, var(--accent-soft));
+    border-color: color-mix(in srgb, var(--accent) 25%, transparent);
+}
+.qr-pill-info .qr-pill-eyebrow,
+.qr-pill-info .text-sm { color: var(--accent); }
+
+/* ── Disabled CTA ── */
+.qr-cta-disabled {
+    background: var(--surface-2) !important;
+    color: var(--text-3) !important;
+    border: 1px solid var(--border) !important;
+    cursor: not-allowed !important;
+    opacity: 0.7;
+}

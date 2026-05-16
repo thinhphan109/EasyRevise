@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dashboard — EasyRevise</title>
+<meta name="description" content="Thống kê học tập cá nhân và lịch sử làm bài.">
+<meta name="theme-color" content="#0071e3">
+
+<!-- No-flicker theme apply -->
+<script>
+(function(){
+    try {
+        var v = localStorage.getItem('easyrevise_theme');
+        var t = (v === 'light' || v === 'dark')
+            ? v
+            : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+})();
+</script>
+
+<link rel="stylesheet" href="/css/main.css">
+</head>
+
+<body class="dashboard-page">
+
+<a href="#main" class="skip-link">Bỏ qua nội dung</a>
+
+<!-- ── Sticky topbar ────────────────────────────────── -->
+<div class="dash-topbar">
+    <div class="dash-container dash-topbar-inner">
+        <a href="/" class="btn btn-ghost btn-sm" aria-label="Về trang chủ">
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#arrow-left"/></svg>
+            <span>Trang chủ</span>
+        </a>
+        <div style="flex:1;"></div>
+        <div id="themeToggleSlot"></div>
+    </div>
+</div>
+
+<main id="main" class="dash-container">
+
+    <!-- ── Loading state ────────────────────────────── -->
+    <div id="dashboardLoading" class="dash-loading">
+        <div class="dash-loading-spinner" aria-hidden="true"></div>
+        <p>Đang tải thống kê...</p>
+    </div>
+
+    <!-- ── Login required state ─────────────────────── -->
+    <div id="dashboardLoginRequired" style="display:none;">
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <svg class="icon"><use href="/assets/icons/sprite.svg#shield-check"/></svg>
+            </div>
+            <h3 class="empty-state-title">Cần đăng nhập</h3>
+            <p class="empty-state-desc">Bạn cần đăng nhập để xem dashboard cá nhân.</p>
+            <a href="/" class="btn btn-primary">
+                <svg class="icon icon-sm" aria-hidden="true"><use href="/assets/icons/sprite.svg#arrow-left"/></svg>
+                Về trang chủ
+            </a>
+        </div>
+    </div>
+
+    <!-- ── Content ──────────────────────────────────── -->
+    <div id="dashboardContent" style="display:none;">
+
+        <!-- Profile card -->
+        <section class="dash-profile" aria-labelledby="profileName">
+            <img id="profileAvatar" class="dash-profile-avatar" src="/api/avatar?name=anonymous&size=160" alt="Avatar" width="80" height="80">
+            <div class="dash-profile-info">
+                <h1 id="profileName" class="dash-profile-name">—</h1>
+                <p id="profileMeta" class="dash-profile-meta">Đang tải...</p>
+            </div>
+            <div id="streakBadge" class="dash-streak" style="display:none;">
+                <svg class="icon icon-sm" aria-hidden="true" style="color:var(--warning);"><use href="/assets/icons/sprite.svg#flame"/></svg>
+                <strong><span id="streakCount">0</span></strong>
+                <span>ngày</span>
+            </div>
+        </section>
+
+        <!-- Stat grid -->
+        <section class="dash-section">
+            <h2 class="dash-section-title">Tổng quan</h2>
+            <div id="statGrid" class="stat-grid"></div>
+        </section>
+
+        <!-- Subject breakdown -->
+        <section id="subjectSection" class="dash-section" style="display:none;">
+            <h2 class="dash-section-title">
+                <svg class="icon" style="color:var(--accent);" aria-hidden="true"><use href="/assets/icons/sprite.svg#bar-chart-3"/></svg>
+                Phân tích theo môn
+            </h2>
+            <div id="subjectList" class="subject-list"></div>
+        </section>
+
+        <!-- Recent history -->
+        <section id="historySection" class="dash-section" style="display:none;">
+            <h2 class="dash-section-title">
+                <svg class="icon" style="color:var(--accent);" aria-hidden="true"><use href="/assets/icons/sprite.svg#clock"/></svg>
+                Lịch sử gần đây
+            </h2>
+            <div id="historyList" class="history-list"></div>
+        </section>
+
+        <!-- Empty state (no history) -->
+        <div id="emptyState" style="display:none;">
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <svg class="icon"><use href="/assets/icons/sprite.svg#file-text"/></svg>
+                </div>
+                <h3 class="empty-state-title">Chưa có hoạt động</h3>
+                <p class="empty-state-desc">Bạn chưa làm bài nào. Hãy chọn một đề ôn tập để bắt đầu.</p>
+                <a href="/" class="btn btn-primary">
+                    Chọn đề ôn tập
+                    <svg class="icon icon-sm" aria-hidden="true"><use href="/assets/icons/sprite.svg#arrow-right"/></svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer class="dash-footer">
+    <div class="dash-container">
+        <strong>EasyRevise</strong> · Luyện đề thông minh
+    </div>
+</footer>
+
+
+<!-- ── Bottom nav (mobile) ──────────────────────────── -->
+<nav class="bottom-nav" aria-label="Điều hướng dưới">
+    <a href="/" class="bottom-nav-item">
+        <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#home"/></svg>
+        <span class="bottom-nav-item-label">Trang chủ</span>
+    </a>
+    <a href="/#history" class="bottom-nav-item">
+        <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#clock"/></svg>
+        <span class="bottom-nav-item-label">Lịch sử</span>
+    </a>
+    <a href="/dashboard.html" class="bottom-nav-item active" aria-current="page">
+        <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#user"/></svg>
+        <span class="bottom-nav-item-label">Tài khoản</span>
+    </a>
+</nav>
+
+
+<!-- ── New ESM modules (theme + icons) ──────────────── -->
+<script type="module">
+import { mountThemeToggle } from '/js/components/theme-toggle.js';
+import { preloadSprite } from '/js/core/icons.js';
+
+await preloadSprite();
+mountThemeToggle('#themeToggleSlot', { size: 'md' });
+</script>
+
+
+<!-- ── Stat icon override (replace emoji with SVG) ── -->
+<script>
+(function () {
+    // Map emoji → svg icon id
+    const ICON_MAP = {
+        '📝': 'file-text',
+        '⭐': 'star',
+        '🎯': 'target',
+        '⏱️': 'timer',
+        '📊': 'bar-chart-3'
+    };
+
+    function decorateStatCards() {
+        const grid = document.getElementById('statGrid');
+        if (!grid) return;
+        const cards = grid.querySelectorAll('.stat-card .stat-icon');
+        cards.forEach(el => {
+            const txt = (el.textContent || '').trim();
+            if (ICON_MAP[txt]) {
+                el.innerHTML = `<svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#${ICON_MAP[txt]}"/></svg>`;
+            }
+        });
+    }
+
+    // Run after dashboard data fully loaded — observe stat grid
+    function watchGrid() {
+        const grid = document.getElementById('statGrid');
+        if (!grid) return;
+        const obs = new MutationObserver(() => {
+            if (grid.children.length > 0) {
+                decorateStatCards();
+                obs.disconnect();
+            }
+        });
+        obs.observe(grid, { childList: true });
+        // First check
+        if (grid.children.length > 0) {
+            decorateStatCards();
+            obs.disconnect();
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', watchGrid);
+    } else {
+        watchGrid();
+    }
+})();
+</script>
+
+
+<!-- ── Legacy core + dashboard module ────────────────── -->
+<script src="/js/core/utils.js"></script>
+<script src="/js/core/api.js"></script>
+<script src="/js/core/store.js"></script>
+<script src="/js/core/auth.js"></script>
+<script src="/js/components/theme.js"></script>
+<script src="/js/components/toast.js"></script>
+<script src="/js/pages/dashboard/index.js"></script>
+
+</body>
+</html>

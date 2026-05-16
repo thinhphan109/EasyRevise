@@ -1,0 +1,294 @@
+/* ============================================================
+   native-select-enhancer.css
+   Premium themed dropdown — portal menu (in body) for any
+   <select>. Dark-mode safe via tokens.
+   ============================================================ */
+
+/* ── Host (wraps the original <select>) ─────────────────── */
+.ns-host {
+    position: relative;
+    display: inline-block;
+    /* Width follows parent layout (flex:1, max-width, etc.) inherited via classList
+       copy from the native <select>. Default to auto to avoid forcing 100%. */
+    width: auto;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+/* When host inherits form-input/form-select/select-* classes from native select,
+   suppress the visual chrome from those classes — the host's chrome is already
+   provided by the inner .ns-trigger. */
+.ns-host.form-input,
+.ns-host.form-select,
+.ns-host[class*="form-"] {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    box-shadow: none !important;
+    color: inherit !important;
+    appearance: auto;
+}
+.ns-host.is-sm .ns-trigger { min-height: 36px; padding: 0.42rem 2.2rem 0.42rem 0.75rem; font-size: 0.85rem; }
+.ns-host.is-lg .ns-trigger { min-height: 52px; padding: 0.85rem 2.4rem 0.85rem 1rem; font-size: 1rem; }
+
+/* Hide the native control without removing it from the a11y tree.
+   We keep it in the layout so existing CSS sizing rules apply, and just
+   stack it underneath the trigger. */
+.ns-native {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    z-index: -1 !important;
+    /* Keep contributing to the host's intrinsic size */
+}
+
+/* ── Trigger button ─────────────────────────────────────── */
+.ns-trigger {
+    width: 100%;
+    min-height: 44px;
+    padding: 0.65rem 2.4rem 0.65rem 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    background: var(--surface, #fff);
+    color: var(--text, #111);
+    border: 1px solid var(--border, rgba(0,0,0,0.12));
+    border-radius: var(--radius, 12px);
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 500;
+    line-height: 1.3;
+    text-align: left;
+    cursor: pointer;
+    transition:
+        border-color 180ms ease,
+        background 180ms ease,
+        box-shadow 180ms ease;
+    box-sizing: border-box;
+    position: relative;
+}
+.ns-trigger:hover {
+    border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+}
+.ns-host.is-open .ns-trigger {
+    /* When the menu is open, the menu itself provides the focus indicator.
+       Drop the focus shadow here to avoid the visible "line" between
+       trigger and menu. */
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: none;
+}
+.ns-trigger:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+.ns-host.is-disabled .ns-trigger {
+    opacity: 0.55;
+    cursor: not-allowed;
+    background: var(--surface-2, var(--surface));
+}
+
+.ns-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.ns-label.is-placeholder { color: var(--text-3, #888); font-weight: 400; }
+
+.ns-chevron {
+    color: var(--text-3, #888);
+    flex-shrink: 0;
+    transition: transform 220ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.ns-host.is-open .ns-chevron { transform: rotate(180deg); color: var(--accent); }
+
+/* ── Portal menu (rendered in body) ─────────────────────── */
+.ns-portal {
+    position: fixed;
+    z-index: 99999;
+    background: var(--surface, #fff);
+    border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
+    border-radius: 12px;
+    padding: 0.4rem;
+    box-shadow:
+        0 24px 60px color-mix(in srgb, var(--text, #000) 22%, transparent),
+        0 8px 20px color-mix(in srgb, var(--text, #000) 12%, transparent),
+        0 0 0 4px color-mix(in srgb, var(--accent) 8%, transparent);
+    /* Removed `inset 0 1px 0 white 18%` — was creating a horizontal "line"
+       near the top of the menu that read as a stripe overlapping the
+       first option in dark mode. */
+    min-width: 200px;
+    max-height: 320px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: translateY(-6px) scale(0.97);
+    transform-origin: top center;
+    opacity: 0;
+    pointer-events: none;
+    transition:
+        transform 200ms cubic-bezier(0.34, 1.45, 0.64, 1),
+        opacity 160ms ease-out;
+}
+.ns-portal.is-open {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    pointer-events: auto;
+}
+.ns-portal.is-above { transform-origin: bottom center; }
+.ns-portal.is-above:not(.is-open) { transform: translateY(6px) scale(0.97); }
+
+/* (Removed top halo gradient ::before — was reading as a dark band on top of
+   dark-mode menus. Border-color now uses a subtle accent tint instead.) */
+.ns-portal > * { position: relative; z-index: 1; }
+
+/* Search bar */
+.ns-search {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.5rem 0.7rem;
+    margin-bottom: 0.35rem;
+    border-radius: 10px;
+    background: var(--surface-2, color-mix(in srgb, var(--text, #000) 5%, var(--surface)));
+    border: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+    color: var(--text-3);
+    flex-shrink: 0;
+}
+.ns-search > svg { flex-shrink: 0; }
+
+/* Reset hard against global input rules (e.g. _admin-polish.css setting
+   border + background on input[type="text"]). */
+.ns-portal .ns-search-input,
+.ns-portal input.ns-search-input,
+.ns-portal input[type="text"].ns-search-input {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+    border: 0 !important;
+    outline: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 0 0 0.15rem !important;
+    margin: 0 !important;
+    color: var(--text);
+    font: inherit;
+    font-size: 0.88rem;
+    min-height: 0 !important;
+    height: auto !important;
+    line-height: 1.4 !important;
+    border-radius: 0 !important;
+}
+.ns-portal .ns-search-input::placeholder { color: var(--text-3); opacity: 1; }
+
+/* Option list */
+.ns-list {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+    padding-right: 2px;
+}
+.ns-list::-webkit-scrollbar { width: 8px; }
+.ns-list::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--text-3) 40%, transparent);
+    border-radius: 999px;
+    border: 2px solid var(--surface);
+}
+.ns-list::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--text-3) 60%, transparent);
+}
+
+/* Option */
+.ns-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.5rem 0.65rem;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    color: var(--text);
+    font: inherit;
+    font-size: 0.9rem;
+    text-align: left;
+    cursor: pointer;
+    transition:
+        background 130ms ease,
+        border-color 130ms ease,
+        transform 130ms ease;
+    margin: 1px 0;
+}
+.ns-option:hover,
+.ns-option.is-focus {
+    background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+    border-color: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+.ns-option:active { transform: scale(0.99); }
+.ns-option:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+.ns-option.is-selected {
+    background: linear-gradient(135deg,
+        color-mix(in srgb, var(--accent) 14%, var(--surface)),
+        color-mix(in srgb, var(--subject-math, var(--accent)) 10%, var(--surface)));
+    border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.ns-option.is-selected .ns-option-text {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.ns-option-text {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.ns-option-check {
+    color: var(--accent);
+    opacity: 0;
+    flex-shrink: 0;
+    transition: opacity 130ms ease;
+}
+.ns-option.is-selected .ns-option-check { opacity: 1; }
+
+/* Group label */
+.ns-option[data-group]::before {
+    content: attr(data-group) " · ";
+    color: var(--text-3);
+    font-weight: 500;
+    margin-right: 4px;
+}
+
+/* Empty state */
+.ns-empty {
+    display: none;
+    text-align: center;
+    color: var(--text-3);
+    padding: 1.2rem 0.5rem;
+    font-size: 0.85rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ns-portal { transition: opacity 120ms ease; }
+    .ns-chevron, .ns-option { transition: none; }
+}
+
+@media (max-width: 540px) {
+    .ns-portal { max-height: 70vh; }
+}

@@ -1,0 +1,93 @@
+/* ===========================================================
+   Components — Bottom Navigation (Task 19)
+   Mobile-only, fixed bottom, glass blur, safe-area inset
+   =========================================================== */
+
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: var(--z-sticky);
+    background: var(--surface-glass);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+    border-top: 1px solid var(--border);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+    display: flex;
+    justify-content: space-around;
+    align-items: stretch;
+    height: calc(56px + env(safe-area-inset-bottom, 0px));
+}
+
+.bottom-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: var(--space-2) var(--space-1);
+    color: var(--text-3);
+    font-size: 11px;
+    font-weight: var(--weight-medium);
+    text-decoration: none;
+    transition: color var(--dur-fast) var(--ease-apple);
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+.bottom-nav-item .icon {
+    width: 22px;
+    height: 22px;
+    transition: transform var(--dur-fast) var(--ease-bounce);
+}
+.bottom-nav-item:active .icon {
+    transform: scale(0.92);
+}
+.bottom-nav-item-label {
+    line-height: 1;
+}
+
+/* Active state */
+.bottom-nav-item.active,
+.bottom-nav-item[aria-current="page"] {
+    color: var(--accent);
+}
+.bottom-nav-item.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 3px;
+    background: var(--accent);
+    border-radius: 0 0 var(--radius-pill) var(--radius-pill);
+}
+
+/* Hide on tablet+ */
+@media (min-width: 768px) {
+    .bottom-nav {
+        display: none;
+    }
+}
+
+/* Hide via class (used in exam page for immersive mode) */
+.bottom-nav-hidden .bottom-nav,
+body.no-bottom-nav .bottom-nav {
+    display: none;
+}
+
+/* When bottom-nav present, page content needs padding */
+body:has(.bottom-nav) {
+    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0));
+}
+@media (min-width: 768px) {
+    body:has(.bottom-nav) {
+        padding-bottom: 0;
+    }
+}

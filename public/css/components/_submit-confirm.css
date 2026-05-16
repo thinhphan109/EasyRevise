@@ -1,0 +1,213 @@
+/* ============================================================
+   Submit-confirm modal — exam unanswered warning
+   Token-based, dark-mode safe, premium gradient + spring entry
+   ============================================================ */
+
+.submit-confirm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background:
+        radial-gradient(ellipse at 30% 20%, color-mix(in srgb, var(--warning) 18%, transparent), transparent 55%),
+        radial-gradient(ellipse at 70% 80%, color-mix(in srgb, var(--error) 14%, transparent), transparent 60%),
+        color-mix(in srgb, var(--text) 38%, transparent);
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    opacity: 0;
+    transition: opacity 220ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.submit-confirm-overlay.is-open { opacity: 1; }
+
+.submit-confirm-card {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow:
+        0 36px 96px color-mix(in srgb, var(--text) 26%, transparent),
+        0 12px 32px color-mix(in srgb, var(--text) 14%, transparent),
+        inset 0 1px 0 color-mix(in srgb, white 22%, transparent);
+    overflow: hidden;
+    transform: translateY(14px) scale(0.94);
+    opacity: 0;
+    transition:
+        transform 360ms cubic-bezier(0.34, 1.45, 0.64, 1),
+        opacity 240ms ease-out;
+}
+.submit-confirm-overlay.is-open .submit-confirm-card {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+.submit-confirm-card::before {
+    content: '';
+    position: absolute;
+    inset: -1px -1px auto -1px;
+    height: 100px;
+    background: linear-gradient(180deg,
+        color-mix(in srgb, var(--warning) 16%, transparent) 0%,
+        color-mix(in srgb, var(--error) 8%, transparent) 50%,
+        transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+}
+.submit-confirm-card > * { position: relative; z-index: 1; }
+
+/* ── Body ── */
+.submit-confirm-body {
+    padding: 1.6rem 1.75rem 1.2rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+}
+
+.submit-confirm-head {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: 0.65rem;
+}
+
+.submit-confirm-icon {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    border-radius: 13px;
+    background: linear-gradient(135deg,
+        color-mix(in srgb, var(--warning) 92%, transparent),
+        color-mix(in srgb, var(--warning) 65%, var(--error)));
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+        0 8px 22px color-mix(in srgb, var(--warning) 36%, transparent),
+        0 0 0 5px color-mix(in srgb, var(--warning) 12%, transparent);
+    animation: submit-icon-pop 460ms cubic-bezier(0.34, 1.45, 0.64, 1);
+}
+
+@keyframes submit-icon-pop {
+    0%   { transform: scale(0); opacity: 0; }
+    60%  { transform: scale(1.12); opacity: 1; }
+    100% { transform: scale(1); }
+}
+
+.submit-confirm-text { min-width: 0; flex: 1; }
+.submit-confirm-title {
+    font-weight: 700;
+    font-size: 1.06rem;
+    color: var(--text);
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+}
+.submit-confirm-subtitle {
+    font-size: 0.86rem;
+    color: var(--text-2);
+    margin-top: 0.2rem;
+}
+
+/* ── Pills ── */
+.submit-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 0.6rem;
+}
+
+.submit-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    height: 34px;
+    padding: 0 0.5rem;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--error) 12%, var(--surface));
+    border: 1.5px solid color-mix(in srgb, var(--error) 30%, transparent);
+    color: var(--error);
+    font-size: 0.82rem;
+    font-weight: 700;
+    transition: transform 150ms ease;
+}
+.submit-pill:hover { transform: scale(1.08); }
+
+.submit-pill.submit-pill-more {
+    border-radius: 17px;
+    padding: 0 0.7rem;
+    background: var(--surface-2);
+    border-color: var(--border);
+    color: var(--text-2);
+    font-size: 0.78rem;
+}
+
+/* ── Actions ── */
+.submit-confirm-actions {
+    padding: 1.1rem 1.75rem 1.3rem;
+    display: flex;
+    gap: 0.7rem;
+    background: linear-gradient(180deg,
+        transparent,
+        color-mix(in srgb, var(--surface-2) 50%, transparent));
+}
+
+.submit-btn {
+    flex: 1;
+    padding: 0.78rem 1rem;
+    border-radius: 13px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition:
+        background 180ms ease,
+        transform 180ms cubic-bezier(0.34, 1.45, 0.64, 1),
+        box-shadow 180ms ease;
+}
+.submit-btn:hover { transform: translateY(-1px); }
+.submit-btn:active { transform: translateY(0) scale(0.98); }
+.submit-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.submit-btn-cancel {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+}
+.submit-btn-cancel:hover {
+    background: var(--surface-3, var(--surface-2));
+    border-color: var(--border-strong, var(--border));
+}
+
+.submit-btn-confirm {
+    background: linear-gradient(135deg,
+        var(--warning),
+        color-mix(in srgb, var(--warning) 70%, var(--error)));
+    color: #fff;
+    border: 1px solid transparent;
+    box-shadow:
+        0 6px 16px color-mix(in srgb, var(--warning) 32%, transparent),
+        inset 0 1px 0 color-mix(in srgb, white 22%, transparent);
+}
+.submit-btn-confirm:hover {
+    box-shadow:
+        0 10px 24px color-mix(in srgb, var(--warning) 42%, transparent),
+        inset 0 1px 0 color-mix(in srgb, white 26%, transparent);
+}
+
+@media (max-width: 480px) {
+    .submit-confirm-body { padding: 1.3rem 1.2rem 1rem; }
+    .submit-confirm-actions { padding: 0.9rem 1.2rem 1.1rem; }
+    .submit-pill { min-width: 30px; height: 30px; font-size: 0.76rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .submit-confirm-overlay,
+    .submit-confirm-card,
+    .submit-confirm-icon,
+    .submit-pill { animation: none; transition: none; }
+}

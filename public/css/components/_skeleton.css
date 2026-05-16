@@ -1,60 +1,67 @@
-/* ========================================
-   EasyRevise — Skeleton Loading
-   .skeleton, .skeleton-card, .skeleton-text
-   ======================================== */
+/* ===========================================================
+   Components — Skeleton loader (Task 17)
+   Shimmer animation respecting reduced-motion
+   =========================================================== */
 
-.skeleton-card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    padding: var(--space-6);
-    min-height: 180px;
-    position: relative;
-    overflow: hidden;
+@keyframes skeleton-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
 }
 
+.skeleton {
+    display: block;
+    background: linear-gradient(
+        90deg,
+        var(--surface-2) 25%,
+        var(--surface-3) 50%,
+        var(--surface-2) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.6s linear infinite;
+    border-radius: var(--radius-sm);
+}
+
+/* ── Variants ──────────────────────────────────────────── */
 .skeleton-line {
     height: 14px;
-    border-radius: var(--radius-md);
+    width: 100%;
+    border-radius: var(--radius-xs);
+    margin-bottom: var(--space-2);
+}
+.skeleton-line:last-child { margin-bottom: 0; }
+.skeleton-line-short { width: 40%; }
+.skeleton-line-medium { width: 70%; }
+.skeleton-line-long { width: 100%; }
+
+.skeleton-title {
+    height: 22px;
+    width: 60%;
     margin-bottom: var(--space-3);
-    background: linear-gradient(90deg, var(--color-border) 25%, var(--color-surface-hover) 50%, var(--color-border) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
 }
 
-.skeleton-line.w80 { width: 80%; height: 18px; margin-bottom: var(--space-4); }
-.skeleton-line.w60 { width: 60%; }
-.skeleton-line.w50 { width: 50%; height: 12px; }
-.skeleton-line.w40 { width: 40%; }
-.skeleton-line.w30 { width: 30%; }
-
-.skeleton-btn {
-    width: 130px;
-    height: 38px;
-    border-radius: var(--radius-md);
-    background: linear-gradient(90deg, var(--color-border) 25%, var(--color-surface-hover) 50%, var(--color-border) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-    margin-top: var(--space-4);
-}
-
-/* ── Skeleton circle (avatar) ── */
-.skeleton-circle {
-    width: 40px;
-    height: 40px;
+.skeleton-avatar {
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    background: linear-gradient(90deg, var(--color-border) 25%, var(--color-surface-hover) 50%, var(--color-border) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
+    flex-shrink: 0;
+}
+.skeleton-avatar-lg { width: 56px; height: 56px; }
+
+.skeleton-card {
+    height: 120px;
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-3);
 }
 
-/* ── Skeleton text block ── */
-.skeleton-text {
+.skeleton-thumb {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    border-radius: var(--radius);
+}
+
+.skeleton-row {
     display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-}
-
-.skeleton-text .skeleton-line:last-child {
-    width: 70%;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) 0;
 }

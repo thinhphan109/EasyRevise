@@ -1,0 +1,193 @@
+/* ============================================================
+   Action Menu — list-style chooser dialog (file/folder actions)
+   Premium variant with gradient halo + iconified items.
+   ============================================================ */
+
+.action-menu-overlay {
+    z-index: 10004;
+}
+
+.action-menu-card {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 1.4rem 1.4rem 1rem;
+    width: 100%;
+    max-width: 380px;
+    box-shadow:
+        0 36px 96px color-mix(in srgb, var(--text) 26%, transparent),
+        0 12px 32px color-mix(in srgb, var(--text) 14%, transparent),
+        inset 0 1px 0 color-mix(in srgb, white 22%, transparent);
+    overflow: hidden;
+    transform: translateY(14px) scale(0.94);
+    opacity: 0;
+    animation: action-menu-pop 360ms cubic-bezier(0.34, 1.45, 0.64, 1) forwards;
+}
+
+.action-menu-card::before {
+    content: '';
+    position: absolute;
+    inset: -1px -1px auto -1px;
+    height: 100px;
+    background: linear-gradient(180deg,
+        color-mix(in srgb, var(--accent) 14%, transparent) 0%,
+        color-mix(in srgb, var(--subject-math, var(--accent)) 6%, transparent) 50%,
+        transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+}
+.action-menu-card > * { position: relative; z-index: 1; }
+
+@keyframes action-menu-pop {
+    to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.action-menu-header {
+    text-align: center;
+    margin-bottom: 0.85rem;
+    padding: 0 0.5rem;
+}
+.action-menu-title {
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+    letter-spacing: -0.012em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.action-menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.action-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.62rem 0.8rem;
+    background: var(--surface-2);
+    border: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 0.92rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition:
+        background 180ms ease,
+        border-color 180ms ease,
+        transform 180ms cubic-bezier(0.34, 1.45, 0.64, 1);
+    font-family: inherit;
+    position: relative;
+    overflow: hidden;
+}
+
+.action-menu-item:hover {
+    background: var(--surface-3, var(--surface-2));
+    border-color: color-mix(in srgb, var(--accent) 22%, var(--border));
+    transform: translateX(2px);
+}
+.action-menu-item:hover .action-menu-chevron { opacity: 1; transform: translateX(2px); }
+.action-menu-item:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.action-menu-icon {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    background: linear-gradient(135deg,
+        color-mix(in srgb, var(--accent) 14%, var(--surface)),
+        color-mix(in srgb, var(--subject-math, var(--accent)) 14%, var(--surface)));
+    border: 1px solid color-mix(in srgb, var(--accent) 14%, var(--border));
+    font-size: 1.05rem;
+    flex-shrink: 0;
+    transition: transform 240ms cubic-bezier(0.34, 1.45, 0.64, 1);
+}
+.action-menu-item:hover .action-menu-icon { transform: scale(1.08) rotate(-3deg); }
+
+.action-menu-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    letter-spacing: 0.005em;
+}
+
+.action-menu-chevron {
+    color: var(--text-3);
+    opacity: 0;
+    transition: opacity 180ms ease, transform 180ms ease;
+    flex-shrink: 0;
+}
+
+/* Danger variant — destructive action */
+.action-menu-item.is-danger {
+    background: linear-gradient(135deg,
+        color-mix(in srgb, var(--error) 8%, var(--surface-2)),
+        color-mix(in srgb, var(--error) 4%, var(--surface-2)));
+    border-color: color-mix(in srgb, var(--error) 22%, transparent);
+    color: var(--error);
+}
+.action-menu-item.is-danger .action-menu-icon {
+    background: linear-gradient(135deg,
+        color-mix(in srgb, var(--error) 14%, var(--surface)),
+        color-mix(in srgb, var(--error) 8%, var(--surface)));
+    border-color: color-mix(in srgb, var(--error) 25%, transparent);
+}
+.action-menu-item.is-danger:hover {
+    background: linear-gradient(135deg,
+        color-mix(in srgb, var(--error) 14%, var(--surface-2)),
+        color-mix(in srgb, var(--error) 8%, var(--surface-2)));
+    border-color: color-mix(in srgb, var(--error) 35%, transparent);
+}
+
+.action-menu-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.85rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid color-mix(in srgb, var(--border) 60%, transparent);
+}
+
+.action-menu-close {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-2);
+    padding: 0.45rem 1rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 180ms ease, color 180ms ease, border-color 180ms ease;
+    font-family: inherit;
+}
+.action-menu-close:hover {
+    background: var(--surface-2);
+    color: var(--text);
+    border-color: var(--border-strong, var(--border));
+}
+.action-menu-close:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+@media (max-width: 380px) {
+    .action-menu-card { padding: 1.2rem 1.1rem 0.9rem; max-width: calc(100vw - 1rem); }
+    .action-menu-icon { width: 28px; height: 28px; font-size: 0.95rem; }
+    .action-menu-item { padding: 0.55rem 0.7rem; font-size: 0.88rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .action-menu-card { animation: none; transform: none; opacity: 1; }
+    .action-menu-item, .action-menu-icon, .action-menu-chevron { transition: none; }
+}

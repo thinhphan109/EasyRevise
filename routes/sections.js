@@ -4,6 +4,7 @@ const router = express.Router();
 const { readData, writeData, uuidv4 } = require('../lib/data');
 const { adminOnly } = require('../lib/auth');
 const { validateSection, validateURL } = require('../lib/validate');
+const { normalizeSection } = require('../lib/exam-normalizer');
 
 // POST /api/exams/:id/sections
 router.post('/:id/sections', adminOnly, (req, res) => {
@@ -16,7 +17,7 @@ router.post('/:id/sections', adminOnly, (req, res) => {
     const data = readData();
     const exam = data.exams.find(e => e.id === req.params.id);
     if (!exam) return res.status(404).json({ error: 'Exam not found' });
-    const newSection = {
+    const newSection = normalizeSection({
         id: req.body.id || uuidv4(), title: req.body.title || 'Phần mới',
         instruction: req.body.instruction || '', type: req.body.type || 'multiple-choice',
         passage: req.body.passage || null, questions: req.body.questions || [],
@@ -24,7 +25,7 @@ router.post('/:id/sections', adminOnly, (req, res) => {
         cues: req.body.cues || [], sampleAnswer: req.body.sampleAnswer || null,
         explanation: req.body.explanation || null,
         showInstruction: req.body.showInstruction ?? true, showCues: req.body.showCues ?? true
-    };
+    });
     exam.sections.push(newSection);
     exam.updatedAt = new Date().toISOString();
     writeData(data);
@@ -46,7 +47,7 @@ router.put('/:examId/sections/:sectionId', adminOnly, (req, res) => {
     if (!exam) return res.status(404).json({ error: 'Exam not found' });
     const sIndex = exam.sections.findIndex(s => s.id === req.params.sectionId);
     if (sIndex === -1) return res.status(404).json({ error: 'Section not found' });
-    exam.sections[sIndex] = { ...exam.sections[sIndex], ...req.body };
+    exam.sections[sIndex] = normalizeSection({ ...exam.sections[sIndex], ...req.body });
     exam.updatedAt = new Date().toISOString();
     writeData(data);
     res.json(exam.sections[sIndex]);

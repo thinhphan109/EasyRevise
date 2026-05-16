@@ -1,0 +1,241 @@
+/* ===========================================================
+   Component — Auth modal & QR scanner
+   Used by index.html (login/register/code/PIN/review/QR)
+   =========================================================== */
+
+/* ── Modal overlay (fullscreen blur backdrop) ────────── */
+.auth-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal, 100);
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4);
+    animation: auth-modal-fade var(--dur-base) var(--ease-apple);
+}
+
+.auth-modal.active {
+    display: flex;
+}
+
+@keyframes auth-modal-fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* ── Modal box ──────────────────────────────────────── */
+.auth-box {
+    width: 100%;
+    max-width: 420px;
+    padding: var(--space-6);
+    animation: auth-box-up var(--dur-base) var(--ease-apple);
+}
+
+.modal-box-sm {
+    max-width: 360px;
+}
+
+@keyframes auth-box-up {
+    from { opacity: 0; transform: translateY(8px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .auth-modal,
+    .auth-box { animation: none; }
+}
+
+/* ── Tab switch (Login / Register) ──────────────────── */
+.tab-switch {
+    display: flex;
+    background: var(--surface-2);
+    border-radius: var(--radius);
+    padding: 4px;
+    margin-bottom: var(--space-5);
+}
+.tab-switch button {
+    flex: 1;
+    padding: 8px 0;
+    background: transparent;
+    border: none;
+    color: var(--text-2);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    border-radius: calc(var(--radius) - 2px);
+    cursor: pointer;
+    transition: all var(--dur-fast) var(--ease-apple);
+}
+.tab-switch button.active {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow-xs);
+}
+
+/* ── Auth input (login/register/code/PIN) ───────────── */
+.auth-input {
+    width: 100%;
+    height: 44px;
+    padding: 0 var(--space-4);
+    font-family: var(--font-sans);
+    font-size: var(--text-md); /* 16px - prevents iOS zoom */
+    color: var(--text);
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: var(--space-3);
+    transition: border-color var(--dur-fast) var(--ease-apple),
+                box-shadow var(--dur-fast) var(--ease-apple);
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.auth-input::placeholder {
+    color: var(--text-3);
+}
+
+.auth-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+.auth-input:hover:not(:focus) {
+    border-color: var(--border-strong);
+}
+
+/* ── Code input (uppercase, centered, spaced) ───────── */
+.code-input {
+    text-transform: uppercase;
+    text-align: center;
+    letter-spacing: 0.18em;
+    font-weight: var(--weight-semi);
+    font-variant-numeric: tabular-nums;
+}
+.code-input::placeholder {
+    letter-spacing: 0.04em;
+    text-transform: none;
+}
+
+/* ── PIN input (large, centered) ────────────────────── */
+.pin-input {
+    text-align: center;
+    letter-spacing: 0.6em;
+    font-size: var(--text-xl);
+    font-weight: var(--weight-semi);
+}
+
+/* ── Auth error message ─────────────────────────────── */
+.auth-error {
+    color: var(--error);
+    background: var(--error-soft);
+    border: 1px solid color-mix(in srgb, var(--error) 25%, transparent);
+    border-radius: var(--radius-sm);
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-3);
+    min-height: 0;
+    display: none;
+}
+.auth-error:not(:empty) {
+    display: block;
+}
+
+/* ═══════════════════════════════════════════════════════
+   QR Scanner overlay components
+   ═══════════════════════════════════════════════════════ */
+
+.qr-scanner-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-4);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+}
+
+.qr-scanner-header-label {
+    font-size: var(--text-xs);
+    font-weight: var(--weight-bold);
+    color: color-mix(in srgb, var(--accent) 75%, var(--text));
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.qr-scanner-header-title {
+    font-size: var(--text-base);
+    font-weight: var(--weight-semi);
+    color: var(--text);
+    margin-top: 2px;
+}
+
+.qr-scanner-viewport {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    background: #000;
+    overflow: hidden;
+}
+
+.qr-scanner-overlay {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+}
+
+.qr-scanner-frame {
+    position: relative;
+    width: 60%;
+    aspect-ratio: 1;
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.qr-scanner-corner {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--accent);
+}
+.qr-corner-tl { top: 0; left: 0; border-right: none; border-bottom: none; border-radius: var(--radius) 0 0 0; }
+.qr-corner-tr { top: 0; right: 0; border-left: none; border-bottom: none; border-radius: 0 var(--radius) 0 0; }
+.qr-corner-bl { bottom: 0; left: 0; border-right: none; border-top: none; border-radius: 0 0 0 var(--radius); }
+.qr-corner-br { bottom: 0; right: 0; border-left: none; border-top: none; border-radius: 0 0 var(--radius) 0; }
+
+.qr-scan-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: qr-scan 2s ease-in-out infinite;
+}
+
+@keyframes qr-scan {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(calc(100% - 2px)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .qr-scan-line { animation: none; opacity: 0.6; }
+}
+
+.qr-scanner-status {
+    padding: var(--space-3) var(--space-4);
+    text-align: center;
+    font-size: var(--text-sm);
+    color: var(--text-2);
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+}
+
+/* ═══════════════════════════════════════════════════════
+   Tab switch active variant
+   ═══════════════════════════════════════════════════════ */

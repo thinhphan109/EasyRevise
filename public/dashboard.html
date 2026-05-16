@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — EasyRevise</title>
+
+    <!-- Brand assets -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/logo/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/logo/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#5b8def">
+    <meta name="description" content="Thống kê học tập cá nhân, lịch sử làm bài và phân tích theo môn học.">
+
+    <!-- Theme: apply before render to prevent flash -->
+    <script>
+        (function () { var t = localStorage.getItem('easyrevise_theme') || (window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light'); document.documentElement.setAttribute('data-theme', t); })();
+    </script>
+
+    <!-- CSS: Apple HIG modular system -->
+    <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body class="dashboard-page has-ambient-orbs">
+    <div class="ambient-orb-3" aria-hidden="true"></div>
+    <!-- Sticky glass topbar -->
+    <header class="dash-topbar">
+        <div class="dash-container dash-topbar-inner">
+            <a href="/" class="btn btn-ghost btn-sm" aria-label="Về trang chủ">
+                <span aria-hidden="true">←</span>
+                <span>Trang chủ</span>
+            </a>
+            <div style="flex:1;"></div>
+            <button id="themeToggle" class="btn btn-icon btn-ghost btn-sm" onclick="toggleTheme()" title="Đổi giao diện" aria-label="Đổi giao diện">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <main class="dash-container">
+        <h1 class="visually-hidden">Dashboard học tập</h1>
+
+        <!-- Loading -->
+        <div id="dashboardLoading" class="dash-loading">
+            <div class="dash-loading-spinner" aria-hidden="true"></div>
+            <p>Đang tải thống kê...</p>
+        </div>
+
+        <!-- Login required -->
+        <div id="dashboardLoginRequired" hidden>
+            <div class="dash-section" style="text-align:center;padding:var(--space-12) var(--space-4);">
+                <div style="font-size:48px;margin-bottom:var(--space-3);">🔐</div>
+                <p style="color:var(--text-2);margin-bottom:var(--space-4);">Bạn cần đăng nhập để xem Dashboard</p>
+                <a href="/" class="btn btn-primary">← Về trang chủ đăng nhập</a>
+            </div>
+        </div>
+
+        <!-- Content -->
+        <div id="dashboardContent" hidden>
+            <!-- Profile -->
+            <section id="profileCard" class="dash-profile" aria-label="Hồ sơ học viên">
+                <img id="profileAvatar" class="dash-profile-avatar" src="/api/avatar?name=anonymous&size=80" alt="Avatar">
+                <div class="dash-profile-info">
+                    <div id="profileName" class="dash-profile-name">—</div>
+                    <div id="profileMeta" class="dash-profile-meta">Đang tải...</div>
+                </div>
+                <div id="streakBadge" class="dash-streak" hidden>
+                    🔥 <strong id="streakCount">0</strong> ngày liên tiếp
+                </div>
+            </section>
+
+            <!-- Stats grid -->
+            <section class="dash-section" aria-label="Thống kê tổng quan">
+                <div id="statGrid" class="stat-grid">
+                    <!-- Rendered by JS -->
+                </div>
+            </section>
+
+            <!-- Subject breakdown -->
+            <section id="subjectSection" class="dash-section" hidden>
+                <h2 class="dash-section-title">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+                    Phân tích theo môn
+                </h2>
+                <div id="subjectList" class="subject-list">
+                    <!-- Rendered by JS -->
+                </div>
+            </section>
+
+            <!-- Recent history -->
+            <section id="historySection" class="dash-section" hidden>
+                <h2 class="dash-section-title">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Lịch sử gần đây
+                    <span id="historyCount" class="home-section-count" style="margin-left:auto;"></span>
+                </h2>
+                <div id="historyReveal" class="home-list-reveal" data-limit="4">
+                    <div id="historyList" class="history-list">
+                        <!-- Rendered by JS -->
+                    </div>
+                </div>
+                <div id="historyFooter" class="home-list-footer" hidden>
+                    <button type="button" class="home-list-toggle" data-target="historyReveal" data-unit="bài" aria-expanded="false">
+                        <span class="home-list-toggle-label">Xem tất cả</span>
+                        <span class="home-list-toggle-count" id="historyToggleCount"></span>
+                        <svg class="home-list-toggle-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Empty state -->
+            <div id="emptyState" hidden>
+                <div class="dash-section" style="text-align:center;padding:var(--space-10) var(--space-4);">
+                    <div style="font-size:48px;margin-bottom:var(--space-3);">📝</div>
+                    <p style="color:var(--text-2);margin-bottom:var(--space-4);">Bạn chưa làm bài nào. Hãy bắt đầu ôn tập ngay!</p>
+                    <a href="/" class="btn btn-primary">Chọn đề ôn tập →</a>
+                </div>
+            </div>
+
+            <footer class="dash-footer">
+                <a href="/" class="btn btn-ghost btn-sm">← Về trang chủ</a>
+            </footer>
+        </div>
+    </main>
+
+    <!-- JS: Core modules -->
+    <script src="/js/core/utils.js"></script>
+    <script src="/js/core/api.js"></script>
+    <script src="/js/core/store.js"></script>
+    <script src="/js/core/auth.js"></script>
+    <script src="/js/components/theme.js"></script>
+    <script src="/js/components/toast.js"></script>
+    <script src="/js/components/confirm-popup.js"></script>
+    <script src="/js/components/notify-popup.js"></script>
+    <script src="/js/components/native-select-enhancer.js"></script>
+
+    <!-- JS: Dashboard -->
+    <script src="/js/pages/home/list-helpers.js"></script>
+    <script src="/js/pages/dashboard/index.js"></script>
+</body>
+
+</html>

@@ -61,7 +61,7 @@ async function generateCodes() {
 }
 
 async function deleteCode(code) { await api(`/api/exams/${currentExamId}/codes/${code}`, 'DELETE'); currentExamData = await api(`/api/exams/${currentExamId}`); showCodeManager(); }
-async function releaseCode(code) { if (!confirm('Giải phóng các lượt dùng chưa hoàn thành của mã ' + code + '?')) return; await api(`/api/exams/${currentExamId}/release-code`, 'POST', { code }); currentExamData = await api(`/api/exams/${currentExamId}`); showCodeManager(); }
+async function releaseCode(code) { if (!(await customConfirm('Giải phóng mã', `Giải phóng các lượt dùng chưa hoàn thành của mã ${code}?`, 'Giải phóng'))) return; await api(`/api/exams/${currentExamId}/release-code`, 'POST', { code }); currentExamData = await api(`/api/exams/${currentExamId}`); showCodeManager(); }
 
 // QR Code
 function showQRCode(examId, code) {

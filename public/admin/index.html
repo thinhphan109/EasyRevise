@@ -5,728 +5,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - EasyRevise</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/style.css">
+
+    <!-- Brand assets -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/logo/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/logo/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#5b8def">
+
+    <!-- Theme: apply before render to prevent flash -->
+    <script>
+        (function(){var t=localStorage.getItem('easyrevise_theme')||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();
+    </script>
+
+    <!-- CSS: Modular system + Admin page -->
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/pages/admin.css">
+    <link rel="stylesheet" href="/css/pages/admin-sidebar.css">
+    <link rel="stylesheet" href="/css/pages/_admin-polish.css">
+
+    <!-- Vendors: KaTeX + QRCode -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-    <style>
-        .admin-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem 0;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 0;
-        }
-
-        .admin-header h1 {
-            font-size: 1.75rem;
-            margin-bottom: 0;
-        }
-
-        .admin-badge {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            padding: 0.35rem 1rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            color: #fff;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .tab-bar {
-            display: flex;
-            gap: 0;
-            border-bottom: 2px solid var(--border);
-            margin-bottom: 2rem;
-        }
-
-        .tab-item {
-            padding: 0.85rem 1.5rem;
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            margin-bottom: -2px;
-            transition: all 0.2s;
-        }
-
-        .tab-item:hover {
-            color: var(--text-main);
-        }
-
-        .tab-item.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
-        }
-
-        .view {
-            display: none;
-        }
-
-        .view.active {
-            display: block;
-            animation: fadeIn 0.4s ease;
-        }
-
-        .exam-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0 0.75rem;
-        }
-
-        .exam-table th {
-            text-align: left;
-            padding: 0.5rem 1rem;
-            color: var(--text-muted);
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .exam-row {
-            background: var(--bg-card);
-            border-radius: 16px;
-            cursor: pointer;
-            transition: var(--transition);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .exam-row:hover {
-            background: var(--primary-light);
-            box-shadow: var(--shadow-md);
-        }
-
-        .exam-row td {
-            padding: 1.25rem 1rem;
-            color: var(--text-main);
-        }
-
-        .exam-row td:first-child {
-            border-radius: 16px 0 0 16px;
-        }
-
-        .exam-row td:last-child {
-            border-radius: 0 16px 16px 0;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: var(--text-main);
-            font-size: 0.9rem;
-        }
-
-        .form-input,
-        .form-select,
-        .form-textarea {
-            width: 100%;
-            padding: 0.85rem 1rem;
-            background: var(--bg-input);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            color: var(--text-main);
-            font-size: 1rem;
-            font-family: inherit;
-            transition: var(--transition);
-        }
-
-        .form-input:focus,
-        .form-select:focus,
-        .form-textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
-
-        .form-textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-
-        .section-card {
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            background: var(--bg-card);
-            transition: var(--transition);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .section-card:hover {
-            border-color: var(--primary);
-            box-shadow: var(--shadow-md);
-        }
-
-        .section-card.drag-over {
-            border-top: 3px solid var(--primary);
-            background: rgba(99, 102, 241, 0.05);
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .section-type-badge {
-            padding: 0.2rem 0.8rem;
-            border-radius: 8px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .type-mc {
-            background: #eef2ff;
-            color: #4f46e5;
-        }
-
-        .type-reading {
-            background: #f0fdf4;
-            color: #16a34a;
-        }
-
-        .type-writing {
-            background: #fdf2f8;
-            color: #db2777;
-        }
-
-        .type-essay {
-            background: #fffbeb;
-            color: #d97706;
-        }
-
-        .type-freeform {
-            background: #f0f9ff;
-            color: #0284c7;
-        }
-
-        .type-fillin {
-            background: #fdf4ff;
-            color: #9333ea;
-        }
-
-        .question-item {
-            padding: 1rem 1.25rem;
-            margin-bottom: 0.5rem;
-            border-radius: 12px;
-            background: var(--bg-body);
-            border: 1px solid transparent;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: var(--transition);
-        }
-
-        .question-item:hover {
-            border-color: var(--border);
-            background: var(--bg-card);
-        }
-
-        .q-num {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            background: #eef2ff;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 0.85rem;
-            margin-right: 1rem;
-            flex-shrink: 0;
-        }
-
-        .q-text {
-            flex: 1;
-            font-size: 0.95rem;
-            color: var(--text-main);
-        }
-
-        .q-correct {
-            padding: 0.2rem 0.6rem;
-            background: #f0fdf4;
-            color: #16a34a;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            margin-left: 0.5rem;
-        }
-
-        .action-bar {
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-            margin-bottom: 2rem;
-        }
-
-        .btn-sm {
-            padding: 0.5rem 1rem;
-            font-size: 0.85rem;
-            border-radius: 10px;
-        }
-
-        .btn-danger {
-            background: #fef2f2;
-            color: #dc2626;
-        }
-
-        .btn-danger:hover {
-            background: #fee2e2;
-        }
-
-        .btn-success {
-            background: #f0fdf4;
-            color: #16a34a;
-        }
-
-        .btn-success:hover {
-            background: #dcfce7;
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-main);
-        }
-
-        .btn-outline:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .btn-ghost {
-            background: var(--bg-input);
-            color: var(--text-secondary);
-        }
-
-        .btn-ghost:hover {
-            background: var(--border);
-            color: var(--text-main);
-        }
-
-        .btn-info {
-            background: #eff6ff;
-            color: #2563eb;
-        }
-
-        .btn-info:hover {
-            background: #dbeafe;
-        }
-
-        .option-row {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .option-row .form-input {
-            flex: 1;
-        }
-
-        .option-radio {
-            width: 20px;
-            height: 20px;
-            accent-color: var(--primary);
-            cursor: pointer;
-        }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal-content {
-            width: 90%;
-            max-width: 700px;
-            max-height: 85vh;
-            overflow-y: auto;
-            padding: 2.5rem;
-            border-radius: 24px;
-        }
-
-        .breadcrumb {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .breadcrumb a {
-            color: var(--primary);
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .breadcrumb a:hover {
-            text-decoration: underline;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 4rem 2rem;
-            color: var(--text-muted);
-        }
-
-        .empty-state .emoji {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-
-        #importFileInput {
-            display: none;
-        }
-
-        /* User table */
-        .user-row td {
-            padding: 1rem;
-        }
-
-        .role-badge {
-            padding: 0.2rem 0.6rem;
-            border-radius: 6px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .role-admin {
-            background: #fef2f2;
-            color: #dc2626;
-        }
-
-        .role-student {
-            background: #eef2ff;
-            color: #4f46e5;
-        }
-
-        /* Login gate */
-        .login-gate {
-            max-width: 400px;
-            margin: 10vh auto;
-            text-align: center;
-        }
-
-        .login-gate h2 {
-            margin-bottom: 1.5rem;
-        }
-
-        /* Subject */
-        .subject-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.85rem 1.25rem;
-            border-radius: 12px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            margin-bottom: 0.5rem;
-        }
-
-        /* Toggle */
-        .toggle-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.75rem 0;
-        }
-
-        .toggle-switch {
-            position: relative;
-            width: 44px;
-            height: 24px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            inset: 0;
-            background: #cbd5e1;
-            border-radius: 12px;
-            transition: 0.3s;
-        }
-
-        .toggle-slider:before {
-            content: '';
-            position: absolute;
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background: white;
-            border-radius: 50%;
-            transition: 0.3s;
-        }
-
-        .toggle-switch input:checked+.toggle-slider {
-            background: var(--primary);
-        }
-
-        .toggle-switch input:checked+.toggle-slider:before {
-            transform: translateX(20px);
-        }
-
-        /* Notification Bell */
-        .notif-btn {
-            position: relative;
-            background: var(--bg-input);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 0.5rem 0.75rem;
-            cursor: pointer;
-            font-size: 1.2rem;
-            line-height: 1;
-            transition: var(--transition);
-        }
-
-        .notif-btn:hover {
-            border-color: var(--primary);
-            background: var(--primary-light);
-        }
-
-        .notif-badge {
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            background: #dc2626;
-            color: #fff;
-            border-radius: 10px;
-            min-width: 18px;
-            height: 18px;
-            font-size: 0.65rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 4px;
-            border: 2px solid var(--bg-body);
-        }
-
-        .notif-panel {
-            position: absolute;
-            top: calc(100% + 8px);
-            right: 0;
-            width: 340px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            box-shadow: var(--shadow-md);
-            z-index: 500;
-            display: none;
-            overflow: hidden;
-        }
-
-        .notif-panel.open {
-            display: block;
-            animation: fadeIn 0.2s ease;
-        }
-
-        .notif-panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 1.25rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .notif-item {
-            padding: 0.85rem 1.25rem;
-            border-bottom: 1px solid var(--border);
-            cursor: pointer;
-            transition: background 0.15s;
-        }
-
-        .notif-item:hover {
-            background: var(--bg-input);
-        }
-
-        .notif-item:last-child {
-            border-bottom: none;
-        }
-
-        .notif-item.unread {
-            background: var(--primary-light);
-        }
-
-        .notif-empty {
-            padding: 2rem;
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
-
-        @keyframes bell-ring {
-
-            0%,
-            100% {
-                transform: rotate(0)
-            }
-
-            20% {
-                transform: rotate(-15deg)
-            }
-
-            40% {
-                transform: rotate(15deg)
-            }
-
-            60% {
-                transform: rotate(-10deg)
-            }
-
-            80% {
-                transform: rotate(10deg)
-            }
-        }
-
-        .bell-ring {
-            animation: bell-ring 0.5s ease;
-        }
-
-        /* Task 4.6: Responsive Mobile Admin */
-        @media (max-width: 768px) {
-            .container {
-                padding: 0.5rem !important;
-            }
-
-            .tab-bar {
-                overflow-x: auto;
-                white-space: nowrap;
-                -webkit-overflow-scrolling: touch;
-                gap: 0.25rem;
-                padding-bottom: 0.3rem;
-            }
-
-            .tab-bar button {
-                font-size: 0.75rem;
-                padding: 0.5rem 0.6rem;
-                flex-shrink: 0;
-                min-width: auto;
-            }
-
-            .glass-panel {
-                padding: 1rem;
-                border-radius: 12px;
-            }
-
-            .action-bar {
-                flex-direction: column;
-                gap: 0.4rem;
-            }
-
-            .action-bar .btn {
-                width: 100%;
-                justify-content: center;
-                font-size: 0.82rem;
-            }
-
-            .exam-table {
-                display: block;
-                overflow-x: auto;
-                white-space: nowrap;
-                -webkit-overflow-scrolling: touch;
-            }
-
-            .exam-table th,
-            .exam-table td {
-                font-size: 0.8rem;
-                padding: 0.4rem 0.5rem;
-            }
-
-            .modal-content {
-                width: 95vw !important;
-                max-width: 95vw !important;
-                max-height: 90vh;
-                overflow-y: auto;
-                border-radius: 12px !important;
-            }
-
-            .breadcrumb {
-                font-size: 0.82rem;
-            }
-
-            h2 {
-                font-size: 1.2rem !important;
-            }
-
-            .section-card {
-                padding: 1rem;
-            }
-
-            .btn {
-                min-height: 40px;
-                font-size: 0.85rem;
-            }
-
-            #examFilterBar {
-                flex-direction: column;
-            }
-
-            #examFilterBar .form-input,
-            #examFilterBar .form-select {
-                max-width: 100% !important;
-                width: 100%;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .tab-bar button {
-                font-size: 0.7rem;
-                padding: 0.4rem 0.5rem;
-            }
-
-            .glass-panel {
-                padding: 0.75rem;
-            }
-
-            .modal-content {
-                padding: 1rem !important;
-            }
-        }
-    </style>
 </head>
 
-<body>
-    <div class="container" style="max-width:1100px;">
+<body class="admin-page has-ambient-orbs">
+    <div class="ambient-orb-3" aria-hidden="true"></div>
+    <div id="adminToastContainer" class="admin-toast-container"></div>
+    <!-- Mobile sidebar overlay -->
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+    <div class="container" style="max-width:none;padding:0;margin:0;">
         <!-- Login Gate -->
-        <div id="loginGate" class="login-gate" style="display:none;">
+        <div id="loginGate" class="login-gate">
             <div class="glass-panel" style="padding:2.5rem;">
                 <h2>🔐 Đăng nhập Admin</h2>
                 <div id="loginError" style="color:var(--error);font-size:0.85rem;margin-bottom:1rem;display:none;">
@@ -765,57 +77,256 @@
 
         <!-- Main Admin -->
         <div id="adminMain" style="display:none;">
-            <div class="admin-header">
-                <div style="display:flex;align-items:center;gap:1rem;">
-                    <a href="/" style="color:var(--text-muted);text-decoration:none;font-size:1.25rem;">←</a>
-                    <h1>Admin Panel</h1>
-                    <span class="admin-badge">Quản trị</span>
+            <div class="admin-layout">
+
+            <!-- ══ SIDEBAR ══ -->
+            <aside id="adminSidebar" class="admin-sidebar">
+                <!-- Brand -->
+                <a href="/" class="sidebar-brand" title="Về trang chủ">
+                    <img class="sidebar-brand-icon" src="/assets/logo/mark-96.png" alt="EasyRevise" width="34" height="34">
+                    <div class="sidebar-brand-name">
+                        <strong>EasyRevise</strong>
+                        <small>Admin Panel</small>
+                    </div>
+                </a>
+
+                <!-- Nav -->
+                <nav class="sidebar-nav">
+                    <!-- Main -->
+                    <div class="sidebar-section-label">Quản lý</div>
+                    <div class="sidebar-item active" data-tab="exams" data-label="Đề thi" onclick="switchTab('exams')">
+                        <span class="sidebar-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>
+                        <span class="sidebar-item-label">Đề thi</span>
+                    </div>
+                    <div class="sidebar-item" data-tab="questionBank" data-label="Ngân hàng đề" onclick="switchTab('questionBank')">
+                        <span class="sidebar-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg></span>
+                        <span class="sidebar-item-label">Ngân hàng đề</span>
+                    </div>
+                    <div class="sidebar-item" data-tab="submissions" data-label="Bài nộp" onclick="switchTab('submissions')">
+                        <span class="sidebar-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
+                        <span class="sidebar-item-label">Bài nộp</span>
+                    </div>
+
+                    <div class="sidebar-divider"></div>
+
+                    <!-- AI -->
+                    <div class="sidebar-section-label">AI</div>
+                    <div class="sidebar-item sidebar-ai" data-tab="aiGen" data-label="AI Tạo Đề" onclick="switchTab('aiGen')">
+                        <span class="sidebar-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z"/></svg></span>
+                        <span class="sidebar-item-label">AI Tạo Đề</span>
+                    </div>
+
+                    <div class="sidebar-divider"></div>
+
+                    <!-- Resources -->
+                    <div class="sidebar-section-label">Hệ thống</div>
+                    <div class="sidebar-item" data-tab="users" data-label="Tài khoản" onclick="switchTab('users')">
+                        <span class="sidebar-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+                        <span class="sidebar-item-label">Tài khoản</span>
+                    </div>
+                    <div class="sidebar-item" data-tab="subjects" data-label="Môn học" onclick="switchTab('subjects')">
+                        <span class="sidebar-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+                        <span class="sidebar-item-label">Môn học</span>
+                    </div>
+                    <div class="sidebar-item" data-tab="activation" data-label="Mã kích hoạt" onclick="switchTab('activation')">
+                        <span class="sidebar-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></span>
+                        <span class="sidebar-item-label">Mã kích hoạt</span>
+                    </div>
+                    <div class="sidebar-item" data-tab="codeLogs" data-label="Log mã KH" onclick="switchTab('codeLogs')">
+                        <span class="sidebar-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+                        <span class="sidebar-item-label">Log mã KH</span>
+                    </div>
+                    <div class="sidebar-item" data-tab="media" data-label="Kho Media" onclick="switchTab('media')">
+                        <span class="sidebar-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span>
+                        <span class="sidebar-item-label">Kho Media</span>
+                    </div>
+
+                    <div class="sidebar-divider"></div>
+
+                    <div class="sidebar-item" data-tab="settings" data-label="Cài đặt" onclick="switchTab('settings')">
+                        <span class="sidebar-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+                        <span class="sidebar-item-label">Cài đặt</span>
+                    </div>
+                    <div class="sidebar-item" data-tab="help" data-label="Hướng dẫn" onclick="switchTab('help')">
+                        <span class="sidebar-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
+                        <span class="sidebar-item-label">Hướng dẫn</span>
+                    </div>
+                </nav>
+
+                <!-- Collapse toggle -->
+                <div class="sidebar-footer">
+                    <button class="sidebar-collapse-btn" onclick="toggleSidebar()" title="Thu gọn">
+                        <span class="sidebar-collapse-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+                        </span>
+                        <span class="sidebar-collapse-label">Thu gọn</span>
+                    </button>
                 </div>
-                <div style="display:flex;align-items:center;gap:0.75rem;">
-                    <span id="adminName" style="font-size:0.85rem;color:var(--text-muted);"></span>
-                    <!-- Notification Bell -->
-                    <div style="position:relative;">
-                        <button id="notifBellBtn" class="notif-btn" onclick="NotificationManager.togglePanel()"
-                            title="Thông báo">
-                            🔔<span id="notifBadge" class="notif-badge" style="display:none;">0</span>
+            </aside>
+
+            <!-- ══ MAIN AREA ══ -->
+            <div id="adminMainArea" class="admin-main-area">
+
+                <!-- Topbar -->
+                <header class="admin-topbar">
+                    <div class="admin-topbar-left">
+                        <!-- Mobile toggle -->
+                        <button class="sidebar-mobile-toggle" onclick="toggleSidebar()" aria-label="Menu">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
                         </button>
-                        <div id="notifPanel" class="notif-panel">
-                            <div class="notif-panel-header">
-                                <span style="font-weight:700;font-size:0.9rem;">🔔 Thông báo</span>
-                                <button class="btn btn-sm btn-ghost" onclick="NotificationManager.markAllRead()"
-                                    style="font-size:0.75rem;padding:0.2rem 0.5rem;">Đọc tất cả</button>
+                        <span id="topbarTitle" class="topbar-page-title">Đề thi</span>
+                    </div>
+                    <div class="admin-topbar-right">
+                        <!-- Theme toggle -->
+                        <button class="topbar-icon-btn" onclick="toggleTheme()" title="Đổi giao diện" id="themeToggleBtn">
+                            <svg class="theme-icon-light" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                            <svg class="theme-icon-dark" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                        </button>
+
+                        <!-- Notifications -->
+                        <div style="position:relative;">
+                            <button id="notifBellBtn" class="topbar-icon-btn" onclick="NotificationManager.togglePanel()" title="Thông báo">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                                <span id="notifBadge" class="notif-badge" style="display:none;">0</span>
+                            </button>
+                            <div id="notifPanel" class="notif-panel">
+                                <div class="notif-panel-header">
+                                    <span style="font-weight:700;font-size:0.9rem;">Thông báo</span>
+                                    <button class="btn btn-sm btn-ghost" onclick="NotificationManager.markAllRead()" style="font-size:0.75rem;padding:0.2rem 0.5rem;">Đọc tất cả</button>
+                                </div>
+                                <div id="notifList"><div class="notif-empty">Chưa có thông báo</div></div>
                             </div>
-                            <div id="notifList">
-                                <div class="notif-empty">Chưa có thông báo</div>
+                        </div>
+
+                        <!-- User dropdown -->
+                        <div class="topbar-user-dropdown" id="userDropdown">
+                            <button class="topbar-user-btn" onclick="document.getElementById('userDropdown').classList.toggle('open')">
+                                <span id="adminAvatar" class="facehash-inline" data-name="admin" data-size="28" style="display:none;"></span>
+                                <span id="adminName" class="topbar-user-name"></span>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
+                            <div class="topbar-dropdown-menu">
+                                <button class="topbar-dropdown-item" onclick="switchTab('settings');document.getElementById('userDropdown').classList.remove('open')">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                                    Cài đặt
+                                </button>
+                                <div class="topbar-dropdown-divider"></div>
+                                <button class="topbar-dropdown-item topbar-dropdown-danger" onclick="adminLogout()">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                                    Đăng xuất
+                                </button>
                             </div>
                         </div>
                     </div>
-                    <button class="btn btn-sm btn-ghost" onclick="adminLogout()">Đăng xuất</button>
+                </header>
+
+                <!-- Tab content -->
+                <div class="admin-view-container">
+
+            <!-- TAB: Dashboard (overview - Bento layout) -->
+            <div id="tabDashboard" class="view active">
+                <div class="page-header">
+                    <div class="page-header-info">
+                        <h1 class="page-header-title">Bảng điều khiển</h1>
+                        <p class="page-header-desc">Tổng quan hoạt động hệ thống và bài nộp gần đây.</p>
+                    </div>
+                    <div class="page-header-actions">
+                        <button class="btn btn-secondary btn-sm" onclick="loadAdminDashboard()" title="Làm mới">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>
+                            Làm mới
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stat row -->
+                <div class="admin-bento" id="adminDashboardStats">
+                    <div class="admin-stat-card">
+                        <div class="admin-stat-icon" style="background: var(--accent-soft); color: var(--accent);">
+                            <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#file-text"/></svg>
+                        </div>
+                        <div class="admin-stat-value" id="adminDashExamCount">—</div>
+                        <div class="admin-stat-label">Đề thi</div>
+                    </div>
+                    <div class="admin-stat-card">
+                        <div class="admin-stat-icon" style="background: color-mix(in srgb, var(--success) 12%, var(--surface-2)); color: var(--success);">
+                            <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#users"/></svg>
+                        </div>
+                        <div class="admin-stat-value" id="adminDashUserCount">—</div>
+                        <div class="admin-stat-label">Học sinh</div>
+                    </div>
+                    <div class="admin-stat-card">
+                        <div class="admin-stat-icon" style="background: color-mix(in srgb, var(--warning) 12%, var(--surface-2)); color: var(--warning);">
+                            <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#send"/></svg>
+                        </div>
+                        <div class="admin-stat-value" id="adminDashSubCount">—</div>
+                        <div class="admin-stat-label">Bài nộp</div>
+                    </div>
+                    <div class="admin-stat-card">
+                        <div class="admin-stat-icon" style="background: color-mix(in srgb, var(--subject-math) 12%, var(--surface-2)); color: var(--subject-math);">
+                            <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#key"/></svg>
+                        </div>
+                        <div class="admin-stat-value" id="adminDashCodeCount">—</div>
+                        <div class="admin-stat-label">Mã kích hoạt</div>
+                    </div>
+                </div>
+
+                <!-- Bottom: chart + activity -->
+                <div class="admin-dash-row">
+                    <!-- Submissions chart (7-day bar chart) -->
+                    <div class="admin-card admin-dash-chart-card">
+                        <div class="admin-dash-card-header">
+                            <h3 class="admin-dash-card-title">
+                                <svg class="icon icon-sm" style="color:var(--accent);" aria-hidden="true"><use href="/assets/icons/sprite.svg#bar-chart-3"/></svg>
+                                Bài nộp 7 ngày
+                            </h3>
+                        </div>
+                        <div class="admin-dash-chart" id="adminDashChart" aria-label="Biểu đồ bài nộp 7 ngày">
+                            <!-- Bars rendered by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Activity feed -->
+                    <div class="admin-card admin-dash-activity-card">
+                        <div class="admin-dash-card-header">
+                            <h3 class="admin-dash-card-title">
+                                <svg class="icon icon-sm" style="color:var(--accent);" aria-hidden="true"><use href="/assets/icons/sprite.svg#clock"/></svg>
+                                Hoạt động gần đây
+                            </h3>
+                        </div>
+                        <ul class="admin-dash-activity" id="adminDashActivity">
+                            <li class="admin-dash-activity-empty">Đang tải...</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Recent submissions table -->
+                <div class="admin-card admin-dash-recent-card">
+                    <div class="admin-dash-card-header">
+                        <h3 class="admin-dash-card-title">
+                            <svg class="icon icon-sm" style="color:var(--accent);" aria-hidden="true"><use href="/assets/icons/sprite.svg#send"/></svg>
+                            Bài nộp mới nhất
+                        </h3>
+                        <button class="btn btn-ghost btn-sm" onclick="switchTab('submissions')">
+                            Xem tất cả
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                    <div class="admin-dash-recent" id="adminDashRecent">
+                        <div class="admin-dash-activity-empty">Đang tải...</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="tab-bar">
-                <div class="tab-item active" onclick="switchTab('exams')">📝 Đề thi</div>
-                <div class="tab-item" onclick="switchTab('users')">👥 Tài khoản</div>
-                <div class="tab-item" onclick="switchTab('subjects')">📚 Môn học</div>
-                <div class="tab-item" onclick="switchTab('codeLogs')">📊 Mã kích hoạt</div>
-                <div class="tab-item" onclick="switchTab('submissions')">📋 Bài nộp</div>
-                <div class="tab-item" onclick="switchTab('questionBank')" style="color:#059669;">📚 Ngân hàng</div>
-                <div class="tab-item" onclick="switchTab('settings')">⚙️ Cài đặt</div>
-                <div class="tab-item" onclick="switchTab('help')" style="color:#0369a1;">📖 Hướng dẫn</div>
-                <div class="tab-item" onclick="switchTab('media')" style="color:#0891b2;">📁 Kho Media</div>
-                <div class="tab-item" onclick="switchTab('aiGen')"
-                    style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border-radius:8px;margin-left:auto;padding:0.6rem 1.2rem;">
-                    🤖 AI Tạo Đề</div>
-            </div>
-
             <!-- TAB: Exams -->
-            <div id="tabExams" class="view active">
+            <div id="tabExams" class="view">
                 <div id="viewExamList" class="view active">
-                    <div
-                        style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;">
-                        <h2 style="font-size:1.5rem;font-weight:700;">Quản lý Đề Thi</h2>
-                        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                    <div class="page-header">
+                        <div class="page-header-info">
+                            <h2>Quản lý Đề Thi</h2>
+                            <p class="page-subtitle">Tạo, chỉnh sửa và quản lý đề thi</p>
+                        </div>
+                        <div class="page-header-actions">
+                            <button class="btn btn-sm btn-outline" onclick="batchExportAll()">📦 Export All</button>
                             <button class="btn btn-sm btn-info" onclick="triggerImport()">Import JSON</button>
                             <input type="file" id="importFileInput" accept=".json" onchange="handleImportFile(event)">
                             <button class="btn btn-primary" onclick="showCreateExamModal()">+ Tạo đề mới</button>
@@ -834,25 +345,40 @@
 
             <!-- TAB: Users -->
             <div id="tabUsers" class="view">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;">
-                    <h2 style="font-size:1.5rem;font-weight:700;">Quản lý Tài khoản</h2>
-                    <button class="btn btn-primary" onclick="showCreateUserModal()">+ Tạo tài khoản</button>
+                <div class="page-header">
+                    <div class="page-header-info">
+                        <h2>Quản lý Tài khoản</h2>
+                        <p class="page-subtitle">Tạo và quản lý tài khoản học sinh</p>
+                    </div>
+                    <div class="page-header-actions">
+                        <button class="btn btn-primary" onclick="showCreateUserModal()">+ Tạo tài khoản</button>
+                    </div>
                 </div>
                 <div id="userListContainer"></div>
             </div>
 
             <!-- TAB: Subjects -->
             <div id="tabSubjects" class="view">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;">
-                    <h2 style="font-size:1.5rem;font-weight:700;">Quản lý Môn học</h2>
-                    <button class="btn btn-primary btn-sm" onclick="showAddSubjectModal()">+ Thêm môn</button>
+                <div class="page-header">
+                    <div class="page-header-info">
+                        <h2>Quản lý Môn học</h2>
+                        <p class="page-subtitle">Danh sách môn học trong hệ thống</p>
+                    </div>
+                    <div class="page-header-actions">
+                        <button class="btn btn-primary btn-sm" onclick="showAddSubjectModal()">+ Thêm môn</button>
+                    </div>
                 </div>
                 <div id="subjectListContainer"></div>
             </div>
 
             <!-- TAB: Code Logs -->
             <div id="tabCodeLogs" class="view">
-                <h2 style="font-size:1.5rem;font-weight:700;margin-bottom:2rem;">📊 Lịch sử sử dụng mã</h2>
+                <div class="page-header">
+                    <div class="page-header-info">
+                        <h2>Lịch sử sử dụng mã</h2>
+                        <p class="page-subtitle">Theo dõi lịch sử tạo và sử dụng mã kích hoạt</p>
+                    </div>
+                </div>
                 <div id="codeLogsContainer" style="max-height:600px;overflow-y:auto;">
                     <div class="empty-state">
                         <div class="emoji">⏳</div>
@@ -864,172 +390,64 @@
 
             <!-- TAB: Question Bank -->
             <div id="tabQuestionBank" class="view">
-                <div class="glass-panel">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:0.75rem;">
-                        <h2>📚 Ngân hàng câu hỏi</h2>
-                        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-                            <button class="btn btn-sm btn-success" onclick="showImportFromExamModal()">📥 Import từ đề</button><button class="btn btn-sm btn-outline" onclick="showAIExtractModal()" style="border-color:#8b5cf6;color:#8b5cf6;">🤖 AI Bóc tách</button>
-                            <button class="btn btn-sm btn-primary" onclick="showGenerateExamFromBankModal()">🎲 Tạo đề từ kho</button>
-                        </div>
+                <div class="page-header">
+                    <div class="page-header-info">
+                        <h2>Ngân hàng câu hỏi</h2>
+                        <p class="page-subtitle" id="qbSubtitle">Đang tải...</p>
                     </div>
-                    <div id="qbFilterBar" style="display:flex;gap:0.5rem;margin-bottom:1rem;align-items:center;flex-wrap:wrap;">
-                        <input id="qbSearchInput" class="form-input" placeholder="🔍 Tìm câu hỏi..." oninput="loadQuestionBank()" style="flex:1;min-width:180px;max-width:280px;">
-                        <select id="qbFilterSubject" class="form-select" onchange="loadQuestionBank()" style="max-width:150px;">
-                            <option value="">Tất cả môn</option>
-                        </select>
-                        <select id="qbFilterType" class="form-select" onchange="loadQuestionBank()" style="max-width:150px;">
-                            <option value="">Tất cả loại</option>
-                            <option value="multiple-choice">Trắc nghiệm</option>
-                            <option value="fill-in-blank">Điền khuyết</option>
-                            <option value="writing-essay">Tự luận</option>
-                            <option value="free-form">Tự do</option>
-                            <option value="reading">Đọc hiểu</option>
-                        </select>
-                        <select id="qbFilterDifficulty" class="form-select" onchange="loadQuestionBank()" style="max-width:120px;">
-                            <option value="">Tất cả độ khó</option>
-                            <option value="easy">Dễ</option>
-                            <option value="medium">TB</option>
-                            <option value="hard">Khó</option>
-                        </select>
-                        <span id="qbCountBadge" style="font-size:0.8rem;color:var(--text-muted);"></span>
+                    <div class="page-header-actions">
+                        <button class="btn btn-sm btn-success" onclick="showImportFromExamModal()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><path d="M12 5v14M5 12l7 7 7-7"/></svg>Import từ đề</button>
+                        <button class="btn btn-sm btn-outline btn-ai-extract" onclick="showAIExtractModal()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><path d="M12 2a4 4 0 0 1 4 4v2H8V6a4 4 0 0 1 4-4z"/><rect x="3" y="8" width="18" height="14" rx="2"/><circle cx="9" cy="15" r="1.5"/><circle cx="15" cy="15" r="1.5"/></svg>AI Bóc tách</button>
+                        <button class="btn btn-sm btn-ai-gradient" onclick="showGenerateExamFromBankModal()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M16 8h.01M8 8h.01M8 16h.01M16 16h.01M12 12h.01"/></svg>Tạo đề từ kho</button>
+                        <button class="btn btn-sm btn-ghost" onclick="exportQuestionBank()" title="Xuất ngân hàng câu hỏi">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Export</button>
                     </div>
-                    <div id="questionBankContainer"></div>
-                    <div id="qbPagination" style="display:flex;gap:0.5rem;justify-content:center;margin-top:1rem;"></div>
                 </div>
+                <div class="page-filter-bar">
+                    <input id="qbSearchInput" class="form-input" placeholder="🔍 Tìm câu hỏi..." oninput="loadQuestionBank()" style="flex:1;min-width:160px;max-width:260px;">
+                    <select id="qbFilterSubject" class="form-select" onchange="loadQuestionBank()">
+                        <option value="">Tất cả môn</option>
+                    </select>
+                    <select id="qbFilterType" class="form-select" onchange="loadQuestionBank()">
+                        <option value="">Tất cả loại</option>
+                        <option value="multiple-choice">Trắc nghiệm</option>
+                        <option value="fill-in-blank">Điền khuyết</option>
+                        <option value="writing-essay">Tự luận</option>
+                        <option value="free-form">Tự do</option>
+                        <option value="reading">Đọc hiểu</option>
+                    </select>
+                    <select id="qbFilterDifficulty" class="form-select" onchange="loadQuestionBank()">
+                        <option value="">Tất cả độ khó</option>
+                        <option value="easy">Dễ</option>
+                        <option value="medium">TB</option>
+                        <option value="hard">Khó</option>
+                    </select>
+                    <span id="qbCountBadge" class="page-filter-count"></span>
+                </div>
+                <div id="questionBankContainer"></div>
+                <div id="qbPagination" style="display:flex;gap:0.5rem;justify-content:center;margin-top:1rem;"></div>
             </div>
 
 
             <!-- TAB: Submissions -->
             <div id="tabSubmissions" class="view">
-                <style>
-                    .submission-card {
-                        background: var(--bg-card);
-                        border: 1px solid var(--border);
-                        border-radius: 16px;
-                        padding: 1.5rem;
-                        margin-bottom: 1.25rem;
-                        box-shadow: var(--shadow-sm);
-                    }
-
-                    .submission-header {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: flex-start;
-                        flex-wrap: wrap;
-                        gap: 0.5rem;
-                        margin-bottom: 1rem;
-                        padding-bottom: 0.75rem;
-                        border-bottom: 1px solid var(--border);
-                    }
-
-                    .submission-name {
-                        font-weight: 700;
-                        font-size: 1rem;
-                    }
-
-                    .submission-meta {
-                        font-size: 0.8rem;
-                        color: var(--text-muted);
-                    }
-
-                    .essay-review-box {
-                        background: var(--bg-body);
-                        border: 1px solid var(--border);
-                        border-radius: 12px;
-                        padding: 1.25rem;
-                        margin-top: 0.75rem;
-                    }
-
-                    .essay-review-box h4 {
-                        font-size: 0.85rem;
-                        font-weight: 700;
-                        color: var(--text-muted);
-                        text-transform: uppercase;
-                        letter-spacing: 0.5px;
-                        margin-bottom: 0.75rem;
-                    }
-
-                    .essay-student-text {
-                        background: white;
-                        border: 1px solid var(--border);
-                        border-radius: 8px;
-                        padding: 0.85rem;
-                        font-size: 0.9rem;
-                        line-height: 1.6;
-                        color: var(--text-main);
-                        min-height: 80px;
-                        white-space: pre-wrap;
-                        word-break: break-word;
-                    }
-
-                    .essay-attach-grid {
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: 0.5rem;
-                        margin-top: 0.5rem;
-                    }
-
-                    .essay-attach-grid img {
-                        width: 100px;
-                        height: 80px;
-                        object-fit: cover;
-                        border-radius: 8px;
-                        border: 1px solid var(--border);
-                        cursor: zoom-in;
-                    }
-
-                    .essay-attach-grid img:hover {
-                        opacity: 0.85;
-                    }
-
-                    .grade-badge {
-                        display: inline-flex;
-                        align-items: center;
-                        gap: 0.3rem;
-                        padding: 0.25rem 0.75rem;
-                        border-radius: 20px;
-                        font-size: 0.8rem;
-                        font-weight: 700;
-                    }
-
-                    .grade-ai {
-                        background: #eef2ff;
-                        color: #4f46e5;
-                    }
-
-                    .grade-teacher {
-                        background: #f0fdf4;
-                        color: #16a34a;
-                    }
-
-                    .grade-pending {
-                        background: #fef9c3;
-                        color: #92400e;
-                    }
-
-                    .review-actions {
-                        display: flex;
-                        gap: 0.5rem;
-                        flex-wrap: wrap;
-                        align-items: center;
-                        margin-top: 0.75rem;
-                    }
-
-                    .sub-filter-bar {
-                        display: flex;
-                        align-items: center;
-                        gap: 1rem;
-                        margin-bottom: 1.5rem;
-                        flex-wrap: wrap;
-                    }
-                </style>
-                <div
-                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:1rem;">
-                    <h2 style="font-size:1.5rem;font-weight:700;">📋 Bài nộp Tự luận</h2>
-                    <button class="btn btn-sm btn-ghost" onclick="loadSubmissions()">🔄 Tải lại</button>
+                <div class="page-header">
+                    <div class="page-header-info">
+                        <h2>Bài nộp Tự luận</h2>
+                        <p class="page-subtitle">Theo dõi và chấm điểm bài nộp</p>
+                    </div>
+                    <div class="page-header-actions">
+                        <button class="btn btn-sm btn-info" id="batchAiGradeBtn" onclick="batchAiGradeAll()" title="AI chấm tất cả bài chưa chấm">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z"/></svg>AI Chấm tất cả</button>
+                        <button class="btn btn-sm btn-ghost" onclick="loadSubmissions()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Tải lại</button>
+                    </div>
                 </div>
-                <div class="sub-filter-bar">
-                    <label style="font-weight:600;font-size:0.9rem;">Lọc theo đề:</label>
+                <div class="page-filter-bar">
+                    <label style="font-weight:600;font-size:0.82rem;">Lọc theo đề:</label>
                     <select id="submissionsExamFilter" class="form-select" style="max-width:320px;"
                         onchange="loadSubmissions()">
                         <option value="">— Tất cả đề —</option>
@@ -1046,7 +464,12 @@
 
             <!-- TAB: Settings -->
             <div id="tabSettings" class="view">
-                <h2 style="font-size:1.5rem;font-weight:700;margin-bottom:2rem;">⚙️ Cài đặt hệ thống</h2>
+                <div class="page-header">
+                    <div class="page-header-info">
+                        <h2>Cài đặt hệ thống</h2>
+                        <p class="page-subtitle">Quản lý bảo mật, AI và cấu hình chung</p>
+                    </div>
+                </div>
                 <div class="glass-panel" style="padding:2rem;margin-bottom:1.5rem;">
                     <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;">🔐 Bảo mật Admin</h3>
                     <div class="form-group">
@@ -1073,90 +496,51 @@
                     <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:1.5rem;">🌐 Trang chủ</h3>
                     <div class="form-group">
                         <label>Tên hệ thống</label>
-                        <input id="settingsSiteName" class="form-input" placeholder="EasyRevise"
-                            style="max-width:300px;">
+                        <input id="settingsSiteName" class="form-input" placeholder="EasyRevise" style="max-width:300px;">
                     </div>
                     <div class="form-group">
                         <label>Mô tả</label>
                         <input id="settingsSiteDesc" class="form-input" placeholder="Hệ thống ôn tập...">
                     </div>
                 </div>
+                <div class="glass-panel ai-providers-panel" style="padding:2rem;margin-bottom:1.5rem;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:1.25rem;">
+                        <div>
+                            <h3 style="font-size:1.1rem;font-weight:700;margin:0 0 0.2rem;">🔌 AI Providers</h3>
+                            <p style="font-size:0.8rem;color:var(--text-muted);margin:0;">Chuyển qua lại giữa các provider — không cần restart</p>
+                        </div>
+                        <button class="btn btn-primary btn-sm" onclick="showProviderModal()">+ Thêm provider</button>
+                    </div>
+                    <div id="providerProfilesList">
+                        <div style="text-align:center;padding:1rem;color:var(--text-muted);font-size:0.875rem;">Đang tải...</div>
+                    </div>
+                </div>
+
+                <!-- ── Per-feature model overrides ── -->
                 <div class="glass-panel" style="padding:2rem;margin-bottom:1.5rem;">
-                    <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:0.5rem;">🤖 Cấu hình Model AI</h3>
-                    <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1.5rem;">Chọn model riêng cho từng
-                        tính năng. Để trống = dùng model mặc định từ <code>.env</code>.</p>
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.5rem;">
+                        <h3 style="font-size:1.1rem;font-weight:700;">🤖 Override Model theo tính năng</h3>
+                        <span id="aiProviderBadge" class="ai-provider-badge" style="display:none;"></span>
+                    </div>
+                    <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1.5rem;">Tuỳ chọn — để trống sẽ dùng model mặc định của provider đang hoạt động.</p>
                     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.25rem;">
                         <div class="form-group" style="margin:0;">
-                            <label>🚀 Tạo đề thi (mặc định tab AI Tạo Đề)</label>
-                            <select id="settingsGenerateModel" class="form-input" style="max-width:100%;">
-                                <option value="">Dùng model .env (mặc định)</option>
-                                <optgroup label="── Claude ──">
-                                    <option value="claude-sonnet-4.6">claude-sonnet-4.6 ⭐ Khuyến nghị</option>
-                                    <option value="claude-sonnet-4">claude-sonnet-4</option>
-                                    <option value="claude-opus-4.6">claude-opus-4.6 💪 Mạnh nhất</option>
-                                    <option value="claude-haiku-4.5">claude-haiku-4.5 ⚡ Nhanh/Rẻ</option>
-                                </optgroup>
-                                <optgroup label="── GPT ──">
-                                    <option value="gpt-4.1">gpt-4.1</option>
-                                    <option value="gpt-4o">gpt-4o</option>
-                                    <option value="gpt-5-mini">gpt-5-mini ⚡ Nhanh/Rẻ</option>
-                                    <option value="gpt-5.2">gpt-5.2</option>
-                                </optgroup>
-                                <optgroup label="── Gemini ──">
-                                    <option value="gemini-3-flash">gemini-3-flash</option>
-                                    <option value="gemini-3.1-pro">gemini-3.1-pro</option>
-                                </optgroup>
-                            </select>
+                            <label>🚀 Tạo đề thi</label>
+                            <select id="settingsGenerateModel" class="form-input" style="max-width:100%;"><option value="">Đang tải...</option></select>
                         </div>
                         <div class="form-group" style="margin:0;">
-                            <label>✍️ Chấm điểm tự luận (Essay &amp; Free-form)</label>
-                            <select id="settingsGradeModel" class="form-input" style="max-width:100%;">
-                                <option value="">Dùng model .env (mặc định)</option>
-                                <optgroup label="── Claude ──">
-                                    <option value="claude-sonnet-4.6">claude-sonnet-4.6 ⭐ Khuyến nghị</option>
-                                    <option value="claude-sonnet-4">claude-sonnet-4</option>
-                                    <option value="claude-opus-4.6">claude-opus-4.6 💪 Mạnh nhất</option>
-                                    <option value="claude-haiku-4.5">claude-haiku-4.5 ⚡ Nhanh/Rẻ</option>
-                                </optgroup>
-                                <optgroup label="── GPT ──">
-                                    <option value="gpt-4.1">gpt-4.1</option>
-                                    <option value="gpt-4o">gpt-4o</option>
-                                    <option value="gpt-5-mini">gpt-5-mini ⚡ Nhanh/Rẻ</option>
-                                    <option value="gpt-5.2">gpt-5.2</option>
-                                </optgroup>
-                                <optgroup label="── Gemini ──">
-                                    <option value="gemini-3-flash">gemini-3-flash</option>
-                                    <option value="gemini-3.1-pro">gemini-3.1-pro</option>
-                                </optgroup>
-                            </select>
+                            <label>✍️ Chấm tự luận</label>
+                            <select id="settingsGradeModel" class="form-input" style="max-width:100%;"><option value="">Đang tải...</option></select>
                         </div>
                         <div class="form-group" style="margin:0;">
-                            <label>🔍 Đọc ảnh OCR (Paste ảnh → điền form)</label>
-                            <select id="settingsOcrModel" class="form-input" style="max-width:100%;">
-                                <option value="">Dùng model .env (mặc định)</option>
-                                <optgroup label="── Claude ──">
-                                    <option value="claude-sonnet-4.6">claude-sonnet-4.6 ⭐ Khuyến nghị</option>
-                                    <option value="claude-sonnet-4">claude-sonnet-4</option>
-                                    <option value="claude-opus-4.6">claude-opus-4.6 💪 Mạnh nhất</option>
-                                    <option value="claude-haiku-4.5">claude-haiku-4.5 ⚡ Nhanh/Rẻ</option>
-                                </optgroup>
-                                <optgroup label="── GPT ──">
-                                    <option value="gpt-4.1">gpt-4.1</option>
-                                    <option value="gpt-4o">gpt-4o</option>
-                                    <option value="gpt-5-mini">gpt-5-mini ⚡ Nhanh/Rẻ</option>
-                                    <option value="gpt-5.2">gpt-5.2</option>
-                                </optgroup>
-                                <optgroup label="── Gemini ──">
-                                    <option value="gemini-3-flash">gemini-3-flash</option>
-                                    <option value="gemini-3.1-pro">gemini-3.1-pro</option>
-                                </optgroup>
-                            </select>
+                            <label>🔍 OCR ảnh</label>
+                            <select id="settingsOcrModel" class="form-input" style="max-width:100%;"><option value="">Đang tải...</option></select>
                         </div>
                     </div>
                 </div>
-                <button class="btn btn-primary" onclick="saveSettings()">💾 Lưu cài đặt</button>
-                <span id="settingsSaveStatus"
-                    style="margin-left:1rem;font-size:0.85rem;color:var(--success);display:none;">✅ Đã lưu!</span>
+
+                <button class="btn btn-primary" onclick="saveSettings()">💾 Lưu cài đặt chung</button>
+                <span id="settingsSaveStatus" style="margin-left:1rem;font-size:0.85rem;color:var(--success);display:none;">✅ Đã lưu!</span>
             </div>
 
             <!-- TAB: Media Library -->
@@ -1202,208 +586,7 @@
 
             <!-- TAB: Help -->
             <div id="tabHelp" class="view">
-                <style>
-                    @media print {
-
-                        .tab-bar,
-                        .admin-header button,
-                        #notifBellBtn {
-                            display: none !important;
-                        }
-
-                        #tabHelp {
-                            display: block !important;
-                        }
-
-                        .help-section-body {
-                            display: block !important;
-                            max-height: none !important;
-                        }
-
-                        .help-chevron {
-                            display: none !important;
-                        }
-                    }
-
-                    .help-section {
-                        border: 1px solid var(--border);
-                        border-radius: 16px;
-                        margin-bottom: 1rem;
-                        overflow: hidden;
-                        background: var(--bg-card);
-                        box-shadow: var(--shadow-sm);
-                        transition: box-shadow 0.2s;
-                    }
-
-                    .help-section:hover {
-                        box-shadow: var(--shadow-md);
-                    }
-
-                    .help-section-header {
-                        display: flex;
-                        align-items: center;
-                        gap: 0.75rem;
-                        padding: 1.1rem 1.5rem;
-                        cursor: pointer;
-                        user-select: none;
-                        background: var(--bg-card);
-                        transition: background 0.15s;
-                    }
-
-                    .help-section-header:hover {
-                        background: var(--primary-light, #eef2ff);
-                    }
-
-                    .help-section-header .help-icon {
-                        font-size: 1.4rem;
-                        width: 36px;
-                        flex-shrink: 0;
-                        text-align: center;
-                    }
-
-                    .help-section-header .help-title {
-                        flex: 1;
-                        font-size: 1rem;
-                        font-weight: 700;
-                        color: var(--text-main);
-                    }
-
-                    .help-chevron {
-                        font-size: 0.75rem;
-                        color: var(--text-muted);
-                        transition: transform 0.25s;
-                    }
-
-                    .help-section.open .help-chevron {
-                        transform: rotate(90deg);
-                    }
-
-                    .help-section-body {
-                        display: none;
-                        padding: 0 1.5rem 1.5rem;
-                        border-top: 1px solid var(--border);
-                        animation: fadeIn 0.2s ease;
-                    }
-
-                    .help-section.open .help-section-body {
-                        display: block;
-                    }
-
-                    .help-table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin: 1rem 0;
-                        font-size: 0.88rem;
-                    }
-
-                    .help-table th {
-                        padding: 0.6rem 0.75rem;
-                        text-align: left;
-                        font-size: 0.72rem;
-                        text-transform: uppercase;
-                        letter-spacing: 0.5px;
-                        color: var(--text-muted);
-                        border-bottom: 2px solid var(--border);
-                        white-space: nowrap;
-                    }
-
-                    .help-table td {
-                        padding: 0.65rem 0.75rem;
-                        border-bottom: 1px solid var(--border);
-                        color: var(--text-main);
-                        vertical-align: top;
-                    }
-
-                    .help-table tr:last-child td {
-                        border-bottom: none;
-                    }
-
-                    .help-table tr:hover td {
-                        background: var(--bg-body);
-                    }
-
-                    .help-badge {
-                        display: inline-block;
-                        padding: 0.15rem 0.6rem;
-                        border-radius: 6px;
-                        font-size: 0.7rem;
-                        font-weight: 700;
-                        text-transform: uppercase;
-                        white-space: nowrap;
-                    }
-
-                    .h-step {
-                        display: flex;
-                        gap: 0.75rem;
-                        align-items: flex-start;
-                        padding: 0.6rem 0;
-                        border-bottom: 1px dashed var(--border);
-                    }
-
-                    .h-step:last-child {
-                        border-bottom: none;
-                    }
-
-                    .h-step-num {
-                        width: 26px;
-                        height: 26px;
-                        border-radius: 50%;
-                        background: var(--primary);
-                        color: white;
-                        font-size: 0.75rem;
-                        font-weight: 700;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        flex-shrink: 0;
-                        margin-top: 1px;
-                    }
-
-                    .h-note {
-                        background: #fffbeb;
-                        border-left: 3px solid #f59e0b;
-                        border-radius: 0 8px 8px 0;
-                        padding: 0.6rem 0.9rem;
-                        font-size: 0.85rem;
-                        margin-top: 0.75rem;
-                        color: #78350f;
-                    }
-
-                    .h-tip {
-                        background: #f0fdf4;
-                        border-left: 3px solid #22c55e;
-                        border-radius: 0 8px 8px 0;
-                        padding: 0.6rem 0.9rem;
-                        font-size: 0.85rem;
-                        margin-top: 0.75rem;
-                        color: #14532d;
-                    }
-
-                    .help-section-body p,
-                    .help-section-body li {
-                        font-size: 0.9rem;
-                        line-height: 1.7;
-                        color: var(--text-secondary, #475569);
-                    }
-
-                    .help-section-body ul {
-                        padding-left: 1.25rem;
-                        margin: 0.5rem 0;
-                    }
-
-                    .help-section-body li {
-                        margin-bottom: 0.3rem;
-                    }
-
-                    .help-section-body h4 {
-                        font-size: 0.9rem;
-                        font-weight: 700;
-                        color: var(--text-main);
-                        margin: 1.25rem 0 0.5rem;
-                    }
-                </style>
-
-                <div
+<div
                     style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;">
                     <div>
                         <h2 style="font-size:1.5rem;font-weight:700;margin-bottom:0.25rem;">📖 Hướng dẫn sử dụng
@@ -1436,36 +619,31 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><span class="help-badge"
-                                            style="background:#eef2ff;color:#4f46e5;">multiple-choice</span></td>
+                                    <td><span class="help-badge type-mc">multiple-choice</span></td>
                                     <td><strong>Trắc nghiệm</strong></td>
                                     <td>4 đáp án A/B/C/D, chọn 1</td>
                                     <td>✅ Tự động (ngay lập tức)</td>
                                 </tr>
                                 <tr>
-                                    <td><span class="help-badge"
-                                            style="background:#f0fdf4;color:#16a34a;">reading</span></td>
+                                    <td><span class="help-badge type-reading">reading</span></td>
                                     <td><strong>Đọc hiểu</strong></td>
                                     <td>Có đoạn văn (passage) kèm câu hỏi trắc nghiệm</td>
                                     <td>✅ Tự động (ngay lập tức)</td>
                                 </tr>
                                 <tr>
-                                    <td><span class="help-badge"
-                                            style="background:#fdf4ff;color:#9333ea;">fill-in-blank</span></td>
+                                    <td><span class="help-badge type-fillin">fill-in-blank</span></td>
                                     <td><strong>Điền vào chỗ trống</strong></td>
                                     <td>Câu có ___ , học sinh điền text/số vào từng ô</td>
                                     <td>✅ Tự động so sánh (text/số nguyên/số thập phân)</td>
                                 </tr>
                                 <tr>
-                                    <td><span class="help-badge"
-                                            style="background:#fffbeb;color:#d97706;">writing-essay</span></td>
+                                    <td><span class="help-badge type-essay">writing-essay</span></td>
                                     <td><strong>Viết luận</strong></td>
                                     <td>Học sinh viết bài tự do, có thể kèm ảnh/PDF</td>
                                     <td>🤖 AI chấm sau khi nộp (~30-60 giây)</td>
                                 </tr>
                                 <tr>
-                                    <td><span class="help-badge"
-                                            style="background:#f0f9ff;color:#0284c7;">free-form</span></td>
+                                    <td><span class="help-badge type-freeform">free-form</span></td>
                                     <td><strong>Tự luận nhiều phần</strong></td>
                                     <td>Nhiều phần a, b, c — mỗi phần một câu trả lời</td>
                                     <td>🤖 AI chấm sau khi nộp (~30-60 giây)</td>
@@ -1697,6 +875,17 @@
                 </div>
             </div>
 
+            <!-- TAB: Activation Codes -->
+            <div id="tabActivation" class="view">
+                <div class="admin-section-header">
+                    <h2 style="font-size:1.5rem;font-weight:700;">🔑 Mã kích hoạt</h2>
+                    <button class="btn btn-primary" onclick="showGenerateCodesModal()">+ Tạo mã mới</button>
+                </div>
+                <div id="activationContainer">
+                    <div class="empty-state"><div class="emoji">🔑</div><p>Đang tải...</p></div>
+                </div>
+            </div>
+
             <!-- TAB: AI Generator -->
             <div id="tabAiGen" class="view">
                 <h2 style="font-size:1.5rem;font-weight:700;margin-bottom:0.5rem;">🤖 AI Tạo Đề Thi</h2>
@@ -1721,40 +910,12 @@
                             </select>
                         </div>
                         <div class="form-group" style="margin:0;">
-                            <label>SDK</label>
-                            <select id="aiSdkType" class="form-select">
-                                <option value="anthropic">🔶 Anthropic</option>
-                                <option value="openai">🟢 OpenAI</option>
-                            </select>
-                        </div>
-                        <div class="form-group" style="margin:0;">
-                            <label>Model</label>
+                            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem;">
+                                <label style="margin:0;">Model AI</label>
+                                <span id="aiTabProviderBadge" class="ai-tab-provider-badge"></span>
+                            </div>
                             <select id="aiModel" class="form-select">
-                                <optgroup label="Claude">
-                                    <option value="claude-sonnet-4.6" selected>claude-sonnet-4.6</option>
-                                    <option value="claude-sonnet-4">claude-sonnet-4</option>
-                                    <option value="claude-opus-4.6">claude-opus-4.6</option>
-                                    <option value="claude-haiku-4.5">claude-haiku-4.5</option>
-                                </optgroup>
-                                <optgroup label="GPT">
-                                    <option value="gpt-4.1">gpt-4.1</option>
-                                    <option value="gpt-4o">gpt-4o</option>
-                                    <option value="gpt-5-mini">gpt-5-mini</option>
-                                    <option value="gpt-5.1-codex">gpt-5.1-codex</option>
-                                    <option value="gpt-5.1-codex-max">gpt-5.1-codex-max</option>
-                                    <option value="gpt-5.1-codex-mini">gpt-5.1-codex-mini</option>
-                                    <option value="gpt-5.2">gpt-5.2</option>
-                                    <option value="gpt-5.2-codex">gpt-5.2-codex</option>
-                                    <option value="gpt-5.3-codex">gpt-5.3-codex</option>
-                                    <option value="gpt-5.4">gpt-5.4</option>
-                                </optgroup>
-                                <optgroup label="Gemini">
-                                    <option value="gemini-3-flash">gemini-3-flash</option>
-                                    <option value="gemini-3.1-pro">gemini-3.1-pro</option>
-                                </optgroup>
-                                <optgroup label="Grok">
-                                    <option value="grok-code-fast">grok-code-fast</option>
-                                </optgroup>
+                                <option value="">Đang tải...</option>
                             </select>
                         </div>
                         <div class="form-group" style="margin:0;">
@@ -1780,16 +941,21 @@
                         <div style="font-size:3rem;margin-bottom:1rem;">📄</div>
                         <p style="font-weight:600;color:var(--text-main);margin-bottom:0.5rem;">Kéo thả file vào đây
                             hoặc click để chọn</p>
-                        <p style="font-size:0.82rem;color:var(--text-muted);">Hỗ trợ: PDF, JPG, PNG, DOCX — Tối đa 10
-                            file, 20MB/file</p>
-                        <input type="file" id="aiFileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.docx"
+                        <p style="font-size:0.82rem;color:var(--text-muted);">Hỗ trợ: PDF, JPG, PNG, DOCX — PDF sẽ được chuyển thành ảnh ngay trên trình duyệt</p>
+                        <input type="file" id="aiFileInput" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,.docx"
                             style="display:none;" onchange="handleAIFiles(this.files)">
                     </div>
                     <div id="aiFileList" style="margin-top:1rem;"></div>
 
-                    <div style="display:flex;gap:1rem;margin-top:1.5rem;align-items:center;">
-                        <button id="aiGenerateBtn" class="btn btn-primary" onclick="generateWithAI()"
+                    <div style="display:flex;gap:0.75rem;margin-top:1.5rem;align-items:center;flex-wrap:wrap;">
+                        <button id="aiGenerateBtn" class="btn btn-primary" onclick="generateWithAI(false)"
                             style="padding:0.75rem 2rem;font-size:1rem;">🚀 Tạo đề bằng AI</button>
+                        <button type="button" class="btn btn-outline" onclick="stitchAIImages()"
+                            style="padding:0.75rem 1rem;font-size:0.95rem;">🧩 Dàn ảnh dọc</button>
+                        <button type="button" class="btn btn-info" onclick="generateWithAI(true)"
+                            style="padding:0.75rem 1rem;font-size:0.95rem;">🔍 OCR rồi tạo đề</button>
+                        <button type="button" class="btn btn-ghost" onclick="clearAIFiles()"
+                            style="padding:0.75rem 1rem;font-size:0.95rem;">🗑️ Xóa file</button>
                         <span id="aiStatus" style="font-size:0.85rem;color:var(--text-muted);"></span>
                     </div>
                 </div>
@@ -1824,13 +990,10 @@
                 </div>
 
                 <!-- Error state -->
-                <div id="aiError" style="display:none;" class="glass-panel"
-                    style="padding:2rem;border:1px solid #fecaca;background:#fef2f2;">
-                    <p style="color:#dc2626;font-weight:600;">❌ <span id="aiErrorMsg"></span></p>
-                    <pre id="aiErrorDetail"
-                        style="margin-top:1rem;font-size:0.8rem;max-height:200px;overflow:auto;background:#fff;padding:1rem;border-radius:8px;display:none;"></pre>
-                    <button id="aiRecoverBtn" onclick="recoverAIResult()"
-                        style="display:none;margin-top:1rem;padding:0.5rem 1.25rem;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;border:none;border-radius:10px;cursor:pointer;font-weight:600;font-size:0.88rem;gap:0.4rem;align-items:center;">
+                <div id="aiError" class="glass-panel admin-error-panel" style="display:none;padding:2rem;">
+                    <p class="admin-error-title">❌ <span id="aiErrorMsg"></span></p>
+                    <pre id="aiErrorDetail" class="admin-error-detail" style="display:none;"></pre>
+                    <button id="aiRecoverBtn" class="btn btn-sm btn-ai-gradient" onclick="recoverAIResult()" style="display:none;margin-top:1rem;">
                         🔄 Khôi phục kết quả từ server
                     </button>
                 </div>
@@ -1839,6 +1002,21 @@
     </div>
 
     <!-- MODALS -->
+    <!-- Generate Activation Codes Modal -->
+    <div id="modalGenerateCodes" class="modal-overlay">
+        <div class="glass-panel modal-content" style="max-width:450px;">
+            <h3 style="font-size:1.25rem;font-weight:700;margin-bottom:1.5rem;">🔑 Tạo mã kích hoạt</h3>
+            <div class="form-group"><label>Tiền tố (Prefix)</label><input id="genCodePrefix" class="form-input" placeholder="VD: ENGL-6A1"></div>
+            <div class="form-group"><label>Tên batch</label><input id="genCodeBatch" class="form-input" placeholder="VD: Lớp 6A1 - HK2 2026"></div>
+            <div class="form-group"><label>Số lượng mã</label><input id="genCodeCount" class="form-input" type="number" min="1" max="500" value="10" style="max-width:150px;"></div>
+            <div class="form-group"><label>Hạn sử dụng (tùy chọn)</label><input id="genCodeExpiry" class="form-input" type="date"></div>
+            <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:1.5rem;">
+                <button class="btn btn-ghost" onclick="closeModal('modalGenerateCodes')">Hủy</button>
+                <button class="btn btn-primary" onclick="generateActivationCodes()">🔑 Tạo mã</button>
+            </div>
+        </div>
+    </div>
+
     <div id="modalExam" class="modal-overlay">
         <div class="glass-panel modal-content">
             <h3 id="modalExamTitle" style="font-size:1.25rem;font-weight:700;margin-bottom:2rem;">Tạo đề mới</h3>
@@ -1976,8 +1154,19 @@
                 </div>
             </div>
             <div id="freeformAnswerGroup" style="display:none;">
-                <div class="form-group"><label>Đáp án</label><textarea id="inputFreeformAnswer" class="form-textarea"
-                        placeholder="Đáp án chi tiết..."></textarea></div>
+                <div class="form-group"><label>Đáp án mẫu / gợi ý chấm</label><textarea id="inputFreeformAnswer" class="form-textarea"
+                        placeholder="Đáp án chi tiết hoặc rubric chấm điểm..."></textarea></div>
+                <div class="form-group">
+                    <label style="display:flex;align-items:center;gap:0.5rem;justify-content:space-between;">
+                        <span>Các ý nhỏ của câu tự luận</span>
+                        <button type="button" class="btn btn-sm btn-outline" onclick="addFreeformSubPart()"
+                            style="padding:0.2rem 0.6rem;font-size:0.75rem;">+ Thêm ý</button>
+                    </label>
+                    <p style="font-size:0.76rem;color:var(--text-muted);margin:-0.25rem 0 0.5rem;">
+                        Mỗi ý sẽ hiện thành một ô trả lời riêng cho học sinh. Nếu để trống, câu tự luận sẽ có một ô trả lời chung.
+                    </p>
+                    <div id="freeformSubPartList"></div>
+                </div>
             </div>
             <!-- Fill-in-blank Group -->
             <div id="fillBlankGroup" style="display:none;">
@@ -2059,7 +1248,10 @@
                         style="padding:0.35rem 0.85rem;font-size:0.82rem;">📷 Ảnh chính</button>
                     <span id="questionImagePreview" style="font-size:0.8rem;color:var(--text-muted);"></span>
                 </div>
-                <img id="questionImageImg" style="display:none;max-width:200px;margin-top:0.5rem;border-radius:8px;">
+                <div class="main-image-container" id="questionImageContainer" style="display:none;">
+                    <img id="questionImageImg" style="max-width:200px;border-radius:8px;">
+                    <button type="button" class="img-delete-btn" onclick="removeMainQuestionImage()" title="Xóa ảnh chính">×</button>
+                </div>
                 <!-- Multi-image for question -->
                 <div
                     style="margin-top:0.75rem;padding:0.75rem;background:var(--bg-body);border:1px dashed var(--border);border-radius:10px;">
@@ -2088,10 +1280,10 @@
                 <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Video hiện khi làm bài (hoặc
                     dạng gợi ý)</p>
             </div>
-            <div class="form-group"><label>📎 Tài liệu đính kèm (PDF/DOCX)</label>
+            <div class="form-group"><label>📎 Tài liệu đính kèm (PDF / DOCX / PPTX)</label>
                 <div style="display:flex;gap:0.5rem;align-items:center;">
                     <input id="inputQuestionAttachment" class="form-input" style="flex:1;"
-                        placeholder="URL tài liệu (PDF, DOCX)" readonly>
+                        placeholder="URL tài liệu (PDF, DOCX, PPTX)" readonly>
                     <button type="button" class="btn btn-sm btn-info" style="padding:0.35rem 0.6rem;font-size:0.78rem;white-space:nowrap;" onclick="openMediaPicker('attachment')">📁 Kho</button>
                     <button type="button" class="btn btn-sm btn-ghost" style="padding:0.35rem 0.5rem;font-size:0.78rem;" onclick="document.getElementById('inputQuestionAttachment').value=''" title="Xóa">✕</button>
                 </div>
@@ -2113,7 +1305,10 @@
                         style="padding:0.35rem 0.85rem;font-size:0.82rem;">📷 Ảnh chính</button>
                     <span id="explanationImagePreview" style="font-size:0.8rem;color:var(--text-muted);"></span>
                 </div>
-                <img id="explanationImageImg" style="display:none;max-width:200px;margin-top:0.5rem;border-radius:8px;">
+                <div class="main-image-container" id="explanationImageContainer" style="display:none;">
+                    <img id="explanationImageImg" style="max-width:200px;border-radius:8px;">
+                    <button type="button" class="img-delete-btn" onclick="removeMainExplanationImage()" title="Xóa ảnh giải thích">×</button>
+                </div>
                 <!-- Multi-image for explanation -->
                 <div
                     style="margin-top:0.75rem;padding:0.75rem;background:var(--bg-body);border:1px dashed var(--border);border-radius:10px;">
@@ -2144,14 +1339,14 @@
 
     <div id="modalSubject" class="modal-overlay">
         <div class="glass-panel modal-content" style="max-width:400px;">
-            <h3 style="font-size:1.25rem;font-weight:700;margin-bottom:2rem;">Thêm môn học</h3>
+            <h3 id="modalSubjectTitle" style="font-size:1.25rem;font-weight:700;margin-bottom:2rem;">Thêm môn học</h3>
             <div class="form-group"><label>Tên môn</label><input id="inputSubjectName" class="form-input"
                     placeholder="VD: Tiếng Anh 9"></div>
             <div class="form-group"><label>Icon</label><input id="inputSubjectIcon" class="form-input" placeholder="📚"
                     value="📚" style="max-width:100px;"></div>
             <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:2rem;">
                 <button class="btn btn-ghost" onclick="closeModal('modalSubject')">Hủy</button>
-                <button class="btn btn-primary" onclick="saveSubject()">Lưu</button>
+                <button id="modalSubjectSaveBtn" class="btn btn-primary" onclick="saveSubject()">Lưu</button>
             </div>
         </div>
     </div>
@@ -2160,7 +1355,7 @@
         <div class="glass-panel modal-content" style="max-width:420px;">
             <h3 id="modalUserTitle" style="font-size:1.25rem;font-weight:700;margin-bottom:2rem;">Tạo tài khoản</h3>
             <div id="userModalError" class="auth-error"
-                style="display:none;margin-bottom:1rem;background:#fef2f2;color:#dc2626;padding:0.5rem 0.75rem;border-radius:8px;font-size:0.85rem;">
+                style="display:none;margin-bottom:1rem;background:var(--error-soft);color:var(--error);padding:0.5rem 0.75rem;border-radius:8px;font-size:0.85rem;">
             </div>
             <div class="form-group"><label>Tên hiển thị</label><input id="inputUserDisplayName" class="form-input"
                     placeholder="VD: Nguyễn Văn A"></div>
@@ -2201,8 +1396,166 @@
     <script src="/admin/js/question-bank.js"></script>
     <!-- 3b. Media Library module -->
     <script src="/admin/js/media-library.js"></script>
+    <script src="/admin/js/activation.js"></script>
+    <script src="/admin/js/ai-extract-ocr.js"></script>
+    <!-- 3c. Dashboard tab (Bento, chart, activity) -->
+    <script src="/admin/js/dashboard.js"></script>
     <!-- 4. Entry point: auth, tabs, init (must be last) -->
+    <script src="/js/components/confirm-popup.js"></script>
+    <script src="/js/components/notify-popup.js"></script>
+    <script src="/js/components/theme-dropdown.js"></script>
+    <script src="/js/components/native-select-enhancer.js"></script>
     <script src="/admin/js/admin-main.js"></script>
+
+    <!-- ── Provider Add/Edit Modal ── -->
+    <div id="providerModal" class="provider-modal-overlay" onclick="if(event.target===this)closeProviderModal()">
+        <div class="provider-modal-card">
+            <div class="provider-modal-header">
+                <h3 id="providerModalTitle" class="provider-modal-title">+ Thêm Provider</h3>
+                <button onclick="closeProviderModal()" class="provider-modal-close" aria-label="Đóng">×</button>
+            </div>
+            <div class="provider-modal-body">
+                <div class="form-group" style="margin:0;">
+                    <label>Tên provider <span style="color:var(--error);">*</span></label>
+                    <input id="pmName" class="form-input" placeholder="trollllm, h2cloud, openai...">
+                </div>
+                <div class="form-group" style="margin:0;">
+                    <label>Base URL <span style="color:var(--error);">*</span></label>
+                    <input id="pmBaseUrl" class="form-input" placeholder="https://chat.trollllm.xyz/v1">
+                </div>
+                <div class="form-group" style="margin:0;">
+                    <label>API Key <span style="color:var(--error);">*</span></label>
+                    <div style="display:flex;gap:0.5rem;">
+                        <input id="pmApiKey" class="form-input" type="password" placeholder="sk-..." style="flex:1;font-family:monospace;font-size:0.82rem;">
+                        <button id="pmToggleKey" onclick="toggleApiKeyVisibility()" class="btn btn-sm btn-ghost" style="flex-shrink:0;" type="button" aria-label="Hiện/ẩn API key">👁</button>
+                    </div>
+                </div>
+                <div class="form-group" style="margin:0;">
+                    <label>Giao thức</label>
+                    <!-- Themed custom dropdown -->
+                    <div id="pmSdkDropdown" class="theme-dropdown" data-value="openai">
+                        <button type="button" class="theme-dropdown-trigger" onclick="_themeDropdownToggle('pmSdkDropdown')" aria-haspopup="listbox" aria-expanded="false">
+                            <span class="theme-dropdown-current">
+                                <span class="theme-dropdown-emoji">🟢</span>
+                                <span class="theme-dropdown-label">OpenAI-compatible</span>
+                            </span>
+                            <svg class="theme-dropdown-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                        <div class="theme-dropdown-menu" role="listbox">
+                            <button type="button" class="theme-dropdown-option" data-value="openai" role="option" onclick="_themeDropdownPick('pmSdkDropdown', this)">
+                                <span class="theme-dropdown-emoji">🟢</span>
+                                <span class="theme-dropdown-option-text">
+                                    <span class="theme-dropdown-option-title">OpenAI-compatible</span>
+                                    <span class="theme-dropdown-option-desc">/v1/chat/completions · /v1/models</span>
+                                </span>
+                                <svg class="theme-dropdown-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </button>
+                            <button type="button" class="theme-dropdown-option" data-value="anthropic" role="option" onclick="_themeDropdownPick('pmSdkDropdown', this)">
+                                <span class="theme-dropdown-emoji">🔶</span>
+                                <span class="theme-dropdown-option-text">
+                                    <span class="theme-dropdown-option-title">Anthropic</span>
+                                    <span class="theme-dropdown-option-desc">Claude · Messages API</span>
+                                </span>
+                                <svg class="theme-dropdown-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            </button>
+                        </div>
+                        <!-- Hidden value sink for backward compat with existing JS -->
+                        <input type="hidden" id="pmSdkType" value="openai">
+                    </div>
+                </div>
+                <div class="form-group" style="margin:0;">
+                    <div style="display:flex;justify-content:space-between;align-items:end;gap:0.5rem;flex-wrap:wrap;">
+                        <label style="margin:0;">Models <span style="font-weight:400;color:var(--text-muted);">(mỗi dòng 1 ID · # để comment)</span></label>
+                        <button type="button" id="pmFetchModelsBtn" onclick="fetchModelsFromBaseUrl()" class="btn btn-sm btn-ghost" style="font-size:0.78rem;">
+                            ⬇ Tải từ /v1/models
+                        </button>
+                    </div>
+                    <textarea id="pmModels" class="form-input" rows="8"
+                        style="font-family:monospace;font-size:0.82rem;resize:vertical;min-height:160px;"
+                        placeholder="# h2cloud:&#10;cx/gpt-5.3-codex&#10;cx/gpt-5.4&#10;cx/auto&#10;&#10;# trollllm:&#10;claude-sonnet-4.6&#10;claude-haiku-4.5"></textarea>
+                </div>
+                <div class="form-group" style="margin:0;">
+                    <label>Model mặc định</label>
+                    <input id="pmDefaultModel" class="form-input" placeholder="cx/gpt-5.3-codex">
+                </div>
+                <div id="pmTestResult" style="display:none;"></div>
+            </div>
+            <div class="provider-modal-actions">
+                <button id="pmTestBtn" class="btn btn-ghost" onclick="testProviderModal()" type="button">🔌 Test</button>
+                <button class="btn btn-ghost" onclick="closeProviderModal()" type="button">Huỷ</button>
+                <button id="pmSaveBtn" class="btn btn-primary" onclick="saveProviderModal()" type="button">💾 Lưu</button>
+            </div>
+        </div>
+    </div><!-- /providerModal -->
+    </div><!-- /admin-view-container -->
+    </div><!-- /admin-main-area -->
+    </div><!-- /admin-layout -->
+    </div><!-- /adminMain -->
+    </div><!-- /container -->
+
+    <!-- Mobile Bottom Nav (≤768px only) -->
+    <nav id="mobileBottomNav" class="mobile-bottom-nav" style="display:none;">
+        <button class="bottom-nav-item active" data-tab="dashboard" onclick="mobileNavSwitch('dashboard')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+            <span>Tổng quan</span>
+        </button>
+        <button class="bottom-nav-item" data-tab="exams" onclick="mobileNavSwitch('exams')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <span>Đề thi</span>
+        </button>
+        <button class="bottom-nav-item" data-tab="submissions" onclick="mobileNavSwitch('submissions')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <span>Bài nộp</span>
+        </button>
+        <button class="bottom-nav-item" data-tab="aiGen" onclick="mobileNavSwitch('aiGen')">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z"/></svg>
+            <span>AI</span>
+        </button>
+        <button class="bottom-nav-item bottom-nav-more" onclick="toggleMobileMore()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+            <span>Thêm</span>
+        </button>
+    </nav>
+
+    <!-- More menu popup -->
+    <div id="mobileMoreMenu" class="mobile-more-menu">
+        <div class="mobile-more-overlay" onclick="toggleMobileMore()"></div>
+        <div class="mobile-more-sheet">
+            <div class="mobile-more-handle"></div>
+            <button class="mobile-more-item" onclick="mobileNavSwitch('questionBank')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
+                <span>Ngân hàng đề</span>
+            </button>
+            <button class="mobile-more-item" onclick="mobileNavSwitch('users')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                <span>Tài khoản</span>
+            </button>
+            <button class="mobile-more-item" onclick="mobileNavSwitch('subjects')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                <span>Môn học</span>
+            </button>
+            <button class="mobile-more-item" onclick="mobileNavSwitch('activation')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+                <span>Mã kích hoạt</span>
+            </button>
+            <button class="mobile-more-item" onclick="mobileNavSwitch('codeLogs')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                <span>Log mã KH</span>
+            </button>
+            <button class="mobile-more-item" onclick="mobileNavSwitch('media')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span>Kho Media</span>
+            </button>
+            <button class="mobile-more-item" onclick="mobileNavSwitch('settings')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                <span>Cài đặt</span>
+            </button>
+            <button class="mobile-more-item" onclick="mobileNavSwitch('help')">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span>Hướng dẫn</span>
+            </button>
+        </div>
+    </div>
 </body>
 
 </html>

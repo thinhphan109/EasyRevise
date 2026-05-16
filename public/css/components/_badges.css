@@ -1,99 +1,93 @@
-/* ========================================
-   EasyRevise — Badges
-   .badge, .badge-success, .badge-error, etc.
-   ======================================== */
+/* ===========================================================
+   Components — Badge / Tag / Pill (Task 14)
+   Used for: tags, status, score pills, "Mới"/"Hot"
+   =========================================================== */
 
 .badge {
     display: inline-flex;
     align-items: center;
     gap: var(--space-1);
-    padding: 0.2rem 0.6rem;
-    border-radius: var(--radius-sm);
+    padding: 2px var(--space-2);
     font-size: var(--text-xs);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    line-height: 1.4;
+    font-weight: var(--weight-semi);
+    line-height: 1.6;
+    border-radius: var(--radius-pill);
+    background: var(--surface-2);
+    color: var(--text-2);
+    border: 1px solid transparent;
     white-space: nowrap;
+    letter-spacing: var(--tracking-normal);
 }
 
-/* ── Semantic badges ── */
-.badge-success,
-.badge-correct {
-    background: var(--color-success-bg);
-    color: var(--color-success);
-}
+.badge-sm { padding: 1px var(--space-2); font-size: 11px; }
+.badge-lg { padding: 4px var(--space-3); font-size: var(--text-sm); }
 
-.badge-error,
-.badge-incorrect {
-    background: var(--color-error-bg);
-    color: var(--color-error);
-}
-
-.badge-warning {
-    background: var(--color-warning-bg);
-    color: var(--color-warning);
-}
-
-.badge-info {
-    background: var(--color-info-bg);
-    color: var(--color-info);
-}
-
-.badge-neutral {
-    background: var(--color-surface-hover);
-    color: var(--color-text-secondary);
-}
-
-.badge-primary {
-    background: var(--color-primary-light);
-    color: var(--color-primary);
-}
-
+/* ── Variants ──────────────────────────────────────────── */
 .badge-accent {
-    background: var(--color-accent-light);
-    color: var(--color-accent);
+    background: var(--accent-soft);
+    color: var(--accent-text);
+}
+.badge-success {
+    background: var(--success-soft);
+    color: var(--success);
+}
+.badge-warning {
+    background: var(--warning-soft);
+    color: var(--warning);
+}
+.badge-error {
+    background: var(--error-soft);
+    color: var(--error);
+}
+.badge-info {
+    background: var(--info-soft);
+    color: var(--info);
 }
 
-/* ── Legacy alias ── */
-.status-badge {
-    display: inline-block;
-    padding: 0.3rem 0.75rem;
-    border-radius: 8px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-}
-
-.score-label {
-    font-size: 0.65rem;
-    font-weight: 600;
-    padding: 0.12rem 0.4rem;
-    border-radius: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-}
-
-/* ── In-progress badge ── */
-.inprogress-badge {
-    padding: 0.2rem 0.6rem;
-    background: #fef3c7;
-    color: #92400e;
-    font-size: 0.7rem;
-    font-weight: 700;
-    border-radius: var(--radius-sm);
-    text-transform: uppercase;
-}
-
-/* ── Dot badge (notification) ── */
-.badge-dot {
-    width: 8px;
-    height: 8px;
+/* ── With dot indicator ────────────────────────────────── */
+.badge-dot::before {
+    content: '';
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
-    background: var(--color-error);
-    display: inline-block;
+    background: currentColor;
+    flex-shrink: 0;
 }
 
-.badge-dot-success {
-    background: var(--color-success);
+/* ── Outline variant ───────────────────────────────────── */
+.badge-outline {
+    background: transparent;
+    border-color: var(--border-strong);
+    color: var(--text);
+}
+
+/* ── Score pill (special — color by score) ────────────── */
+.score-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    padding: 2px var(--space-2);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-bold);
+    font-variant-numeric: tabular-nums;
+    border-radius: var(--radius-pill);
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+.score-pill-high {
+    background: var(--success-soft);
+    color: var(--success);
+    border-color: color-mix(in srgb, var(--success) 30%, transparent);
+}
+.score-pill-mid {
+    background: var(--warning-soft);
+    color: var(--warning);
+    border-color: color-mix(in srgb, var(--warning) 30%, transparent);
+}
+.score-pill-low {
+    background: var(--error-soft);
+    color: var(--error);
+    border-color: color-mix(in srgb, var(--error) 30%, transparent);
 }

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EasyRevise — Component Style Guide</title>
+<script>
+(function(){
+    try {
+        var v = localStorage.getItem('easyrevise_theme');
+        var t;
+        if (v === 'light' || v === 'dark') t = v;
+        else t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+})();
+</script>
+<link rel="stylesheet" href="/css/main.css">
+<style>
+.sg-container { max-width: 920px; margin: 0 auto; padding: var(--space-6) var(--space-4); }
+.sg-section { margin-bottom: var(--space-12); }
+.sg-section h2 { font-size: var(--text-2xl); margin-bottom: var(--space-4); padding-bottom: var(--space-2); border-bottom: 1px solid var(--border); }
+.sg-section h3 { font-size: var(--text-lg); margin: var(--space-6) 0 var(--space-3); color: var(--text-2); }
+.sg-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; margin-bottom: var(--space-4); padding: var(--space-4); background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); }
+.sg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-3); margin-bottom: var(--space-4); }
+.sg-label { font-size: var(--text-xs); color: var(--text-3); text-transform: uppercase; letter-spacing: var(--tracking-loose); margin-bottom: var(--space-2); display: block; }
+.sg-token { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2); background: var(--surface); border-radius: var(--radius-sm); font-family: var(--font-mono); font-size: var(--text-xs); }
+.sg-swatch { width: 24px; height: 24px; border-radius: 6px; border: 1px solid var(--border); flex-shrink: 0; }
+.sg-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-8); padding-bottom: var(--space-4); border-bottom: 1px solid var(--border); }
+.sg-icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: var(--space-3); }
+.sg-icon-item { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-3); background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); font-size: var(--text-xs); color: var(--text-3); font-family: var(--font-mono); }
+</style>
+</head>
+<body>
+
+<div class="sg-container">
+
+<header class="sg-header">
+    <div>
+        <h1 style="font-size:var(--text-3xl);">Component Style Guide</h1>
+        <p style="color:var(--text-3);font-size:var(--text-sm);">Apple HIG — Liquid Glass · Wave 2 outputs</p>
+    </div>
+    <div id="themeToggleMount"></div>
+</header>
+
+<!-- ── BUTTONS ───────────────────────────────────────── -->
+<section class="sg-section">
+    <h2>Buttons</h2>
+
+    <h3>Variants</h3>
+    <div class="sg-row">
+        <button class="btn btn-primary">Primary</button>
+        <button class="btn btn-secondary">Secondary</button>
+        <button class="btn btn-ghost">Ghost</button>
+        <button class="btn btn-danger">Danger</button>
+        <button class="btn btn-success">Success</button>
+        <button class="btn btn-primary" disabled>Disabled</button>
+        <button class="btn btn-primary" aria-busy="true">Loading</button>
+    </div>
+
+    <h3>Sizes</h3>
+    <div class="sg-row">
+        <button class="btn btn-primary btn-sm">Small</button>
+        <button class="btn btn-primary btn-md">Medium</button>
+        <button class="btn btn-primary btn-lg">Large</button>
+        <button class="btn btn-primary btn-xl">Extra Large</button>
+    </div>
+
+    <h3>Pill (Apple CTA)</h3>
+    <div class="sg-row">
+        <button class="btn btn-primary btn-pill btn-lg">Bắt đầu làm bài</button>
+        <button class="btn btn-secondary btn-pill">Hủy</button>
+    </div>
+
+    <h3>Icon</h3>
+    <div class="sg-row">
+        <button class="btn btn-primary"><svg class="icon"><use href="/assets/icons/sprite.svg#send"/></svg>Nộp bài</button>
+        <button class="btn btn-secondary"><svg class="icon"><use href="/assets/icons/sprite.svg#download"/></svg>Tải CSV</button>
+        <button class="btn btn-ghost btn-icon" aria-label="More"><svg class="icon"><use href="/assets/icons/sprite.svg#more-horizontal"/></svg></button>
+        <button class="btn btn-ghost btn-icon btn-sm" aria-label="Close"><svg class="icon icon-sm"><use href="/assets/icons/sprite.svg#x"/></svg></button>
+    </div>
+</section>
+
+<!-- ── INPUTS ────────────────────────────────────────── -->
+<section class="sg-section">
+    <h2>Forms</h2>
+
+    <div class="sg-row" style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-4);">
+        <div>
+            <label class="form-label">Tên đăng nhập</label>
+            <input type="text" class="form-input" placeholder="username">
+        </div>
+        <div>
+            <label class="form-label form-label-required">Mật khẩu</label>
+            <input type="password" class="form-input" placeholder="••••••••">
+        </div>
+        <div>
+            <label class="form-label">Mã kích hoạt</label>
+            <input type="text" class="form-input form-input-code" placeholder="ABC12345" maxlength="10">
+        </div>
+        <div>
+            <label class="form-label">Search</label>
+            <div class="form-search-wrap">
+                <svg class="icon"><use href="/assets/icons/sprite.svg#search"/></svg>
+                <input type="search" class="form-input" placeholder="Tìm đề thi...">
+            </div>
+        </div>
+        <div>
+            <label class="form-label">Môn học</label>
+            <select class="form-select">
+                <option>Toán</option><option>Tiếng Anh</option><option>Vật lý</option>
+            </select>
+        </div>
+        <div>
+            <label class="form-label">Error state</label>
+            <input type="text" class="form-input is-error" value="invalid-input">
+            <div class="form-error">Sai định dạng</div>
+        </div>
+    </div>
+
+    <h3>PIN input</h3>
+    <div class="sg-row">
+        <div class="pin-input-row">
+            <input class="pin-input" maxlength="1" value="1">
+            <input class="pin-input" maxlength="1" value="2">
+            <input class="pin-input" maxlength="1" value="3">
+            <input class="pin-input" maxlength="1">
+            <input class="pin-input" maxlength="1">
+            <input class="pin-input" maxlength="1">
+        </div>
+    </div>
+
+    <h3>Textarea</h3>
+    <div class="sg-row" style="display:block;">
+        <textarea class="form-textarea" placeholder="Viết bài luận của bạn..."></textarea>
+    </div>
+</section>
+
+<!-- ── BADGES ────────────────────────────────────────── -->
+<section class="sg-section">
+    <h2>Badges &amp; Score Pills</h2>
+    <div class="sg-row">
+        <span class="badge">Default</span>
+        <span class="badge badge-accent">Accent</span>
+        <span class="badge badge-success">Success</span>
+        <span class="badge badge-warning">Warning</span>
+        <span class="badge badge-error">Error</span>
+        <span class="badge badge-info">Info</span>
+        <span class="badge badge-outline">Outline</span>
+        <span class="badge badge-success badge-dot">Active</span>
+    </div>
+    <div class="sg-row">
+        <span class="score-pill score-pill-high">9.2</span>
+        <span class="score-pill score-pill-mid">7.5</span>
+        <span class="score-pill score-pill-low">4.8</span>
+        <span class="score-pill">—</span>
+    </div>
+</section>
+
+<!-- ── CARDS ────────────────────────────────────────── -->
+<section class="sg-section">
+    <h2>Cards</h2>
+    <div class="sg-grid">
+        <div class="card">
+            <div class="card-eyebrow">Đề mở</div>
+            <h4 class="card-title">Toán THPT</h4>
+            <p class="card-subtitle">30 câu · 45 phút</p>
+        </div>
+        <div class="card card-raised card-interactive">
+            <div class="card-header">
+                <div class="card-icon-wrap card-icon-math">
+                    <svg class="icon"><use href="/assets/icons/sprite.svg#function-square"/></svg>
+                </div>
+                <span class="badge badge-accent">Mới</span>
+            </div>
+            <h4 class="card-title">Hàm số bậc hai</h4>
+            <p class="card-subtitle">25 câu · 35 phút</p>
+        </div>
+        <div class="card card-glass">
+            <div class="card-header">
+                <div class="card-icon-wrap card-icon-english">
+                    <svg class="icon"><use href="/assets/icons/sprite.svg#globe"/></svg>
+                </div>
+                <span class="badge badge-error">Hot</span>
+            </div>
+            <h4 class="card-title">English Reading</h4>
+            <p class="card-subtitle">40 câu · 60 phút</p>
+        </div>
+    </div>
+</section>
+
+<!-- ── ICONS ─────────────────────────────────────────── -->
+<section class="sg-section">
+    <h2>Icons</h2>
+    <p class="text-muted text-sm">Lucide-based · 50+ icons in sprite</p>
+    <div class="sg-icon-grid" id="iconGrid"></div>
+</section>
+
+<!-- ── PROGRESS ──────────────────────────────────────── -->
+<section class="sg-section">
+    <h2>Progress</h2>
+    <div class="sg-row" style="display:block;">
+        <span class="sg-label">Linear (60%)</span>
+        <div class="progress"><div class="progress-fill" style="width:60%;"></div></div>
+    </div>
+    <div class="sg-row" style="display:block;">
+        <span class="sg-label">Indeterminate</span>
+        <div class="progress progress-indeterminate"><div class="progress-fill"></div></div>
+    </div>
+    <div class="sg-row">
+        <div class="progress-ring">
+            <svg viewBox="0 0 64 64">
+                <circle class="progress-ring-track" cx="32" cy="32" r="28"/>
+                <circle class="progress-ring-fill" cx="32" cy="32" r="28" style="stroke-dasharray:175.93; stroke-dashoffset:70.37;"/>
+            </svg>
+            <span class="progress-ring-label">60%</span>
+        </div>
+        <div class="progress-ring progress-ring-lg progress-ring-success">
+            <svg viewBox="0 0 96 96">
+                <circle class="progress-ring-track" cx="48" cy="48" r="42"/>
+                <circle class="progress-ring-fill" cx="48" cy="48" r="42" style="stroke-dasharray:263.89; stroke-dashoffset:39.58;"/>
+            </svg>
+            <span class="progress-ring-label">85%</span>
+        </div>
+    </div>
+</section>
+
+<!-- ── SKELETON ──────────────────────────────────────── -->
+<section class="sg-section">
+    <h2>Skeleton</h2>
+    <div class="sg-row" style="display:block;">
+        <div class="skeleton skeleton-title"></div>
+        <div class="skeleton skeleton-line skeleton-line-long"></div>
+        <div class="skeleton skeleton-line skeleton-line-medium"></div>
+        <div class="skeleton skeleton-line skeleton-line-short"></div>
+    </div>
+    <div class="sg-row">
+        <div class="skeleton skeleton-avatar"></div>
+        <div class="skeleton skeleton-avatar skeleton-avatar-lg"></div>
+        <div class="skeleton skeleton-thumb" style="max-width:280px;"></div>
+    </div>
+</section>
+
+<!-- ── AVATAR ────────────────────────────────────────── -->
+<section class="sg-section">
+    <h2>Avatar</h2>
+    <div class="sg-row">
+        <div class="avatar avatar-xs">A</div>
+        <div class="avatar avatar-sm">B</div>
+        <div class="avatar avatar-md">C</div>
+        <div class="avatar avatar-lg">D</div>
+        <div class="avatar avatar-xl">E</div>
+        <div class="avatar avatar-md avatar-status">F</div>
+        <div class="avatar-stack">
+            <div class="avatar avatar-md">A</div>
+            <div class="avatar avatar-md">B</div>
+            <div class="avatar avatar-md">C</div>
+        </div>
+    </div>
+</section>
+
+<!-- ── TABS ──────────────────────────────────────────── -->
+<section class="sg-section">
+    <h2>Tabs</h2>
+
+    <h3>Pill style</h3>
+    <div class="sg-row">
+        <div class="tabs-pill" role="tablist" id="tabs1">
+            <button class="tab" role="tab" aria-controls="panel-a" aria-selected="true">Tổng quan</button>
+            <button class="tab" role="tab" aria-controls="panel-b">Lịch sử</button>
+            <button class="tab" role="tab" aria-controls="panel-c">Đang làm</button>
+        </div>
+    </div>
+
+    <h3>Underline style</h3>
+    <div class="sg-row" style="display:block;">
+        <div class="tabs-underline" role="tablist" id="tabs2">
+            <button class="tab" role="tab" aria-controls="panel-d" aria-selected="true">Lịch sử</button>
+            <button class="tab" role="tab" aria-controls="panel-e">Thống kê</button>
+            <button class="tab" role="tab" aria-controls="panel-f">Đang học dở</button>
+        </div>
+    </div>
+</section>
+
+<!-- ── EMPTY STATE ───────────────────────────────────── -->
+<section class="sg-section">
+    <h2>Empty State</h2>
+    <div class="sg-row" style="display:block;">
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <svg class="icon"><use href="/assets/icons/sprite.svg#file-text"/></svg>
+            </div>
+            <h3 class="empty-state-title">Chưa có đề nào</h3>
+            <p class="empty-state-desc">Hãy nhập mã kích hoạt từ giáo viên hoặc tạo đề mới.</p>
+            <div class="empty-state-actions">
+                <button class="btn btn-primary"><svg class="icon"><use href="/assets/icons/sprite.svg#plus"/></svg>Tạo đề</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── MODAL & TOAST DEMOS ───────────────────────────── -->
+<section class="sg-section">
+    <h2>Interactive Demos</h2>
+    <div class="sg-row">
+        <button class="btn btn-primary" id="demoModal">Mở modal</button>
+        <button class="btn btn-primary" id="demoConfirm">Mở confirm</button>
+        <button class="btn btn-primary" id="demoPrompt">Mở prompt</button>
+        <button class="btn btn-success" id="demoToastSuccess">Toast success</button>
+        <button class="btn btn-danger" id="demoToastError">Toast error</button>
+        <button class="btn btn-secondary" id="demoToastWarning">Toast warning</button>
+        <button class="btn btn-secondary" id="demoLightbox">Open lightbox</button>
+    </div>
+</section>
+
+</div>
+
+<!-- Sample modal -->
+<div class="modal-overlay" id="sampleModal" aria-hidden="true">
+    <div class="modal modal-md" role="dialog" aria-labelledby="sample-title">
+        <div class="modal-header">
+            <div class="modal-eyebrow">Xác nhận</div>
+            <h3 class="modal-title" id="sample-title">Toán THPT — Hàm số</h3>
+        </div>
+        <div class="modal-body">
+            <div class="modal-row"><span>Số câu</span><span>30 trắc nghiệm</span></div>
+            <div class="modal-row"><span>Thời gian</span><span>45 phút</span></div>
+            <div class="modal-row"><span>Năm học</span><span>2025-2026</span></div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-ghost" data-modal-close>Hủy</button>
+            <button class="btn btn-primary">Bắt đầu →</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+import { mountThemeToggle } from '/js/components/theme-toggle.js';
+import { openModal } from '/js/components/modal.js';
+import { customConfirm, customPrompt } from '/js/components/confirm.js';
+import { showToast } from '/js/components/toast.js';
+import { openLightbox } from '/js/components/lightbox.js';
+import { initTabs } from '/js/components/tabs.js';
+import { initPinInput } from '/js/components/pin-input.js';
+import { Icon, preloadSprite } from '/js/core/icons.js';
+
+await preloadSprite();
+mountThemeToggle('#themeToggleMount');
+initTabs('#tabs1');
+initTabs('#tabs2');
+initPinInput('.pin-input-row');
+
+const ICONS = ['sun','moon','x','menu','search','user','log-in','log-out','shield-check','key','qr-code','camera','file-text','function-square','globe','atom','book-open','headphones','pen-line','check-circle','check-circle-2','pencil-line','timer','clock','flag','bookmark','send','trophy','medal','sparkles','bar-chart-3','layout-dashboard','settings-2','help-circle','info','alert-triangle','x-circle','upload-cloud','download','image','trash-2','pencil','plus','refresh-cw','arrow-right','arrow-left','chevron-right','chevron-left','chevron-down','home','bookmark-check','more-horizontal','user-circle'];
+document.getElementById('iconGrid').innerHTML = ICONS.map(name => `
+    <div class="sg-icon-item">
+        ${Icon(name, { size: 'lg' })}
+        <span>${name}</span>
+    </div>
+`).join('');
+
+document.getElementById('demoModal').onclick = () => openModal('sampleModal');
+document.getElementById('demoConfirm').onclick = async () => {
+    const ok = await customConfirm('Xóa đề thi?', 'Hành động này không thể hoàn tác. Tất cả mã kích hoạt và bài nộp liên quan sẽ bị xóa.', { danger: true, confirmText: 'Xóa' });
+    showToast(ok ? 'Đã xóa' : 'Đã hủy', ok ? 'success' : 'info');
+};
+document.getElementById('demoPrompt').onclick = async () => {
+    const v = await customPrompt('Tên hiển thị', 'Nhập tên hiển thị mới của bạn', { defaultValue: 'Học sinh 1' });
+    if (v) showToast('Bạn nhập: ' + v, 'success');
+};
+document.getElementById('demoToastSuccess').onclick = () => showToast('Đã lưu thành công!', 'success', { title: 'Thành công' });
+document.getElementById('demoToastError').onclick = () => showToast('Mất kết nối tới server', 'error');
+document.getElementById('demoToastWarning').onclick = () => showToast('Còn 5 phút nữa hết giờ', 'warning');
+document.getElementById('demoLightbox').onclick = () => openLightbox('https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=1200', 'Sample image');
+</script>
+</body>
+</html>
