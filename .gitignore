@@ -51,6 +51,7 @@ scripts/verify-*.mjs
 .agents/
 .gemini/
 
+.kiro/
 # Runtime data — only ignore transient generated artifacts. The committed
 # seed JSONs (users/exams/subjects/settings/media) are needed by tests + first run.
 data/*.db
