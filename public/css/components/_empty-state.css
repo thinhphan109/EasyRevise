@@ -1,0 +1,61 @@
+/* ===========================================================
+   Components — Empty State (Task 18)
+   No data / no submission / error
+   =========================================================== */
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--space-12) var(--space-6);
+    gap: var(--space-3);
+    color: var(--text-2);
+}
+
+.empty-state-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-lg);
+    background: var(--surface-2);
+    display: grid;
+    place-items: center;
+    color: var(--text-3);
+    margin-bottom: var(--space-2);
+}
+.empty-state-icon .icon {
+    width: 32px;
+    height: 32px;
+}
+
+.empty-state-title {
+    font-size: var(--text-lg);
+    font-weight: var(--weight-semi);
+    color: var(--text);
+    margin: 0;
+}
+
+.empty-state-desc {
+    font-size: var(--text-sm);
+    color: var(--text-3);
+    max-width: 320px;
+    line-height: var(--leading-relaxed);
+    margin: 0;
+}
+
+.empty-state-actions {
+    margin-top: var(--space-4);
+    display: flex;
+    gap: var(--space-2);
+}
+
+/* ── Variants ──────────────────────────────────────────── */
+.empty-state-error .empty-state-icon {
+    background: var(--error-soft);
+    color: var(--error);
+}
+.empty-state-success .empty-state-icon {
+    background: var(--success-soft);
+    color: var(--success);
+}

@@ -124,17 +124,25 @@ function _mediaActionMenu(title, actions) {
         if (existing) existing.remove();
         const m = document.createElement('div');
         m.id = '_mediaActionMenu';
-        m.className = 'modal-overlay active';
+        m.className = 'modal-overlay action-menu-overlay active';
         m.style.cssText = 'display:flex;z-index:10004;';
-        m.innerHTML = `<div class="glass-panel modal-content" style="max-width:360px;padding:1.5rem;">
-            <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${title}</h3>
-            <div style="display:flex;flex-direction:column;gap:0.35rem;">
-                ${actions.map((a, i) => `<button class="btn btn-sm ${a.danger ? '' : 'btn-ghost'}" id="_maBtn${i}" style="text-align:left;justify-content:flex-start;padding:0.6rem 0.85rem;font-size:0.88rem;gap:0.6rem;display:flex;align-items:center;border-radius:10px;${a.danger ? 'background:#fef2f2;color:#dc2626;border:1px solid #fecaca;' : ''}">${a.icon || ''} ${a.label}</button>`).join('')}
-            </div>
-            <div style="margin-top:1rem;text-align:right;">
-                <button class="btn btn-sm btn-ghost" id="_maClose">Đóng</button>
-            </div>
-        </div>`;
+        m.innerHTML = `
+            <div class="action-menu-card">
+                <div class="action-menu-header">
+                    <h3 class="action-menu-title" title="${title}">${title}</h3>
+                </div>
+                <div class="action-menu-list">
+                    ${actions.map((a, i) => `
+                        <button class="action-menu-item ${a.danger ? 'is-danger' : ''}" id="_maBtn${i}">
+                            <span class="action-menu-icon">${a.icon || ''}</span>
+                            <span class="action-menu-label">${a.label}</span>
+                            <svg class="action-menu-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>`).join('')}
+                </div>
+                <div class="action-menu-footer">
+                    <button class="action-menu-close" id="_maClose">Đóng</button>
+                </div>
+            </div>`;
         document.body.appendChild(m);
         const close = (val) => { m.remove(); resolve(val); };
         m.querySelector('#_maClose').onclick = () => close(null);
@@ -142,6 +150,9 @@ function _mediaActionMenu(title, actions) {
         actions.forEach((a, i) => {
             m.querySelector(`#_maBtn${i}`).onclick = () => close(i);
         });
+        // Esc to close
+        const onKey = (e) => { if (e.key === 'Escape') { document.removeEventListener('keydown', onKey); close(null); } };
+        document.addEventListener('keydown', onKey);
     });
 }
 
@@ -916,16 +927,8 @@ function previewMediaFile(fileId) {
     const isProtected = file.protection === 'view-only';
     let contentHtml = '';
     if (file.type === 'image') {
-        if (isProtected) {
-            contentHtml = `<div style="position:relative;display:inline-block;max-width:100%;">
-                <img src="${file.url}" style="max-width:100%;max-height:70vh;border-radius:12px;object-fit:contain;pointer-events:none;user-select:none;" loading="lazy" draggable="false">
-                <div style="position:absolute;inset:0;cursor:default;" oncontextmenu="event.preventDefault()"></div>
-            </div>`;
-        } else {
-            contentHtml = `<img src="${file.url}" style="max-width:100%;max-height:70vh;border-radius:12px;object-fit:contain;" loading="lazy">`;
-        }
+        contentHtml = `<img src="${file.url}" style="max-width:100%;max-height:70vh;border-radius:12px;object-fit:contain;" loading="lazy">`;
     } else if (file.type === 'video') {
-        // UX-19: aspect ratio aware
         const ratio = file.aspectRatio || '16:9';
         let wrapperStyle = 'position:relative;overflow:hidden;border-radius:12px;';
         if (ratio === '16:9') wrapperStyle += 'width:100%;aspect-ratio:16/9;';
@@ -936,12 +939,10 @@ function previewMediaFile(fileId) {
             <iframe src="${file.url}" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allow="autoplay" allowfullscreen></iframe>
         </div>`;
     } else if (file.type === 'pdf') {
-        if (isProtected && file.driveFileId) {
-            contentHtml = `<iframe src="https://drive.google.com/file/d/${file.driveFileId}/preview" style="width:100%;height:70vh;border:none;border-radius:12px;"></iframe>`;
-        } else {
-            contentHtml = `<iframe src="${file.url}" style="width:100%;height:70vh;border:none;border-radius:12px;"></iframe>`;
-        }
-    } else if (file.driveFileId) {
+        // Dùng proxy nội bộ để trình duyệt tự mở PDF (Không cần Google Cookie)
+        contentHtml = `<iframe src="${file.url}" style="width:100%;height:70vh;border:none;border-radius:12px;"></iframe>`;
+    } else if (['docx', 'pptx', 'xlsx'].includes(file.type) || file.driveFileId) {
+        // Word/Excel/PowerPoint bắt buộc dùng Google Viewer vì trình duyệt không đọc được
         contentHtml = `<iframe src="https://drive.google.com/file/d/${file.driveFileId}/preview" style="width:100%;height:70vh;border:none;border-radius:12px;" allow="autoplay"></iframe>`;
     } else {
         contentHtml = `<div style="text-align:center;padding:3rem;color:var(--text-muted);">
@@ -1241,10 +1242,14 @@ function openMediaPicker(mode, callback) {
     const existing = document.getElementById('mediaPickerModal');
     if (existing) existing.remove();
 
-    const typeFilter = mode === 'question-images' ? 'image' : mode === 'video' ? 'video' : mode === 'attachment' ? 'pdf' : null;
+    const typeFilter = mode === 'question-images' ? 'image' : mode === 'video' ? 'video' : mode === 'attachment' ? 'document' : null;
     const multiSelect = mode === 'question-images';
     const title = mode === 'question-images' ? 'Chọn ảnh từ kho' : mode === 'video' ? 'Chọn video từ kho' : 'Chọn tài liệu từ kho';
-    const files = _mediaData.files.filter(f => f.status === 'ready' && (!typeFilter || f.type === typeFilter));
+    const DOCUMENT_TYPES = ['pdf', 'docx', 'pptx', 'xlsx', 'other'];
+    const files = _mediaData.files.filter(f => f.status === 'ready' && (
+        !typeFilter ||
+        (typeFilter === 'document' ? DOCUMENT_TYPES.includes(f.type) : f.type === typeFilter)
+    ));
 
     const modal = document.createElement('div');
     modal.id = 'mediaPickerModal';
@@ -1259,7 +1264,7 @@ function openMediaPicker(mode, callback) {
         <div style="margin-bottom:1rem;">
             <label class="btn btn-sm btn-info" style="cursor:pointer;">
                 ${_mi('upload')} Upload thêm
-                <input type="file" ${typeFilter === 'image' ? 'accept="image/*"' : typeFilter === 'video' ? 'accept="video/*"' : 'accept=".pdf,.docx,.doc"'} ${multiSelect ? 'multiple' : ''} style="display:none;" onchange="uploadMediaInPicker(this)">
+                <input type="file" ${typeFilter === 'image' ? 'accept="image/*"' : typeFilter === 'video' ? 'accept="video/*"' : 'accept=".pdf,.docx,.doc,.pptx,.ppt,.xlsx,.xls"'} ${multiSelect ? 'multiple' : ''} style="display:none;" onchange="uploadMediaInPicker(this)">
             </label>
             <span style="font-size:0.78rem;color:var(--text-muted);margin-left:0.5rem;">${multiSelect ? 'Chọn nhiều' : 'Chọn 1 file'}</span>
         </div>
@@ -1347,9 +1352,13 @@ async function uploadMediaInPicker(inputEl) {
     }
     _mediaData = await api('/api/admin/media');
     if (!_mediaData.folders) _mediaData = { folders: [], files: [] };
-    const typeFilter = _mediaPickerMode === 'question-images' ? 'image' : _mediaPickerMode === 'video' ? 'video' : _mediaPickerMode === 'attachment' ? 'pdf' : null;
+    const DOCUMENT_TYPES2 = ['pdf', 'docx', 'pptx', 'xlsx', 'other'];
+    const typeFilter2 = _mediaPickerMode === 'question-images' ? 'image' : _mediaPickerMode === 'video' ? 'video' : _mediaPickerMode === 'attachment' ? 'document' : null;
     const multiSelect = _mediaPickerMode === 'question-images';
-    const filteredFiles = _mediaData.files.filter(f => f.status === 'ready' && (!typeFilter || f.type === typeFilter));
+    const filteredFiles = _mediaData.files.filter(f => f.status === 'ready' && (
+        !typeFilter2 ||
+        (typeFilter2 === 'document' ? DOCUMENT_TYPES2.includes(f.type) : f.type === typeFilter2)
+    ));
     const grid = document.getElementById('pickerFileGrid');
     if (grid) grid.innerHTML = filteredFiles.length ? filteredFiles.map(f => renderPickerCard(f, multiSelect)).join('') : '<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">Chưa có file phù hợp</div>';
     inputEl.value = '';

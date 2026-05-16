@@ -2,7 +2,7 @@
 
 > **⚠️ FILE NÀY ĐƯỢC TỰ ĐỘNG CẬP NHẬT BỞI AI AGENT**
 > Mỗi khi có thay đổi code, agent PHẢI cập nhật file này.
-> Last updated: 2026-04-09T06:40+07:00
+> Last updated: 2026-05-15T09:30+07:00
 
 ---
 
@@ -14,58 +14,87 @@ Có hệ thống mã kích hoạt (access code) cho từng đề thi.
 ## 🏗️ Architecture
 
 ### Tech Stack
-- **Runtime**: Node.js v22.14.0
-- **Backend**: Express.js 4.18.2
+- **Runtime**: Node.js v24.6.0
+- **Backend**: Express.js 4.18.2 + Helmet (CSP/HSTS/XFO)
 - **Frontend**: Vanilla HTML/CSS/JS (no framework)
-- **Data Storage**: JSON files (no database)
-- **AI SDKs**: @anthropic-ai/sdk 0.80.0 + openai 6.32.0 → TrollLLM proxy
+- **Data Storage**: JSON files (primary) + SQLite via sql.js (migration in progress)
+- **Auth**: JWT (jsonwebtoken) + legacy opaque token backward compat
+- **AI SDKs**: @anthropic-ai/sdk 0.80.0 + openai 6.32.0 → h2cloud/loadip proxy
 - **Image Processing**: sharp 0.34.5
-- **File Upload**: multer 2.1.1
+- **File Upload**: multer 2.1.1 + file-type magic-byte verify
 - **PDF Parse**: pdf-parse 2.4.5
 - **DOCX Parse**: mammoth 1.12.0
 - **ID Generator**: uuid 9.0.0
+- **Security**: proper-lockfile (atomic writes), HMAC signed URLs, rate limiting
+- **Logging**: pino structured JSON
+- **CI**: GitHub Actions (test + audit)
 
-### File Structure (Modular Architecture — post-refactor 2026-04-08)
+### File Structure (post-security-audit 2026-05-14)
 ```
 EasyRevise/
-├── server.js              # Entry point — 113 lines (middleware + route mounting)
-├── .env                   # API keys, SDK config
+├── server.js              # Entry point (~150L: helmet, trust-proxy, signed-URL gate, routes)
+├── .env                   # API keys, JWT_SECRET, SIGN_SECRET, CRON_SECRET
 ├── package.json           # Dependencies
+├── vercel.json            # Vercel deploy config + cron jobs
+├── eslint.config.js       # ESLint flat config (v9)
 │
 ├── lib/                   # Shared backend modules
-│   ├── data.js            # read/write JSON helpers (82L)
-│   ├── auth.js            # middleware + rate limit + token (52L)
-│   ├── backup.js          # daily auto-backup (34L)
+│   ├── data.js            # read/write JSON + atomic write + lockfile + pbkdf2
+│   ├── auth.js            # JWT verify + SQLite lookup + legacy fallback + rate limit
+│   ├── jwt.js             # 🆕 JWT sign/verify (HMAC SHA256)
+│   ├── backup.js          # daily auto-backup (7-day rotation)
 │   ├── drive.js           # Google Drive API integration
-│   ├── ai-helpers.js      # AI SDK abstraction (dual SDK)
-│   └── validate.js        # Input validation helpers
+│   ├── ai-client.js       # AI SDK abstraction (OpenAI-compatible)
+│   ├── ai-helpers.js      # AI prompt helpers
+│   ├── exam-normalizer.js # Normalize AI-generated exam JSON
+│   ├── validate.js        # Input validation + UUID validate
+│   ├── file-validate.js   # 🆕 Magic-byte file type verify
+│   ├── signed-url.js      # 🆕 HMAC signed URL for submissions
+│   ├── logger.js          # 🆕 Pino structured logging
+│   └── db/                # 🆕 SQLite layer (Sprint 3)
+│       ├── index.js       # sql.js connection + atomic save + transaction
+│       └── schema.sql     # 11 tables schema
 │
-├── routes/                # Express Router modules (18 files)
-│   ├── auth.js            # register, login, me (53L)
-│   ├── users.js           # CRUD users (53L)
-│   ├── subjects.js        # CRUD subjects (39L)
-│   ├── exams.js           # CRUD exams + export/import (132L)
-│   ├── exams-admin.js     # duplicate + copy-section (63L)
-│   ├── sections.js        # CRUD sections (52L)
-│   ├── questions.js       # CRUD questions in-exam (66L)
-│   ├── question-bank.js   # QB CRUD + import + generate (142L)
-│   ├── codes.js           # access codes + verify + release (161L)
-│   ├── submit.js          # code-result + grading + upload (328L)
-│   ├── grading.js         # admin submissions + review + AI grade (236L)
-│   ├── ai-generate.js     # AI exam gen + extract QB + cache (508L)
-│   ├── ai-tools.js        # OCR + explain-wrong (165L)
-│   ├── media.js           # image upload multer (33L)
-│   ├── media-library.js   # 🆕 Google Drive media library (30L)
-│   ├── stats.js           # code-logs + CSV + exam stats (126L)
-│   ├── settings.js        # settings + site-info (32L)
-│   └── history.js         # exam history + admin PIN (36L)
+├── lib/repos/             # 🆕 Repository layer (SQLite)
+│   └── userRepo.js        # User CRUD + history
 │
-├── data/                  # Data storage (JSON files)
-│   ├── exams.json         # All exam data
-│   ├── users.json         # User accounts
+├── routes/                # Express Router modules (21 files)
+│   ├── auth.js            # register, login, me + dual-write SQLite
+│   ├── users.js           # CRUD users + role whitelist + dual-write
+│   ├── subjects.js        # CRUD subjects
+│   ├── exams.js           # CRUD exams + export/import
+│   ├── exams-admin.js     # duplicate + copy-section
+│   ├── sections.js        # CRUD sections
+│   ├── questions.js       # CRUD questions in-exam
+│   ├── question-bank.js   # QB CRUD + import + generate
+│   ├── codes.js           # access codes + verify + rate-limit + crypto-random
+│   ├── submit.js          # code-result + grading + upload (magic-byte + signed URL)
+│   ├── grading.js         # admin submissions + review + AI grade (prompt injection guard)
+│   ├── ai-generate.js     # AI exam gen + extract QB + cache
+│   ├── ai-tools.js        # OCR + explain-wrong
+│   ├── media.js           # image upload (magic-byte verify, no SVG)
+│   ├── media-library.js   # Google Drive media library + execFile
+│   ├── stats.js           # code-logs + CSV + exam stats
+│   ├── settings.js        # settings + site-info
+│   ├── history.js         # exam history + admin PIN
+│   ├── dashboard.js       # student dashboard API
+│   ├── health.js          # 🆕 /api/health endpoint
+│   ├── backup-cron.js     # 🆕 Vercel cron daily backup
+│   ├── avatar.js          # FaceHash SVG avatars (SSR)
+│   └── activation.js      # activation codes (admin + public verify)
+│
+├── scripts/               # 🆕 Migration & maintenance scripts
+│   ├── migrate-users-to-sqlite.js   # JSON→SQLite users migration
+│   └── migrate-passwords.js         # Force-expire simpleHash passwords
+│
+├── data/                  # Data storage
+│   ├── exams.json         # All exam data (primary)
+│   ├── users.json         # User accounts (primary, shadow→SQLite)
+│   ├── easyrevise.db      # 🆕 SQLite database (users migrated)
 │   ├── subjects.json      # Subject categories
-│   ├── questions.json     # 🆕 Question Bank data
+│   ├── questions.json     # Question Bank data
 │   ├── settings.json      # Site settings
+│   ├── media.json         # Media library metadata
 │   ├── ai-gen-cache.json  # AI result cache (recovery)
 │   └── backups/           # Daily auto-backups (7 max)
 │
@@ -73,6 +102,43 @@ EasyRevise/
 │   ├── index.html         # Student homepage
 │   ├── exam.html          # Exam taking page
 │   ├── result.html        # Result display page
+│   ├── dashboard.html     # Student dashboard
+│   ├── assets/            # Self-hosted fonts + SVG sprite
+│   ├── css/               # Modular CSS (25+ files)
+│   ├── js/                # Modular JS (core, components, pages)
+│   ├── admin/             # Admin panel (index.html + 17 JS modules)
+│   └── uploads/           # Uploaded media (submissions gated by signed URL)
+│
+├── tests/                 # Test suite (jest)
+├── .github/               # 🆕 CI/CD
+│   ├── workflows/ci.yml   # Test + audit on push/PR
+│   └── dependabot.yml     # Auto dependency updates
+│
+├── AUDIT_REPORT.md        # 🆕 CTO security audit (2026-05-14)
+├── ROADMAP.md             # 🆕 Unified roadmap (replaces 14 PLAN_*.md)
+├── SECURITY_FIXES.md      # 🆕 Security fix tracker (22/22 done)
+├── PROJECT.md             # This file
+├── README.md              # Project README
+├── LICENSE                # MIT License
+└── _archive/              # Legacy files (PLAN_*.md, old code)
+```
+│   │       └── sprite.svg
+│   │
+│   ├── css/               # 🆕 Modular CSS architecture (25+ files)
+│   │   ├── main.css       # Entry point (@import all modules)
+│   │   ├── base/          # Foundation: _reset, _tokens, _typography, _animations, _dark-mode
+│   │   ├── components/    # UI: _buttons, _cards, _modals, _forms, _badges, _toasts, _skeleton, _progress
+│   │   ├── layout/        # Structure: _grid, _header, _responsive
+│   │   └── pages/         # Per-page: home, exam, result, dashboard
+│   │
+│   ├── js/                # 🆕 Modular JS architecture
+│   │   ├── core/          # Shared: utils, api, store, auth
+│   │   ├── components/    # UI: theme, toast
+│   │   ├── pages/
+│   │   │   ├── home/      # 7 modules: init, exam-list, history, code-entry, review-code, qr-scanner, qr-popup
+│   │   │   └── dashboard/ # 🆕 index.js (stats, history, subjects)
+│   │   ├── app.js         # Exam page logic (~1400L, stable monolith)
+│   │   └── result.js      # Result page logic (~800L, stable monolith)
 │   │
 │   ├── admin/
 │   │   ├── index.html     # Admin panel HTML
@@ -94,12 +160,7 @@ EasyRevise/
 │   │       ├── submissions.js     # Submissions + review (168L)
 │   │       ├── stats.js           # Stats + code logs (140L)
 │   │       ├── question-bank.js   # Question bank UI (100L)
-│   │       └── media-library.js   # 🆕 Media library UI (Drive)
-│   │
-│   ├── css/style.css      # Main stylesheet
-│   ├── js/
-│   │   ├── app.js         # Student app logic (~1400L)
-│   │   └── result.js      # Result page logic (~800L)
+│   │       └── media-library.js   # Media library UI (Drive)
 │   │
 │   └── uploads/           # Uploaded media files
 │       ├── ai-images/     # AI-cropped images
@@ -443,6 +504,9 @@ MONGODB_URI=mongodb+srv://...            # (installed but not used for primary d
 | FIX-5 | ✅ FIXED | explain-wrong tìm sai bài nộp (sai học sinh) | server.js + result.js |
 | FIX-6 | ✅ FIXED | sanitizeCode() input validation | server.js |
 | FIX-7 | ✅ FIXED | Login rate limit 10 lần/3 phút/IP | server.js |
+| UI-1 | ✅ FIXED 2026-05-15 | Desktop click bị CSP `script-src-attr 'none'` chặn → mọi inline `onclick=""` không hoạt động | server.js |
+| UI-2 | ✅ FIXED 2026-05-15 | Submit bài fail (do UI-1 chặn confirm modal handler) | server.js |
+| UI-3 | ✅ FIXED 2026-05-15 | Gõ tiếng Việt có dấu trong textarea/input bị back về câu trước (IME composition + global keydown) | public/js/app.js |
 
 ---
 
@@ -580,12 +644,18 @@ MONGODB_URI=mongodb+srv://...            # (installed but not used for primary d
 
 > 📄 **Chi tiết:** Xem [PLAN_STORAGE.md](./PLAN_STORAGE.md)
 
-### 🔲 UI Overhaul — (đang plan, branch `feature/ui-overhaul`)
-- [ ] File restructure: tách monolith HTML/CSS/JS → modular
-- [ ] Design system: Clean + Liquid Glass, dark mode
-- [ ] Student Dashboard
-- [ ] Admin settings upgrade
-- [ ] Cross-platform optimization
+### ✅ UI Overhaul — COMPLETE (branch `feature/ui-overhaul`)
+- [x] CSS Foundation: 17 modular CSS modules (base, components, layout, pages)
+- [x] JS Core: utils, api, store, auth + components (theme, toast, swipe)
+- [x] index.html rewrite: 62KB→11KB, zero inline CSS/JS
+- [x] Self-hosted fonts (Inter 5 weights) + SVG sprite (37 icons)
+- [x] Inline CSS extracted from exam.html, result.html, index.html
+- [x] Dark mode with system auto-detect + manual toggle (32 CSS vars)
+- [x] Student Dashboard (API + page + animated stats)
+- [x] Animations: stagger grid, count-up, glass hover, bar fills
+- [x] Cross-platform: touch targets, safe-area, landscape, swipe, haptic, print, reduced-motion, high contrast
+- [x] Admin CSS: 700-line inline `<style>` → external admin.css (20KB), 111KB→79KB
+- [x] QA: all 5 pages × 0 inline `<style>` blocks, 22 CSS modules verified
 
 > 📄 **Chi tiết:** Xem [PLAN_UI_OVERHAUL.md](./PLAN_UI_OVERHAUL.md)
 
@@ -616,7 +686,8 @@ MONGODB_URI=mongodb+srv://...            # (installed but not used for primary d
 ## 📝 Change Log
 | Date | Changes |
 |---|---|
-| **2026-04-08T05:00** | **PROJECT.md major update:** File tree → modular architecture. Line maps → route/module tables. Phase 7 ✅ + Refactor ✅. Fill-blank schema updated (dropdown, alternatives, fraction, tolerance) |
+| **2026-05-15T09:30** | **UI Bug Fixes:** UI-1 desktop click bị chặn do CSP `script-src-attr 'none'` (helmet useDefaults) — nới `'unsafe-inline'`. UI-2 nộp bài fail (do UI-1 chặn confirm modal handler). UI-3 IME tiếng Việt: thêm `e.isComposing` + `keyCode 229` guard, mở rộng skip cho INPUT/SELECT/contentEditable, exclude phím a/b/c/d trên fill-blank/free-form/essay |
+| **2026-05-14T19:30** | **Security Sprint 1+2 ✅ DONE (22/22):** 9 CRITICAL (XSS, upload bypass, SVG, magic-byte, brute-force, cancel-code auth, PII leak, race, IDOR) + 13 HIGH (JWT, trust proxy, Helmet, role whitelist, reset-password input, random PIN, drop simpleHash, prompt injection, AI cooldown, npm audit, exit on uncaught, Vercel cron, remove dead deps). Sprint 3 Phase A+B: SQLite users migration (sql.js WASM, dual-write, 1 user + 82 history) |
 | **2026-04-08T04:30** | **PLAN_REFACTOR P1+P2 ✅:** server.js 2378→113L (17 routes + 3 libs). admin.js→16 modules (1922L). index.html updated. Old admin.js kept as backup |
 | **2026-04-08T00:30** | **Phase 7 ✅ COMPLETE (21/21):** Fill-blank upgrade (dropdown/alternatives/fraction/tolerance/caseSensitive), Print Exam+Answer Key, Question Bank (CRUD+import+generate+AI extract), Drag&Drop, Bulk delete, Custom confirm, Exam Preview, Search/Filter, Responsive, Enter login, Fix double-login |
 | **2026-04-07T12:54** | **PLAN_PHASE7.md created:** 21 tasks (4 nhóm): Phase 5 gaps, fill-blank upgrade, print đề, question bank, UX fixes |
@@ -649,3 +720,69 @@ MONGODB_URI=mongodb+srv://...            # (installed but not used for primary d
 | **2026-03-26** | **Phase 2-4 ✅:** AI pipeline, upload, grading, security, backup, KaTeX |
 | **2026-03-25** | **Phase 1 ✅:** Multi-image, OCR, notifications, model selector |
 | **2026-03-23** | Initial release: AI exam generator, dual SDK, admin panel, student UI |
+
+---
+
+## 🔒 Security Hardening (2026-05-14)
+
+### Completed (Sprint 1+2)
+- **22 issues fixed** (9 CRITICAL + 13 HIGH) — see `SECURITY_FIXES.md`
+- Helmet CSP/HSTS/XFO/CORP active
+- JWT auth (HMAC SHA256) + legacy opaque backward compat
+- Magic-byte file upload verify (no SVG, no mime spoof)
+- HMAC signed URLs for `/uploads/submissions/` (7-day TTL)
+- Atomic JSON writes + proper-lockfile transactions
+- Rate-limit: login (10/3min), verify-code (5/min), review-by-code (10/min)
+- Prompt injection guard for AI grader (`<student_answer>` delimiter)
+- AI grading cooldown (5 min per user)
+- Role whitelist, self-demotion prevention
+- Password reset revokes all sessions
+- Random admin PIN on first init
+- Vercel Cron daily backup
+
+### Environment Variables (production MUST set)
+| Key | Purpose |
+|---|---|
+| `JWT_SECRET` | HMAC signing key for JWT tokens |
+| `SIGN_SECRET` | HMAC signing key for submission URLs |
+| `CRON_SECRET` | Auth header for Vercel cron calls |
+| `DROP_SIMPLEHASH` | Set `true` after running migrate-passwords.js |
+
+---
+
+## 🗄️ Database (Sprint 3 — in progress)
+
+**Current state:** Dual-source architecture
+- **Primary:** JSON files (`data/*.json`) — all routes read/write here
+- **Shadow:** SQLite (`data/easyrevise.db`) — users table migrated, dual-write active
+
+**Migration plan:**
+1. ✅ Phase A: Schema + connection + userRepo
+2. ✅ Phase B: Users migrated + dual-write in auth/users routes
+3. ⏳ Phase C: Exams + codes + submissions migration
+4. ⏳ Phase D: Swap primary to SQLite, deprecate JSON
+
+---
+
+## 📦 NPM Scripts
+
+| Script | Command | Purpose |
+|---|---|---|
+| `npm start` | `node server.js` | Production start |
+| `npm run dev` | `node server.js` | Dev start (same) |
+| `npm test` | `jest --verbose --forceExit` | Run test suite |
+| `npm run lint` | `eslint . --max-warnings 50` | Lint check |
+| `npm run lint:fix` | `eslint . --fix` | Auto-fix lint issues |
+| `npm run migrate:users` | `node scripts/migrate-users-to-sqlite.js` | Migrate users.json → SQLite |
+| `npm run migrate:passwords` | `node scripts/migrate-passwords.js` | Force-expire simpleHash passwords |
+
+---
+
+## 🔄 CI/CD
+
+- **GitHub Actions** (`.github/workflows/ci.yml`): runs on push/PR to main/develop
+  - Matrix: Node 20.x + 22.x
+  - Steps: install → test → lint → audit (high+ severity)
+- **Dependabot** (`.github/dependabot.yml`): weekly npm updates, grouped patch+minor
+- **Vercel**: auto-deploy on push to main
+- **Vercel Cron**: daily backup at 00:00 ICT (`/api/admin/run-backup`)

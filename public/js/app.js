@@ -68,6 +68,7 @@ class ExamApp {
         this.visitedQuestions = new Set();
         this.flaggedQuestions = new Set();
         this.isMobile = window.innerWidth <= 768;
+        this._progressSaveTimer = null;
 
         // DOM
         this.examTitle = document.getElementById('examTitle');
@@ -110,11 +111,30 @@ class ExamApp {
             if (this.isPreview) {
                 // Admin preview mode — fetch directly with admin token
                 const token = localStorage.getItem('easyrevise_token');
-                if (!token) { alert('Cần đăng nhập admin để xem thử!'); window.location.href = '/'; return; }
+                if (!token) {
+                    (window.notify?.error || alert)('Cần đăng nhập admin để xem thử!');
+                    window.location.href = '/admin/';
+                    return;
+                }
                 const res = await fetch(`/api/exams/${this.examId}/preview`, { headers: { 'Authorization': `Bearer ${token}` } });
-                if (!res.ok) throw new Error('Preview failed');
+                if (!res.ok) {
+                    let detail = `HTTP ${res.status}`;
+                    try { const err = await res.json(); if (err?.error) detail = err.error; } catch (_) {}
+                    if (res.status === 401 || res.status === 403) {
+                        (window.notify?.error || alert)(`Phiên admin hết hạn hoặc không đủ quyền (${detail}). Vui lòng đăng nhập lại.`);
+                        window.location.href = '/admin/';
+                        return;
+                    }
+                    if (res.status === 404) {
+                        (window.notify?.error || alert)(`Không tìm thấy đề thi (id: ${this.examId}). Có thể đã bị xóa hoặc đường dẫn sai.`);
+                        window.location.href = '/admin/';
+                        return;
+                    }
+                    throw new Error(detail);
+                }
                 const data = await res.json();
                 this.examData = data.exam;
+                if (!this.examData) throw new Error('Dữ liệu đề trống');
             } else {
                 const headers = {};
                 const unlocked = JSON.parse(localStorage.getItem('easyrevise_unlocked') || '{}');
@@ -126,8 +146,9 @@ class ExamApp {
                 this.examData = await res.json();
             }
         } catch (err) {
-            alert('Không tìm thấy đề thi!');
-            window.location.href = '/';
+            console.error('[exam-init]', err);
+            (window.notify?.error || alert)(`Không tải được đề thi: ${err.message || err}`);
+            window.location.href = this.isPreview ? '/admin/' : '/';
             return;
         }
 
@@ -160,14 +181,26 @@ class ExamApp {
             if (section.type === 'writing-essay') {
                 this.questionsList.push({ ...section, isEssay: true, sectionTitle: section.title });
             } else if (section.type === 'free-form') {
-                // free-form: the whole section is one "question" with subParts
-                this.questionsList.push({
-                    ...section,
-                    id: section.id,
-                    isEssay: false,
-                    isFreeForm: true,
-                    sectionTitle: section.title,
-                    instruction: section.instruction || ''
+                // free-form chuẩn: mỗi item trong section.questions là một câu tự luận riêng,
+                // mỗi câu có thể có subParts a/b/c. Giữ fallback cho dữ liệu cũ dạng section.subParts.
+                const freeQuestions = (section.questions && section.questions.length)
+                    ? section.questions
+                    : (section.subParts && section.subParts.length)
+                        ? [{ id: section.id, question: section.prompt || section.title || '', subParts: section.subParts, sampleAnswer: section.sampleAnswer || '' }]
+                        : [];
+                freeQuestions.forEach(q => {
+                    this.questionsList.push({
+                        ...q,
+                        id: q.id || `${section.id}_${this.questionsList.length}`,
+                        isEssay: false,
+                        isFreeForm: true,
+                        sectionTitle: section.title,
+                        instruction: section.instruction || '',
+                        passage: section.passage || null,
+                        sectionPrompt: section.prompt || '',
+                        sectionSampleAnswer: section.sampleAnswer || '',
+                        cues: q.cues || section.cues || []
+                    });
                 });
             } else {
                 (section.questions || []).forEach(q => {
@@ -181,6 +214,20 @@ class ExamApp {
         });
 
         this.totalQuestions = this.questionsList.length;
+
+        // Guard: sections exist but no questions were flattened (e.g. all sections empty)
+        if (this.totalQuestions === 0) {
+            if (this.examData.requireCode) {
+                const unlocked = JSON.parse(localStorage.getItem('easyrevise_unlocked') || '{}');
+                delete unlocked[this.examId];
+                localStorage.setItem('easyrevise_unlocked', JSON.stringify(unlocked));
+                alert('Mã kích hoạt không hợp lệ hoặc đề thi chưa có câu hỏi.');
+            } else {
+                alert('Đề thi chưa có câu hỏi!');
+            }
+            window.location.href = '/';
+            return;
+        }
 
         // Load saved progress
         const saved = localStorage.getItem(`easyrevise_progress_${this.examId}`);
@@ -262,6 +309,11 @@ class ExamApp {
                     this.countdown.style.background = '#dc2626';
                     this.countdown.classList.remove('timer-warning');
                     this.countdown.classList.add('timer-danger');
+                    // Sound alert once at 60s mark
+                    if (remaining === 60 && !this._warned60s) {
+                        this._warned60s = true;
+                        this._playBeep(880, 0.18, 2); // high beep x2
+                    }
                 } else if (remaining <= 300) {
                     this.countdown.style.background = '#f59e0b';
                     this.countdown.classList.add('timer-warning');
@@ -282,6 +334,7 @@ class ExamApp {
                 // Auto-submit
                 if (remaining <= 0) {
                     clearInterval(this.timerInterval);
+                    this._playBeep(660, 0.25, 3); // triple beep on expiry
                     alert('⏰ Hết giờ! Bài sẽ được tự động nộp.');
                     this.submitExam(true);
                 }
@@ -342,6 +395,25 @@ class ExamApp {
         setTimeout(() => { if (banner.parentNode) banner.remove(); }, 12000);
     }
 
+    /** Play a short beep via Web Audio API (no external files needed) */
+    _playBeep(freq = 880, duration = 0.15, count = 1) {
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            for (let i = 0; i < count; i++) {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = freq;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0.3, ctx.currentTime + i * 0.3);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.3 + duration);
+                osc.start(ctx.currentTime + i * 0.3);
+                osc.stop(ctx.currentTime + i * 0.3 + duration);
+            }
+        } catch (e) { /* Audio not supported — silent fallback */ }
+    }
+
     attachEventListeners() {
         // Desktop nav
         if (this.prevBtn) this.prevBtn.onclick = () => this.navigate(-1);
@@ -363,19 +435,32 @@ class ExamApp {
                 } else {
                     this.userAnswers[currentQ.id] = e.target.value;
                 }
-                this.saveProgress();
-                this.updateQuestionGrid();
+                this.debouncedSaveProgress();
             };
+
+            this.essayInput.addEventListener('paste', (e) => this.handleEssayPaste(e));
         }
 
+        document.addEventListener('paste', (e) => this.handleEssayPaste(e));
+
         document.onkeydown = (e) => {
-            if (e.target.tagName === 'TEXTAREA') return;
+            // IME composition guard (tiếng Việt có dấu, tiếng Trung, v.v.)
+            if (e.isComposing || e.keyCode === 229) return;
+            // Modifier keys (Ctrl+R, Cmd+S, ...) — đừng hijack
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
+            // Đang gõ trong bất kỳ input/select/contentEditable → đừng hijack
+            const tag = e.target.tagName;
+            if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT'
+                || e.target.isContentEditable) return;
+
             if (e.key === 'ArrowLeft') this.navigate(-1);
             if (e.key === 'ArrowRight') this.navigate(1);
             if (['a', 'b', 'c', 'd'].includes(e.key.toLowerCase())) {
                 const idx = e.key.toLowerCase().charCodeAt(0) - 97;
                 const q = this.questionsList[this.currentQuestionIndex];
-                if (!q.isEssay && q.options && idx < q.options.length) {
+                // Chỉ áp cho multiple-choice/reading; loại fill-blank, free-form, essay
+                if (!q.isEssay && !q.isFillBlank && !q.isFreeForm
+                    && q.options && idx < q.options.length) {
                     this.userAnswers[q.id] = idx;
                     this.saveProgress();
                     this.renderQuestion();
@@ -567,6 +652,22 @@ class ExamApp {
             </div>`;
     }
 
+    async handleEssayPaste(event) {
+        if (event._easyrevisePasteHandled) return;
+        const q = this.questionsList[this.currentQuestionIndex];
+        if (!q || (!q.isEssay && !q.isFreeForm)) return;
+        const items = Array.from(event.clipboardData?.items || []);
+        const imageItem = items.find(item => item.type && item.type.startsWith('image/'));
+        if (!imageItem) return;
+        const file = imageItem.getAsFile();
+        if (!file) return;
+        event._easyrevisePasteHandled = true;
+        event.preventDefault();
+        const namedFile = new File([file], `pasted-${Date.now()}.${(file.type.split('/')[1] || 'png')}`, { type: file.type });
+        if (q.isFreeForm) await this.uploadFreeFormFile(q.id, namedFile);
+        else await this.uploadSubmissionFile(q.id, namedFile);
+    }
+
     async handleEssayFileInput(event, questionId) {
         const file = event.target.files[0];
         if (!file) return;
@@ -680,8 +781,7 @@ class ExamApp {
     saveFillBlank(questionId, blankIndex, value) {
         if (!this.userAnswers[questionId]) this.userAnswers[questionId] = {};
         this.userAnswers[questionId][blankIndex] = value;
-        this.saveProgress();
-        this.updateQuestionGrid();
+        this.debouncedSaveProgress();
     }
 
     renderFreeForm(question) {
@@ -698,8 +798,8 @@ class ExamApp {
         this.essayArea.style.display = 'none';
         this.renderQuestionMedia(question);
 
-        const savedAns = this.userAnswers[question.id] || {}; // { parts: {0:'', 1:''}, attachments: [] }
-        const parts = question.subParts || question.questions || [];
+        const savedAns = this.userAnswers[question.id] || {}; // { parts: {0:'', 1:''}, text:'', attachments: [] }
+        const parts = question.subParts || [];
         const attachments = savedAns.attachments || [];
 
         // Reuse / create a free-form container
@@ -711,10 +811,28 @@ class ExamApp {
         }
         container.style.display = 'block';
 
-        if (question.prompt) {
-            container.innerHTML = `<div style="font-size:1.05rem;font-weight:600;color:var(--text-main);margin-bottom:1.25rem;line-height:1.6;" class="katex-render">${renderMarkdown(question.prompt)}</div>`;
+        const mainPrompt = question.question || question.prompt || question.sectionPrompt || '';
+        if (mainPrompt) {
+            container.innerHTML = `<div style="font-size:1.05rem;font-weight:600;color:var(--text-main);margin-bottom:1.25rem;line-height:1.6;" class="katex-render">${renderMarkdown(mainPrompt)}</div>`;
         } else {
             container.innerHTML = '';
+        }
+
+        if (!parts.length) {
+            const savedText = savedAns.text || savedAns[0] || '';
+            const singleDiv = document.createElement('div');
+            singleDiv.style.cssText = 'margin-bottom:1.25rem;padding:1rem;background:var(--bg-input);border-radius:12px;border:1px solid var(--border);';
+            singleDiv.innerHTML = `
+                <textarea class="freeform-part-input" rows="4"
+                    placeholder="Nhập câu trả lời..."
+                    data-part-index="0"
+                    oninput="window._examApp.saveFreeFormText('${question.id}', this.value)"
+                    style="width:100%;padding:0.75rem 0.9rem;border:1.5px solid var(--border);border-radius:8px;
+                        background:white;font-size:0.95rem;font-family:inherit;color:var(--text-main);
+                        transition:border-color 0.15s;outline:none;resize:vertical;"
+                    onfocus="this.style.borderColor='var(--primary)'"
+                    onblur="this.style.borderColor='var(--border)'">${String(savedText).replace(/</g, '&lt;')}</textarea>`;
+            container.appendChild(singleDiv);
         }
 
         parts.forEach((part, i) => {
@@ -800,7 +918,7 @@ class ExamApp {
         }).join('');
 
         zone.innerHTML = `<div class="essay-upload-area" style="margin-top:0.75rem;">
-            <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem;font-weight:600;">📎 Đính kèm bài làm (tuỳ chọn)</div>
+            <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem;font-weight:600;">📎 Đính kèm bài làm (tuỳ chọn) — có thể Ctrl+V ảnh trực tiếp</div>
             <div class="essay-attach-list">${thumbs}</div>
             <label class="essay-upload-btn" title="Tối đa 10MB - JPG/PNG/WebP/PDF">
                 📷 Thêm ảnh/PDF
@@ -811,13 +929,21 @@ class ExamApp {
         </div>`;
     }
 
+    saveFreeFormText(questionId, value) {
+        if (!this.userAnswers[questionId] || typeof this.userAnswers[questionId] !== 'object') {
+            this.userAnswers[questionId] = { parts: {}, attachments: [] };
+        }
+        this.userAnswers[questionId].text = value;
+        this.userAnswers[questionId].parts = { 0: value };
+        this.debouncedSaveProgress();
+    }
+
     saveFreeFormPart(questionId, partIndex, value) {
         const current = this.userAnswers[questionId] || { parts: {}, attachments: [] };
         if (!current.parts) current.parts = {};
         current.parts[partIndex] = value;
         this.userAnswers[questionId] = current;
-        this.saveProgress();
-        this.updateQuestionGrid();
+        this.debouncedSaveProgress();
     }
 
     async handleFreeFormFileInput(event, questionId) {
@@ -958,6 +1084,15 @@ class ExamApp {
         this.saveInProgress();
     }
 
+    debouncedSaveProgress(delay = 350) {
+        if (this._progressSaveTimer) clearTimeout(this._progressSaveTimer);
+        this._progressSaveTimer = setTimeout(() => {
+            this.saveProgress();
+            this.updateQuestionGrid();
+            this._progressSaveTimer = null;
+        }, delay);
+    }
+
     saveInProgress() {
         const inProgress = JSON.parse(localStorage.getItem('easyrevise_in_progress') || '{}');
         inProgress[this.examId] = {
@@ -1090,20 +1225,49 @@ class ExamApp {
                 // Normalize essay answer: support both string and {text, attachments} formats
                 const textAns = (typeof userAns === 'object' && userAns !== null) ? (userAns.text || '') : (userAns || '');
                 const attachments = (typeof userAns === 'object' && userAns !== null) ? (userAns.attachments || []) : [];
-                return { id: q.id, userAnswer: textAns, attachments, isCorrect: null, isEssay: true };
+                return {
+                    id: q.id,
+                    userAnswer: textAns,
+                    attachments,
+                    isCorrect: null,
+                    isEssay: true,
+                    gradingType: 'writing-essay',
+                    prompt: q.prompt || q.question || q.instruction || '',
+                    sampleAnswer: q.sampleAnswer || q.answer || '',
+                    rubric: q.rubric || q.explanation || '',
+                    cues: q.cues || []
+                };
             }
             if (q.isFreeForm) {
                 const parts = (userAns && userAns.parts) ? userAns.parts : {};
                 const attachments = (userAns && userAns.attachments) ? userAns.attachments : [];
                 // Serialize parts as readable text for AI grading
-                const partsList = (q.subParts || q.questions || []).map((p, i) => {
+                const freeParts = q.subParts || [];
+                const partsList = freeParts.length ? freeParts.map((p, i) => {
                     const ans = parts[i] || '';
                     const label = p.label ? `(${p.label})` : `Phần ${i + 1}`;
-                    return `${label}: ${ans || '(chưa điền)'}`;
-                }).join('\n');
-                const hasAny = Object.values(parts).some(v => v && String(v).trim());
+                    const prompt = p.question || p.prompt || p.title || '';
+                    return `${label} ${prompt}\nBài làm: ${ans || '(chưa điền)'}`;
+                }).join('\n\n') : (userAns.text || parts[0] || '');
+                const expectedList = freeParts.map((p, i) => {
+                    const label = p.label ? `(${p.label})` : `Phần ${i + 1}`;
+                    return `${label}: ${p.sampleAnswer || p.answer || p.expectedAnswer || ''}`;
+                }).filter(x => !x.endsWith(': ')).join('\n');
+                const hasAny = Object.values(parts).some(v => v && String(v).trim()) || !!(userAns.text && String(userAns.text).trim());
                 if (!hasAny && !attachments.length) skipped++;
-                return { id: q.id, userAnswer: partsList, attachments, isCorrect: null, isEssay: true, isFreeFormOrigin: true };
+                return {
+                    id: q.id,
+                    userAnswer: partsList,
+                    attachments,
+                    isCorrect: null,
+                    isEssay: true,
+                    isFreeFormOrigin: true,
+                    gradingType: 'free-form',
+                    prompt: q.question || q.prompt || q.sectionPrompt || q.instruction || q.sectionTitle || '',
+                    sampleAnswer: q.sampleAnswer || q.answer || q.expectedAnswer || q.sectionSampleAnswer || expectedList || '',
+                    rubric: q.rubric || q.explanation || '',
+                    subParts: freeParts.map(p => ({ label: p.label, question: p.question || p.prompt || '', sampleAnswer: p.sampleAnswer || p.answer || p.expectedAnswer || '' }))
+                };
             }
             if (q.isFillBlank) {
                 const blanks = q.blanks || [];
@@ -1112,10 +1276,19 @@ class ExamApp {
                 blanks.forEach((blank, i) => {
                     const given = (answers[i] || '').trim();
                     const expected = String(blank.answer || '').trim();
+                    const tol = blank.tolerance || undefined;
                     let match = false;
                     if (blank.type === 'int') match = parseInt(given) === parseInt(expected);
-                    else if (blank.type === 'float') match = Math.abs(parseFloat(given) - parseFloat(expected)) <= 0.01;
-                    else match = given.toLowerCase() === expected.toLowerCase();
+                    else if (blank.type === 'float') match = Math.abs(parseFloat(given) - parseFloat(expected)) <= (tol || 0.01);
+                    else if (blank.type === 'fraction') {
+                        const evalFrac = (s) => { const p = String(s).split('/'); return p.length === 2 ? parseFloat(p[0]) / parseFloat(p[1]) : parseFloat(s); };
+                        const gv = evalFrac(given), ev = evalFrac(expected);
+                        match = !isNaN(gv) && !isNaN(ev) && Math.abs(gv - ev) <= (tol || 0.001);
+                    } else {
+                        const normalize = (s) => blank.caseSensitive ? String(s).trim() : String(s).trim().toLowerCase();
+                        const allCorrect = [expected, ...(blank.alternatives || [])].filter(a => a !== undefined && a !== null && String(a).trim());
+                        match = allCorrect.some(ans => normalize(given) === normalize(ans));
+                    }
                     if (!match) allCorrect = false;
                 });
                 if (Object.keys(answers).length === 0) skipped++;
@@ -1173,6 +1346,17 @@ class ExamApp {
                     displayName: displayName  // TN3: pass displayName
                 })
             }).catch(() => { });
+            const hasEssayOrFill = results.some(r => r.isEssay || r.isFillBlank || r.isFreeFormOrigin);
+            if (hasEssayOrFill) {
+                sessionStorage.setItem('easyrevise_grade_poll', JSON.stringify({
+                    examId: this.examId,
+                    code: null,
+                    userId: userId || 'anonymous',
+                    source: 'open'
+                }));
+            } else {
+                sessionStorage.removeItem('easyrevise_grade_poll');
+            }
         }
 
         // Remove in-progress + unlock so student must re-enter code for a new attempt
@@ -1209,45 +1393,61 @@ class ExamApp {
     _showSubmitConfirmModal(unanswered, unansweredIndices = []) {
         return new Promise(resolve => {
             const overlay = document.createElement('div');
-            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(5px);z-index:99999;display:flex;align-items:center;justify-content:center;padding:1rem;animation:erFadeIn 0.18s ease;';
+            overlay.className = 'submit-confirm-overlay';
 
             const MAX_SHOW = 12;
             const shownIndices = unansweredIndices.slice(0, MAX_SHOW);
             const moreCount = unansweredIndices.length - MAX_SHOW;
             const pillsHtml = shownIndices.map(n =>
-                `<span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:#fef2f2;border:1.5px solid #fecaca;color:#dc2626;font-size:0.78rem;font-weight:700;">${n}</span>`
-            ).join('') + (moreCount > 0 ? `<span style="display:inline-flex;align-items:center;padding:0 0.6rem;height:32px;border-radius:16px;background:#f1f5f9;color:#64748b;font-size:0.75rem;font-weight:600;">+${moreCount}</span>` : '');
+                `<span class="submit-pill">${n}</span>`
+            ).join('') + (moreCount > 0 ? `<span class="submit-pill submit-pill-more">+${moreCount}</span>` : '');
 
             overlay.innerHTML = `
-                <div style="background:var(--bg-card,#fff);border-radius:22px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);overflow:hidden;animation:erSlideUp 0.22s ease;">
-                    <div style="padding:1.5rem 1.75rem 1.25rem;border-bottom:1px solid #f1f5f9;">
-                        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
-                            <div style="width:42px;height:42px;border-radius:12px;background:#fef2f2;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;">⚠️</div>
-                            <div>
-                                <div style="font-weight:800;font-size:1.05rem;color:#1e293b;">Còn ${unanswered} câu chưa trả lời</div>
-                                <div style="font-size:0.82rem;color:#94a3b8;margin-top:0.15rem;">Bạn có chắc muốn nộp bài ngay?</div>
+                <div class="submit-confirm-card">
+                    <div class="submit-confirm-body">
+                        <div class="submit-confirm-head">
+                            <div class="submit-confirm-icon">
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="0.8" fill="currentColor"/></svg>
+                            </div>
+                            <div class="submit-confirm-text">
+                                <div class="submit-confirm-title">Còn ${unanswered} câu chưa trả lời</div>
+                                <div class="submit-confirm-subtitle">Bạn có chắc muốn nộp bài ngay?</div>
                             </div>
                         </div>
-                        ${pillsHtml ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:0.5rem;">${pillsHtml}</div>` : ''}
+                        ${pillsHtml ? `<div class="submit-pills">${pillsHtml}</div>` : ''}
                     </div>
-                    <div style="padding:1.25rem 1.75rem;display:flex;gap:0.75rem;">
-                        <button id="_submitCancel" style="flex:1;padding:0.75rem;border-radius:12px;border:1.5px solid #e2e8f0;background:#f8fafc;color:#475569;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f8fafc'">Làm tiếp</button>
-                        <button id="_submitConfirm" style="flex:1;padding:0.75rem;border-radius:12px;border:none;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-size:0.9rem;font-weight:700;cursor:pointer;transition:opacity 0.15s;" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">Nộp bài</button>
+                    <div class="submit-confirm-actions">
+                        <button type="button" id="_submitCancel" class="submit-btn submit-btn-cancel">Làm tiếp</button>
+                        <button type="button" id="_submitConfirm" class="submit-btn submit-btn-confirm">Nộp bài</button>
                     </div>
                 </div>`;
 
-            if (!document.getElementById('_erModalStyles')) {
-                const s = document.createElement('style');
-                s.id = '_erModalStyles';
-                s.textContent = `@keyframes erFadeIn{from{opacity:0}to{opacity:1}} @keyframes erSlideUp{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}`;
-                document.head.appendChild(s);
-            }
             document.body.appendChild(overlay);
+            requestAnimationFrame(() => overlay.classList.add('is-open'));
 
-            overlay.querySelector('#_submitCancel').addEventListener('click', () => { overlay.remove(); resolve(false); });
-            overlay.querySelector('#_submitConfirm').addEventListener('click', () => { overlay.remove(); resolve(true); });
+            let settled = false;
+            const done = (value) => {
+                if (settled) return;
+                settled = true;
+                overlay.remove();
+                resolve(value);
+            };
+
+            overlay.querySelector('#_submitCancel').addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                done(false);
+            });
+            overlay.querySelector('#_submitConfirm').addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const btn = e.currentTarget;
+                btn.disabled = true;
+                btn.textContent = 'Đang nộp...';
+                done(true);
+            });
             // Click outside = cancel
-            overlay.addEventListener('click', e => { if (e.target === overlay) { overlay.remove(); resolve(false); } });
+            overlay.addEventListener('click', e => { if (e.target === overlay) done(false); });
         });
     }
 

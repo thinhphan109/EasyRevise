@@ -454,6 +454,7 @@ router.get('/media/:fileId', async (req, res) => {
         const mimeType = fileRecord?.mimeType || 'application/octet-stream';
         const isViewOnly = fileRecord?.protection === 'view-only';
 
+        res.setHeader('X-Content-Type-Options', 'nosniff');
         // Video: stream directly (don't cache in RAM)
         if (mimeType.startsWith('video/')) {
             res.setHeader('Content-Type', mimeType);
@@ -485,7 +486,12 @@ router.get('/media/:fileId', async (req, res) => {
         const buf = { buffer: Buffer.from(driveRes.data), mimeType: driveRes.headers['content-type'] || mimeType };
         mediaRamCache.set(fileId, buf);
         setTimeout(() => mediaRamCache.delete(fileId), 60 * 60 * 1000); // clear after 1h
-        res.setHeader('Content-Type', buf.mimeType);
+        let finalMime = buf.mimeType;
+        if (fileRecord?.type === 'pdf') finalMime = 'application/pdf';
+
+        res.setHeader('Content-Type', finalMime);
+        res.setHeader('Content-Length', buf.buffer.length);
+        res.setHeader('Accept-Ranges', 'bytes');
         res.send(buf.buffer);
     } catch (err) {
         console.error('[Media] Proxy error:', err.message);
@@ -495,19 +501,24 @@ router.get('/media/:fileId', async (req, res) => {
 
 // ========================
 // Helper: Video conversion (background task)
+// M9: Use execFile (no shell) to prevent command injection — safer than exec.
 // ========================
 async function convertAndUploadVideo(buffer, originalName, fileRecordId, driveFolderId) {
     const os = require('os');
+    const { execFile } = require('child_process');
     const ext = path.extname(originalName).toLowerCase();
     const tmpIn = path.join(os.tmpdir(), `easyrevise_in_${fileRecordId}${ext}`);
     const tmpOut = path.join(os.tmpdir(), `easyrevise_out_${fileRecordId}.mp4`);
     try {
         fs.writeFileSync(tmpIn, buffer);
         await new Promise((resolve, reject) => {
-            const cmd = ext === '.m3u8'
-                ? `ffmpeg -y -protocol_whitelist file,http,https,tcp,tls,crypto -i "${tmpIn}" -c copy "${tmpOut}"`
-                : `ffmpeg -y -i "${tmpIn}" -c:v libx264 -c:a aac -movflags +faststart "${tmpOut}"`;
-            require('child_process').exec(cmd, { timeout: 30 * 60 * 1000 }, (err, _, stderr) => err ? reject(new Error(stderr || err.message)) : resolve());
+            // M9: array args, no shell interpretation
+            const args = ext === '.m3u8'
+                ? ['-y', '-protocol_whitelist', 'file,http,https,tcp,tls,crypto', '-i', tmpIn, '-c', 'copy', tmpOut]
+                : ['-y', '-i', tmpIn, '-c:v', 'libx264', '-c:a', 'aac', '-movflags', '+faststart', tmpOut];
+            execFile('ffmpeg', args, { timeout: 30 * 60 * 1000 }, (err, _, stderr) => {
+                err ? reject(new Error(stderr || err.message)) : resolve();
+            });
         });
         const mp4Buffer = fs.readFileSync(tmpOut);
         const newName = path.basename(originalName, ext) + '.mp4';

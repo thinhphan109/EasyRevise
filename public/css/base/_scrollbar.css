@@ -1,0 +1,30 @@
+/* ===========================================================
+   Base — Custom scrollbar (subtle, theme-aware)
+   =========================================================== */
+
+@supports selector(::-webkit-scrollbar) {
+    *::-webkit-scrollbar {
+        width: 12px;
+        height: 12px;
+    }
+    *::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    *::-webkit-scrollbar-thumb {
+        background: var(--border-strong);
+        border-radius: var(--radius-pill);
+        border: 3px solid var(--bg);
+    }
+    *::-webkit-scrollbar-thumb:hover {
+        background: var(--text-3);
+    }
+    *::-webkit-scrollbar-corner {
+        background: transparent;
+    }
+}
+
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+}

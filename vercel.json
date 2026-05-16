@@ -27,5 +27,11 @@
       "src": "/(.*)",
       "dest": "server.js"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/admin/run-backup",
+      "schedule": "0 17 * * *"
+    }
   ]
 }

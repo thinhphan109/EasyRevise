@@ -7,6 +7,7 @@ const multer = require('multer');
 const sharp = require('sharp');
 const { readData, writeData, readSettings } = require('../lib/data');
 const { adminOnly, sanitizeCode } = require('../lib/auth');
+const { chatCompletion, getConfig } = require('../lib/ai-client');
 
 // OCR multer config
 const ocrUpload = multer({
@@ -32,42 +33,23 @@ router.post('/ocr', adminOnly, ocrUpload.single('image'), async (req, res) => {
             .toBuffer();
         const base64 = resized.toString('base64');
 
-        const sdkType = process.env.CLAUDE_SDK_TYPE || 'anthropic';
-        const baseUrl = (process.env.CLAUDE_API_URL || 'https://chat.trollllm.xyz').replace(/\/+$/, '');
+        const cfg = getConfig();
+        if (!cfg.apiKey) return res.status(500).json({ error: 'API_KEY_FIXED chưa cấu hình' });
         const settings = readSettings();
-        const model = settings.ocrModel || process.env.CLAUDE_MODEL || 'claude-sonnet-4.6';
-        const CUSTOM_HEADERS = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' };
+        const model = settings.ocrModel || cfg.defaultModel;
 
         const ocrPrompt = 'Trích xuất chính xác toàn bộ văn bản trong ảnh. Công thức toán viết dạng LaTeX: inline dùng $...$, block dùng $$...$$. Chỉ trả về nội dung thuần, không giải thích thêm.';
 
-        let text = '';
-        if (sdkType === 'openai') {
-            const OpenAI = require('openai');
-            const openai = new OpenAI({ baseURL: `${baseUrl}/v1`, apiKey, timeout: 60000, defaultHeaders: CUSTOM_HEADERS });
-            const completion = await openai.chat.completions.create({
-                model, max_tokens: 4096,
-                messages: [{
-                    role: 'user', content: [
-                        { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${base64}` } },
-                        { type: 'text', text: ocrPrompt }
-                    ]
-                }]
-            });
-            text = completion.choices?.[0]?.message?.content || '';
-        } else {
-            const Anthropic = require('@anthropic-ai/sdk');
-            const client = new Anthropic({ baseURL: baseUrl, apiKey, timeout: 60000, defaultHeaders: CUSTOM_HEADERS });
-            const msg = await client.messages.create({
-                model, max_tokens: 4096,
-                messages: [{
-                    role: 'user', content: [
-                        { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: base64 } },
-                        { type: 'text', text: ocrPrompt }
-                    ]
-                }]
-            });
-            text = msg.content?.[0]?.text || '';
-        }
+        const text = await chatCompletion({
+            model,
+            maxTokens: 4096,
+            messages: [{
+                role: 'user', content: [
+                    { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${base64}` } },
+                    { type: 'text', text: ocrPrompt }
+                ]
+            }]
+        });
 
         res.json({ text: text.trim() });
     } catch (err) {
@@ -106,14 +88,11 @@ async function explainWrongHandler(req, res) {
         return res.status(429).json({ error: `Đã dùng hết ${effectiveLimit} lần giải thích AI`, used, limit: effectiveLimit });
     }
 
-    const apiKey = process.env.CLAUDE_API_KEY;
-    if (!apiKey) return res.status(500).json({ error: 'CLAUDE_API_KEY chưa cấu hình' });
+    const cfg = getConfig();
+    if (!cfg.apiKey) return res.status(500).json({ error: 'API_KEY_FIXED chưa cấu hình' });
 
-    const sdkType = process.env.CLAUDE_SDK_TYPE || 'anthropic';
-    const baseUrl = (process.env.CLAUDE_API_URL || 'https://chat.trollllm.xyz').replace(/\/+$/, '');
     const settings = readSettings();
-    const model = settings.gradeModel || process.env.CLAUDE_MODEL || 'claude-sonnet-4.6';
-    const CUSTOM_HEADERS = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' };
+    const model = settings.gradeModel || cfg.defaultModel;
 
     const optLabels = ['A', 'B', 'C', 'D'];
     const optText = (options || []).map((o, i) => `${optLabels[i]}. ${o}`).join('\n');
@@ -122,24 +101,10 @@ async function explainWrongHandler(req, res) {
     const prompt = `Học sinh vừa trả lời sai câu hỏi sau:\nCâu hỏi: ${questionText}\nCác lựa chọn:\n${optText}\nHọc sinh chọn: ${userLabel}\nĐáp án đúng: ${correctLabel}\n${explanation ? `Giải thích có sẵn: ${explanation}` : ''}\n\nHãy giải thích ngắn gọn (3-5 câu) tại sao đáp án của học sinh sai và tại sao đáp án đúng là đúng. Dùng tiếng Việt, thân thiện, dễ hiểu.`;
 
     try {
-        let aiText = '';
-        if (sdkType === 'openai') {
-            const OpenAI = require('openai');
-            const openai = new OpenAI({ baseURL: `${baseUrl}/v1`, apiKey, timeout: 60000, defaultHeaders: CUSTOM_HEADERS });
-            const completion = await openai.chat.completions.create({
-                model, max_tokens: 512,
-                messages: [{ role: 'user', content: prompt }]
-            });
-            aiText = completion.choices?.[0]?.message?.content || '';
-        } else {
-            const Anthropic = require('@anthropic-ai/sdk');
-            const client = new Anthropic({ baseURL: baseUrl, apiKey, timeout: 60000, defaultHeaders: CUSTOM_HEADERS });
-            const msg = await client.messages.create({
-                model, max_tokens: 512,
-                messages: [{ role: 'user', content: prompt }]
-            });
-            aiText = msg.content?.[0]?.text || '';
-        }
+        const aiText = await chatCompletion({
+            model, maxTokens: 512,
+            messages: [{ role: 'user', content: prompt }]
+        });
 
         // Save counter
         const freshData = readData();

@@ -10,6 +10,8 @@ const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
 const { readSettings, readQuestionBank, writeQuestionBank, uuidv4 } = require('../lib/data');
 const { adminOnly } = require('../lib/auth');
+const { chatCompletion, getConfig, getAvailableModels, imageContent } = require('../lib/ai-client');
+const { normalizeExam } = require('../lib/exam-normalizer');
 
 // Multer for AI files (PDF, images, DOCX)
 const aiUpload = multer({
@@ -39,7 +41,7 @@ const SUBJECT_PROMPTS = {
 // POST /api/admin/ai-generate
 router.post('/ai-generate', adminOnly, aiUpload.array('files', 10), async (req, res) => {
     try {
-        const { title, subject, year, subjectType, sdkType: reqSdkType, model: reqModel } = req.body;
+        const { title, subject, year, subjectType, sdkType: reqSdkType, model: reqModel, clientOcrText } = req.body;
         const files = req.files;
 
         if (!files || files.length === 0) {
@@ -111,6 +113,11 @@ router.post('/ai-generate', adminOnly, aiUpload.array('files', 10), async (req, 
             }
         }
 
+        if (clientOcrText && String(clientOcrText).trim()) {
+            contentParts.unshift(`[OCR_FRONTEND]\n${String(clientOcrText).trim()}`);
+            console.log(`[AI] Client OCR text received: ${String(clientOcrText).length} chars`);
+        }
+
         const extractedText = contentParts.join('\n\n---\n\n');
 
         if (!extractedText.trim() && imageParts.length === 0) {
@@ -130,10 +137,10 @@ QUY TẮC BẮT BUỘC:
 1. Phát hiện tự động loại section từ các loại sau:
    - "multiple-choice": câu trắc nghiệm 4 lựa chọn A/B/C/D
    - "reading": đọc hiểu, có đoạn văn (passage) kèm câu hỏi trắc nghiệm
-   - "writing-choice": viết có lựa chọn đáp án
    - "writing-essay": viết luận, tự do
    - "fill-in-blank": điền vào chỗ trống ___, dùng khi đề có dạng: điền từ, điền số, hoàn thành câu
    - "free-form": câu tự luận có nhiều phần a, b, c (yêu cầu lời giải)
+   - KHÔNG dùng "writing-choice"; nếu gặp dạng viết có lựa chọn, dùng "multiple-choice"
 2. Nếu đề CÓ đáp án → sử dụng đáp án đó
 3. Nếu đề KHÔNG CÓ đáp án → tự giải và cung cấp correctAnswer chính xác
 4. correctAnswer: 0=A, 1=B, 2=C, 3=D
@@ -181,7 +188,7 @@ SCHEMA:
       {
         "title": "Tên phần",
         "instruction": "Hướng dẫn",
-        "type": "multiple-choice|reading|writing-choice|writing-essay|fill-in-blank|free-form",
+        "type": "multiple-choice|reading|writing-essay|fill-in-blank|free-form",
         "passage": "(nếu reading)",
         "questions": [
           {
@@ -221,68 +228,47 @@ SCHEMA:
         }
         userContent.push({ type: 'text', text: textPrompt });
 
-        const sdkType = reqSdkType || process.env.CLAUDE_SDK_TYPE || 'anthropic';
-        const baseUrl = (process.env.CLAUDE_API_URL || 'https://chat.trollllm.xyz').replace(/\/+$/, '');
-        const apiKey = process.env.CLAUDE_API_KEY;
+        const cfg = getConfig();
         const settingsData = readSettings();
-        const model = reqModel || settingsData.generateModel || process.env.CLAUDE_MODEL || 'claude-sonnet-4.6';
-        const CUSTOM_HEADERS = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' };
+        const model = reqModel || settingsData.generateModel || cfg.defaultModel;
 
-        if (!apiKey) {
-            return res.status(500).json({ error: 'CLAUDE_API_KEY chưa được cấu hình trong .env' });
+        if (!cfg.apiKey) {
+            return res.status(500).json({ error: 'API_KEY_FIXED (hoặc CLAUDE_API_KEY) chưa được cấu hình trong .env' });
         }
 
-        console.log(`Using ${sdkType.toUpperCase()} SDK | Model: ${model}`);
+        console.log(`[AI] Provider: ${cfg.providerName} | Model: ${model} | SDK: ${cfg.sdkType}`);
+
+        // Convert imageParts from Anthropic format → OpenAI format for new provider
+        const convertedContent = userContent.map(p => {
+            if (p.type === 'image') {
+                return { type: 'image_url', image_url: { url: `data:${p.source.media_type};base64,${p.source.data}` } };
+            }
+            return p;
+        });
 
         // Retry logic (3 attempts)
         let aiText = '';
         const MAX_RETRIES = 3;
         for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
             try {
-                console.log(`AI API attempt ${attempt}/${MAX_RETRIES} (${sdkType})...`);
-
-                if (sdkType === 'openai') {
-                    const OpenAI = require('openai');
-                    const openai = new OpenAI({
-                        baseURL: `${baseUrl}/v1`, apiKey: apiKey,
-                        timeout: 5 * 60 * 1000, defaultHeaders: CUSTOM_HEADERS
-                    });
-                    const openaiContent = userContent.map(p => {
-                        if (p.type === 'image') {
-                            return { type: 'image_url', image_url: { url: `data:${p.source.media_type};base64,${p.source.data}` } };
-                        }
-                        return p;
-                    });
-                    const completion = await openai.chat.completions.create({
-                        model, max_tokens: 64000,
-                        messages: [
-                            { role: 'system', content: systemPrompt },
-                            { role: 'user', content: openaiContent }
-                        ]
-                    });
-                    aiText = completion.choices?.[0]?.message?.content || '';
-                } else {
-                    const Anthropic = require('@anthropic-ai/sdk');
-                    const client = new Anthropic({
-                        baseURL: baseUrl, apiKey: apiKey,
-                        timeout: 10 * 60 * 1000, defaultHeaders: CUSTOM_HEADERS
-                    });
-                    const stream = client.messages.stream({
-                        model, max_tokens: 64000,
-                        system: systemPrompt,
-                        messages: [{ role: 'user', content: userContent }]
-                    });
-                    const finalMessage = await stream.finalMessage();
-                    aiText = finalMessage.content?.[0]?.text || '';
-                }
-                break; // success
+                console.log(`[AI] Attempt ${attempt}/${MAX_RETRIES}...`);
+                aiText = await chatCompletion({
+                    model,
+                    maxTokens: 64000,
+                    timeout: 10 * 60 * 1000,
+                    messages: [
+                        { role: 'system', content: systemPrompt },
+                        { role: 'user', content: convertedContent }
+                    ]
+                });
+                break;
             } catch (apiErr) {
-                console.error(`Claude API error (attempt ${attempt}):`, apiErr.message);
+                console.error(`[AI] Error (attempt ${attempt}):`, apiErr.message);
                 if (attempt < MAX_RETRIES) {
-                    console.log('Retrying in 2s...');
+                    console.log('[AI] Retrying in 2s...');
                     await new Promise(r => setTimeout(r, 2000));
                 } else {
-                    return res.status(502).json({ error: `Lỗi từ AI API sau ${MAX_RETRIES} lần thử (${sdkType})`, detail: apiErr.message });
+                    return res.status(502).json({ error: `Lỗi từ AI API sau ${MAX_RETRIES} lần thử`, detail: apiErr.message });
                 }
             }
         }
@@ -347,6 +333,8 @@ SCHEMA:
                                 const filename = `q${q.id}_${Date.now()}.jpg`;
                                 fs.writeFileSync(path.join(uploadsDir, filename), cropped);
                                 q.imageUrl = `/uploads/ai-images/${filename}`;
+                                if (!Array.isArray(q.images)) q.images = [];
+                                if (!q.images.includes(q.imageUrl)) q.images.push(q.imageUrl);
                                 console.log(`Cropped image for Q${q.id}: ${filename} (${(cropped.length / 1024).toFixed(0)}KB)`);
                             }
                         } catch (cropErr) {
@@ -356,6 +344,8 @@ SCHEMA:
                 }
             }
         }
+
+        parsed.exam = normalizeExam(parsed.exam);
 
         // Cache before sending
         const AI_CACHE_FILE = path.join(__dirname, '..', 'data', 'ai-gen-cache.json');
@@ -439,30 +429,28 @@ Trả về JSON THUẦN TÚY (không markdown, không \`\`\`json):
         imageParts.forEach(img => userContent.push(img));
         userContent.push({ type: 'text', text: 'Hãy tách tất cả câu hỏi trong đề thi trên thành JSON array.' });
 
-        const sdkType = process.env.AI_SDK_TYPE || 'anthropic';
-        let result;
-        if (sdkType === 'openrouter') {
-            const openrouterRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-                method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.OPENROUTER_API_KEY}` },
-                body: JSON.stringify({
-                    model: process.env.AI_MODEL || 'anthropic/claude-sonnet-4',
-                    messages: [{ role: 'system', content: extractPrompt }, { role: 'user', content: userContent.map(p => p.type === 'text' ? p : { type: 'image_url', image_url: { url: `data:${p.source.media_type};base64,${p.source.data}` } }) }],
-                    max_tokens: 8000, temperature: 0.2
-                })
-            });
-            const orData = await openrouterRes.json();
-            result = orData.choices?.[0]?.message?.content || '';
-        } else {
-            const Anthropic = require('@anthropic-ai/sdk');
-            const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-            const response = await anthropic.messages.create({
-                model: process.env.AI_MODEL || 'claude-sonnet-4-20250514',
-                max_tokens: 8000, temperature: 0.2,
-                system: extractPrompt,
-                messages: [{ role: 'user', content: userContent }]
-            });
-            result = response.content?.[0]?.text || '';
-        }
+        const cfg = getConfig();
+        const settingsData2 = readSettings();
+        const extractModel = settingsData2.generateModel || cfg.defaultModel;
+
+        // Convert to OpenAI image_url format
+        const extractContent = userContent.map(p => {
+            if (p.type === 'image') {
+                return { type: 'image_url', image_url: { url: `data:${p.source.media_type};base64,${p.source.data}` } };
+            }
+            return p;
+        });
+
+        console.log(`[AI Extract] Provider: ${cfg.providerName} | Model: ${extractModel}`);
+        const result = await chatCompletion({
+            model: extractModel,
+            maxTokens: 8000,
+            temperature: 0.2,
+            messages: [
+                { role: 'system', content: extractPrompt },
+                { role: 'user', content: extractContent }
+            ]
+        });
 
         // Parse JSON
         let cleaned = result.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
@@ -481,6 +469,78 @@ Trả về JSON THUẦN TÚY (không markdown, không \`\`\`json):
     } catch (err) {
         console.error('AI extract error:', err);
         res.status(500).json({ error: err.message || 'Lỗi AI' });
+    }
+});
+
+// POST /api/admin/ai-ocr — single page OCR via configured AI provider
+router.post('/ai-ocr', adminOnly, express.json({ limit: '10mb' }), async (req, res) => {
+    try {
+        const { imageBase64, mimeType } = req.body;
+        if (!imageBase64) return res.status(400).json({ error: 'Thiếu imageBase64' });
+
+        const cfg = getConfig();
+        const settingsData = readSettings();
+        const ocrModel = settingsData.generateModel || cfg.defaultModel;
+
+        const ocrPrompt = `Hãy chuyển đổi toàn bộ nội dung trong hình ảnh này thành văn bản có cấu trúc.
+
+QUY TẮC BẮT BUỘC:
+
+1. BẢNG BIỂU: Chuyển thành LaTeX dùng \\begin{tabular}...\\end{tabular}. Dùng |c|c|... cho cột, \\hline cho dòng kẻ.
+
+2. CÔNG THỨC TOÁN:
+   - Inline: dùng $...$. Display: dùng $$...$$.
+   - KHÔNG có khoảng trắng SÁT TRONG dấu $. Đúng: $x^2$ — Sai: $ x^2 $
+   - BẮT BUỘC có DẤU CÁCH trước và sau mỗi cặp $...$, $$...$$ khi nó nằm cạnh chữ.
+     VD đúng: đường kính $AB$ và điểm $M$ là trung điểm
+     VD sai:  đường kính $AB$và điểm$M$là trung điểm
+   - Chỉ bọc CÔNG THỨC TOÁN trong $. KHÔNG bọc text/tên biến đơn lẻ nếu không cần thiết.
+
+3. ĐỊNH DẠNG: Tiêu đề, số thứ tự câu in đậm Markdown: **Câu 1:**
+
+4. HÌNH ẢNH/SƠ ĐỒ: Phát hiện bounding box → [IMG_BBOX: ymin, xmin, ymax, xmax] (thang 1000). BỎ QUA watermark.
+
+5. TIẾNG VIỆT: Giữ NGUYÊN mọi ký tự có dấu. TUYỆT ĐỐI không để mất dấu thành ký tự "?".
+
+6. DÒNG TRỐNG: KHÔNG xuất dòng trống liên tiếp. Mỗi câu/phần cách nhau đúng 1 dòng trống.
+
+7. KHÔNG bọc kết quả trong code block. Trả về text thuần.`;
+
+        console.log(`[AI OCR] Provider: ${cfg.providerName} | Model: ${ocrModel}`);
+
+        const result = await chatCompletion({
+            model: ocrModel,
+            maxTokens: 12000,
+            temperature: 0.05,
+            messages: [
+                { role: 'user', content: [
+                    { type: 'text', text: ocrPrompt },
+                    { type: 'image_url', image_url: { url: `data:${mimeType || 'image/jpeg'};base64,${imageBase64}` } }
+                ]}
+            ]
+        });
+
+        // ── Clean up AI response ──
+        let cleaned = result
+            // Remove code block wrappers
+            .replace(/^```(?:latex|tex|math|markdown|md)?\s*\n?/gm, '')
+            .replace(/```\s*$/gm, '')
+            // Fix LaTeX delimiter issues
+            .replace(/\${3,}/g, '$$')
+            .replace(/\$\s+\$/g, '$$')
+            .replace(/\$\s+([^$]+?)\s+\$/g, (m, inner) => '$' + inner.trim() + '$')
+            // CRITICAL: Add space around $ when touching non-space chars
+            // "$AB$và" → "$AB$ và"  |  "điểm$M$" → "điểm $M$"
+            .replace(/\$([^$\n]+)\$([^\s\n,.:;!?\)}\]$"'])/g, '$$$1$$ $2')
+            .replace(/([^\s\n(\[{$"'])\$([^$\n]+)\$/g, '$1 $$$2$$')
+            // Clean consecutive blank lines → max 1
+            .replace(/\n{3,}/g, '\n\n')
+            .trim();
+
+        res.json({ success: true, text: cleaned });
+    } catch (err) {
+        console.error('AI OCR error:', err);
+        res.status(500).json({ error: err.message || 'Lỗi AI OCR' });
     }
 });
 

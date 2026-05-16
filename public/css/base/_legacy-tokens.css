@@ -1,0 +1,49 @@
+/* ===========================================================
+   Legacy token compat layer
+   Maps old `--color-*` vars to new design system tokens.
+   Used by admin.css, admin-sidebar.css, and other legacy CSS.
+   Will be removed in Wave 7 task 60 after admin migration.
+   =========================================================== */
+
+:root {
+    /* Brand */
+    --color-primary:       var(--accent);
+    --color-primary-hover: var(--accent-hover, var(--accent));
+    --color-primary-light: var(--accent-soft);
+    --color-accent:        var(--accent);
+
+    /* Neutral */
+    --color-bg:             var(--bg);
+    --color-surface:        var(--surface);
+    --color-surface-hover:  var(--surface-2);
+    --color-text:           var(--text);
+    --color-text-secondary: var(--text-2);
+    --color-text-muted:     var(--text-3);
+    --color-border:         var(--border);
+    --color-border-hover:   color-mix(in srgb, var(--border) 60%, var(--text-3) 40%);
+    --color-input-bg:       var(--surface-2);
+    --color-hover:          var(--surface-2);
+
+    /* Semantic */
+    --color-success:        var(--success);
+    --color-success-bg:     var(--success-soft);
+    --color-error:          var(--error);
+    --color-error-bg:       var(--error-soft);
+    --color-warning:        var(--warning);
+    --color-warning-bg:     var(--warning-soft);
+
+    /* Misc legacy aliases used in older code */
+    --primary:        var(--accent);
+    --primary-light:  var(--accent-soft);
+    --primary-hover:  var(--accent);
+    --bg-body:        var(--bg);
+    --bg-card:        var(--surface);
+    --bg-input:       var(--surface-2);
+    --text-main:      var(--text);
+
+    /* Glass tokens (legacy) */
+    --glass-bg:        color-mix(in srgb, var(--surface) 70%, transparent);
+    --glass-blur:      blur(16px) saturate(180%);
+    --glass-border:    color-mix(in srgb, var(--surface) 30%, transparent);
+    --glass-highlight: inset 0 1px 0 color-mix(in srgb, var(--surface) 50%, transparent);
+}

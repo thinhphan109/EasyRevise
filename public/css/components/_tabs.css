@@ -1,0 +1,77 @@
+/* ===========================================================
+   Components — Tabs (Task 13)
+   Pill style + underline style
+   =========================================================== */
+
+/* ── Pill tabs (background pills, sliding indicator) ──── */
+.tabs-pill {
+    display: inline-flex;
+    gap: 2px;
+    background: var(--surface-2);
+    padding: 4px;
+    border-radius: var(--radius-pill);
+    position: relative;
+}
+.tabs-pill .tab {
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    color: var(--text-2);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    transition: color var(--dur-fast) var(--ease-apple);
+    white-space: nowrap;
+}
+.tabs-pill .tab:hover { color: var(--text); }
+.tabs-pill .tab[aria-selected="true"],
+.tabs-pill .tab.active {
+    color: var(--text);
+    background: var(--surface);
+    box-shadow: var(--shadow-xs);
+}
+
+/* ── Underline tabs ────────────────────────────────────── */
+.tabs-underline {
+    display: flex;
+    gap: var(--space-1);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.tabs-underline::-webkit-scrollbar { display: none; }
+
+.tabs-underline .tab {
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    color: var(--text-2);
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: color var(--dur-fast) var(--ease-apple);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    white-space: nowrap;
+}
+.tabs-underline .tab:hover { color: var(--text); }
+.tabs-underline .tab[aria-selected="true"],
+.tabs-underline .tab.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+}
+
+/* ── Tab panels ────────────────────────────────────────── */
+.tab-panel {
+    display: none;
+    animation: tab-fade-in var(--dur-fast) var(--ease-apple);
+}
+.tab-panel[aria-hidden="false"],
+.tab-panel.active {
+    display: block;
+}
+@keyframes tab-fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}

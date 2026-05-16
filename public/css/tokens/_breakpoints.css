@@ -1,0 +1,21 @@
+/* ===========================================================
+   Design Tokens — Breakpoints
+   Reference values (used in @media queries via numeric value)
+   CSS variables in px usable for JS via getComputedStyle.
+   =========================================================== */
+
+:root {
+    --bp-sm:  640px;
+    --bp-md:  768px;
+    --bp-lg:  1024px;
+    --bp-xl:  1280px;
+    --bp-2xl: 1536px;
+
+    /* Z-index layers */
+    --z-base:     0;
+    --z-sticky:   10;
+    --z-dropdown: 50;
+    --z-overlay:  100;
+    --z-modal:    101;
+    --z-toast:    200;
+}

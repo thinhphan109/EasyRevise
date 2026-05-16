@@ -6,9 +6,94 @@ async function loadExamList() {
     _allExams = await api('/api/exams');
     document.getElementById('examFilterBar')?.remove();
     renderFilteredExams();
+    loadDashboardStats();
+}
+
+// #4: Dashboard stat cards — overview metrics
+async function loadDashboardStats() {
+    let container = document.getElementById('dashboardStats');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'dashboardStats';
+        container.className = 'dashboard-stats';
+        const examTab = document.getElementById('examListContainer');
+        if (examTab) examTab.parentNode.insertBefore(container, examTab.previousElementSibling || examTab);
+    }
+
+    // Show skeleton while loading
+    container.innerHTML = Array(4).fill(`
+        <div class="stat-card">
+            <div class="skeleton skeleton-avatar" style="width:40px;height:40px;border-radius:8px;margin-bottom:0.75rem;"></div>
+            <div class="skeleton skeleton-line skeleton-line--short" style="height:24px;margin-bottom:0.4rem;"></div>
+            <div class="skeleton skeleton-line skeleton-line--medium" style="height:10px;"></div>
+        </div>`).join('');
+
+    try {
+        const [users, qb] = await Promise.all([
+            api('/api/users').catch(() => []),
+            api('/api/admin/questions').catch(() => [])
+        ]);
+
+        const totalExams = _allExams.length;
+        const totalUsers = Array.isArray(users) ? users.length : 0;
+        const totalQuestions = Array.isArray(qb) ? qb.length : 0;
+        const totalSections = _allExams.reduce((s, e) => s + (e.sectionCount || 0), 0);
+
+        container.innerHTML = `
+            <div class="stat-card stat-card--primary">
+                <div class="stat-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </div>
+                <div class="stat-card-value">${totalExams}</div>
+                <div class="stat-card-label">Đề thi</div>
+            </div>
+            <div class="stat-card stat-card--info">
+                <div class="stat-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <div class="stat-card-value">${totalQuestions}</div>
+                <div class="stat-card-label">Câu hỏi trong kho</div>
+            </div>
+            <div class="stat-card stat-card--success">
+                <div class="stat-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <div class="stat-card-value">${totalUsers}</div>
+                <div class="stat-card-label">Tài khoản</div>
+            </div>
+            <div class="stat-card stat-card--warning">
+                <div class="stat-card-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                </div>
+                <div class="stat-card-value">${totalSections}</div>
+                <div class="stat-card-label">Phần thi</div>
+            </div>`;
+    } catch (e) {
+        container.innerHTML = '';
+    }
 }
 
 function renderFilteredExams() {
+    if (!document.getElementById('examVisibilityToggleStyle')) {
+        const style = document.createElement('style');
+        style.id = 'examVisibilityToggleStyle';
+        style.textContent = `
+            .exam-visibility-toggle{display:inline-flex;align-items:center;gap:.5rem;border:1px solid var(--border);background:rgba(148,163,184,.12);color:var(--text-muted);border-radius:999px;padding:.24rem .62rem .24rem .28rem;cursor:pointer;font-weight:800;font-size:.78rem;transition:all .18s ease;min-width:92px;justify-content:flex-start}
+            .exam-visibility-toggle:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(15,23,42,.12)}
+            .exam-visibility-toggle:disabled{opacity:.55;cursor:wait;transform:none}
+            .exam-visibility-toggle .toggle-track{width:34px;height:20px;border-radius:999px;background:#94a3b8;position:relative;display:inline-flex;align-items:center;transition:background .18s ease;box-shadow:inset 0 1px 3px rgba(0,0,0,.22)}
+            .exam-visibility-toggle .toggle-knob{width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;left:2px;top:2px;transition:transform .18s ease;box-shadow:0 2px 6px rgba(0,0,0,.28)}
+            .exam-visibility-toggle.active{background:rgba(34,197,94,.13);border-color:rgba(34,197,94,.34);color:#16a34a}
+            .exam-visibility-toggle.active .toggle-track{background:linear-gradient(135deg,#22c55e,#16a34a)}
+            .exam-visibility-toggle.active .toggle-knob{transform:translateX(14px)}
+            .exam-drag-handle{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;color:var(--text-muted);cursor:grab;user-select:none;font-size:1.08rem;transition:all .16s ease}
+            .exam-drag-handle:hover{background:rgba(99,102,241,.12);color:var(--primary)}
+            .exam-row.dragging{opacity:.45;transform:scale(.995)}
+            .exam-row.drag-over{outline:2px dashed var(--primary);outline-offset:-4px;background:rgba(99,102,241,.08)}
+        `;
+        document.head.appendChild(style);
+    }
+
     const c = document.getElementById('examListContainer');
     const searchVal = (document.getElementById('examSearchInput')?.value || '').toLowerCase();
     const subjectVal = document.getElementById('examFilterSubject')?.value || '';
@@ -40,17 +125,31 @@ function renderFilteredExams() {
     if (subjectVal) exams = exams.filter(e => e.subject === subjectVal);
     if (yearVal) exams = exams.filter(e => e.year === yearVal);
 
+    const isFiltering = !!(searchVal || subjectVal || yearVal);
     const countBadge = document.getElementById('examCountBadge');
-    if (countBadge) countBadge.textContent = `${exams.length}/${_allExams.length} đề`;
+    if (countBadge) countBadge.textContent = `${exams.length}/${_allExams.length} đề${isFiltering ? ' — tắt bộ lọc để sắp xếp' : ''}`;
 
     if (!exams.length) { c.innerHTML = `<div class="empty-state"><div class="emoji">📝</div><p>${_allExams.length ? 'Không tìm thấy đề phù hợp' : 'Chưa có đề. Bấm <strong>"+ Tạo đề mới"</strong>'}</p></div>`; return; }
-    c.innerHTML = `<table class="exam-table"><thead><tr><th>Tên đề</th><th>Môn</th><th>Năm</th><th>Câu hỏi</th><th>Mã</th><th>Cập nhật</th><th></th></tr></thead><tbody>
-    ${exams.map(e => `<tr class="exam-row">
+    c.innerHTML = `${isFiltering ? '<div style="margin-bottom:0.75rem;padding:0.65rem 0.85rem;border:1px solid rgba(245,158,11,.25);background:rgba(245,158,11,.10);color:#b45309;border-radius:12px;font-size:.86rem;font-weight:700;">⚠️ Đang bật bộ lọc/tìm kiếm nên tạm khóa kéo-thả. Tắt bộ lọc để sắp xếp toàn bộ đề.</div>' : ''}<table class="exam-table"><thead><tr><th style="width:42px;"></th><th>Tên đề</th><th>Môn</th><th>Năm</th><th>Câu hỏi</th><th>Mã</th><th>Hiển thị</th><th>Cập nhật</th><th></th></tr></thead><tbody>
+    ${exams.map(e => `<tr class="exam-row" draggable="${!isFiltering}" data-exam-id="${e.id}"
+        ondragstart="${isFiltering ? 'event.preventDefault()' : `onExamDragStart(event, '${e.id}')`}"
+        ondragover="onExamDragOver(event)"
+        ondragenter="event.currentTarget.classList.add('drag-over')"
+        ondragleave="event.currentTarget.classList.remove('drag-over')"
+        ondrop="onExamDrop(event, '${e.id}')"
+        ondragend="onExamDragEnd(event)">
+        <td onclick="event.stopPropagation();"><span class="exam-drag-handle" title="Kéo để sắp xếp">⠿</span></td>
         <td style="font-weight:600;cursor:pointer;" onclick="openExamEditor('${e.id}')">${escapeHtml(e.title)}</td>
         <td style="cursor:pointer;" onclick="openExamEditor('${e.id}')">${escapeHtml(e.subject)}</td>
         <td style="cursor:pointer;" onclick="openExamEditor('${e.id}')">${escapeHtml(e.year)}</td>
         <td style="cursor:pointer;" onclick="openExamEditor('${e.id}')">${e.totalQuestions} câu, ${e.sectionCount} phần</td>
         <td style="cursor:pointer;" onclick="openExamEditor('${e.id}')">${e.requireCode ? '🔒' : '🔓'}</td>
+        <td onclick="event.stopPropagation();" style="min-width:118px;">
+            <button class="exam-visibility-toggle ${e.visible === false ? '' : 'active'}" onclick="toggleExamVisible(event, '${e.id}', ${e.visible === false ? 'true' : 'false'})" title="${e.visible === false ? 'Bật hiển thị ngoài trang chủ' : 'Ẩn khỏi trang chủ'}" aria-label="${e.visible === false ? 'Đang ẩn' : 'Đang hiện'}">
+                <span class="toggle-track"><span class="toggle-knob"></span></span>
+                <span class="toggle-text">${e.visible === false ? 'Ẩn' : 'Hiện'}</span>
+            </button>
+        </td>
         <td style="color:var(--text-muted);font-size:0.85rem;cursor:pointer;" onclick="openExamEditor('${e.id}')">${new Date(e.updatedAt).toLocaleDateString('vi-VN')}</td>
         <td style="display:flex;gap:0.3rem;flex-shrink:0;">
             <button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();loadExamStats('${e.id}','${escapeHtml(e.title).replace(/'/g, "\\\\'")}')" title="Thống kê">📊</button>
@@ -59,25 +158,87 @@ function renderFilteredExams() {
     </tr>`).join('')}</tbody></table>`;
 }
 
+async function toggleExamVisible(event, examId, visible) {
+    if (event?.stopPropagation) event.stopPropagation();
+    const btn = event?.currentTarget;
+    if (btn) btn.disabled = true;
+
+    let r = await api(`/api/exams/${examId}/visibility`, 'PATCH', { visible });
+    if (r.error && /404|not found/i.test(r.error)) {
+        r = await api(`/api/exams/${examId}`, 'PUT', { visible });
+        if (!r.error) r = { success: true, id: r.id || examId, visible: r.visible !== false, updatedAt: r.updatedAt };
+    }
+
+    if (btn) btn.disabled = false;
+    if (r.error) { showToast('Lỗi đổi trạng thái: ' + r.error, 'error'); return; }
+    const exam = _allExams.find(e => e.id === examId);
+    const newVisible = r.visible !== false;
+    if (exam) { exam.visible = newVisible; exam.updatedAt = r.updatedAt || exam.updatedAt; }
+    showToast(newVisible ? 'Đề đã hiển thị ngoài trang chủ' : 'Đề đã được ẩn khỏi trang chủ', 'success');
+    renderFilteredExams();
+}
+
+function onExamDragStart(event, examId) {
+    _dragExamId = examId;
+    event.currentTarget.classList.add('dragging');
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', examId);
+}
+
+function onExamDragOver(event) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+}
+
+function onExamDragEnd(event) {
+    event.currentTarget.classList.remove('dragging');
+    document.querySelectorAll('.exam-row.drag-over').forEach(row => row.classList.remove('drag-over'));
+    _dragExamId = null;
+}
+
+async function onExamDrop(event, targetExamId) {
+    event.preventDefault();
+    event.currentTarget.classList.remove('drag-over');
+    const sourceExamId = _dragExamId || event.dataTransfer.getData('text/plain');
+    if (!sourceExamId || sourceExamId === targetExamId) return;
+
+    const from = _allExams.findIndex(e => String(e.id) === String(sourceExamId));
+    const to = _allExams.findIndex(e => String(e.id) === String(targetExamId));
+    if (from < 0 || to < 0) return;
+
+    const [moved] = _allExams.splice(from, 1);
+    _allExams.splice(to, 0, moved);
+    renderFilteredExams();
+
+    const r = await api('/api/exams/reorder', 'PATCH', { order: _allExams.map(e => e.id) });
+    if (r.error) {
+        showToast('Lỗi lưu thứ tự: ' + r.error, 'error');
+        loadExamList();
+        return;
+    }
+    showToast('Đã lưu thứ tự đề thi', 'success');
+}
+
 async function duplicateExam(examId) {
-    if (!confirm('Nhân bản đề thi này? Đề mới sẽ không có mã kích hoạt.')) return;
+    if (!(await customConfirm('Nhân bản đề thi', 'Đề mới sẽ không có mã kích hoạt. Tiếp tục?', 'Nhân bản'))) return;
     const res = await api(`/api/admin/exams/${examId}/duplicate`, 'POST');
-    if (res.success) { alert(`✅ Đã tạo bản sao: "${res.title}"`); loadExamList(); }
-    else { alert('❌ Lỗi: ' + (res.error || 'Không rõ')); }
+    if (res.success) { showToast(`Đã tạo bản sao: "${res.title}"`, 'success'); loadExamList(); }
+    else { showToast('Lỗi: ' + (res.error || 'Không rõ'), 'error'); }
 }
 
 async function copySectionTo(sectionId) {
     const exams = await api('/api/exams');
     const others = exams.filter(e => e.id !== currentExamId);
-    if (!others.length) { alert('Không có đề khác để copy vào!'); return; }
+    if (!others.length) { showToast('Không có đề khác để copy vào!', 'warning'); return; }
     const opts = others.map((e, i) => `${i + 1}. ${e.title}`).join('\n');
-    const choice = prompt(`Chọn đề đích (nhập số):\n${opts}`);
+    const choice = await customPrompt('Copy sang đề khác', `Chọn đề đích (nhập số):\n${opts}`);
+    if (choice === null) return;
     const idx = parseInt(choice) - 1;
-    if (isNaN(idx) || idx < 0 || idx >= others.length) { alert('Hủy hoặc lựa chọn không hợp lệ.'); return; }
+    if (isNaN(idx) || idx < 0 || idx >= others.length) { showToast('Lựa chọn không hợp lệ', 'warning'); return; }
     const targetExam = others[idx];
     const res = await api(`/api/admin/exams/${currentExamId}/copy-section`, 'POST', { sectionId, targetExamId: targetExam.id });
-    if (res.success) { alert(`✅ Đã copy section sang đề "${targetExam.title}"`); }
-    else { alert('❌ Lỗi: ' + (res.error || 'Không rõ')); }
+    if (res.success) { showToast(`Đã copy section sang đề "${targetExam.title}"`, 'success'); }
+    else { showToast('Lỗi: ' + (res.error || 'Không rõ'), 'error'); }
 }
 
 async function openExamEditor(examId) {
@@ -153,9 +314,13 @@ async function saveExam() {
         autoGrade: document.getElementById('checkAutoGrade').checked,
         aiExplainLimit: aiExplainLimitEl ? (parseInt(aiExplainLimitEl.value) ?? -1) : -1
     };
-    if (editingExamId) await api(`/api/exams/${editingExamId}`, 'PUT', body);
-    else await api('/api/exams', 'POST', body);
-    closeModal('modalExam'); loadExamList(); if (editingExamId) openExamEditor(editingExamId);
+    try {
+        let result;
+        if (editingExamId) result = await api(`/api/exams/${editingExamId}`, 'PUT', body);
+        else result = await api('/api/exams', 'POST', body);
+        if (result.error) { showToast('Lỗi lưu đề: ' + result.error, 'error'); return; }
+        closeModal('modalExam'); loadExamList(); if (editingExamId) openExamEditor(editingExamId);
+    } catch (err) { showToast('Lỗi kết nối: ' + err.message, 'error'); }
 }
 
 async function deleteExam() {
@@ -172,6 +337,25 @@ function exportExam() { window.open(`/api/exams/${currentExamId}/export`, '_blan
 function triggerImport() { document.getElementById('importFileInput').click(); }
 async function handleImportFile(event) {
     const file = event.target.files[0]; if (!file) return;
-    try { const text = await file.text(); const data = JSON.parse(text); const r = await api('/api/exams/import', 'POST', data); if (r.error) alert('Lỗi: ' + r.error); else { alert('Import OK: ' + r.title); loadExamList(); } } catch (e) { alert('File lỗi: ' + e.message); }
+    try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        // Support batch format
+        if (data._format === 'easyrevise-backup-v1' && Array.isArray(data.exams)) {
+            const r = await api('/api/exams/batch-import', 'POST', data);
+            if (r.error) showToast('Lỗi: ' + r.error, 'error');
+            else { showToast(`Import thành công ${r.imported} đề!`, 'success'); loadExamList(); }
+        } else {
+            // Single exam import
+            const r = await api('/api/exams/import', 'POST', data);
+            if (r.error) showToast('Lỗi: ' + r.error, 'error');
+            else { showToast('Import OK: ' + r.title, 'success'); loadExamList(); }
+        }
+    } catch (e) { showToast('File lỗi: ' + e.message, 'error'); }
     event.target.value = '';
+}
+
+// Batch export all (or filtered) exams
+function batchExportAll() {
+    window.open('/api/exams/batch-export', '_blank');
 }

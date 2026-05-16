@@ -4,6 +4,7 @@ const router = express.Router();
 const { readData, writeData } = require('../lib/data');
 const { adminOnly } = require('../lib/auth');
 const { validateQuestion, validateURL } = require('../lib/validate');
+const { normalizeQuestion } = require('../lib/exam-normalizer');
 
 // POST /api/exams/:examId/sections/:sectionId/questions
 router.post('/:examId/sections/:sectionId/questions', adminOnly, (req, res) => {
@@ -17,12 +18,12 @@ router.post('/:examId/sections/:sectionId/questions', adminOnly, (req, res) => {
     for (const urlField of ['video', 'explanationVideo']) {
         if (req.body[urlField]) { const urlErr = validateURL(req.body[urlField]); if (urlErr) return res.status(400).json({ error: urlErr }); }
     }
-    const newQ = {
+    const newQ = normalizeQuestion({
         id: req.body.id || Date.now(), question: req.body.question || '',
         options: req.body.options || ['', '', '', ''], correctAnswer: req.body.correctAnswer ?? 0,
         explanation: req.body.explanation || '', expansion: req.body.expansion || '',
-        answer: req.body.answer || '', image: req.body.image || null,
-        images: req.body.images || [],
+        answer: req.body.answer || '', sampleAnswer: req.body.sampleAnswer || '', rubric: req.body.rubric || '',
+        image: req.body.image || null, images: req.body.images || [],
         optionImages: req.body.optionImages || [null, null, null, null],
         explanationImages: req.body.explanationImages || [],
         video: req.body.video || null, mediaAsHint: !!req.body.mediaAsHint,
@@ -30,10 +31,11 @@ router.post('/:examId/sections/:sectionId/questions', adminOnly, (req, res) => {
         explanationVideo: req.body.explanationVideo || null,
         type: req.body.type || null,
         blanks: req.body.blanks || null,
+        subParts: req.body.subParts || [],
         table: req.body.table || null,
         imageUrl: req.body.imageUrl || null,
         imageRegion: req.body.imageRegion || null
-    };
+    }, section.type);
     section.questions.push(newQ);
     exam.updatedAt = new Date().toISOString();
     writeData(data);
@@ -54,7 +56,7 @@ router.put('/:examId/sections/:sectionId/questions/:questionId', adminOnly, (req
     }
     const qIndex = section.questions.findIndex(q => String(q.id) === String(req.params.questionId));
     if (qIndex === -1) return res.status(404).json({ error: 'Question not found' });
-    section.questions[qIndex] = { ...section.questions[qIndex], ...req.body };
+    section.questions[qIndex] = normalizeQuestion({ ...section.questions[qIndex], ...req.body }, section.type);
     exam.updatedAt = new Date().toISOString();
     writeData(data);
     res.json(section.questions[qIndex]);
