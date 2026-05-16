@@ -51,13 +51,10 @@ scripts/verify-*.mjs
 .agents/
 .gemini/
 
-# Runtime data (DB, JSON stores, AI cache, backups)
+# Runtime data — only ignore transient generated artifacts. The committed
+# seed JSONs (users/exams/subjects/settings/media) are needed by tests + first run.
 data/*.db
 data/*.db-journal
-data/exams.json
-data/questions.json
-data/users.json
-data/settings.json
 data/ai-gen-cache.json
 data/backups/
 

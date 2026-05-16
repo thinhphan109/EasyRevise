@@ -1,0 +1,35 @@
+{
+  "adminPin": "123456",
+  "pinSessionHours": 3,
+  "siteName": "*Sivuong.vn*",
+  "siteDescription": "**Học để tô lên độ sĩ của mình**",
+  "codeExpireHours": 1,
+  "generateModel": "GPT-5.5-Medium",
+  "gradeModel": "GPT-5.5-Medium",
+  "ocrModel": "GPT-5.5-Medium",
+  "aiProviders": [
+    {
+      "id": "9e9813d9-f5e2-4d5f-8629-aa5faf5507a1",
+      "name": "h2cloud",
+      "baseUrl": "https://api.loadip.com/v1",
+      "apiKey": "sk-80c6f26e1d3336a7-5ahrqn-6975d32c",
+      "sdkType": "openai",
+      "models": "cx/gpt-5.5\ncx/gpt-5.4\ncx/gpt-5.3-codex-xhigh\ncx/gpt-5.3-codex-high\ncx/gpt-5.3",
+      "defaultModel": "cx/gpt-5.5",
+      "createdAt": "2026-04-24T18:55:28.336Z",
+      "updatedAt": "2026-04-25T10:15:29.685Z"
+    },
+    {
+      "id": "4a88369c-03ff-43fc-9f48-98d4d7e6fe40",
+      "name": "thinhmetech",
+      "baseUrl": "https://9router.thinhme.tech/v1",
+      "apiKey": "sk-2474b65c88abf5af-gzqmus-59bf5797",
+      "sdkType": "openai",
+      "models": "# Loaded from https://9router.thinhme.tech/v1/models (00:02:45)\nGPT-5.5-xHigh\nGPT-5.5-Medium\nGPT-5.5-High\nClaudeSonet-4.5\nMiMo-V2.5-Pro\nMiMo-V2.5\nGPT-5.5-High-NEW\nHermes_CLI\nReview-GPT-5.5\nDeepSeek-Rotate\nGemini-3.1-Pro-High\nGemini-3.1-Pro-Low\nGemini-3-Flash\nClaude-Sonet\nClaude-Opus\nGPT-OSS\nClaude-Opus-4.7\nlinux/auto\nlinux/claude_sonet_4.5\nlinux/admin_h2\ncse/dinh_nhat\ncse/cx/gpt-5.5-review\ncse/cx/gpt-5.4\ncse/cx/gpt-5.4-review\ncse/cx/gpt-5.3-codex\ncse/cx/gpt-5.3-codex-review\ncse/cx/gpt-5.3-codex-xhigh\ncse/cx/gpt-5.3-codex-xhigh-review\ncse/cx/gpt-5.3-codex-high\ncse/cx/gpt-5.3-codex-high-review\ncse/cx/gpt-5.3-codex-low\ncse/cx/gpt-5.3-codex-low-review\ncse/cx/gpt-5.3-codex-none\ncse/cx/gpt-5.3-codex-none-review\ncse/cx/gpt-5.3-codex-spark\ncse/cx/gpt-5.3-codex-spark-review\ncse/cx/gpt-5.5\ntroll/claude-opus-4-6\ncmc/deepseek/deepseek-v4-pro\ncmc/deepseek/deepseek-v4-flash\ncmc/moonshotai/Kimi-K2.6\ncmc/moonshotai/Kimi-K2.5\ncmc/zai-org/GLM-5.1\ncmc/zai-org/GLM-5\ncmc/MiniMaxAI/MiniMax-M2.7\ncmc/MiniMaxAI/MiniMax-M2.5\ncmc/Qwen/Qwen3.6-Max-Preview\ncmc/Qwen/Qwen3.6-Plus\ncmc/stepfun/Step-3.5-Flash\nkr/auto\nkr/auto-thinking\nkr/claude-opus-4.7\nkr/claude-opus-4.7-thinking\nkr/claude-opus-4.7-agentic\nkr/claude-opus-4.7-thinking-agentic\nkr/claude-opus-4.6\nkr/claude-opus-4.6-thinking\nkr/claude-opus-4.6-agentic\nkr/claude-opus-4.6-thinking-agentic\nkr/claude-sonnet-4.6\nkr/claude-sonnet-4.6-thinking\nkr/claude-sonnet-4.6-agentic\nkr/claude-sonnet-4.6-thinking-agentic\nkr/claude-opus-4.5\nkr/claude-opus-4.5-thinking\nkr/claude-opus-4.5-agentic\nkr/claude-opus-4.5-thinking-agentic\nkr/claude-sonnet-4.5\nkr/claude-sonnet-4.5-thinking\nkr/claude-sonnet-4.5-agentic\nkr/claude-sonnet-4.5-thinking-agentic\nkr/claude-sonnet-4\nkr/claude-sonnet-4-thinking\nkr/claude-sonnet-4-agentic\nkr/claude-sonnet-4-thinking-agentic\nkr/claude-haiku-4.5\nkr/claude-haiku-4.5-thinking\nkr/claude-haiku-4.5-agentic\nkr/claude-haiku-4.5-thinking-agentic\nkr/deepseek-3.2\nkr/deepseek-3.2-thinking\nkr/deepseek-3.2-agentic\nkr/deepseek-3.2-thinking-agentic\nkr/minimax-m2.5\nkr/minimax-m2.5-thinking\nkr/minimax-m2.5-agentic\nkr/minimax-m2.5-thinking-agentic\nkr/minimax-m2.1\nkr/minimax-m2.1-thinking\nkr/minimax-m2.1-agentic\nkr/minimax-m2.1-thinking-agentic\nkr/glm-5\nkr/glm-5-thinking\nkr/glm-5-agentic\nkr/glm-5-thinking-agentic\nkr/qwen3-coder-next\nkr/qwen3-coder-next-thinking\nkr/qwen3-coder-next-agentic\nkr/qwen3-coder-next-thinking-agentic\nxmtp/mimo-v2.5-pro\nxmtp/mimo-v2.5\nxmtp/mimo-v2-pro\nxmtp/mimo-v2-omni\nxmtp/mimo-v2-tts\nxmtp/mimo-v2.5-tts\nxmtp/mimo-v2.5-tts-voiceclone\nxmtp/mimo-v2.5-tts-voicedesign\ncx/gpt-5.5-review\ncx/gpt-5.4\ncx/gpt-5.4-review\ncx/gpt-5.3-codex\ncx/gpt-5.3-codex-review\ncx/gpt-5.3-codex-xhigh\ncx/gpt-5.3-codex-xhigh-review\ncx/gpt-5.3-codex-high\ncx/gpt-5.3-codex-high-review\ncx/gpt-5.3-codex-low\ncx/gpt-5.3-codex-low-review\ncx/gpt-5.3-codex-none\ncx/gpt-5.3-codex-none-review\ncx/gpt-5.3-codex-spark\ncx/gpt-5.3-codex-spark-review\ncx/gpt-5.1-codex-mini\ncx/gpt-5.1-codex-mini-review\ncx/gpt-5.1-codex-mini-high\ncx/gpt-5.1-codex-mini-high-review\ncx/gpt-5.2-codex\ncx/gpt-5.2-codex-review\ncx/gpt-5.2\ncx/gpt-5.2-review\ncx/gpt-5.1-codex-max\ncx/gpt-5.1-codex-max-review\ncx/gpt-5.1-codex\ncx/gpt-5.1-codex-review\ncx/gpt-5.1\ncx/gpt-5.1-review\ncx/gpt-5-codex\ncx/gpt-5-codex-review\ncx/gpt-5-codex-mini\ncx/gpt-5-codex-mini-review\ncx/gpt-5.5-xhigh\ncx/gpt-5.5-high\ncx/gpt-5.5-medium",
+      "defaultModel": "GPT-5.5",
+      "createdAt": "2026-05-02T14:17:10.330Z",
+      "updatedAt": "2026-05-16T17:03:00.387Z"
+    }
+  ],
+  "aiActiveProviderId": "4a88369c-03ff-43fc-9f48-98d4d7e6fe40"
+}
