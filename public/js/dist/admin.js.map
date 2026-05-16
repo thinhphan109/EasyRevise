@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../pages/admin/index.js"],
+  "sourcesContent": ["// Stub entry for admin \u2014 replace with real entry point\nexport default {};\n"],
+  "mappings": ";AACA,IAAO,gBAAQ,CAAC;",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../pages/exam/index.js"],
+  "sourcesContent": ["// Stub entry for exam \u2014 replace with real entry point\nexport default {};\n"],
+  "mappings": ";AACA,IAAO,eAAQ,CAAC;",
+  "names": []
+}
