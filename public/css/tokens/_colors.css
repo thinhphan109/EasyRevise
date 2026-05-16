@@ -49,6 +49,27 @@
     --subject-literature: #ff3b30;
     --subject-it:         #5ac8fa;
     --subject-ielts:      #5856d6;
+
+    /* ── Legacy compat (admin/old CSS) ────────────────────── */
+    --color-bg:              var(--bg);
+    --color-surface:         var(--surface);
+    --color-surface-hover:   var(--surface-2);
+    --color-input-bg:        var(--surface);
+    --color-hover:           var(--surface-2);
+    --color-border:          var(--border);
+    --color-border-hover:    var(--border-strong);
+    --color-text:            var(--text);
+    --color-text-secondary:  var(--text-2);
+    --color-text-muted:      var(--text-3);
+    --color-primary:         var(--accent);
+    --color-primary-light:   var(--accent-hover);
+    --color-accent:          var(--accent);
+    --color-success:         var(--success);
+    --color-success-bg:      var(--success-soft);
+    --color-error:           var(--error);
+    --color-error-bg:        var(--error-soft);
+    --color-warning:         var(--warning);
+    --color-warning-bg:      var(--warning-soft);
 }
 
 /* ============================================================

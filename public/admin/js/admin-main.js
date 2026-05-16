@@ -116,6 +116,9 @@ const TAB_TITLES = {
 function switchTab(tab) {
     const tabs = ['dashboard', 'exams', 'users', 'subjects', 'codeLogs', 'submissions', 'questionBank', 'settings', 'help', 'media', 'activation', 'aiGen'];
 
+    // Track active tab on body so tab-scoped UI (e.g. submission floating bar) can hide automatically
+    document.body.dataset.activeTab = tab;
+
     // Update sidebar active item
     document.querySelectorAll('.sidebar-item').forEach(el => {
         el.classList.toggle('active', el.dataset.tab === tab);
@@ -149,7 +152,11 @@ function switchTab(tab) {
             if (!el || !el.classList.contains('active')) { clearInterval(window._submissionsInterval); window._submissionsInterval = null; return; }
             try { const examId = document.getElementById('submissionsExamFilter')?.value || ''; const url = `/api/admin/submissions${examId ? '?examId=' + examId : ''}`; const data = await apiFetch(url); const hash = JSON.stringify(data).length + '_' + (data[0]?.userId || ''); if (hash !== window._submissionsLastHash) { window._submissionsLastHash = hash; renderSubmissions(data); } } catch (e) { /* silent */ }
         }, 15000);
-    } else { if (window._submissionsInterval) { clearInterval(window._submissionsInterval); window._submissionsInterval = null; } }
+    } else {
+        if (window._submissionsInterval) { clearInterval(window._submissionsInterval); window._submissionsInterval = null; }
+        // Hide floating bulk bar when leaving submissions tab
+        document.getElementById('submissionFloatingBar')?.classList.remove('is-visible');
+    }
     if (tab === 'questionBank') loadQuestionBank();
     if (tab === 'settings') loadSettings();
     if (tab === 'media') { loadMedia(); setupMediaDropZone(); }

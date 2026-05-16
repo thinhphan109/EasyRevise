@@ -124,17 +124,25 @@ function _mediaActionMenu(title, actions) {
         if (existing) existing.remove();
         const m = document.createElement('div');
         m.id = '_mediaActionMenu';
-        m.className = 'modal-overlay active';
+        m.className = 'modal-overlay action-menu-overlay active';
         m.style.cssText = 'display:flex;z-index:10004;';
-        m.innerHTML = `<div class="glass-panel modal-content" style="max-width:360px;padding:1.5rem;">
-            <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${title}</h3>
-            <div style="display:flex;flex-direction:column;gap:0.35rem;">
-                ${actions.map((a, i) => `<button class="btn btn-sm ${a.danger ? '' : 'btn-ghost'}" id="_maBtn${i}" style="text-align:left;justify-content:flex-start;padding:0.6rem 0.85rem;font-size:0.88rem;gap:0.6rem;display:flex;align-items:center;border-radius:10px;${a.danger ? 'background:#fef2f2;color:#dc2626;border:1px solid #fecaca;' : ''}">${a.icon || ''} ${a.label}</button>`).join('')}
-            </div>
-            <div style="margin-top:1rem;text-align:right;">
-                <button class="btn btn-sm btn-ghost" id="_maClose">Đóng</button>
-            </div>
-        </div>`;
+        m.innerHTML = `
+            <div class="action-menu-card">
+                <div class="action-menu-header">
+                    <h3 class="action-menu-title" title="${title}">${title}</h3>
+                </div>
+                <div class="action-menu-list">
+                    ${actions.map((a, i) => `
+                        <button class="action-menu-item ${a.danger ? 'is-danger' : ''}" id="_maBtn${i}">
+                            <span class="action-menu-icon">${a.icon || ''}</span>
+                            <span class="action-menu-label">${a.label}</span>
+                            <svg class="action-menu-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>`).join('')}
+                </div>
+                <div class="action-menu-footer">
+                    <button class="action-menu-close" id="_maClose">Đóng</button>
+                </div>
+            </div>`;
         document.body.appendChild(m);
         const close = (val) => { m.remove(); resolve(val); };
         m.querySelector('#_maClose').onclick = () => close(null);
@@ -142,6 +150,9 @@ function _mediaActionMenu(title, actions) {
         actions.forEach((a, i) => {
             m.querySelector(`#_maBtn${i}`).onclick = () => close(i);
         });
+        // Esc to close
+        const onKey = (e) => { if (e.key === 'Escape') { document.removeEventListener('keydown', onKey); close(null); } };
+        document.addEventListener('keydown', onKey);
     });
 }
 

@@ -18,14 +18,14 @@ async function showQREntryPopup(code, examId) {
     overlay.className = 'modal-overlay active';
     overlay.style.zIndex = '10000';
     overlay.innerHTML = `
-        <div class="modal-box" style="max-width:480px;border-radius:24px;overflow:hidden;">
-            <div style="background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:1.5rem 1.75rem;color:#fff;">
-                <div class="text-xs font-bold" style="text-transform:uppercase;letter-spacing:1px;opacity:0.8;margin-bottom:0.35rem;">📱 QR Kích Hoạt</div>
-                <div id="qrPopupTitle" style="font-size:1.4rem;font-weight:800;line-height:1.3;">Đang tải...</div>
-                <div id="qrPopupMeta" class="text-sm" style="opacity:0.85;margin-top:0.35rem;"></div>
-                <div style="margin-top:0.75rem;display:inline-block;background:rgba(255,255,255,0.2);border-radius:8px;padding:0.25rem 0.75rem;font-family:monospace;font-size:1rem;font-weight:900;letter-spacing:3px;">${code}</div>
+        <div class="modal-box qr-popup-card" style="max-width:480px;border-radius:24px;overflow:hidden;">
+            <div class="qr-popup-header">
+                <div class="qr-popup-eyebrow">✎ QR Kích Hoạt</div>
+                <div id="qrPopupTitle" class="qr-popup-title">Đang tải...</div>
+                <div id="qrPopupMeta" class="qr-popup-meta"></div>
+                <div class="qr-popup-code">${code}</div>
             </div>
-            <div id="qrPopupBody" style="padding:1.5rem 1.75rem;">
+            <div id="qrPopupBody" class="qr-popup-body">
                 <div class="text-center text-muted p-6">⏳ Đang tải thông tin...</div>
             </div>
         </div>`;
@@ -69,16 +69,21 @@ async function showQREntryPopup(code, examId) {
             <div class="text-xs font-bold text-muted mb-2" style="text-transform:uppercase;letter-spacing:0.5px;">📋 Lịch sử làm bài</div>
             ${data.history.slice(0, 3).map(h => {
             const score = h.score !== null && h.score !== undefined ? parseFloat(h.score) : null;
-            const scoreColor = score === null ? '#94a3b8' : score >= 8 ? '#16a34a' : score >= 5 ? '#d97706' : '#dc2626';
+            const scoreCls = score === null ? 'is-muted' : score >= 8 ? 'is-success' : score >= 5 ? 'is-warning' : 'is-error';
             const scoreTxt = score !== null ? score + '/10' : '—';
             const time = h.completedAt ? new Date(h.completedAt).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' }) : '';
             const mins = h.result ? Math.floor((h.result.timeSpent || 0) / 60) + ' phút' : '';
-            return `<div class="history-item" style="margin-bottom:0.35rem;padding:0.6rem 0.85rem;">
+            const isOwn = currentUser && (h.userId === currentUser.id || h.displayName === currentUser.displayName);
+            const delBtn = isOwn && h.completedAt ? `<button class="qr-history-delete" onclick="event.stopPropagation();window._qrDeleteHistory('${examId}','${encodeURIComponent(h.completedAt)}')" title="Xóa lịch sử này" aria-label="Xóa"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button>` : '';
+            return `<div class="history-item qr-history-item">
                     <div>
                         <div class="font-semibold text-sm">${h.displayName}</div>
                         <div class="text-xs text-muted">${time}${mins ? ' · ' + mins : ''}</div>
                     </div>
-                    <div style="font-weight:800;font-size:1.05rem;color:${scoreColor};">${scoreTxt}</div>
+                    <div class="qr-history-right">
+                        <span class="qr-history-score ${scoreCls}">${scoreTxt}</span>
+                        ${delBtn}
+                    </div>
                 </div>`;
         }).join('')}
             ${data.history.length > 3 ? `<div class="text-xs text-muted" style="text-align:right;">+${data.history.length - 3} lần nữa</div>` : ''}
@@ -87,9 +92,9 @@ async function showQREntryPopup(code, examId) {
 
     let inProgressHtml = '';
     if (hasInProgress) {
-        inProgressHtml = `<div class="mb-4" style="padding:0.75rem 1rem;background:var(--color-warning-bg);border-radius:12px;border:1px solid #fde68a;">
-            <div class="text-xs font-bold mb-1" style="text-transform:uppercase;letter-spacing:0.5px;color:#92400e;">⏳ Đang làm bài</div>
-            ${data.inProgress.slice(0, 2).map(u => `<div class="text-sm font-semibold" style="color:#78350f;">${u.displayName}</div>`).join('')}
+        inProgressHtml = `<div class="mb-4 qr-pill qr-pill-warning">
+            <div class="qr-pill-eyebrow">⏳ Đang làm bài</div>
+            ${data.inProgress.slice(0, 2).map(u => `<div class="text-sm font-semibold">${u.displayName}</div>`).join('')}
         </div>`;
     }
 
@@ -97,16 +102,16 @@ async function showQREntryPopup(code, examId) {
     let localProgressHtml = '';
     if (inProgress && alreadyUnlocked) {
         const pct = Math.round((inProgress.answeredCount / inProgress.totalQuestions) * 100);
-        localProgressHtml = `<div class="mb-4" style="padding:0.75rem 1rem;background:var(--color-info-bg);border-radius:12px;border:1px solid #bfdbfe;">
-            <div class="text-xs font-bold mb-1" style="text-transform:uppercase;color:#1e40af;">📌 Bài đang làm dở của bạn</div>
-            <div class="text-sm" style="color:#1e40af;">${inProgress.answeredCount}/${inProgress.totalQuestions} câu · ${pct}%</div>
+        localProgressHtml = `<div class="mb-4 qr-pill qr-pill-info">
+            <div class="qr-pill-eyebrow">📌 Bài đang làm dở của bạn</div>
+            <div class="text-sm">${inProgress.answeredCount}/${inProgress.totalQuestions} câu · ${pct}%</div>
         </div>`;
     }
 
     // CTA button
     let ctaBtn;
     if (data.isFull && !alreadyUnlocked) {
-        ctaBtn = `<button disabled class="btn btn-block" style="background:#e2e8f0;color:#94a3b8;cursor:not-allowed;">🚫 Mã đã hết lượt sử dụng</button>`;
+        ctaBtn = `<button disabled class="btn btn-block qr-cta-disabled">🚫 Mã đã hết lượt sử dụng</button>`;
     } else if (alreadyUnlocked && inProgress) {
         ctaBtn = `<button onclick="window._qrStartExam('${examId}')" class="btn btn-warning btn-block btn-lg">▶️ Tiếp tục làm bài</button>`;
     } else {
@@ -119,6 +124,40 @@ async function showQREntryPopup(code, examId) {
         ${localProgressHtml}${inProgressHtml}${historyHtml}${usageTag}${ctaBtn}
         <button onclick="document.getElementById('qrEntryPopup').remove()" class="btn btn-ghost btn-block mt-2 text-muted">Đóng</button>`;
 }
+
+/**
+ * Delete one history entry from current user — refresh popup after.
+ */
+window._qrDeleteHistory = async function (examId, completedAtEnc) {
+    const ok = await (window.confirmPopup ? window.confirmPopup({
+        title: 'Xóa lịch sử làm bài',
+        message: 'Bài này sẽ bị xóa khỏi lịch sử. Không thể hoàn tác.',
+        confirmText: 'Xóa',
+        cancelText: 'Hủy',
+        danger: true
+    }) : Promise.resolve(confirm('Xóa lịch sử làm bài này?')));
+    if (!ok) return;
+    const completedAt = decodeURIComponent(completedAtEnc);
+    const token = localStorage.getItem('easyrevise_token');
+    if (!token) return alert('Bạn cần đăng nhập');
+    try {
+        const res = await fetch(`/api/history/${encodeURIComponent(examId)}?completedAt=${encodeURIComponent(completedAt)}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const d = await res.json();
+        if (!res.ok) throw new Error(d.error || 'Lỗi xóa');
+        // Refresh popup
+        const overlay = document.getElementById('qrEntryPopup');
+        if (overlay) {
+            const code = overlay.querySelector('.qr-popup-code')?.textContent?.trim();
+            overlay.remove();
+            if (code) showQREntryPopup(code, examId);
+        }
+    } catch (err) {
+        (window.notify?.error || alert)('❌ ' + err.message);
+    }
+};
 
 /**
  * Start exam from QR popup — verify code then navigate
@@ -144,7 +183,7 @@ window._qrStartExam = async function (examId, code) {
         });
         const data = await res.json();
         if (data.error) {
-            alert('❌ ' + data.error);
+            (window.notify?.error || alert)('❌ ' + data.error);
             if (btn) { btn.textContent = '🚀 Bắt đầu làm bài'; btn.disabled = false; }
             return;
         }
@@ -154,7 +193,7 @@ window._qrStartExam = async function (examId, code) {
         document.getElementById('qrEntryPopup')?.remove();
         window.location.href = `exam.html?id=${examId}`;
     } catch (err) {
-        alert('❌ Lỗi kết nối: ' + err.message);
+        (window.notify?.error || alert)('❌ Lỗi kết nối: ' + err.message);
         if (btn) { btn.textContent = '🚀 Bắt đầu làm bài'; btn.disabled = false; }
     }
 };

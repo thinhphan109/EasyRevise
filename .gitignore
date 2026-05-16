@@ -1,38 +1,69 @@
+# Dependencies
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment & secrets
 .env
+.env.local
+.env.*.local
+*.pem
+*.key
+service-account.json
+service-account*.json
+*-credentials.json
+*-firebase-adminsdk*.json
+
+# Logs
+logs/
 *.log
+
+# Editor / OS
+.vscode/
+.idea/
 .DS_Store
 Thumbs.db
-.agents/
+*.swp
 
-# Data — chứa dữ liệu học sinh, không commit
+# Build / temp
+dist/
+build/
+.cache/
+.tmp/
+*.tmp
+
+# Project-specific scratch
+.git-commit-msg.tmp
+_visual_captures/
+LogoTemp/
+
+# Test/dev capture & verify scripts (kept locally)
+scripts/audit-*.mjs
+scripts/capture-*.mjs
+scripts/debug-*.mjs
+scripts/diag-*.mjs
+scripts/inspect-*.mjs
+scripts/test-*.mjs
+scripts/verify-*.mjs
+
+# Antigravity / agent artifacts
+.agents/
+.gemini/
+
+# Runtime data (DB, JSON stores, AI cache, backups)
+data/*.db
+data/*.db-journal
 data/exams.json
-data/users.json
-data/easyrevise.db
-data/easyrevise.db.tmp.*
-data/subjects.json
-data/settings.json
 data/questions.json
+data/users.json
+data/settings.json
 data/ai-gen-cache.json
 data/backups/
 
-# Uploads — file media học sinh
-public/uploads/
+# Uploaded user content (keep folder, ignore contents)
+public/uploads/*
+!public/uploads/.gitkeep
 
-# Service account key — tuyệt đối không commit
-service-account.json
-*.key.json
-
-# Archive — legacy files
+# Local archive
 _archive/
-*.bak
-
-# Temp/test
-_test_env.js
-*.zip
-
-service-account.json
-
-
-# Frontend bundles (generated)
-public/js/dist/

@@ -5,6 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard — EasyRevise</title>
+
+    <!-- Brand assets -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/logo/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/logo/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#5b8def">
     <meta name="description" content="Thống kê học tập cá nhân, lịch sử làm bài và phân tích theo môn học.">
 
     <!-- Theme: apply before render to prevent flash -->
@@ -16,7 +23,8 @@
     <link rel="stylesheet" href="css/main.css">
 </head>
 
-<body class="dashboard-page">
+<body class="dashboard-page has-ambient-orbs">
+    <div class="ambient-orb-3" aria-hidden="true"></div>
     <!-- Sticky glass topbar -->
     <header class="dash-topbar">
         <div class="dash-container dash-topbar-inner">
@@ -86,9 +94,19 @@
                 <h2 class="dash-section-title">
                     <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     Lịch sử gần đây
+                    <span id="historyCount" class="home-section-count" style="margin-left:auto;"></span>
                 </h2>
-                <div id="historyList" class="history-list">
-                    <!-- Rendered by JS -->
+                <div id="historyReveal" class="home-list-reveal" data-limit="4">
+                    <div id="historyList" class="history-list">
+                        <!-- Rendered by JS -->
+                    </div>
+                </div>
+                <div id="historyFooter" class="home-list-footer" hidden>
+                    <button type="button" class="home-list-toggle" data-target="historyReveal" data-unit="bài" aria-expanded="false">
+                        <span class="home-list-toggle-label">Xem tất cả</span>
+                        <span class="home-list-toggle-count" id="historyToggleCount"></span>
+                        <svg class="home-list-toggle-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
                 </div>
             </section>
 
@@ -114,8 +132,12 @@
     <script src="/js/core/auth.js"></script>
     <script src="/js/components/theme.js"></script>
     <script src="/js/components/toast.js"></script>
+    <script src="/js/components/confirm-popup.js"></script>
+    <script src="/js/components/notify-popup.js"></script>
+    <script src="/js/components/native-select-enhancer.js"></script>
 
     <!-- JS: Dashboard -->
+    <script src="/js/pages/home/list-helpers.js"></script>
     <script src="/js/pages/dashboard/index.js"></script>
 </body>
 

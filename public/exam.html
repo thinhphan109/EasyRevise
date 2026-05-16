@@ -5,6 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đang Làm Bài — EasyRevise</title>
+
+    <!-- Brand assets -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/logo/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/logo/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#5b8def">
     <meta name="description" content="Làm bài thi với giao diện trực quan, đếm ngược và lưu tự động.">
 
     <!-- Theme: apply before render to prevent flash -->
@@ -21,7 +28,8 @@
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 </head>
 
-<body class="exam-page">
+<body class="exam-page has-ambient-orbs">
+    <div class="ambient-orb-3" aria-hidden="true"></div>
     <!-- Sticky glass topbar -->
     <header class="exam-topbar">
         <div class="exam-container exam-topbar-inner">
@@ -121,6 +129,9 @@
         document.addEventListener('dragstart', e => { if (e.target.tagName === 'IMG') e.preventDefault(); });
     </script>
     <script src="js/components/swipe.js"></script>
+    <script src="js/components/confirm-popup.js"></script>
+    <script src="js/components/notify-popup.js"></script>
+    <script src="js/components/native-select-enhancer.js"></script>
     <script src="js/app.js"></script>
 </body>
 

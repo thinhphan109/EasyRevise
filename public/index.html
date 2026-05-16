@@ -8,6 +8,18 @@
     <meta name="description"
         content="Hệ thống ôn tập hiệu quả với đề cương chi tiết, chấm điểm tự động và lời giải mở rộng.">
 
+    <!-- Brand assets -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/logo/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/logo/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#5b8def">
+    <meta property="og:title" content="EasyRevise — Ôn Tập Đề Cương">
+    <meta property="og:description" content="Hệ thống ôn tập hiệu quả với đề cương chi tiết, chấm điểm tự động và lời giải mở rộng.">
+    <meta property="og:image" content="/assets/logo/og-cover.png">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+
     <!-- Theme: apply before render to prevent flash -->
     <script>
         (function () { var t = localStorage.getItem('easyrevise_theme') || (window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light'); document.documentElement.setAttribute('data-theme', t); })();
@@ -24,12 +36,12 @@
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 </head>
 
-<body class="home-page">
+<body class="home-page has-ambient-orbs">
     <!-- Sticky glass header -->
     <header class="home-header">
         <div class="home-container home-header-inner">
             <a href="/" class="home-brand">
-                <span class="home-brand-mark" aria-hidden="true">E</span>
+                <img class="home-brand-mark" src="/assets/logo/mark-64.png" alt="EasyRevise" width="32" height="32" loading="eager" decoding="async">
                 <span>EasyRevise</span>
             </a>
             <div class="home-header-actions">
@@ -47,7 +59,7 @@
         </div>
     </header>
 
-    <div class="home-orb-3" aria-hidden="true"></div>
+    <div class="home-orb-3 ambient-orb-3" aria-hidden="true"></div>
 
     <main class="home-container">
         <!-- Compact hero + command bar -->
@@ -289,6 +301,9 @@
     <!-- JS: Components -->
     <script src="/js/components/theme.js"></script>
     <script src="/js/components/toast.js"></script>
+    <script src="/js/components/confirm-popup.js"></script>
+    <script src="/js/components/notify-popup.js"></script>
+    <script src="/js/components/native-select-enhancer.js"></script>
 
     <!-- JS: Home page modules -->
     <script src="/js/pages/home/list-helpers.js"></script>

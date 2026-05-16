@@ -281,7 +281,7 @@ export async function uploadFreeFormFile(questionId, file, ctx) {
         if (ctx.handlers.saveProgress) ctx.handlers.saveProgress();
         renderFreeFormUpload(questionId, current.attachments, ctx);
     } catch (err) {
-        alert('❌ ' + err.message);
+        (window.notify?.error || alert)('❌ ' + err.message);
         if (zone && zone.dataset.prevHtml) zone.innerHTML = zone.dataset.prevHtml;
     }
 }

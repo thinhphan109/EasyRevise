@@ -137,9 +137,16 @@ function showProviderModal(provider = null) {
     document.getElementById('providerModalTitle').textContent = provider ? '✏️ Chỉnh sửa Provider' : '+ Thêm Provider';
     document.getElementById('pmName').value = provider?.name || '';
     document.getElementById('pmBaseUrl').value = provider?.baseUrl || '';
-    document.getElementById('pmApiKey').value = '';  // never pre-fill masked key
+    document.getElementById('pmApiKey').value = '';
     document.getElementById('pmApiKey').placeholder = provider ? '(giữ nguyên nếu không đổi)' : 'sk-...';
-    document.getElementById('pmSdkType').value = provider?.sdkType || 'openai';
+    // Sync themed dropdown (falls back to direct value if helper missing)
+    const sdkType = provider?.sdkType || 'openai';
+    if (typeof window._themeDropdownSetValue === 'function') {
+        window._themeDropdownSetValue('pmSdkDropdown', sdkType);
+    } else {
+        const sink = document.getElementById('pmSdkType');
+        if (sink) sink.value = sdkType;
+    }
     document.getElementById('pmModels').value = provider?.models || '';
     document.getElementById('pmDefaultModel').value = provider?.defaultModel || '';
     document.getElementById('pmTestResult').style.display = 'none';
@@ -191,7 +198,14 @@ async function saveProviderModal() {
 }
 
 async function deleteProvider(id, name) {
-    if (!confirm(`Xoá provider "${name}"? Hành động này không thể hoàn tác.`)) return;
+    const ok = await (window.confirmPopup ? window.confirmPopup({
+        title: 'Xoá Provider?',
+        message: `Provider "${name}" sẽ bị xoá khỏi danh sách. Hành động không thể hoàn tác.`,
+        confirmText: 'Xoá',
+        cancelText: 'Huỷ',
+        danger: true
+    }) : Promise.resolve(confirm(`Xoá provider "${name}"?`)));
+    if (!ok) return;
     try {
         await api(`/api/ai-providers/${id}`, 'DELETE', {});
         showToast(`Đã xoá provider: ${name}`, 'success');

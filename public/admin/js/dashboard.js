@@ -15,7 +15,7 @@
             const [exams, subs, users, codes] = await Promise.all([
                 api('/api/exams').catch(() => []),
                 api('/api/admin/submissions').catch(() => []),
-                api('/api/admin/users').catch(() => []),
+                api('/api/users').catch(() => []),
                 api('/api/admin/activation').catch(() => [])
             ]);
 

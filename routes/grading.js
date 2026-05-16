@@ -147,6 +147,65 @@ router.post('/submissions/review', adminOnly, (req, res) => {
     res.json({ success: true, grade });
 });
 
+// DELETE /api/admin/submissions — admin remove a submission (cascade clears user history too)
+// Body: { examId, userId, completedAt, code? } — code optional (open vs code-locked)
+router.delete('/submissions', adminOnly, (req, res) => {
+    const { examId, userId, completedAt, code } = req.body || {};
+    if (!examId || !userId || !completedAt) {
+        return res.status(400).json({ error: 'Thiếu examId / userId / completedAt' });
+    }
+    const data = readData();
+    const exam = data.exams.find(e => e.id === examId);
+    if (!exam) return res.status(404).json({ error: 'Exam not found' });
+
+    let removed = 0;
+    // Remove from accessCodes[].usedBy if code submitted
+    if (code) {
+        const codeObj = (exam.accessCodes || []).find(c => String(c.code).toUpperCase() === String(code).toUpperCase());
+        if (codeObj && Array.isArray(codeObj.usedBy)) {
+            const before = codeObj.usedBy.length;
+            codeObj.usedBy = codeObj.usedBy.filter(u => !(u.userId === userId && u.completedAt === completedAt));
+            removed += before - codeObj.usedBy.length;
+        }
+    } else if (Array.isArray(exam.openSubmissions)) {
+        const before = exam.openSubmissions.length;
+        exam.openSubmissions = exam.openSubmissions.filter(u => !(u.userId === userId && u.completedAt === completedAt));
+        removed += before - exam.openSubmissions.length;
+    }
+
+    if (removed === 0) {
+        // Try fallback in either store (caller may have wrong source)
+        for (const c of (exam.accessCodes || [])) {
+            if (!Array.isArray(c.usedBy)) continue;
+            const before = c.usedBy.length;
+            c.usedBy = c.usedBy.filter(u => !(u.userId === userId && u.completedAt === completedAt));
+            removed += before - c.usedBy.length;
+        }
+        if (Array.isArray(exam.openSubmissions)) {
+            const before = exam.openSubmissions.length;
+            exam.openSubmissions = exam.openSubmissions.filter(u => !(u.userId === userId && u.completedAt === completedAt));
+            removed += before - exam.openSubmissions.length;
+        }
+    }
+
+    if (removed === 0) return res.status(404).json({ error: 'Không tìm thấy bài nộp' });
+    writeData(data);
+
+    // Cascade: remove from target user's personal history
+    const { readUsers, writeUsers } = require('../lib/data');
+    const usersData = readUsers();
+    const targetUser = usersData.users.find(u => u.id === userId);
+    let userHistRemoved = 0;
+    if (targetUser && Array.isArray(targetUser.history)) {
+        const before = targetUser.history.length;
+        targetUser.history = targetUser.history.filter(h => !(String(h.examId) === String(examId) && h.completedAt === completedAt));
+        userHistRemoved = before - targetUser.history.length;
+        if (userHistRemoved > 0) writeUsers(usersData);
+    }
+
+    res.json({ success: true, removed, userHistoryRemoved: userHistRemoved });
+});
+
 // POST /api/admin/ai-grade-essay
 router.post('/ai-grade-essay', adminOnly, async (req, res) => {
     try {

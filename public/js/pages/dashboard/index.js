@@ -203,25 +203,75 @@ function renderHistory(history) {
     const section = document.getElementById('historySection');
     section.hidden = false;
 
+    // Count badge + reveal toggle (mirror home page behaviour)
+    if (typeof updateSectionCount === 'function') {
+        updateSectionCount('historyCount', history.length, 'bài');
+    }
+
     const list = document.getElementById('historyList');
-    list.innerHTML = history.map(h => {
+    list.innerHTML = history.map((h, idx) => {
         const score = parseFloat(h.score) || 0;
         const scoreClass = score >= 8 ? 'high' : (score >= 5 ? 'mid' : 'low');
         const timeAgo = formatTimeAgo(h.completedAt);
         const timeStr = formatDuration(h.timeSpent);
+        const completedAtAttr = h.completedAt ? encodeURIComponent(h.completedAt) : '';
 
         return `
-            <a class="history-item" href="result.html?examId=${h.examId}">
-                <div class="history-item-info">
-                    <div class="history-item-title">${escapeHtml(h.examTitle)}</div>
-                    <div class="history-item-meta">
-                        ${h.subject ? escapeHtml(h.subject) + ' · ' : ''}${h.correct}/${h.total} câu đúng · ${timeStr}
+            <div class="history-item history-item--row" data-idx="${idx}">
+                <a class="history-item-link" href="result.html?examId=${h.examId}">
+                    <div class="history-item-info">
+                        <div class="history-item-title">${escapeHtml(h.examTitle)}</div>
+                        <div class="history-item-meta">
+                            ${h.subject ? escapeHtml(h.subject) + ' · ' : ''}${h.correct}/${h.total} câu đúng · ${timeStr}
+                        </div>
                     </div>
-                </div>
-                <div class="history-score history-score--${scoreClass}">${score.toFixed(1)}/10</div>
-                <div class="history-time">${timeAgo}</div>
-            </a>`;
+                    <div class="history-score history-score--${scoreClass}">${score.toFixed(1)}/10</div>
+                    <div class="history-time">${timeAgo}</div>
+                </a>
+                <button class="history-item-delete" data-examid="${escapeHtml(h.examId)}" data-completedat="${completedAtAttr}" title="Xóa lịch sử" aria-label="Xóa lịch sử này">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+                </button>
+            </div>`;
     }).join('');
+
+    // Wire delete handlers
+    list.querySelectorAll('.history-item-delete').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const ok = await (window.confirmPopup ? window.confirmPopup({
+                title: 'Xóa lịch sử làm bài',
+                message: 'Bài này sẽ bị xóa khỏi danh sách lịch sử của bạn. Hành động không thể hoàn tác.',
+                confirmText: 'Xóa',
+                cancelText: 'Hủy',
+                danger: true
+            }) : Promise.resolve(confirm('Xóa lịch sử làm bài này?')));
+            if (!ok) return;
+            const examId = btn.dataset.examid;
+            const completedAt = decodeURIComponent(btn.dataset.completedat || '');
+            const token = localStorage.getItem('easyrevise_token');
+            if (!token) return alert('Bạn cần đăng nhập');
+            try {
+                const url = `/api/history/${encodeURIComponent(examId)}${completedAt ? '?completedAt=' + encodeURIComponent(completedAt) : ''}`;
+                const res = await fetch(url, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
+                const d = await res.json();
+                if (!res.ok) throw new Error(d.error || 'Lỗi xóa');
+                btn.closest('.history-item').remove();
+                if (!list.children.length) section.hidden = true;
+                // Refresh overflow toggle visibility
+                if (typeof checkListOverflow === 'function') {
+                    checkListOverflow('historyReveal', 'historyFooter', 'historyToggleCount', list.children.length);
+                }
+            } catch (err) {
+                alert('❌ ' + err.message);
+            }
+        });
+    });
+
+    // Show "Xem tất cả" if more than data-limit (4) entries
+    if (typeof checkListOverflow === 'function') {
+        checkListOverflow('historyReveal', 'historyFooter', 'historyToggleCount', history.length);
+    }
 }
 
 /**

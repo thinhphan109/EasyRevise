@@ -468,12 +468,12 @@
 .ldot-answered { background: var(--success); }
 .ldot-flagged { background: var(--warning); }
 
-.sidebar-nav {
+.exam-sidebar .sidebar-nav {
     display: flex;
     gap: 6px;
     margin-top: var(--space-3);
 }
-.sidebar-nav .btn { flex: 1; }
+.exam-sidebar .sidebar-nav .btn { flex: 1; }
 
 /* ── Mobile drawer ─────────────────────────────────── */
 .mobile-drawer {

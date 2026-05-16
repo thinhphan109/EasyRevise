@@ -1,6 +1,12 @@
 // ========================
-// submissions.js — Submissions list, CSV export, AI grade, review
+// submissions.js — Submissions list, CSV export, AI grade, review, bulk select
 // ========================
+
+// Bulk-select state — keys are `${examId}::${userId}::${completedAt}`
+const _bulkSelected = new Set();
+let _lastSubmissions = [];
+function _bulkKey(s) { return `${s.examId}::${s.userId}::${s.completedAt || ''}`; }
+function _bulkClear() { _bulkSelected.clear(); _bulkRenderToolbar(); }
 
 async function loadSubmissions() {
     const examId = document.getElementById('submissionsExamFilter')?.value || '';
@@ -22,22 +28,30 @@ async function loadSubmissions() {
 
     const url = examId ? `/api/admin/submissions?examId=${examId}` : '/api/admin/submissions';
     const submissions = await api(url);
+    _lastSubmissions = submissions || [];
     const countEl = document.getElementById('submissionsCount');
     if (!submissions || !submissions.length) {
         c.innerHTML = renderEmptyState('inbox', 'Chưa có bài nộp tự luận', 'Bài nộp sẽ xuất hiện khi học sinh hoàn thành');
         if (countEl) countEl.textContent = '0 bài nộp';
+        _bulkClear();
         return;
     }
     if (countEl) countEl.textContent = `${submissions.length} bài nộp`;
 
-    const csvBtn = document.createElement('div');
-    csvBtn.style.cssText = 'margin-bottom:1rem;';
-    csvBtn.innerHTML = `<button class="btn btn-sm btn-success" onclick="exportSubmissionsCSV('${examId}')" style="gap:0.4rem;">📥 Tải CSV bảng điểm</button>`;
-    c.innerHTML = '';
-    c.appendChild(csvBtn);
-    const submissionsDiv = document.createElement('div');
-    submissionsDiv.innerHTML = renderSubmissions(submissions);
-    c.appendChild(submissionsDiv);
+    // Drop stale selections that are no longer in the current dataset
+    const currentKeys = new Set(submissions.map(_bulkKey));
+    [..._bulkSelected].forEach(k => { if (!currentKeys.has(k)) _bulkSelected.delete(k); });
+
+    c.innerHTML = `
+        <div class="submission-bulk-toolbar" id="submissionBulkBar"></div>
+        <div class="submission-csv-bar">
+            <button class="btn btn-sm btn-success" onclick="exportSubmissionsCSV('${examId}')" style="gap:0.4rem;">📥 Tải CSV bảng điểm</button>
+            <button class="btn btn-sm btn-ghost" onclick="submissionBulkSelectAll()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>Chọn tất cả
+            </button>
+        </div>
+        <div id="submissionsList">${renderSubmissions(submissions)}</div>`;
+    _bulkRenderToolbar();
 }
 
 function exportSubmissionsCSV(examId) {
@@ -119,22 +133,245 @@ function renderSubmissions(submissions) {
         }).join('');
 
         const cardId = `subCard_${si}`;
-        return `<div class="submission-card" style="overflow:hidden;">
-            <div onclick="(function(h){const b=document.getElementById('${cardId}');const open=b.style.display!=='none';b.style.display=open?'none':'block';h.querySelector('.sub-chevron').textContent=open?'▶':'▼';})(this)"
-                 style="display:flex;align-items:flex-start;gap:0.75rem;cursor:pointer;user-select:none;">
-                <span class="sub-chevron" style="margin-top:0.2rem;font-size:0.72rem;color:var(--text-muted);flex-shrink:0;">▶</span>
-                <div style="flex:1;min-width:0;">
-                    <div class="submission-name"><span class="facehash-inline" data-name="${encodeURIComponent(sub.userId)}" data-size="24"></span> ${escapeHtml(sub.displayName || sub.userId)}</div>
-                    <div class="submission-meta">🎫 ${sub.code ? `Mã: <strong>${escapeHtml(sub.code)}</strong>` : '<span style="color:var(--success);">🔓 Đề mở (không cần mã)</span>'} &nbsp;|&nbsp; 📝 ${escapeHtml(sub.examTitle)}</div>
-                    <div class="submission-meta">⏰ Nộp: ${time} &nbsp;|&nbsp; 📊 MC: ${sub.mcScore !== null ? sub.mcScore + '/10' : '—'}</div>
+        const codeArg = sub.code ? `'${sub.code}'` : 'null';
+        const bulkKey = _bulkKey(sub);
+        const isChecked = _bulkSelected.has(bulkKey);
+        return `<div class="submission-card${isChecked ? ' is-bulk-selected' : ''}" data-bulk-key="${bulkKey}" style="overflow:hidden;">
+            <div class="submission-card-header">
+                <label class="submission-checkbox" onclick="event.stopPropagation()" title="Chọn bài nộp này">
+                    <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="submissionBulkToggle('${bulkKey}', this.checked)" aria-label="Chọn bài nộp">
+                    <span class="submission-checkbox-box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+                </label>
+                <div class="submission-card-clickable" onclick="(function(h){const b=document.getElementById('${cardId}');const open=b.style.display!=='none';b.style.display=open?'none':'block';h.querySelector('.sub-chevron').textContent=open?'▶':'▼';})(this.parentElement)">
+                    <span class="sub-chevron" style="margin-top:0.2rem;font-size:0.72rem;color:var(--text-muted);flex-shrink:0;">▶</span>
+                    <div style="flex:1;min-width:0;">
+                        <div class="submission-name"><span class="facehash-inline" data-name="${encodeURIComponent(sub.userId)}" data-size="24"></span> ${escapeHtml(sub.displayName || sub.userId)}</div>
+                        <div class="submission-meta">🎫 ${sub.code ? `Mã: <strong>${escapeHtml(sub.code)}</strong>` : '<span style="color:var(--success);">🔓 Đề mở (không cần mã)</span>'} &nbsp;|&nbsp; 📝 ${escapeHtml(sub.examTitle)}</div>
+                        <div class="submission-meta">⏰ Nộp: ${time} &nbsp;|&nbsp; 📊 MC: ${sub.mcScore !== null ? sub.mcScore + '/10' : '—'}</div>
+                    </div>
                 </div>
-                <span style="font-size:0.75rem;color:var(--text-muted);flex-shrink:0;margin-top:0.2rem;">${sub.essays.length} mục cần chấm</span>
+                <div class="submission-card-actions" onclick="event.stopPropagation()">
+                    <span class="submission-meta-count">${sub.essays.length} mục</span>
+                    <button class="btn-icon-danger" title="Xóa bài nộp (cả lịch sử user)" aria-label="Xóa bài nộp"
+                        onclick="deleteAdminSubmission('${sub.examId}', '${sub.userId}', '${sub.completedAt}', ${codeArg}, '${escapeHtml(sub.displayName || sub.userId)}')">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+                    </button>
+                </div>
             </div>
             <div id="${cardId}" style="display:none;border-top:1px solid var(--border);margin-top:0.75rem;padding-top:0.75rem;">
                 ${essayBlocks}
             </div>
         </div>`;
     }).join('');
+}
+
+// ============================================================
+// Bulk-select helpers
+// ============================================================
+window.submissionBulkToggle = function (key, checked) {
+    if (checked) _bulkSelected.add(key);
+    else _bulkSelected.delete(key);
+    document.querySelector(`.submission-card[data-bulk-key="${key}"]`)?.classList.toggle('is-bulk-selected', checked);
+    _bulkRenderToolbar();
+};
+
+window.submissionBulkSelectAll = function () {
+    const allKeys = _lastSubmissions.map(_bulkKey);
+    const allSelected = allKeys.every(k => _bulkSelected.has(k));
+    if (allSelected) _bulkSelected.clear();
+    else allKeys.forEach(k => _bulkSelected.add(k));
+    document.querySelectorAll('.submission-card').forEach(card => {
+        const k = card.getAttribute('data-bulk-key');
+        const isOn = _bulkSelected.has(k);
+        card.classList.toggle('is-bulk-selected', isOn);
+        const cb = card.querySelector('.submission-checkbox input');
+        if (cb) cb.checked = isOn;
+    });
+    _bulkRenderToolbar();
+};
+
+function _bulkRenderToolbar() {
+    const bar = document.getElementById('submissionBulkBar');
+    if (!bar) return;
+    const n = _bulkSelected.size;
+    if (n === 0) {
+        bar.classList.remove('is-active');
+        bar.innerHTML = '';
+        _bulkUpdateFloating(false);
+        return;
+    }
+    bar.classList.add('is-active');
+    bar.innerHTML = `
+        <div class="bulk-info">
+            <span class="bulk-count">${n}</span>
+            <span>bài nộp đã chọn</span>
+        </div>
+        <div class="bulk-actions">
+            <button class="btn btn-sm btn-info" onclick="submissionBulkAiGrade()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z"/></svg>AI chấm
+            </button>
+            <button class="btn btn-sm btn-danger" onclick="submissionBulkDelete()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>Xóa
+            </button>
+            <button class="btn btn-sm btn-ghost" onclick="submissionBulkClear()">Bỏ chọn</button>
+        </div>`;
+    _bulkUpdateFloating(true);
+}
+
+// ── Floating pinned bar — shows when sticky toolbar is off-screen ──
+function _bulkEnsureFloating() {
+    let bar = document.getElementById('submissionFloatingBar');
+    if (!bar) {
+        bar = document.createElement('div');
+        bar.id = 'submissionFloatingBar';
+        bar.className = 'submission-floating-bar';
+        bar.setAttribute('role', 'toolbar');
+        bar.setAttribute('aria-label', 'Thao tác nhanh trên bài nộp đã chọn');
+        document.body.appendChild(bar);
+    }
+    return bar;
+}
+
+function _bulkUpdateFloating(hasSelection) {
+    const fbar = _bulkEnsureFloating();
+    if (!hasSelection) {
+        fbar.classList.remove('is-visible');
+        return;
+    }
+    const n = _bulkSelected.size;
+    fbar.innerHTML = `
+        <span class="float-count">${n}</span>
+        <span class="float-label">đã chọn</span>
+        <button type="button" class="float-btn-ai" title="AI chấm các bài đã chọn" aria-label="AI chấm" onclick="submissionBulkAiGrade()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z"/></svg>
+        </button>
+        <button type="button" class="float-btn-delete" title="Xóa các bài đã chọn" aria-label="Xóa" onclick="submissionBulkDelete()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        </button>
+        <button type="button" class="float-btn-clear" title="Bỏ chọn" aria-label="Bỏ chọn" onclick="submissionBulkClear()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>`;
+    _bulkAttachStickyObserver(fbar);
+}
+
+let _bulkObserver = null;
+function _bulkAttachStickyObserver(fbar) {
+    const sticky = document.getElementById('submissionBulkBar');
+    if (!sticky || !('IntersectionObserver' in window)) {
+        // Fallback — always show when there's a selection
+        fbar.classList.add('is-visible');
+        return;
+    }
+    if (_bulkObserver) _bulkObserver.disconnect();
+    _bulkObserver = new IntersectionObserver(entries => {
+        const entry = entries[0];
+        // Show floating bar when sticky toolbar is no longer fully visible
+        const showFloat = !entry.isIntersecting;
+        fbar.classList.toggle('is-visible', showFloat && _bulkSelected.size > 0);
+    }, { threshold: [0, 1], rootMargin: '-12px 0px 0px 0px' });
+    _bulkObserver.observe(sticky);
+}
+
+window.submissionBulkClear = function () {
+    _bulkClear();
+    document.querySelectorAll('.submission-card.is-bulk-selected').forEach(c => c.classList.remove('is-bulk-selected'));
+    document.querySelectorAll('.submission-checkbox input:checked').forEach(cb => { cb.checked = false; });
+};
+
+window.submissionBulkDelete = async function () {
+    const items = _lastSubmissions.filter(s => _bulkSelected.has(_bulkKey(s)));
+    if (!items.length) return;
+    const confirmFn = window.confirmPopup || ((opts) => Promise.resolve(confirm(opts.title)));
+    const ok = await confirmFn({
+        title: `Xóa ${items.length} bài nộp?`,
+        message: `<strong>${items.length} bài nộp</strong> sẽ bị xóa khỏi danh sách admin và lịch sử học sinh. Không thể hoàn tác.`,
+        allowHtml: true,
+        confirmText: 'Xóa tất cả',
+        cancelText: 'Hủy',
+        danger: true
+    });
+    if (!ok) return;
+    let done = 0, fail = 0, removed = 0, hist = 0;
+    for (const s of items) {
+        try {
+            const r = await api('/api/admin/submissions', 'DELETE', { examId: s.examId, userId: s.userId, completedAt: s.completedAt, code: s.code || null });
+            removed += r.removed || 0;
+            hist += r.userHistoryRemoved || 0;
+            done++;
+        } catch (e) {
+            fail++;
+            console.warn('[bulk-delete]', e);
+        }
+    }
+    showToast(`Đã xóa ${done} bài (${removed} submissions, ${hist} lịch sử)${fail ? ` · ${fail} lỗi` : ''}`, fail ? 'warning' : 'success');
+    _bulkClear();
+    await loadSubmissions();
+    if (typeof loadAdminDashboard === 'function') loadAdminDashboard();
+};
+
+window.submissionBulkAiGrade = async function () {
+    const items = _lastSubmissions.filter(s => _bulkSelected.has(_bulkKey(s)));
+    if (!items.length) return;
+    const jobs = [];
+    for (const sub of items) {
+        for (const essay of (sub.essays || [])) {
+            if (essay.gradingType === 'fill-in-blank') continue;
+            jobs.push({ sub, essay });
+        }
+    }
+    if (!jobs.length) { showToast('Không có bài tự luận nào trong các bài nộp đã chọn', 'warning'); return; }
+    const confirmFn = window.confirmPopup || ((opts) => Promise.resolve(confirm(opts.title)));
+    const ok = await confirmFn({
+        title: `AI chấm ${jobs.length} bài?`,
+        message: `Sẽ chấm lần lượt <strong>${jobs.length}</strong> bài tự luận từ <strong>${items.length}</strong> bài nộp đã chọn. Có thể mất vài phút.`,
+        allowHtml: true,
+        confirmText: 'Bắt đầu',
+        cancelText: 'Hủy',
+        type: 'info'
+    });
+    if (!ok) return;
+    let done = 0, errors = 0;
+    const bar = document.getElementById('submissionBulkBar');
+    for (const { sub, essay } of jobs) {
+        done++;
+        if (bar) {
+            const cnt = bar.querySelector('.bulk-count');
+            if (cnt) cnt.textContent = `${done}/${jobs.length}`;
+        }
+        try {
+            await api('/api/admin/ai-grade-essay', 'POST', {
+                examId: sub.examId, code: sub.code, userId: sub.userId,
+                questionId: essay.questionId,
+                studentAnswer: essay.studentAnswer,
+                attachments: essay.attachments || [],
+                sampleAnswer: essay.sampleAnswer,
+                prompt: essay.prompt,
+                completedAt: sub.completedAt
+            });
+        } catch (e) { errors++; console.warn('[bulk-ai]', e); }
+    }
+    showToast(`AI chấm xong! ${done - errors}/${jobs.length} bài đã chấm${errors ? ` · ${errors} lỗi` : ''}`, errors ? 'warning' : 'success');
+    await loadSubmissions();
+};
+
+// Admin delete: cascade removes from exam.openSubmissions / accessCodes.usedBy AND user's history
+async function deleteAdminSubmission(examId, userId, completedAt, code, displayName) {
+    const ok = await customConfirm(
+        'Xóa bài nộp',
+        `Bạn sắp xóa bài nộp của <strong>${displayName}</strong>.<br><br>Hành động này sẽ:<br>• Xóa khỏi danh sách bài nộp (admin)<br>• Xóa khỏi lịch sử làm bài của học sinh<br><br><strong style="color:var(--error);">Không thể hoàn tác.</strong>`,
+        'Xóa vĩnh viễn'
+    );
+    if (!ok) return;
+    try {
+        const result = await api('/api/admin/submissions', 'DELETE', {
+            examId, userId, completedAt, code: code || null
+        });
+        showToast(`Đã xóa (${result.removed} bài nộp, ${result.userHistoryRemoved} lịch sử user)`, 'success');
+        await loadSubmissions();
+        if (typeof loadAdminDashboard === 'function') loadAdminDashboard();
+    } catch (err) {
+        showToast('Lỗi xóa: ' + (err.message || err), 'error');
+    }
 }
 
 async function aiGradeEssay(examId, code, userId, questionId, si, ei, completedAt = '') {

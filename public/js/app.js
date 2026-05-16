@@ -111,11 +111,30 @@ class ExamApp {
             if (this.isPreview) {
                 // Admin preview mode — fetch directly with admin token
                 const token = localStorage.getItem('easyrevise_token');
-                if (!token) { alert('Cần đăng nhập admin để xem thử!'); window.location.href = '/'; return; }
+                if (!token) {
+                    (window.notify?.error || alert)('Cần đăng nhập admin để xem thử!');
+                    window.location.href = '/admin/';
+                    return;
+                }
                 const res = await fetch(`/api/exams/${this.examId}/preview`, { headers: { 'Authorization': `Bearer ${token}` } });
-                if (!res.ok) throw new Error('Preview failed');
+                if (!res.ok) {
+                    let detail = `HTTP ${res.status}`;
+                    try { const err = await res.json(); if (err?.error) detail = err.error; } catch (_) {}
+                    if (res.status === 401 || res.status === 403) {
+                        (window.notify?.error || alert)(`Phiên admin hết hạn hoặc không đủ quyền (${detail}). Vui lòng đăng nhập lại.`);
+                        window.location.href = '/admin/';
+                        return;
+                    }
+                    if (res.status === 404) {
+                        (window.notify?.error || alert)(`Không tìm thấy đề thi (id: ${this.examId}). Có thể đã bị xóa hoặc đường dẫn sai.`);
+                        window.location.href = '/admin/';
+                        return;
+                    }
+                    throw new Error(detail);
+                }
                 const data = await res.json();
                 this.examData = data.exam;
+                if (!this.examData) throw new Error('Dữ liệu đề trống');
             } else {
                 const headers = {};
                 const unlocked = JSON.parse(localStorage.getItem('easyrevise_unlocked') || '{}');
@@ -127,8 +146,9 @@ class ExamApp {
                 this.examData = await res.json();
             }
         } catch (err) {
-            alert('Không tìm thấy đề thi!');
-            window.location.href = '/';
+            console.error('[exam-init]', err);
+            (window.notify?.error || alert)(`Không tải được đề thi: ${err.message || err}`);
+            window.location.href = this.isPreview ? '/admin/' : '/';
             return;
         }
 
@@ -1373,40 +1393,37 @@ class ExamApp {
     _showSubmitConfirmModal(unanswered, unansweredIndices = []) {
         return new Promise(resolve => {
             const overlay = document.createElement('div');
-            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(5px);z-index:99999;display:flex;align-items:center;justify-content:center;padding:1rem;animation:erFadeIn 0.18s ease;';
+            overlay.className = 'submit-confirm-overlay';
 
             const MAX_SHOW = 12;
             const shownIndices = unansweredIndices.slice(0, MAX_SHOW);
             const moreCount = unansweredIndices.length - MAX_SHOW;
             const pillsHtml = shownIndices.map(n =>
-                `<span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:#fef2f2;border:1.5px solid #fecaca;color:#dc2626;font-size:0.78rem;font-weight:700;">${n}</span>`
-            ).join('') + (moreCount > 0 ? `<span style="display:inline-flex;align-items:center;padding:0 0.6rem;height:32px;border-radius:16px;background:#f1f5f9;color:#64748b;font-size:0.75rem;font-weight:600;">+${moreCount}</span>` : '');
+                `<span class="submit-pill">${n}</span>`
+            ).join('') + (moreCount > 0 ? `<span class="submit-pill submit-pill-more">+${moreCount}</span>` : '');
 
             overlay.innerHTML = `
-                <div style="background:var(--bg-card,#fff);border-radius:22px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.2);overflow:hidden;animation:erSlideUp 0.22s ease;">
-                    <div style="padding:1.5rem 1.75rem 1.25rem;border-bottom:1px solid #f1f5f9;">
-                        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
-                            <div style="width:42px;height:42px;border-radius:12px;background:#fef2f2;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;">⚠️</div>
-                            <div>
-                                <div style="font-weight:800;font-size:1.05rem;color:#1e293b;">Còn ${unanswered} câu chưa trả lời</div>
-                                <div style="font-size:0.82rem;color:#94a3b8;margin-top:0.15rem;">Bạn có chắc muốn nộp bài ngay?</div>
+                <div class="submit-confirm-card">
+                    <div class="submit-confirm-body">
+                        <div class="submit-confirm-head">
+                            <div class="submit-confirm-icon">
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="0.8" fill="currentColor"/></svg>
+                            </div>
+                            <div class="submit-confirm-text">
+                                <div class="submit-confirm-title">Còn ${unanswered} câu chưa trả lời</div>
+                                <div class="submit-confirm-subtitle">Bạn có chắc muốn nộp bài ngay?</div>
                             </div>
                         </div>
-                        ${pillsHtml ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:0.5rem;">${pillsHtml}</div>` : ''}
+                        ${pillsHtml ? `<div class="submit-pills">${pillsHtml}</div>` : ''}
                     </div>
-                    <div style="padding:1.25rem 1.75rem;display:flex;gap:0.75rem;">
-                        <button type="button" id="_submitCancel" style="flex:1;padding:0.75rem;border-radius:12px;border:1.5px solid #e2e8f0;background:#f8fafc;color:#475569;font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f8fafc'">Làm tiếp</button>
-                        <button type="button" id="_submitConfirm" style="flex:1;padding:0.75rem;border-radius:12px;border:none;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-size:0.9rem;font-weight:700;cursor:pointer;transition:opacity 0.15s;" onmouseover="this.style.opacity='0.88'" onmouseout="this.style.opacity='1'">Nộp bài</button>
+                    <div class="submit-confirm-actions">
+                        <button type="button" id="_submitCancel" class="submit-btn submit-btn-cancel">Làm tiếp</button>
+                        <button type="button" id="_submitConfirm" class="submit-btn submit-btn-confirm">Nộp bài</button>
                     </div>
                 </div>`;
 
-            if (!document.getElementById('_erModalStyles')) {
-                const s = document.createElement('style');
-                s.id = '_erModalStyles';
-                s.textContent = `@keyframes erFadeIn{from{opacity:0}to{opacity:1}} @keyframes erSlideUp{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}`;
-                document.head.appendChild(s);
-            }
             document.body.appendChild(overlay);
+            requestAnimationFrame(() => overlay.classList.add('is-open'));
 
             let settled = false;
             const done = (value) => {

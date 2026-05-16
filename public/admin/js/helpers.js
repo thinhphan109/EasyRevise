@@ -139,53 +139,64 @@ function openModal(id) {
     }
 }
 
-// Custom Confirm Modal (replaces browser confirm())
+// Custom Confirm Modal — delegates to global confirmPopup() for unified premium UI.
+// Falls back to native confirm() only if the script hasn't loaded yet.
 function customConfirm(title, message, confirmText = 'Xác nhận', danger = false) {
-    return new Promise(resolve => {
-        document.getElementById('customConfirmModal')?.remove();
-        const m = document.createElement('div');
-        m.id = 'customConfirmModal';
-        m.className = 'modal-overlay active';
-        m.style.cssText = 'display:flex;z-index:10001;';
-        m.innerHTML = `<div class="glass-panel modal-content" style="max-width:400px;text-align:center;">
-            <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:0.75rem;">${title}</h3>
-            <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.5;margin-bottom:1.25rem;">${message}</p>
-            <div style="display:flex;gap:0.75rem;justify-content:center;">
-                <button class="btn btn-sm btn-ghost" id="ccmCancel" style="min-width:80px;">Hủy</button>
-                <button class="btn btn-sm ${danger ? 'btn-danger' : 'btn-primary'}" id="ccmConfirm" style="min-width:80px;">${confirmText}</button>
-            </div>
-        </div>`;
-        document.body.appendChild(m);
-        m.querySelector('#ccmCancel').onclick = () => { m.remove(); resolve(false); };
-        m.querySelector('#ccmConfirm').onclick = () => { m.remove(); resolve(true); };
-        m.addEventListener('click', e => { if (e.target === m) { m.remove(); resolve(false); } });
-    });
+    if (typeof window.confirmPopup === 'function') {
+        return window.confirmPopup({
+            title,
+            message,
+            allowHtml: true,
+            confirmText,
+            cancelText: 'Hủy',
+            danger
+        });
+    }
+    return Promise.resolve(window.confirm(`${title}\n\n${String(message).replace(/<[^>]*>/g, '')}`));
 }
 
-// Custom Prompt Modal (replaces browser prompt())
+// Custom Prompt Modal — premium themed input popup using confirm-popup classes
 function customPrompt(title, message, defaultValue = '') {
     return new Promise(resolve => {
         document.getElementById('customPromptModal')?.remove();
-        const m = document.createElement('div');
-        m.id = 'customPromptModal';
-        m.className = 'modal-overlay active';
-        m.style.cssText = 'display:flex;z-index:10001;';
-        m.innerHTML = `<div class="glass-panel modal-content" style="max-width:420px;text-align:center;">
-            <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:0.75rem;">${title}</h3>
-            <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.5;margin-bottom:1rem;">${message}</p>
-            <input type="text" class="form-input" id="cpmInput" value="${escapeHtml(defaultValue)}" style="margin-bottom:1.25rem;text-align:center;">
-            <div style="display:flex;gap:0.75rem;justify-content:center;">
-                <button class="btn btn-sm btn-ghost" id="cpmCancel" style="min-width:80px;">Hủy</button>
-                <button class="btn btn-sm btn-primary" id="cpmConfirm" style="min-width:80px;">OK</button>
-            </div>
-        </div>`;
-        document.body.appendChild(m);
-        const inp = m.querySelector('#cpmInput');
-        setTimeout(() => { inp.focus(); inp.select(); }, 50);
-        inp.addEventListener('keydown', e => { if (e.key === 'Enter') { m.remove(); resolve(inp.value); } });
-        m.querySelector('#cpmCancel').onclick = () => { m.remove(); resolve(null); };
-        m.querySelector('#cpmConfirm').onclick = () => { m.remove(); resolve(inp.value); };
-        m.addEventListener('click', e => { if (e.target === m) { m.remove(); resolve(null); } });
+        const overlay = document.createElement('div');
+        overlay.id = 'customPromptModal';
+        overlay.className = 'confirm-popup-overlay is-info';
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+
+        overlay.innerHTML = `
+            <div class="confirm-popup-card is-info">
+                <div class="confirm-popup-icon is-info">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </div>
+                <h3 class="confirm-popup-title">${escapeHtml(title)}</h3>
+                ${message ? `<p class="confirm-popup-msg">${message}</p>` : ''}
+                <input type="text" id="cpmInput" class="form-input" value="${escapeHtml(defaultValue)}" style="margin: 0.4rem 0 1.2rem; text-align: center; font-size: 0.95rem;">
+                <div class="confirm-popup-actions">
+                    <button type="button" class="confirm-popup-btn is-cancel" id="cpmCancel">Hủy</button>
+                    <button type="button" class="confirm-popup-btn is-primary" id="cpmConfirm">OK</button>
+                </div>
+            </div>`;
+        document.body.appendChild(overlay);
+        requestAnimationFrame(() => overlay.classList.add('is-open'));
+
+        const inp = overlay.querySelector('#cpmInput');
+        setTimeout(() => { inp.focus(); inp.select(); }, 60);
+
+        const close = (val) => {
+            overlay.classList.remove('is-open');
+            overlay.classList.add('is-closing');
+            setTimeout(() => overlay.remove(), 220);
+            resolve(val);
+        };
+        inp.addEventListener('keydown', e => {
+            if (e.key === 'Enter') close(inp.value);
+            if (e.key === 'Escape') close(null);
+        });
+        overlay.querySelector('#cpmCancel').onclick = () => close(null);
+        overlay.querySelector('#cpmConfirm').onclick = () => close(inp.value);
+        overlay.addEventListener('click', e => { if (e.target === overlay) close(null); });
     });
 }
 

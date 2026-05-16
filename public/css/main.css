@@ -26,6 +26,7 @@
 @import url('./base/_typography.css');
 @import url('./base/_focus.css');
 @import url('./base/_scrollbar.css');
+@import url('./base/_ambient-orbs.css');
 
 /* ── 3. Layout (existing) ──────────────────────────────── */
 /* TODO Phase 1+: rebuild layout components */
@@ -48,6 +49,14 @@
 @import url('./components/_empty-state.css');
 @import url('./components/_tabs.css');
 @import url('./components/_bottom-nav.css');
+@import url('./components/_qr-popup.css');
+@import url('./components/_history-delete.css');
+@import url('./components/_confirm-popup.css');
+@import url('./components/_action-menu.css');
+@import url('./components/_theme-dropdown.css');
+@import url('./components/_submit-confirm.css');
+@import url('./components/_native-select-enhancer.css');
+@import url('./pages/_admin-bulk.css');
 
 /* ── 5. Pages ──────────────────────────────────────────── */
 @import url('./pages/_home.css');

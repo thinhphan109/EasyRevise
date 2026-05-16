@@ -13,97 +13,8 @@
     isolation: isolate;
 }
 
-/* Vibrant background — 3 orbs drifting (subtle but lively) */
-.home-page::before,
-.home-page::after {
-    content: '';
-    position: fixed;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: -1;
-    filter: blur(90px) saturate(140%);
-    opacity: 0.55;
-    will-change: transform;
-}
-
-/* Top-left orb — violet → accent blend */
-.home-page::before {
-    width: 540px;
-    height: 540px;
-    top: -180px;
-    left: -200px;
-    background: radial-gradient(circle at 30% 30%,
-        color-mix(in srgb, var(--subject-math, #af52de) 70%, transparent),
-        color-mix(in srgb, var(--accent) 50%, transparent) 50%,
-        transparent 75%);
-    animation: home-orb-a 22s var(--ease-apple, cubic-bezier(0.4, 0, 0.2, 1)) infinite alternate;
-}
-
-/* Right-mid orb — amber → rose blend */
-.home-page::after {
-    width: 620px;
-    height: 620px;
-    top: 25vh;
-    right: -240px;
-    background: radial-gradient(circle at 70% 30%,
-        color-mix(in srgb, var(--subject-physics, #ff9500) 65%, transparent),
-        color-mix(in srgb, var(--subject-geography, #ff375f) 40%, transparent) 50%,
-        transparent 75%);
-    animation: home-orb-b 26s var(--ease-apple, cubic-bezier(0.4, 0, 0.2, 1)) infinite alternate;
-    animation-delay: -6s;
-}
-
-/* Third orb via container element (rendered in main) */
-.home-page .home-orb-3 {
-    content: '';
-    position: fixed;
-    bottom: -200px;
-    left: 30vw;
-    width: 480px;
-    height: 480px;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: -1;
-    filter: blur(90px) saturate(140%);
-    opacity: 0.45;
-    background: radial-gradient(circle at 50% 50%,
-        color-mix(in srgb, var(--subject-biology, #40c8e0) 60%, transparent),
-        color-mix(in srgb, var(--accent) 35%, transparent) 55%,
-        transparent 75%);
-    animation: home-orb-c 30s var(--ease-apple, cubic-bezier(0.4, 0, 0.2, 1)) infinite alternate;
-    animation-delay: -12s;
-}
-
-[data-theme="dark"] .home-page::before,
-[data-theme="dark"] .home-page::after,
-[data-theme="dark"] .home-page .home-orb-3 {
-    opacity: 0.42;
-    filter: blur(110px) saturate(160%);
-}
-
-@keyframes home-orb-a {
-    0%   { transform: translate(0, 0) scale(1) rotate(0deg); }
-    50%  { transform: translate(60px, 40px) scale(1.08) rotate(20deg); }
-    100% { transform: translate(-30px, 80px) scale(0.95) rotate(-10deg); }
-}
-
-@keyframes home-orb-b {
-    0%   { transform: translate(0, 0) scale(1); }
-    50%  { transform: translate(-50px, 60px) scale(1.06); }
-    100% { transform: translate(40px, -30px) scale(0.92); }
-}
-
-@keyframes home-orb-c {
-    0%   { transform: translate(0, 0) scale(1); }
-    50%  { transform: translate(-80px, -50px) scale(1.1); }
-    100% { transform: translate(60px, 30px) scale(0.94); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .home-page::before,
-    .home-page::after,
-    .home-page .home-orb-3 { animation: none; }
-}
+/* Orbs moved to /css/base/_ambient-orbs.css (shared across pages).
+   Apply with: <body class="has-ambient-orbs"> + .ambient-orb-3 element. */
 
 .home-container {
     max-width: var(--container-lg);
@@ -145,16 +56,23 @@
     flex-shrink: 0;
 }
 .home-brand-mark {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     border-radius: var(--radius-sm);
-    background: linear-gradient(135deg, var(--text), var(--text-2));
+    background: transparent;
     color: var(--bg);
     display: grid;
     place-items: center;
     font-weight: var(--weight-bold);
     font-size: var(--text-sm);
-    box-shadow: var(--shadow-xs);
+    overflow: hidden;
+    flex-shrink: 0;
+}
+img.home-brand-mark {
+    object-fit: contain;
+    object-position: center;
+    background: transparent;
+    box-shadow: none;
 }
 
 .home-nav {

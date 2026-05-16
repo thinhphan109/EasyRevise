@@ -24,6 +24,35 @@ router.get('/history', authMiddleware, (req, res) => {
     res.json(user.history || []);
 });
 
+// DELETE /api/history — clear ALL of current user's history
+router.delete('/history', authMiddleware, (req, res) => {
+    const usersData = readUsers();
+    const user = usersData.users.find(u => u.id === req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    const removed = (user.history || []).length;
+    user.history = [];
+    writeUsers(usersData);
+    res.json({ success: true, removed });
+});
+
+// DELETE /api/history/:examId — remove all entries for one exam (optional ?completedAt=ISO for one specific entry)
+router.delete('/history/:examId', authMiddleware, (req, res) => {
+    const { examId } = req.params;
+    const { completedAt } = req.query;
+    const usersData = readUsers();
+    const user = usersData.users.find(u => u.id === req.user.id);
+    if (!user || !Array.isArray(user.history)) return res.json({ success: true, removed: 0 });
+    const before = user.history.length;
+    user.history = user.history.filter(h => {
+        if (String(h.examId) !== String(examId)) return true;
+        if (completedAt && h.completedAt !== completedAt) return true;
+        return false;
+    });
+    const removed = before - user.history.length;
+    writeUsers(usersData);
+    res.json({ success: true, removed });
+});
+
 // PIN rate limit — 5 attempts per 10 minutes per IP
 const _pinAttempts = new Map();
 const PIN_MAX = 5;

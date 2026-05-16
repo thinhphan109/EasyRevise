@@ -120,14 +120,17 @@
 
 /* ── Section ───────────────────────────────────────── */
 .dash-section {
-    margin-bottom: var(--space-7);
+    margin-bottom: var(--space-9);
+}
+.dash-section + .dash-section {
+    margin-top: var(--space-3);
 }
 
 .dash-section-title {
     font-size: var(--text-xl);
     font-weight: var(--weight-bold);
     color: var(--text);
-    margin: 0 0 var(--space-3);
+    margin: 0 0 var(--space-4);
     display: flex;
     align-items: center;
     gap: var(--space-2);
@@ -373,11 +376,30 @@
 }
 
 @media (max-width: 479px) {
-    .history-item {
+    .history-item:not(.history-item--row) {
         grid-template-columns: 1fr auto;
         grid-template-rows: auto auto;
     }
-    .history-time { grid-column: 1 / -1; }
+    .history-item:not(.history-item--row) .history-time { grid-column: 1 / -1; }
+}
+
+/* History row variant + reveal scroll — see _history-delete.css for the rest */
+#historyReveal.home-list-reveal.expanded {
+    max-height: min(60vh, 540px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 4px;
+    border-radius: var(--radius-lg);
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+#historyReveal.home-list-reveal.expanded::-webkit-scrollbar { width: 6px; }
+#historyReveal.home-list-reveal.expanded::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+#historyReveal.home-list-reveal.expanded::-webkit-scrollbar-thumb:hover {
+    background: var(--border-strong, var(--text-3));
 }
 
 /* ── Loading state ─────────────────────────────────── */
@@ -390,6 +412,7 @@
     color: var(--text-2);
     font-size: var(--text-sm);
 }
+.dash-loading[hidden] { display: none !important; }
 
 .dash-loading-spinner {
     width: 36px;
