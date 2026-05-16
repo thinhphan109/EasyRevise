@@ -19,8 +19,8 @@
     /* Text */
     --text:    #1d1d1f;
     --text-2:  #515154;
-    --text-3:  #86868b;
-    --text-4:  #a1a1a6;
+    --text-3:  #6e6e73;
+    --text-4:  #86868b;
 
     /* Accent — Apple Blue */
     --accent:        #0071e3;
@@ -63,13 +63,13 @@
 
     --text:    #f5f5f7;
     --text-2:  #a8a8ad;
-    --text-3:  #6e6e73;
-    --text-4:  #48484a;
+    --text-3:  #98989d;
+    --text-4:  #6e6e73;
 
-    --accent:        #0a84ff;
-    --accent-hover:  #409cff;
+    --accent:        #0a6dd8;
+    --accent-hover:  #1a82ff;
     --accent-soft:   rgba(10, 132, 255, 0.18);
-    --accent-text:   #0a84ff;
+    --accent-text:   #58a6ff;
 
     --success:        #30d158;
     --success-soft:   rgba(48, 209, 88, 0.16);
@@ -104,10 +104,10 @@
         --border-strong: rgba(255, 255, 255, 0.16);
         --text:    #f5f5f7;
         --text-2:  #a8a8ad;
-        --text-3:  #6e6e73;
-        --text-4:  #48484a;
-        --accent:        #0a84ff;
-        --accent-hover:  #409cff;
+        --text-3:  #98989d;
+        --text-4:  #6e6e73;
+        --accent:        #0a6dd8;
+        --accent-hover:  #1a82ff;
         --accent-soft:   rgba(10, 132, 255, 0.18);
         --success:        #30d158;
         --success-soft:   rgba(48, 209, 88, 0.16);

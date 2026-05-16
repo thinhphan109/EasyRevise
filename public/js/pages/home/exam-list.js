@@ -29,7 +29,7 @@ async function loadExams() {
                 : `window.location.href='exam.html?id=${exam.id}'`;
             const lockSvg = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;opacity:0.6;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
             return `
-                <article class="card card-raised card-interactive home-exam-card" onclick="${clickAction}" tabindex="0" role="button" aria-label="${exam.title}">
+                <article class="card card-raised card-interactive home-exam-card" onclick="${clickAction}" tabindex="0" aria-label="${exam.title}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
                     <div class="home-exam-card-top">
                         <h3 class="home-exam-card-title">${isLocked ? lockSvg : ''}${exam.title}</h3>
                     </div>

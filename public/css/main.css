@@ -37,6 +37,7 @@
 @import url('./components/_icon.css');
 @import url('./components/_buttons.css');
 @import url('./components/_forms.css');
+@import url('./components/_auth-modal.css');
 @import url('./components/_cards.css');
 @import url('./components/_modals.css');
 @import url('./components/_toasts.css');
