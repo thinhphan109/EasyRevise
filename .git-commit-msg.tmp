@@ -1,41 +1,31 @@
-feat(ui): apply Apple HIG to home + exam pages
+feat(ui): apply Apple HIG to student dashboard
 
-Visible visual change for the two remaining student-facing pages.
-Result page was done in 4fcd359; this commit completes the trio.
+Completes the student-facing pages (Home, Exam, Result, Dashboard).
+Admin panel still uses its own legacy theme (separate concern).
 
-Home page:
-- index.html — switch to .home-page/.home-header/.home-hero/.home-section
-  markup. Removed legacy css/pages/home.css link (left only main.css).
-  Sections use `hidden` attribute for accessibility.
-- exam-list.js — exam cards now use .card.card-raised.card-interactive
-  with .home-exam-card structure (top header, meta badges, footer CTA).
-  Added tabindex + role=button + aria-label.
-- exam-list.js — in-progress card now uses semantic <a> with
-  .home-inprogress-item class (HIG warm accent variant).
-- history.js — replaced style.display='block'/'none' with hidden
-  attribute for a11y. Updated SVG arrow color to var(--accent).
+dashboard.html:
+- Switched from .dashboard-* legacy markup to .dash-* HIG classes
+  (.dashboard-page, .dash-topbar, .dash-container, .dash-profile,
+  .dash-section, .dash-section-title, .dash-loading, .dash-footer).
+- Removed link to legacy css/pages/dashboard.css (only main.css now).
+- Replaced inline `style="display:none"` with `hidden` attribute
+  for accessibility — sections show via JS toggling .hidden = false.
 
-Exam page:
-- public/css/pages/_exam.css (NEW, ~9 KB) — Apple HIG exam styles:
-  glass topbar, gradient progress bar, animated 3-state timer pill
-  (normal/warning/danger with pulse), question card with fade-in,
-  option-btn with hover translate + selected ring, sidebar grid
-  with status colors via tokens, mobile drawer with backdrop blur,
-  gradient submit button.
-- main.css — added _exam.css to imports.
-- exam.html — switch to .exam-page/.exam-topbar/.exam-question-card
-  semantic markup. Kept all IDs so app.js orchestrator runs unchanged.
-- Removed legacy public/css/pages/exam.css (replaced by _exam.css).
-- Removed legacy public/css/pages/home.css (replaced by _home.css).
-- Removed orphan public/minimal-exam-demo.html.
+dashboard/index.js:
+- All `style.display = 'block'/'none'` calls now use the `.hidden`
+  attribute (a11y best practice, consistent with rest of app).
+- Error fallback uses .dash-section instead of removed .dashboard-empty.
+- The stat-card / subject-bar / history-item classes remain as-is —
+  these are already wired through public/css/pages/_dashboard.css.
 
-Verified:
-- Smoke test still passes (9/9, no behavioural break).
-- Visual capture-visuals.mjs renders both light + dark themes
-  for all 3 pages without errors.
+scripts/capture-visuals.mjs:
+- Added `captureDashboard()` that mocks /api/dashboard via fetch stub,
+  rendering full dashboard with sample profile + stats + 5 subjects
+  + 5 history entries. Bypasses auth (mock token + intercepted fetch).
+- Now supports CLI args: `node capture-visuals.mjs [pages...]`
+  e.g. `node capture-visuals.mjs dashboard home`.
 
-User-facing summary:
-- Apple gray #f5f5f7 background, glassmorphism headers
-- Subject-color accent palette in tokens
-- Stagger reveals + spring easing (cubic-bezier 0.2,0.8,0.2,1)
-- Auto dark mode + prefers-reduced-motion support throughout
+Cleanup:
+- Removed legacy public/css/pages/dashboard.css (replaced by _dashboard.css).
+
+Visual verified for both light + dark themes.

@@ -146,16 +146,82 @@ async function captureExam(theme = 'light') {
     await browser.close();
 }
 
+async function captureDashboard(theme = 'light') {
+    const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
+    const page = await browser.newPage();
+    page.on('console', msg => { if (msg.type() === 'error') console.log('  [browser-error]', msg.text()); });
+    await page.setViewport({ width: 1280, height: 900, deviceScaleFactor: 2 });
+
+    // Mock data shaped like /api/dashboard response
+    const mockData = {
+        user: {
+            username: 'demo_student',
+            displayName: 'Phạm Anh Demo',
+            joinedAt: '2025-09-15T08:00:00Z'
+        },
+        stats: {
+            totalExams: 24,
+            avgScore: 7.8,
+            accuracy: 82,
+            timeSpentMinutes: 460,
+            totalAttempts: 24,
+            streakDays: 7
+        },
+        subjectBreakdown: [
+            { subject: 'Toán', attempts: 9, avgScore: 8.2 },
+            { subject: 'Tiếng Anh (IELTS)', attempts: 6, avgScore: 7.4 },
+            { subject: 'Vật Lí', attempts: 5, avgScore: 6.9 },
+            { subject: 'Hóa Học', attempts: 3, avgScore: 8.5 },
+            { subject: 'Ngữ Văn', attempts: 1, avgScore: 7.0 }
+        ],
+        recentHistory: [
+            { examId: 'ex-1', examTitle: 'Đề thi thử THPT Toán 2026', subject: 'Toán', score: '8.5', correct: 38, total: 50, timeSpent: 5400, completedAt: new Date(Date.now() - 1000 * 60 * 30).toISOString() },
+            { examId: 'ex-2', examTitle: 'IELTS Reading - Cambridge 18 Test 1', subject: 'Tiếng Anh', score: '7.5', correct: 30, total: 40, timeSpent: 3600, completedAt: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString() },
+            { examId: 'ex-3', examTitle: 'Đề KT 1 tiết Vật Lí 11 Chương 3', subject: 'Vật Lí', score: '6.0', correct: 18, total: 30, timeSpent: 2400, completedAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString() },
+            { examId: 'ex-4', examTitle: 'Đề minh hoạ Hoá Học HCM 2024', subject: 'Hóa Học', score: '9.0', correct: 36, total: 40, timeSpent: 3000, completedAt: new Date(Date.now() - 1000 * 60 * 60 * 26).toISOString() },
+            { examId: 'ex-5', examTitle: 'Bài kiểm tra Văn nghị luận', subject: 'Ngữ Văn', score: '7.0', correct: 0, total: 1, timeSpent: 4800, completedAt: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString() }
+        ]
+    };
+
+    await page.evaluateOnNewDocument((theme, data) => {
+        localStorage.setItem('easyrevise_theme', theme);
+        localStorage.setItem('easyrevise_token', 'mock-visual-token');
+        // Stub fetch for /api/dashboard
+        const originalFetch = window.fetch;
+        window.fetch = async (url, opts) => {
+            if (typeof url === 'string' && url.includes('/api/dashboard')) {
+                return new Response(JSON.stringify(data), {
+                    status: 200,
+                    headers: { 'Content-Type': 'application/json' }
+                });
+            }
+            return originalFetch(url, opts);
+        };
+    }, theme, mockData);
+
+    await page.goto(`${HOST}/dashboard.html`, { waitUntil: 'domcontentloaded', timeout: 15000 });
+    await new Promise(r => setTimeout(r, 2500)); // dashboard fetch + animations
+
+    const outDir = path.join(__dirname, '..', '_visual_captures');
+    await page.screenshot({
+        path: path.join(outDir, `dashboard_apple_hig_${theme}.png`),
+        fullPage: true
+    });
+    console.log(`✓ Saved dashboard_apple_hig_${theme}.png`);
+    await browser.close();
+}
+
 async function main() {
     const fs = await import('node:fs');
     fs.mkdirSync(path.join(__dirname, '..', '_visual_captures'), { recursive: true });
     const args = process.argv.slice(2);
-    const pages = args.length ? args : ['result', 'home', 'exam'];
+    const pages = args.length ? args : ['result', 'home', 'exam', 'dashboard'];
     const themes = ['light', 'dark'];
     for (const t of themes) {
         if (pages.includes('result')) await captureResult(t);
         if (pages.includes('home')) await captureHome(t);
         if (pages.includes('exam')) await captureExam(t);
+        if (pages.includes('dashboard')) await captureDashboard(t);
     }
     console.log('\nDone. Screenshots in _visual_captures/');
 }

@@ -7,8 +7,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Check auth
     const token = localStorage.getItem('easyrevise_token');
     if (!token) {
-        document.getElementById('dashboardLoading').style.display = 'none';
-        document.getElementById('dashboardLoginRequired').style.display = 'block';
+        document.getElementById('dashboardLoading').hidden = true;
+        document.getElementById('dashboardLoginRequired').hidden = false;
         return;
     }
 
@@ -18,8 +18,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         if (res.status === 401 || res.status === 403) {
-            document.getElementById('dashboardLoading').style.display = 'none';
-            document.getElementById('dashboardLoginRequired').style.display = 'block';
+            document.getElementById('dashboardLoading').hidden = true;
+            document.getElementById('dashboardLoginRequired').hidden = false;
             return;
         }
 
@@ -28,8 +28,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const data = await res.json();
 
         // Hide loading, show content
-        document.getElementById('dashboardLoading').style.display = 'none';
-        document.getElementById('dashboardContent').style.display = 'block';
+        document.getElementById('dashboardLoading').hidden = true;
+        document.getElementById('dashboardContent').hidden = false;
 
         renderProfile(data.user, data.stats);
         renderStats(data.stats);
@@ -39,9 +39,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (err) {
         console.error('Dashboard load error:', err);
         document.getElementById('dashboardLoading').innerHTML = `
-            <div class="dashboard-empty">
-                <div class="dashboard-empty-icon">⚠️</div>
-                <p>Không thể tải dữ liệu. Vui lòng thử lại.</p>
+            <div class="dash-section" style="text-align:center;padding:var(--space-10) 0;">
+                <div style="font-size:48px;margin-bottom:var(--space-3);">⚠️</div>
+                <p style="color:var(--text-2);margin-bottom:var(--space-4);">Không thể tải dữ liệu. Vui lòng thử lại.</p>
                 <button class="btn btn-primary" onclick="location.reload()">Tải lại</button>
             </div>`;
     }
@@ -66,7 +66,7 @@ function renderProfile(user, stats) {
         joinDate ? `Thành viên từ ${joinDate}` : 'Học viên';
 
     if (stats.streakDays > 0) {
-        document.getElementById('streakBadge').style.display = 'flex';
+        document.getElementById('streakBadge').hidden = false;
         document.getElementById('streakCount').textContent = stats.streakDays;
     }
 }
@@ -155,7 +155,7 @@ function renderSubjects(subjects, totalAttempts) {
     if (!subjects || subjects.length === 0) return;
 
     const section = document.getElementById('subjectSection');
-    section.style.display = 'block';
+    section.hidden = false;
 
     const colors = ['', '--accent', '--success', '--warning', '--info'];
     const maxAttempts = Math.max(...subjects.map(s => s.attempts));
@@ -189,12 +189,12 @@ function renderSubjects(subjects, totalAttempts) {
  */
 function renderHistory(history) {
     if (!history || history.length === 0) {
-        document.getElementById('emptyState').style.display = 'block';
+        document.getElementById('emptyState').hidden = false;
         return;
     }
 
     const section = document.getElementById('historySection');
-    section.style.display = 'block';
+    section.hidden = false;
 
     const list = document.getElementById('historyList');
     list.innerHTML = history.map(h => {

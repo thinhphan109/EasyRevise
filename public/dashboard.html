@@ -9,107 +9,101 @@
 
     <!-- Theme: apply before render to prevent flash -->
     <script>
-        (function(){var t=localStorage.getItem('easyrevise_theme')||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();
+        (function () { var t = localStorage.getItem('easyrevise_theme') || (window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light'); document.documentElement.setAttribute('data-theme', t); })();
     </script>
 
-    <!-- CSS: Modular system -->
+    <!-- CSS: Apple HIG modular system -->
     <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/pages/dashboard.css">
 </head>
 
-<body>
-    <div class="container container-page">
-        <!-- Header -->
-        <header class="dashboard-header">
-            <a href="/" class="dashboard-back">
-                <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
-                </svg>
-                Quay lại
+<body class="dashboard-page">
+    <!-- Sticky glass topbar -->
+    <header class="dash-topbar">
+        <div class="dash-container dash-topbar-inner">
+            <a href="/" class="btn btn-ghost btn-sm" aria-label="Về trang chủ">
+                <span aria-hidden="true">←</span>
+                <span>Trang chủ</span>
             </a>
             <div style="flex:1;"></div>
-            <button id="themeToggle" class="btn btn-icon btn-ghost" onclick="toggleTheme()" title="Đổi giao diện">
+            <button id="themeToggle" class="btn btn-icon btn-ghost btn-sm" onclick="toggleTheme()" title="Đổi giao diện" aria-label="Đổi giao diện">
                 <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
             </button>
-        </header>
+        </div>
+    </header>
 
-        <!-- Loading State -->
-        <div id="dashboardLoading" class="dashboard-loading">
-            <div class="dashboard-loading-spinner"></div>
+    <main class="dash-container">
+        <!-- Loading -->
+        <div id="dashboardLoading" class="dash-loading">
+            <div class="dash-loading-spinner" aria-hidden="true"></div>
             <p>Đang tải thống kê...</p>
         </div>
 
-        <!-- Login Required State -->
-        <div id="dashboardLoginRequired" style="display:none;">
-            <div class="dashboard-empty">
-                <div class="dashboard-empty-icon">🔐</div>
-                <p>Bạn cần đăng nhập để xem Dashboard</p>
+        <!-- Login required -->
+        <div id="dashboardLoginRequired" hidden>
+            <div class="dash-section" style="text-align:center;padding:var(--space-12) var(--space-4);">
+                <div style="font-size:48px;margin-bottom:var(--space-3);">🔐</div>
+                <p style="color:var(--text-2);margin-bottom:var(--space-4);">Bạn cần đăng nhập để xem Dashboard</p>
                 <a href="/" class="btn btn-primary">← Về trang chủ đăng nhập</a>
             </div>
         </div>
 
-        <!-- Dashboard Content (hidden until loaded) -->
-        <div id="dashboardContent" style="display:none;">
-            <!-- Profile Card -->
-            <div id="profileCard" class="profile-card">
-                <div class="profile-info">
-                    <img id="profileAvatar" class="profile-avatar" src="/api/avatar?name=anonymous&size=64" alt="Avatar">
-                    <div>
-                        <div id="profileName" class="profile-name">—</div>
-                        <div id="profileMeta" class="profile-meta">Đang tải...</div>
-                    </div>
+        <!-- Content -->
+        <div id="dashboardContent" hidden>
+            <!-- Profile -->
+            <section id="profileCard" class="dash-profile" aria-label="Hồ sơ học viên">
+                <img id="profileAvatar" class="dash-profile-avatar" src="/api/avatar?name=anonymous&size=80" alt="Avatar">
+                <div class="dash-profile-info">
+                    <div id="profileName" class="dash-profile-name">—</div>
+                    <div id="profileMeta" class="dash-profile-meta">Đang tải...</div>
                 </div>
-                <div id="streakBadge" class="streak-badge" style="display:none;">
-                    🔥 <span id="streakCount">0</span> ngày liên tiếp
+                <div id="streakBadge" class="dash-streak" hidden>
+                    🔥 <strong id="streakCount">0</strong> ngày liên tiếp
                 </div>
-            </div>
+            </section>
 
-            <!-- Stat Grid -->
-            <div id="statGrid" class="stat-grid">
-                <!-- Rendered by JS -->
-            </div>
+            <!-- Stats grid -->
+            <section class="dash-section" aria-label="Thống kê tổng quan">
+                <div id="statGrid" class="stat-grid">
+                    <!-- Rendered by JS -->
+                </div>
+            </section>
 
-            <!-- Subject Breakdown -->
-            <div id="subjectSection" style="display:none;">
-                <h2 class="section-title">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/>
-                    </svg>
+            <!-- Subject breakdown -->
+            <section id="subjectSection" class="dash-section" hidden>
+                <h2 class="dash-section-title">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
                     Phân tích theo môn
                 </h2>
                 <div id="subjectList" class="subject-list">
                     <!-- Rendered by JS -->
                 </div>
-            </div>
+            </section>
 
-            <!-- Recent History -->
-            <div id="historySection" style="display:none;">
-                <h2 class="section-title">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                    </svg>
+            <!-- Recent history -->
+            <section id="historySection" class="dash-section" hidden>
+                <h2 class="dash-section-title">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                     Lịch sử gần đây
                 </h2>
                 <div id="historyList" class="history-list">
                     <!-- Rendered by JS -->
                 </div>
-            </div>
+            </section>
 
-            <!-- Empty State (no history) -->
-            <div id="emptyState" style="display:none;">
-                <div class="dashboard-empty">
-                    <div class="dashboard-empty-icon">📝</div>
-                    <p>Bạn chưa làm bài nào. Hãy bắt đầu ôn tập ngay!</p>
+            <!-- Empty state -->
+            <div id="emptyState" hidden>
+                <div class="dash-section" style="text-align:center;padding:var(--space-10) var(--space-4);">
+                    <div style="font-size:48px;margin-bottom:var(--space-3);">📝</div>
+                    <p style="color:var(--text-2);margin-bottom:var(--space-4);">Bạn chưa làm bài nào. Hãy bắt đầu ôn tập ngay!</p>
                     <a href="/" class="btn btn-primary">Chọn đề ôn tập →</a>
                 </div>
             </div>
 
-            <!-- Footer -->
-            <div class="dashboard-footer">
-                <a href="/" class="btn btn-ghost">← Về trang chủ</a>
-            </div>
+            <footer class="dash-footer">
+                <a href="/" class="btn btn-ghost btn-sm">← Về trang chủ</a>
+            </footer>
         </div>
-    </div>
+    </main>
 
     <!-- JS: Core modules -->
     <script src="/js/core/utils.js"></script>
