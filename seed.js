@@ -1,4 +1,8 @@
 // Seed script - converts exam-data.js into data/exams.json
+// LEGACY: pre-Postgres seed flow. Kept for one-off snapshot generation.
+// Reads the old `js/exam-data.js` (a const declaration) and uses eval()
+// to materialise it. Project moved to Postgres + JSON imports — this
+// is no longer part of the runtime; ESLint rule is suppressed locally.
 const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
@@ -9,7 +13,8 @@ let examDataContent = fs.readFileSync(path.join(__dirname, 'js', 'exam-data.js')
 // Replace 'const EXAM_DATA' with 'var EXAM_DATA' so eval works
 examDataContent = examDataContent.replace('const EXAM_DATA', 'var EXAM_DATA');
 
-// Execute in current scope
+// Execute in current scope (legacy flow — see file header)
+// eslint-disable-next-line no-eval
 eval(examDataContent);
 
 const examId = uuidv4();

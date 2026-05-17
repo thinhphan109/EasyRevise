@@ -18,7 +18,7 @@ function createApp() {
     app.use('/api/auth', require('../routes/auth'));
     app.use('/api/ielts', require('../routes/ielts'));
     app.use((err, req, res, next) => {
-        // eslint-disable-next-line no-console
+         
         console.error('[test] unhandled:', err);
         res.status(500).json({ error: err.message });
     });

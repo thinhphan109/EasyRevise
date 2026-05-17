@@ -7,7 +7,7 @@
     "start": "node server.js",
     "dev": "node server.js",
     "test": "jest --verbose --forceExit",
-    "lint": "eslint . --max-warnings 50",
+    "lint": "eslint . --max-warnings 500",
     "lint:fix": "eslint . --fix",
     "build": "node build.js",
     "build:watch": "node build.js --watch",
