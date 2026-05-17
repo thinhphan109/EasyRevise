@@ -291,6 +291,56 @@ router.delete('/speaking/submissions/:id', authMiddleware, async (req, res, next
     } catch (e) { next(e); }
 });
 
+// ── Auth: user soft-hide a completed submission from their history ──
+//   POST /api/ielts/submissions/:id/hide            → reading/listening
+//   POST /api/ielts/writing/submissions/:id/hide    → writing
+//   POST /api/ielts/speaking/submissions/:id/hide   → speaking
+// Admin retains full visibility.
+router.post('/submissions/:id/hide', authMiddleware, async (req, res, next) => {
+    try {
+        const row = await repos.ielts.hideReadingSubmission(req.params.id, req.user.id);
+        if (!row) return res.status(404).json({ error: 'Not found, not yours, or not completed' });
+        res.json({ ok: true, id: row.id });
+    } catch (e) { next(e); }
+});
+router.post('/writing/submissions/:id/hide', authMiddleware, async (req, res, next) => {
+    try {
+        const row = await repos.ielts.hideWritingSubmission(req.params.id, req.user.id);
+        if (!row) return res.status(404).json({ error: 'Not found, not yours, or not completed' });
+        res.json({ ok: true, id: row.id });
+    } catch (e) { next(e); }
+});
+router.post('/speaking/submissions/:id/hide', authMiddleware, async (req, res, next) => {
+    try {
+        const row = await repos.ielts.hideSpeakingSubmission(req.params.id, req.user.id);
+        if (!row) return res.status(404).json({ error: 'Not found, not yours, or not completed' });
+        res.json({ ok: true, id: row.id });
+    } catch (e) { next(e); }
+});
+
+// ── Admin: hard-delete a single submission (cascades user history) ──
+router.delete('/admin/submissions/:id', adminOnly, async (req, res, next) => {
+    try {
+        const row = await repos.ielts.adminDeleteReadingSubmission(req.params.id);
+        if (!row) return res.status(404).json({ error: 'Submission not found' });
+        res.json({ ok: true, id: row.id });
+    } catch (e) { next(e); }
+});
+router.delete('/admin/writing/submissions/:id', adminOnly, async (req, res, next) => {
+    try {
+        const row = await repos.ielts.adminDeleteWritingSubmission(req.params.id);
+        if (!row) return res.status(404).json({ error: 'Submission not found' });
+        res.json({ ok: true, id: row.id });
+    } catch (e) { next(e); }
+});
+router.delete('/admin/speaking/submissions/:id', adminOnly, async (req, res, next) => {
+    try {
+        const row = await repos.ielts.adminDeleteSpeakingSubmission(req.params.id);
+        if (!row) return res.status(404).json({ error: 'Submission not found' });
+        res.json({ ok: true, id: row.id });
+    } catch (e) { next(e); }
+});
+
 // ── Admin: tests CRUD ─────────────────────────────────────────────────
 router.get('/admin/tests', adminOnly, async (req, res, next) => {
     try {

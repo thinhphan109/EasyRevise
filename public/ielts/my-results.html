@@ -132,7 +132,7 @@
         .result-list { display: flex; flex-direction: column; gap: 0.5rem; }
         .result-row {
             display: grid;
-            grid-template-columns: 50px 1fr auto auto;
+            grid-template-columns: 50px 1fr auto auto auto;
             gap: 1rem;
             align-items: center;
             padding: 0.85rem 1rem;
@@ -187,6 +187,19 @@
             min-width: 60px; text-align: right;
         }
         .result-arrow { color: var(--text-muted); font-size: 1rem; }
+
+        .result-hide {
+            background: none; border: 1px solid transparent;
+            border-radius: 7px; padding: 0.3rem 0.55rem;
+            color: var(--text-muted); cursor: pointer;
+            font-family: inherit; font-size: 0.95rem;
+            line-height: 1; transition: all .15s;
+        }
+        .result-hide:hover {
+            background: var(--surface-2);
+            border-color: var(--border);
+            color: var(--danger, #e11d48);
+        }
 
         .result-empty {
             text-align: center; padding: 4rem 1.5rem;
@@ -370,19 +383,23 @@
                 }
                 const partLabel = r.partNumber ? ` · Part ${r.partNumber}` : '';
                 const skillLabel = SKILL_LABELS[r.skill] || r.skill;
+                // Quiz rows are owned by TracNghiem core — hide button only for IELTS.
+                const canHide = r.skillKind !== 'quiz';
                 return `
-                    <a class="result-row" data-skill="${r.skill}" href="${resultUrl(r)}">
-                        <div class="result-icon">${ICONS[r.skill] || '📄'}</div>
-                        <div class="result-info">
+                    <div class="result-row" data-skill="${r.skill}" data-id="${r.submissionId}" data-kind="${r.skillKind}">
+                        <a class="result-icon" href="${resultUrl(r)}" style="text-decoration:none;">${ICONS[r.skill] || '📄'}</a>
+                        <a class="result-info" href="${resultUrl(r)}" style="text-decoration:none;color:inherit;min-width:0;">
                             <p class="result-title">${escapeHtml(r.title || 'Untitled')}</p>
                             <div class="result-meta">
                                 <span class="result-meta-pill">${skillLabel}${partLabel}</span>
                                 <span>${fmtDate(r.submittedAt)}</span>
                             </div>
-                        </div>
-                        <div class="result-band">${scoreText}</div>
-                        <div class="result-arrow">→</div>
-                    </a>`;
+                        </a>
+                        <a class="result-band" href="${resultUrl(r)}" style="text-decoration:none;">${scoreText}</a>
+                        ${canHide
+                            ? `<button class="result-hide" data-act="hide" title="Xoá khỏi lịch sử của tôi (admin vẫn giữ bản lưu)">✕</button>`
+                            : `<span class="result-arrow">→</span>`}
+                    </div>`;
             }).join('');
         }
 
@@ -417,6 +434,36 @@
             btn.classList.add('active');
             STATE.filter = btn.dataset.filter;
             renderList();
+        });
+
+        // Hide-from-history handler
+        document.getElementById('resultList').addEventListener('click', async (e) => {
+            const btn = e.target.closest('button[data-act=hide]');
+            if (!btn) return;
+            const row = btn.closest('.result-row');
+            const id = row?.dataset.id;
+            const kind = row?.dataset.kind;
+            if (!id || !kind) return;
+            if (!confirm('Xoá bài này khỏi lịch sử của bạn?\n(Admin vẫn giữ bản ghi.)')) return;
+            const path = kind === 'reading'  ? `/api/ielts/submissions/${id}/hide`
+                       : kind === 'writing'  ? `/api/ielts/writing/submissions/${id}/hide`
+                       : kind === 'speaking' ? `/api/ielts/speaking/submissions/${id}/hide`
+                       : null;
+            if (!path) return;
+            btn.disabled = true; btn.textContent = '…';
+            try {
+                const r = await fetch(path, {
+                    method: 'POST',
+                    headers: { Authorization: 'Bearer ' + getToken() }
+                });
+                if (!r.ok) throw new Error(await r.text());
+                STATE.all = STATE.all.filter(x => x.submissionId !== id);
+                renderCounts();
+                renderList();
+            } catch (err) {
+                btn.disabled = false; btn.textContent = '✕';
+                alert('Lỗi: ' + err.message);
+            }
         });
 
         load();
