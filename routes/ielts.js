@@ -415,18 +415,46 @@ router.post('/writing/submissions/:id/submit', authMiddleware, async (req, res, 
             await repos.ielts.saveWritingDraft(req.params.id, essay);
         }
 
+        // Block trivially short essays so the AI doesn't refuse / produce junk
+        const wordCount = essay.trim().split(/\s+/).filter(Boolean).length;
+        if (wordCount < 50) {
+            return res.status(400).json({
+                error: `Bài viết quá ngắn (${wordCount}/50 từ tối thiểu). Hãy viết thêm rồi nộp lại.`
+            });
+        }
+
         // Look up prompt directly
         const promptRow = await require('../lib/repos/_pool').queryOne(
             `SELECT * FROM ielts_writing_prompts WHERE id = $1`, [sub.prompt_id]
         );
         if (!promptRow) return res.status(404).json({ error: 'Prompt missing' });
 
-        const grade = await gradeWriting({
-            taskType: promptRow.task_type,
-            prompt: promptRow.prompt_text,
-            graphImageUrl: promptRow.graph_image_url,
-            essay
-        });
+        // ── Resilient AI grading ──
+        // If the AI provider fails (no key, rate limit, JSON parse, network)
+        // we still finalize the submission with a sentinel grade so the
+        // user is not locked out. Admin can re-grade later.
+        let grade;
+        let degraded = false;
+        try {
+            grade = await gradeWriting({
+                taskType: promptRow.task_type,
+                prompt: promptRow.prompt_text,
+                graphImageUrl: promptRow.graph_image_url,
+                essay
+            });
+        } catch (gradingError) {
+            console.warn(`[ielts/writing/submit] AI grading failed for ${req.params.id}:`, gradingError.message);
+            degraded = true;
+            grade = {
+                bandTr: 0, bandCc: 0, bandLr: 0, bandGra: 0, bandOverall: 0,
+                feedback: {
+                    error: 'AI_GRADING_FAILED',
+                    error_message: gradingError.message,
+                    overall_comment: 'Bài viết đã được nộp nhưng hệ thống AI chấm điểm tạm thời gặp sự cố. Bạn có thể yêu cầu chấm lại sau.',
+                    suggestions: ['Liên hệ admin để được chấm lại nếu cần điểm chính thức.']
+                }
+            };
+        }
 
         const durationSec = Math.round((Date.now() - new Date(sub.started_at).getTime()) / 1000);
         const finalized = await repos.ielts.finalizeWritingSubmission(req.params.id, {
@@ -440,7 +468,8 @@ router.post('/writing/submissions/:id/submit', authMiddleware, async (req, res, 
                 lr: Number(finalized.band_lr), gra: Number(finalized.band_gra),
                 overall: Number(finalized.band_overall)
             },
-            feedback: finalized.ai_feedback
+            feedback: finalized.ai_feedback,
+            degraded
         });
     } catch (e) { next(e); }
 });
@@ -511,14 +540,41 @@ router.post('/speaking/submissions/:id/submit', authMiddleware, async (req, res,
         const audioUrl = req.body.audioUrl || null;
         const audioDriveId = req.body.audioDriveId || null;
 
+        // Block trivially short transcripts
+        const wordCount = transcript.trim().split(/\s+/).filter(Boolean).length;
+        if (wordCount < 20) {
+            return res.status(400).json({
+                error: `Transcript quá ngắn (${wordCount}/20 từ tối thiểu). Hãy ghi âm dài hơn rồi nộp lại.`
+            });
+        }
+
         const partRow = await require('../lib/repos/_pool').queryOne(
             `SELECT * FROM ielts_speaking_parts WHERE id = $1`, [sub.speaking_part_id]
         );
-        const grade = await gradeSpeaking({
-            partNumber: partRow.part_number,
-            prompts: partRow.prompts || [],
-            transcript
-        });
+        if (!partRow) return res.status(404).json({ error: 'Speaking part missing' });
+
+        // ── Resilient AI grading ──
+        let grade;
+        let degraded = false;
+        try {
+            grade = await gradeSpeaking({
+                partNumber: partRow.part_number,
+                prompts: partRow.prompts || [],
+                transcript
+            });
+        } catch (gradingError) {
+            console.warn(`[ielts/speaking/submit] AI grading failed for ${req.params.id}:`, gradingError.message);
+            degraded = true;
+            grade = {
+                bandFc: 0, bandLr: 0, bandGra: 0, bandPron: 0, bandOverall: 0,
+                feedback: {
+                    error: 'AI_GRADING_FAILED',
+                    error_message: gradingError.message,
+                    overall_comment: 'Bài Speaking đã được nộp nhưng hệ thống AI chấm điểm tạm thời gặp sự cố. Bạn có thể yêu cầu chấm lại sau.',
+                    suggestions: ['Liên hệ admin để được chấm lại nếu cần điểm chính thức.']
+                }
+            };
+        }
 
         const durationSec = Math.round((Date.now() - new Date(sub.started_at).getTime()) / 1000);
         const finalized = await repos.ielts.finalizeSpeakingSubmission(req.params.id, {
@@ -531,7 +587,8 @@ router.post('/speaking/submissions/:id/submit', authMiddleware, async (req, res,
                 gra: Number(finalized.band_gra), pron: Number(finalized.band_pron),
                 overall: Number(finalized.band_overall)
             },
-            feedback: finalized.ai_feedback
+            feedback: finalized.ai_feedback,
+            degraded
         });
     } catch (e) { next(e); }
 });

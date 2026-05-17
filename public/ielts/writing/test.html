@@ -454,6 +454,14 @@
                 `;
                 document.getElementById('reviewBtn').onclick = () => location.href = '/ielts/writing/result.html?id=' + state.submissionId;
                 document.getElementById('resultModal').classList.add('is-open');
+                if (r.degraded) {
+                    window.notifyPopup({
+                        title: 'Đã nộp · AI chấm điểm gặp sự cố',
+                        message: 'Bài viết đã được lưu. Hệ thống AI tạm thời không chấm được — bạn có thể yêu cầu admin chấm lại.',
+                        type: 'warning',
+                        duration: 6000
+                    });
+                }
             } catch (e) {
                 document.getElementById('gradingOverlay').classList.remove('is-open');
                 window.notifyPopup({ title: 'Chấm bài lỗi', message: e.message, type: 'error' });
