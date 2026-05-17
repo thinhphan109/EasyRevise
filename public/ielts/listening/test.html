@@ -731,7 +731,7 @@
                     window.location.href = '/ielts/listening/result.html?id=' + state.submissionId;
                 };
             } catch (e) {
-                alert('Nộp bài lỗi: ' + e.message);
+                window.notifyPopup({ title: 'Nộp bài lỗi', message: e.message, type: 'error' });
                 state.isComplete = false;
             }
         }
@@ -765,5 +765,7 @@
             }
         })();
     </script>
+    <script src="/js/ielts-bootstrap.js"></script>
+
 </body>
 </html>

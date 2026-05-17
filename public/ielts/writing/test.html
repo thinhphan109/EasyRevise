@@ -420,8 +420,17 @@
             const essay = document.getElementById('essay').value;
             const wc = countWords(essay);
             if (!expired) {
-                if (wc < 50) { alert('Bài viết quá ngắn để chấm.'); return; }
-                if (!confirm(`Nộp bài ngay? (${wc} từ)`)) return;
+                if (wc < 50) { window.notifyPopup({ message: 'Bài viết quá ngắn để chấm.', type: 'warning' }); return; }
+                if (window.confirmPopup) {
+                    const ok = await window.confirmPopup({
+                        title: 'Nộp bài Writing?',
+                        message: `Bài viết hiện ${wc} từ. Sau khi nộp bạn không thể chỉnh sửa nữa.`,
+                        confirmText: 'Nộp bài',
+                        cancelText: 'Tiếp tục viết',
+                        type: 'info'
+                    });
+                    if (!ok) return;
+                } else if (!confirm(`Nộp bài ngay? (${wc} từ)`)) return;
             }
             state.isComplete = true;
             clearInterval(state.timerHandle);
@@ -447,7 +456,7 @@
                 document.getElementById('resultModal').classList.add('is-open');
             } catch (e) {
                 document.getElementById('gradingOverlay').classList.remove('is-open');
-                alert('Chấm bài lỗi: ' + e.message);
+                window.notifyPopup({ title: 'Chấm bài lỗi', message: e.message, type: 'error' });
                 state.isComplete = false;
             }
         }
@@ -458,5 +467,7 @@
             document.getElementById('loading').textContent = 'Lỗi: ' + e.message;
         });
     </script>
+    <script src="/js/ielts-bootstrap.js"></script>
+
 </body>
 </html>

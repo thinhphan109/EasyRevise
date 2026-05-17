@@ -28,6 +28,170 @@
     <!-- CSS: Apple HIG modular system (tokens + components + home page) -->
     <link rel="stylesheet" href="css/main.css">
 
+    <!-- IELTS Feature Card — self-contained styles so the card renders
+         even if css/main.css is cached or fails to load. -->
+    <style>
+        .home-ielts-feature { margin: 2rem 0 2.75rem; }
+        .home-ielts-card {
+            position: relative; display: block;
+            border-radius: 22px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 30%, #4c1d95 60%, #6d28d9 100%);
+            color: #fff;
+            text-decoration: none;
+            overflow: hidden;
+            box-shadow: 0 10px 30px -10px rgba(76, 29, 149, 0.5),
+                        0 6px 18px -6px rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s cubic-bezier(.2,.8,.2,1);
+            isolation: isolate;
+        }
+        [data-theme="dark"] .home-ielts-card {
+            background: linear-gradient(135deg, #020617 0%, #1e1b4b 35%, #4c1d95 65%, #7c3aed 100%);
+            box-shadow: 0 10px 36px -8px rgba(0, 0, 0, 0.7),
+                        0 0 0 1px rgba(124, 58, 237, 0.18) inset;
+        }
+        .home-ielts-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 18px 50px -12px rgba(124, 58, 237, 0.6),
+                        0 8px 22px -8px rgba(15, 23, 42, 0.5);
+        }
+        .home-ielts-orbs {
+            position: absolute; inset: 0;
+            pointer-events: none; z-index: 0;
+        }
+        .home-ielts-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.55;
+            transition: opacity .35s ease, transform .8s cubic-bezier(.2,.8,.2,1);
+        }
+        .home-ielts-orb-a {
+            width: 320px; height: 320px;
+            top: -120px; right: -80px;
+            background: radial-gradient(circle, #ec4899 0%, transparent 70%);
+        }
+        .home-ielts-orb-b {
+            width: 280px; height: 280px;
+            bottom: -100px; left: -60px;
+            background: radial-gradient(circle, #06b6d4 0%, transparent 70%);
+            opacity: 0.4;
+        }
+        .home-ielts-card:hover .home-ielts-orb-a { transform: translate(-10px, 10px); opacity: 0.7; }
+        .home-ielts-card:hover .home-ielts-orb-b { transform: translate(10px, -10px); opacity: 0.55; }
+
+        .home-ielts-grid {
+            position: relative; z-index: 1;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 1.5rem;
+            align-items: center;
+            padding: 2.25rem 2.5rem;
+        }
+        .home-ielts-content { min-width: 0; }
+
+        .home-ielts-eyebrow {
+            display: inline-flex; align-items: center; gap: 0.6rem;
+            font-size: 0.78rem; font-weight: 500;
+            color: rgba(255, 255, 255, 0.78);
+            margin-bottom: 0.8rem;
+            letter-spacing: 0.01em;
+        }
+        .home-ielts-badge {
+            display: inline-flex; align-items: center;
+            padding: 0.18rem 0.55rem;
+            background: linear-gradient(135deg, #f472b6, #ec4899);
+            color: #fff;
+            font-weight: 700; font-size: 0.7rem;
+            letter-spacing: 0.06em;
+            border-radius: 999px;
+            box-shadow: 0 2px 8px rgba(236, 72, 153, 0.45);
+        }
+        .home-ielts-title {
+            font-family: 'Source Serif 4', 'Inter', Georgia, serif;
+            font-size: 1.85rem; font-weight: 600;
+            line-height: 1.2;
+            letter-spacing: -0.025em;
+            margin: 0 0 0.6rem;
+            color: #fff;
+        }
+        .home-ielts-accent {
+            background: linear-gradient(120deg, #c4b5fd 0%, #f0abfc 50%, #fda4af 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .home-ielts-desc {
+            margin: 0 0 1.25rem;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.78);
+            max-width: 580px;
+        }
+        .home-ielts-skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .home-ielts-skill {
+            display: inline-flex; align-items: center;
+            font-size: 0.82rem; font-weight: 500;
+            padding: 0.4rem 0.85rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            color: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            transition: background .2s ease, transform .2s ease;
+        }
+        .home-ielts-skill-icon {
+            margin-right: 0.4rem;
+            font-size: 1rem;
+            line-height: 1;
+        }
+        .home-ielts-card:hover .home-ielts-skill {
+            background: rgba(255, 255, 255, 0.14);
+        }
+
+        .home-ielts-cta-wrap { display: flex; align-items: center; }
+        .home-ielts-cta {
+            display: inline-flex; align-items: center; gap: 0.55rem;
+            padding: 0.85rem 1.4rem;
+            background: rgba(255, 255, 255, 0.95);
+            color: #4c1d95;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border-radius: 12px;
+            transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+            box-shadow: 0 4px 14px -4px rgba(0, 0, 0, 0.25);
+            white-space: nowrap;
+        }
+        .home-ielts-card:hover .home-ielts-cta {
+            transform: translateX(4px);
+            background: #fff;
+            box-shadow: 0 8px 22px -6px rgba(0, 0, 0, 0.3);
+        }
+        .home-ielts-cta svg {
+            transition: transform .25s ease;
+        }
+        .home-ielts-card:hover .home-ielts-cta svg {
+            transform: translateX(2px);
+        }
+
+        @media (max-width: 760px) {
+            .home-ielts-grid {
+                grid-template-columns: 1fr;
+                padding: 1.75rem 1.5rem 1.85rem;
+                gap: 1.25rem;
+            }
+            .home-ielts-title { font-size: 1.4rem; }
+            .home-ielts-cta { width: 100%; justify-content: center; }
+            .home-ielts-orb-a { width: 220px; height: 220px; }
+            .home-ielts-orb-b { width: 200px; height: 200px; }
+        }
+    </style>
+
     <!-- Vendors: KaTeX + jsQR -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -108,25 +272,40 @@
 
         <!-- IELTS Feature Card — entry point for the IELTS skill suite -->
         <section class="home-ielts-feature" aria-label="Luyện thi IELTS">
-            <a href="/ielts/" class="home-ielts-card">
-                <div class="home-ielts-glow" aria-hidden="true"></div>
-                <div class="home-ielts-content">
-                    <div class="home-ielts-eyebrow">
-                        <span class="home-ielts-badge">Mới</span>
-                        <span>Luyện thi IELTS chuyên sâu</span>
-                    </div>
-                    <h2 class="home-ielts-title">4 kỹ năng IELTS · AI chấm theo rubric chính thức</h2>
-                    <p class="home-ielts-desc">Reading, Listening, Writing, Speaking với đề thật, ghi âm trực tiếp và phản hồi chi tiết theo từng tiêu chí band.</p>
-                    <div class="home-ielts-skills">
-                        <span class="home-ielts-skill" data-skill="reading">📖 Reading</span>
-                        <span class="home-ielts-skill" data-skill="listening">🎧 Listening</span>
-                        <span class="home-ielts-skill" data-skill="writing">✍️ Writing</span>
-                        <span class="home-ielts-skill" data-skill="speaking">🎤 Speaking</span>
-                    </div>
+            <a href="/ielts/" class="home-ielts-card" id="ieltsHomeCard">
+                <div class="home-ielts-orbs" aria-hidden="true">
+                    <span class="home-ielts-orb home-ielts-orb-a"></span>
+                    <span class="home-ielts-orb home-ielts-orb-b"></span>
                 </div>
-                <div class="home-ielts-cta" aria-hidden="true">
-                    <span>Vào IELTS</span>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                <div class="home-ielts-grid">
+                    <div class="home-ielts-content">
+                        <div class="home-ielts-eyebrow">
+                            <span class="home-ielts-badge">MỚI</span>
+                            <span>Luyện thi IELTS chuyên sâu</span>
+                        </div>
+                        <h2 class="home-ielts-title">4 kỹ năng IELTS<br><span class="home-ielts-accent">AI chấm theo rubric chính thức</span></h2>
+                        <p class="home-ielts-desc">Đề thật, ghi âm trực tiếp trên trình duyệt và phản hồi chi tiết theo từng tiêu chí band.</p>
+                        <div class="home-ielts-skills">
+                            <span class="home-ielts-skill">
+                                <span class="home-ielts-skill-icon">📖</span>Reading
+                            </span>
+                            <span class="home-ielts-skill">
+                                <span class="home-ielts-skill-icon">🎧</span>Listening
+                            </span>
+                            <span class="home-ielts-skill">
+                                <span class="home-ielts-skill-icon">✍️</span>Writing
+                            </span>
+                            <span class="home-ielts-skill">
+                                <span class="home-ielts-skill-icon">🎤</span>Speaking
+                            </span>
+                        </div>
+                    </div>
+                    <div class="home-ielts-cta-wrap">
+                        <div class="home-ielts-cta">
+                            <span>Vào luyện IELTS</span>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </div>
+                    </div>
                 </div>
             </a>
         </section>

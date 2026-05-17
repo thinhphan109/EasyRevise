@@ -427,12 +427,12 @@
                     document.getElementById('recordTime').textContent = R.formatTime(sec);
                 }, 1000);
             } catch (e) {
-                alert('Không thể truy cập microphone: ' + e.message);
+                window.notifyPopup({ title: 'Không truy cập được microphone', message: e.message, type: 'error' });
             }
         }
 
         async function autoTranscribe() {
-            if (!state.audioBlob) return alert('Hãy ghi âm trước.');
+            if (!state.audioBlob) { window.notifyPopup({ message: 'Hãy ghi âm trước.', type: 'warning' }); return; }
             const btn = document.getElementById('transcribeBtn');
             btn.disabled = true;
             btn.textContent = '⏳ Đang chuyển...';
@@ -465,10 +465,19 @@
             if (state.isComplete) return;
             const transcript = document.getElementById('transcriptInput').value.trim();
             if (transcript.length < 30) {
-                alert('Cần transcript dài ít nhất 30 ký tự để AI chấm.');
+                window.notifyPopup({ message: 'Cần transcript dài ít nhất 30 ký tự để AI chấm.', type: 'warning' });
                 return;
             }
-            if (!confirm('Nộp bài cho AI chấm?')) return;
+            if (window.confirmPopup) {
+                const ok = await window.confirmPopup({
+                    title: 'Nộp bài cho AI chấm?',
+                    message: `Transcript hiện ${transcript.length} ký tự. Sau khi nộp bạn không thể chỉnh sửa.`,
+                    confirmText: 'Nộp bài',
+                    cancelText: 'Tiếp tục',
+                    type: 'info'
+                });
+                if (!ok) return;
+            } else if (!confirm('Nộp bài cho AI chấm?')) return;
             state.isComplete = true;
 
             document.getElementById('gradingOverlay').classList.add('is-open');
@@ -493,7 +502,7 @@
                 document.getElementById('resultModal').classList.add('is-open');
             } catch (e) {
                 document.getElementById('gradingOverlay').classList.remove('is-open');
-                alert('Chấm bài lỗi: ' + e.message);
+                window.notifyPopup({ title: 'Chấm bài lỗi', message: e.message, type: 'error' });
                 state.isComplete = false;
             }
         }
@@ -502,5 +511,7 @@
             document.getElementById('loading').textContent = 'Lỗi: ' + e.message;
         });
     </script>
+    <script src="/js/ielts-bootstrap.js"></script>
+
 </body>
 </html>
