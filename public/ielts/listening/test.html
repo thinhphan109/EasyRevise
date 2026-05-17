@@ -772,7 +772,7 @@
                 state.flat = R.flattenQuestions(state.test);
                 state.durationLeft = state.test.durationSec || 3600;
 
-                const sub = await R.startSubmission(TEST_ID);
+                const sub = await R.startWithCode('listening', TEST_ID);
                 state.submissionId = sub.id;
 
                 document.getElementById('skillLabel').textContent = `IELTS ${state.test.skill[0].toUpperCase()}${state.test.skill.slice(1)}`;

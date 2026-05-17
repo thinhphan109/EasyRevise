@@ -88,12 +88,92 @@
 
         listTests: () => api('GET', '/tests'),
         getTest: (id) => api('GET', '/tests/' + id),
-        startSubmission: (testId) => api('POST', '/tests/' + testId + '/start'),
+        startSubmission: (testId, code) =>
+            api('POST', '/tests/' + testId + '/start', code ? { code } : undefined),
         saveAnswers: (subId, answers, flags) =>
             api('POST', '/submissions/' + subId + '/answer', { answers, flags }),
         submit: (subId, answers, flags) =>
             api('POST', '/submissions/' + subId + '/submit', { answers, flags }),
         getSubmission: (id) => api('GET', '/submissions/' + id),
-        listSubmissions: () => api('GET', '/submissions')
+        listSubmissions: () => api('GET', '/submissions'),
+        verifyCode: (testId, code) =>
+            api('POST', '/tests/' + testId + '/verify-code', { code }),
+        previewCode: (testId, code) =>
+            api('POST', '/tests/' + testId + '/preview-code', { code }),
+        startWriting: (testId, code) =>
+            api('POST', '/writing/tests/' + testId + '/start', code ? { code } : undefined),
+        startSpeaking: (testId, code) =>
+            api('POST', '/speaking/tests/' + testId + '/start', code ? { code } : undefined),
+
+        // ── High-level helper: start a session, auto-prompt for code when required ──
+        // Pass `kind` = 'reading' | 'listening' | 'writing' | 'speaking'.
+        // Returns the start response on success; throws on cancel/failure.
+        async startWithCode(kind, testId) {
+            const startFn = (kind === 'writing') ? this.startWriting
+                          : (kind === 'speaking') ? this.startSpeaking
+                          : this.startSubmission;
+            const tryStart = (code) => startFn.call(this, testId, code);
+
+            try {
+                return await tryStart();
+            } catch (e) {
+                const requiresCode =
+                    e.status === 403 && /mã kích hoạt|mã này/i.test(e.message);
+                if (!requiresCode) throw e;
+            }
+
+            // Prompt the user for a code, retry up to 5 times
+            for (let attempt = 0; attempt < 5; attempt++) {
+                const code = await promptForCode(attempt);
+                if (!code) throw new Error('CODE_CANCELLED');
+                try {
+                    return await tryStart(code);
+                } catch (e) {
+                    if (e.status === 403) {
+                        if (window.notifyPopup) {
+                            window.notifyPopup({
+                                title: 'Mã không hợp lệ',
+                                message: e.message, type: 'error', duration: 3500
+                            });
+                        }
+                        continue;
+                    }
+                    throw e;
+                }
+            }
+            throw new Error('CODE_TOO_MANY_ATTEMPTS');
+        }
     };
+
+    // ── Inline modal for code entry (avoids loading another component) ──
+    function promptForCode(attempt) {
+        return new Promise((resolve) => {
+            const overlay = document.createElement('div');
+            overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px);';
+            overlay.innerHTML = `
+                <div style="background:var(--surface,#fff);color:var(--text,#1a1a1a);padding:1.75rem 1.85rem;border-radius:14px;max-width:400px;width:calc(100% - 2rem);box-shadow:0 16px 40px rgba(0,0,0,0.18);font-family:Inter,sans-serif;">
+                    <div style="font-size:0.72rem;font-weight:600;color:var(--text-muted,#888);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.4rem;">Mã kích hoạt đề thi</div>
+                    <h3 style="margin:0 0 0.45rem;font-size:1.1rem;font-weight:600;">Nhập mã để vào phòng thi</h3>
+                    <p style="margin:0 0 1rem;font-size:0.85rem;color:var(--text-2,#555);line-height:1.5;">
+                        Đề thi này được bảo vệ bằng mã kích hoạt. Nhập mã được cấp để bắt đầu làm bài.
+                    </p>
+                    <input id="_codeInp" type="text" placeholder="VD: ABCD1234" autocomplete="off" maxlength="32"
+                           style="width:100%;padding:0.7rem 0.85rem;font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;background:var(--surface-2,#f5f5f5);border:1.5px solid var(--border,#e5e5e5);border-radius:8px;color:var(--text,#1a1a1a);outline:none;transition:border-color 0.15s;" />
+                    <div style="display:flex;gap:0.55rem;margin-top:1.1rem;">
+                        <button id="_codeCancel" style="flex:1;padding:0.6rem;background:var(--surface,#fff);border:1px solid var(--border,#e5e5e5);border-radius:8px;font-family:inherit;font-size:0.88rem;cursor:pointer;">Huỷ</button>
+                        <button id="_codeOk" style="flex:1.4;padding:0.6rem;background:var(--text,#1a1a1a);color:var(--bg,#fff);border:0;border-radius:8px;font-family:inherit;font-size:0.88rem;font-weight:600;cursor:pointer;">Xác nhận</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(overlay);
+            const inp = overlay.querySelector('#_codeInp');
+            inp.focus();
+            const close = (val) => { document.body.removeChild(overlay); resolve(val); };
+            overlay.querySelector('#_codeCancel').onclick = () => close(null);
+            overlay.querySelector('#_codeOk').onclick = () => close(inp.value.trim().toUpperCase());
+            inp.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') close(inp.value.trim().toUpperCase());
+                if (e.key === 'Escape') close(null);
+            });
+        });
+    }
 })(window);

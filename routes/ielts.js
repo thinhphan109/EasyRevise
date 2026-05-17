@@ -8,6 +8,34 @@ const { gradeSubmission } = require('../lib/ielts-grader');
 const drive = require('../lib/drive');
 const { queryOne } = require('../lib/repos/_pool');
 
+// ── Helper: enforce per-test activation code (mirrors TracNghiem flow) ─
+async function enforceAccessCode(req, test) {
+    if (!test.requiresCode) return { ok: true };
+    const inputCode = (req.body.code || '').toUpperCase().trim();
+    if (!inputCode) return { ok: false, status: 403, error: 'Đề này yêu cầu mã kích hoạt' };
+    const loaded = await repos.ieltsCodes.loadCodeForTest(inputCode, test.id);
+    if (!loaded) return { ok: false, status: 403, error: 'Mã kích hoạt không đúng' };
+    const { code } = loaded;
+
+    // Auto-expire stale in-progress usages
+    const settings = await repos.settings.getAll();
+    const expireMs = (settings.codeExpireHours || 24) * 60 * 60 * 1000;
+    await repos.ieltsCodes.deleteStaleInProgress(inputCode, expireMs);
+
+    const usages = await repos.ieltsCodes.listUsages(inputCode);
+    const completedUses = usages.filter(u => u.completed).length;
+    if (completedUses >= code.max_uses) {
+        return { ok: false, status: 403, error: `Mã này đã dùng hết ${code.max_uses} lần` };
+    }
+    if (code.max_attempts > 0) {
+        const userDone = usages.filter(u => u.userId === req.user.id && u.completed).length;
+        if (userDone >= code.max_attempts) {
+            return { ok: false, status: 403, error: `Bạn đã hết lượt làm bài (tối đa ${code.max_attempts} lần)` };
+        }
+    }
+    return { ok: true, code: inputCode };
+}
+
 // ── Audio stream: prefer Drive mirror, fall back to youpass.vn ─────────
 // Public so audio works without auth (player can't send Bearer header
 // inside <audio> tag). Throttling is implicit via Drive quota.
@@ -74,9 +102,20 @@ router.post('/tests/:id/start', authMiddleware, async (req, res, next) => {
     try {
         const test = await repos.ielts.getTestById(req.params.id);
         if (!test || !test.isPublished) return res.status(404).json({ error: 'Test not found' });
+        const gate = await enforceAccessCode(req, test);
+        if (!gate.ok) return res.status(gate.status).json({ error: gate.error });
+
         const sub = await repos.ielts.startSubmission({
             testId: req.params.id, userId: req.user.id
         });
+        if (gate.code) {
+            await repos.ieltsCodes.recordUsage({
+                code: gate.code, userId: req.user.id,
+                displayName: req.user.displayName || req.user.username,
+                submissionKind: test.skill === 'listening' ? 'listening' : 'reading',
+                submissionId: sub.id
+            });
+        }
         res.status(201).json({ id: sub.id, startedAt: sub.startedAt });
     } catch (e) { next(e); }
 });
@@ -139,6 +178,14 @@ router.post('/submissions/:id/submit', authMiddleware, async (req, res, next) =>
             perQuestion: graded.perQuestion,
             durationSec
         });
+
+        // Best-effort: mark the linked code usage as completed
+        await repos.ieltsCodes.markUsageCompleted({
+            submissionKind: test.skill === 'listening' ? 'listening' : 'reading',
+            submissionId: finalized.id,
+            score: band,
+            result: { raw: graded.raw, total: graded.total }
+        }).catch(() => {});
 
         res.json({
             id: finalized.id,
@@ -375,11 +422,23 @@ router.get('/writing/tests/:id', async (req, res, next) => {
 
 router.post('/writing/tests/:id/start', authMiddleware, async (req, res, next) => {
     try {
+        const test = await repos.ielts.getTestById(req.params.id);
+        if (!test) return res.status(404).json({ error: 'Test not found' });
+        const gate = await enforceAccessCode(req, test);
+        if (!gate.ok) return res.status(gate.status).json({ error: gate.error });
+
         const prompt = await repos.ielts.getWritingPromptByTestId(req.params.id);
         if (!prompt) return res.status(404).json({ error: 'Prompt missing' });
         const sub = await repos.ielts.createWritingSubmission({
             promptId: prompt.id, userId: req.user.id
         });
+        if (gate.code) {
+            await repos.ieltsCodes.recordUsage({
+                code: gate.code, userId: req.user.id,
+                displayName: req.user.displayName || req.user.username,
+                submissionKind: 'writing', submissionId: sub.id
+            });
+        }
         res.status(201).json({ id: sub.id, startedAt: sub.started_at });
     } catch (e) { next(e); }
 });
@@ -460,6 +519,12 @@ router.post('/writing/submissions/:id/submit', authMiddleware, async (req, res, 
         const finalized = await repos.ielts.finalizeWritingSubmission(req.params.id, {
             ...grade, aiFeedback: grade.feedback, durationSec
         });
+        await repos.ieltsCodes.markUsageCompleted({
+            submissionKind: 'writing',
+            submissionId: finalized.id,
+            score: Number(finalized.band_overall),
+            result: { degraded }
+        }).catch(() => {});
         res.json({
             id: finalized.id,
             wordCount: finalized.word_count,
@@ -514,11 +579,23 @@ router.get('/speaking/tests/:id', async (req, res, next) => {
 
 router.post('/speaking/tests/:id/start', authMiddleware, async (req, res, next) => {
     try {
+        const test = await repos.ielts.getTestById(req.params.id);
+        if (!test) return res.status(404).json({ error: 'Test not found' });
+        const gate = await enforceAccessCode(req, test);
+        if (!gate.ok) return res.status(gate.status).json({ error: gate.error });
+
         const part = await repos.ielts.getSpeakingPartByTestId(req.params.id);
         if (!part) return res.status(404).json({ error: 'Part missing' });
         const sub = await repos.ielts.createSpeakingSubmission({
             speakingPartId: part.id, userId: req.user.id
         });
+        if (gate.code) {
+            await repos.ieltsCodes.recordUsage({
+                code: gate.code, userId: req.user.id,
+                displayName: req.user.displayName || req.user.username,
+                submissionKind: 'speaking', submissionId: sub.id
+            });
+        }
         res.status(201).json({ id: sub.id, startedAt: sub.started_at });
     } catch (e) { next(e); }
 });
@@ -580,6 +657,12 @@ router.post('/speaking/submissions/:id/submit', authMiddleware, async (req, res,
         const finalized = await repos.ielts.finalizeSpeakingSubmission(req.params.id, {
             audioDriveId, audioUrl, transcript, ...grade, aiFeedback: grade.feedback, durationSec
         });
+        await repos.ieltsCodes.markUsageCompleted({
+            submissionKind: 'speaking',
+            submissionId: finalized.id,
+            score: Number(finalized.band_overall),
+            result: { degraded }
+        }).catch(() => {});
         res.json({
             id: finalized.id, transcript: finalized.transcript,
             band: {

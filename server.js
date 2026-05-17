@@ -175,6 +175,10 @@ app.use('/api/admin', require('./routes/backup-cron'));
 // IELTS Reading
 app.use('/api/ielts', require('./routes/ielts'));
 
+// IELTS Activation Codes (per-test) — mounted at /api/ielts/tests so paths
+// look like /api/ielts/tests/:testId/codes (mirrors /api/exams/:id/codes).
+app.use('/api/ielts/tests', require('./routes/ielts-codes'));
+
 // Admin Drive monitor + re-auth
 app.use('/api/admin/drive', require('./routes/admin-drive'));
 app.use('/api/admin/settings', require('./routes/admin-settings'));

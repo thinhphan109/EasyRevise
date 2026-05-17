@@ -303,6 +303,37 @@
         </div>
     </div>
 
+    <!-- Codes management modal -->
+    <div class="modal-backdrop" id="codesModal">
+        <div class="modal" style="max-width:680px;">
+            <h3 id="codesTitle">Mã kích hoạt</h3>
+            <div style="font-size:0.82rem;color:var(--text-2);margin-bottom:1rem;" id="codesSubtitle"></div>
+
+            <div style="display:flex;gap:0.5rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:0.85rem;padding:0.75rem;background:var(--surface-2);border-radius:8px;">
+                <div class="field" style="margin:0;flex:1;min-width:90px;">
+                    <label>Số mã</label>
+                    <input id="codeCount" type="number" value="5" min="1" max="100">
+                </div>
+                <div class="field" style="margin:0;flex:1;min-width:120px;">
+                    <label>Lượt dùng / mã</label>
+                    <input id="codeMaxUses" type="number" value="1" min="1">
+                </div>
+                <div class="field" style="margin:0;flex:1;min-width:120px;">
+                    <label>Lượt / học sinh</label>
+                    <input id="codeMaxAttempts" type="number" value="0" min="0" placeholder="0 = không giới hạn">
+                </div>
+                <button class="btn btn-primary" id="codeCreateBtn">+ Sinh mã</button>
+            </div>
+
+            <div id="codesList" style="max-height:340px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;">
+                <div class="loading">Đang tải…</div>
+            </div>
+            <div class="actions">
+                <button class="btn" id="codesCloseBtn">Đóng</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const PAGE_SIZE = 25;
         const state = {
@@ -382,6 +413,7 @@
                         <div class="row-actions">
                             <button class="icon-btn" data-act="open" title="Xem">👁</button>
                             <button class="icon-btn" data-act="edit" title="Sửa">✎</button>
+                            <button class="icon-btn" data-act="codes" title="Mã kích hoạt">🔑</button>
                             <button class="icon-btn" data-act="toggle" title="${t.isPublished ? 'Unpublish' : 'Publish'}">${t.isPublished ? '⏸' : '▶'}</button>
                             <button class="icon-btn danger" data-act="delete" title="Xoá">✕</button>
                         </div>
@@ -441,6 +473,8 @@
                 window.open(path, '_blank');
             } else if (act === 'edit') {
                 openEditModal(test);
+            } else if (act === 'codes') {
+                openCodesModal(test);
             } else if (act === 'toggle') {
                 try {
                     await api('POST', `/admin/tests/${id}/${test.isPublished ? 'unpublish' : 'publish'}`);
@@ -539,6 +573,92 @@
                 await load();
             } catch (err) { alert('Lỗi bulk: ' + err.message); }
         }
+
+        // ── Activation codes management ──
+        const codesState = { test: null };
+        async function openCodesModal(test) {
+            codesState.test = test;
+            document.getElementById('codesTitle').textContent = `Mã kích hoạt · ${test.title}`;
+            document.getElementById('codesSubtitle').innerHTML =
+                `${test.skill.toUpperCase()} · ${test.module || 'academic'} · `
+                + (test.requiresCode
+                    ? '<span style="color:var(--success);font-weight:600;">Đang yêu cầu mã</span>'
+                    : '<span style="color:var(--text-muted);">Chưa yêu cầu mã (sẽ tự bật khi tạo mã đầu tiên)</span>');
+            document.getElementById('codesModal').classList.add('is-open');
+            await loadCodes();
+        }
+        function closeCodesModal() {
+            document.getElementById('codesModal').classList.remove('is-open');
+            codesState.test = null;
+        }
+        async function loadCodes() {
+            const list = document.getElementById('codesList');
+            list.innerHTML = '<div class="loading">Đang tải…</div>';
+            try {
+                const codes = await api('GET', `/tests/${codesState.test.id}/codes`);
+                if (!codes.length) {
+                    list.innerHTML = '<div class="empty">Chưa có mã nào.</div>';
+                    return;
+                }
+                list.innerHTML = `<table style="width:100%;">
+                    <thead><tr>
+                        <th style="width:130px;">Mã</th>
+                        <th style="width:110px;">Dùng / Tối đa</th>
+                        <th style="width:120px;">Lượt / HS</th>
+                        <th>Tạo lúc</th>
+                        <th style="width:85px;text-align:right;">Actions</th>
+                    </tr></thead>
+                    <tbody>${codes.map(c => `
+                        <tr data-code="${c.code}">
+                            <td><code style="font-family:'JetBrains Mono',monospace;font-weight:600;letter-spacing:0.05em;">${escapeHtml(c.code)}</code></td>
+                            <td class="col-meta">${c.used_count} / ${c.max_uses}${c.in_progress_count ? ` <span style="color:var(--warning);">(+${c.in_progress_count} đang làm)</span>` : ''}</td>
+                            <td class="col-meta">${c.max_attempts || '∞'}</td>
+                            <td class="col-meta">${new Date(c.created_at).toLocaleString('vi-VN')}</td>
+                            <td>
+                                <div class="row-actions">
+                                    <button class="icon-btn" data-act="copy" title="Sao chép">⧉</button>
+                                    <button class="icon-btn danger" data-act="del" title="Xoá">✕</button>
+                                </div>
+                            </td>
+                        </tr>`).join('')}</tbody>
+                </table>`;
+                list.querySelectorAll('button.icon-btn').forEach(b =>
+                    b.addEventListener('click', onCodeAction));
+            } catch (e) {
+                list.innerHTML = `<div class="empty">Lỗi: ${escapeHtml(e.message)}</div>`;
+            }
+        }
+        async function onCodeAction(e) {
+            const tr = e.target.closest('tr');
+            const code = tr.dataset.code;
+            const act = e.target.dataset.act;
+            if (act === 'copy') {
+                try { await navigator.clipboard.writeText(code); e.target.textContent = '✓'; setTimeout(() => e.target.textContent = '⧉', 1200); }
+                catch { alert('Không sao chép được'); }
+            } else if (act === 'del') {
+                if (!confirm(`Xoá mã ${code}? Tất cả lượt đang dùng sẽ bị huỷ.`)) return;
+                try {
+                    await api('DELETE', `/tests/${codesState.test.id}/codes/${code}`);
+                    await loadCodes();
+                } catch (err) { alert(err.message); }
+            }
+        }
+        async function createCodes() {
+            const count = Number(document.getElementById('codeCount').value) || 1;
+            const maxUses = Number(document.getElementById('codeMaxUses').value) || 1;
+            const maxAttempts = Number(document.getElementById('codeMaxAttempts').value) || 0;
+            try {
+                await api('POST', `/tests/${codesState.test.id}/codes`,
+                    { count, maxUses, maxAttempts });
+                // Refresh requiresCode flag locally
+                codesState.test.requiresCode = true;
+                document.getElementById('codesSubtitle').innerHTML =
+                    `${codesState.test.skill.toUpperCase()} · ${codesState.test.module || 'academic'} · <span style="color:var(--success);font-weight:600;">Đang yêu cầu mã</span>`;
+                await loadCodes();
+            } catch (err) { alert(err.message); }
+        }
+        document.getElementById('codeCreateBtn').addEventListener('click', createCodes);
+        document.getElementById('codesCloseBtn').addEventListener('click', closeCodesModal);
 
         load();
     </script>

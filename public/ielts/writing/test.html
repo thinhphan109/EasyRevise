@@ -354,7 +354,7 @@
             state.test = data.test;
             state.prompt = data.prompt;
 
-            const sub = await R.api('POST', '/writing/tests/' + TEST_ID + '/start');
+            const sub = await R.startWithCode('writing', TEST_ID);
             state.submissionId = sub.id;
             state.durationLeft = state.prompt.timeLimitSec || (state.prompt.taskType === 1 ? 1200 : 2400);
 

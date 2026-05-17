@@ -340,7 +340,7 @@
             const data = await R.api('GET', '/speaking/tests/' + TEST_ID);
             state.test = data.test;
             state.part = data.part;
-            const sub = await R.api('POST', '/speaking/tests/' + TEST_ID + '/start');
+            const sub = await R.startWithCode('speaking', TEST_ID);
             state.submissionId = sub.id;
             render();
         }
