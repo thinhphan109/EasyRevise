@@ -12,7 +12,6 @@
     "build": "node build.js",
     "build:watch": "node build.js --watch",
     "build:prod": "node build.js --prod",
-    "seed": "node seed.js",
     "migrate": "node scripts/ielts/run-migrations.mjs",
     "migrate:passwords": "node scripts/migrate-passwords.js"
   },
