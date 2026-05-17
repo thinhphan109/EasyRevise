@@ -244,6 +244,7 @@
             <span style="flex:1;"></span>
             <button class="btn" id="bulkPublish">▶ Publish</button>
             <button class="btn" id="bulkUnpublish">⏸ Unpublish</button>
+            <button class="btn" id="bulkTag">🏷 Tag</button>
             <button class="btn" id="bulkDelete" style="color:var(--danger);border-color:var(--danger-soft);">✕ Xoá</button>
             <button class="btn" id="bulkClear">Bỏ chọn</button>
         </div>
@@ -335,6 +336,50 @@
             <div class="actions">
                 <button class="btn" id="cancelBtn">Huỷ</button>
                 <button class="btn btn-primary" id="saveBtn">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk-tag modal -->
+    <div class="modal-backdrop" id="bulkTagModal">
+        <div class="modal" style="max-width:560px;">
+            <h3>Gán nhãn hàng loạt</h3>
+            <div style="font-size:0.82rem;color:var(--text-2);margin-bottom:1rem;" id="bulkTagSubtitle"></div>
+
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:0.6rem;">
+                <div class="field"><label>Category</label>
+                    <input id="bt_category" list="_categoryList" type="text" placeholder="— giữ nguyên —">
+                </div>
+                <div class="field"><label>Topic</label>
+                    <input id="bt_topic" list="_topicList" type="text" placeholder="— giữ nguyên —">
+                </div>
+                <div class="field"><label>Level</label>
+                    <select id="bt_level">
+                        <option value="__SKIP__">— giữ nguyên —</option>
+                        <option value="">(xóa level)</option>
+                        <option value="foundation">Foundation</option>
+                        <option value="target_5_5">Target 5.5</option>
+                        <option value="target_6_5">Target 6.5</option>
+                        <option value="target_7_plus">Target 7+</option>
+                    </select>
+                </div>
+                <div class="field"><label>Year</label>
+                    <input id="bt_year" type="number" placeholder="— giữ nguyên —">
+                </div>
+            </div>
+
+            <div class="field"><label>Tags (csv)</label>
+                <input id="bt_tags" type="text" placeholder="vd: cambridge18, recent">
+            </div>
+            <div class="field" style="display:flex;gap:1rem;align-items:center;font-size:0.85rem;color:var(--text-2);">
+                <label style="text-transform:none;letter-spacing:0;color:var(--text);font-weight:500;"><input type="radio" name="bt_tagsMode" value="merge" checked style="width:auto;margin:0 0.4rem 0 0;"> Thêm (merge)</label>
+                <label style="text-transform:none;letter-spacing:0;color:var(--text);font-weight:500;"><input type="radio" name="bt_tagsMode" value="replace" style="width:auto;margin:0 0.4rem 0 0;"> Thay thế</label>
+                <label style="text-transform:none;letter-spacing:0;color:var(--text);font-weight:500;"><input type="radio" name="bt_tagsMode" value="remove" style="width:auto;margin:0 0.4rem 0 0;"> Loại bỏ</label>
+            </div>
+
+            <div class="actions">
+                <button class="btn" id="bulkTagCancel">Huỷ</button>
+                <button class="btn btn-primary" id="bulkTagApply">Áp dụng</button>
             </div>
         </div>
     </div>
@@ -605,6 +650,54 @@
         document.getElementById('bulkUnpublish').addEventListener('click', () => bulkAct('unpublish', 'Unpublish'));
         document.getElementById('bulkDelete').addEventListener('click', () => bulkAct('delete', 'Xoá'));
         document.getElementById('bulkClear').addEventListener('click', () => { state.selected.clear(); render(); });
+
+        // ── Bulk tag flow ──
+        document.getElementById('bulkTag').addEventListener('click', () => {
+            const n = state.selected.size;
+            if (!n) return;
+            document.getElementById('bulkTagSubtitle').textContent = `Sẽ áp dụng cho ${n} đề. Để trống trường để giữ nguyên.`;
+            document.getElementById('bt_category').value = '';
+            document.getElementById('bt_topic').value = '';
+            document.getElementById('bt_level').value = '__SKIP__';
+            document.getElementById('bt_year').value = '';
+            document.getElementById('bt_tags').value = '';
+            document.querySelector('input[name=bt_tagsMode][value=merge]').checked = true;
+            document.getElementById('bulkTagModal').classList.add('is-open');
+        });
+        document.getElementById('bulkTagCancel').addEventListener('click', () => {
+            document.getElementById('bulkTagModal').classList.remove('is-open');
+        });
+        document.getElementById('bulkTagApply').addEventListener('click', async () => {
+            const ids = Array.from(state.selected);
+            if (!ids.length) return;
+            const payload = {};
+            const cat = document.getElementById('bt_category').value.trim();
+            const top = document.getElementById('bt_topic').value.trim();
+            const lvl = document.getElementById('bt_level').value;
+            const yr  = document.getElementById('bt_year').value.trim();
+            const tags = document.getElementById('bt_tags').value.split(',').map(s => s.trim()).filter(Boolean);
+            const mode = document.querySelector('input[name=bt_tagsMode]:checked').value;
+            if (cat !== '') payload.category = cat;
+            if (top !== '') payload.topic = top;
+            if (lvl !== '__SKIP__') payload.level = lvl;
+            if (yr  !== '') payload.year  = Number(yr) || null;
+            if (tags.length) { payload.tags = tags; payload.tagsMode = mode; }
+            if (!Object.keys(payload).length) return alert('Chưa nhập trường nào.');
+
+            try {
+                const r = await fetch('/api/admin/ielts/tests/bulk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + getToken() },
+                    body: JSON.stringify({ ids, action: 'tag', payload })
+                });
+                if (!r.ok) throw new Error(await r.text());
+                const data = await r.json();
+                document.getElementById('bulkTagModal').classList.remove('is-open');
+                alert(`Đã áp dụng cho ${data.affected || data.count} đề.`);
+                state.selected.clear();
+                await load();
+            } catch (err) { alert('Lỗi: ' + err.message); }
+        });
 
         async function bulkAct(action, label) {
             const ids = Array.from(state.selected);

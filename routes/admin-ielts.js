@@ -90,15 +90,15 @@ router.put('/users/:id/quota', adminOnly, async (req, res, next) => {
     } catch (e) { next(e); }
 });
 
-// ── Bulk publish/unpublish IELTS tests ───────────────────────────────
+// ── Bulk publish/unpublish/delete/tag IELTS tests ────────────────────
 router.post('/tests/bulk', adminOnly, async (req, res, next) => {
     try {
-        const { ids, action } = req.body || {};
+        const { ids, action, payload } = req.body || {};
         if (!Array.isArray(ids) || !ids.length) {
             return res.status(400).json({ error: 'ids required (non-empty array)' });
         }
-        if (!['publish', 'unpublish', 'delete'].includes(action)) {
-            return res.status(400).json({ error: 'action must be publish|unpublish|delete' });
+        if (!['publish', 'unpublish', 'delete', 'tag'].includes(action)) {
+            return res.status(400).json({ error: 'action must be publish|unpublish|delete|tag' });
         }
 
         let affected = 0;
@@ -113,6 +113,46 @@ router.post('/tests/bulk', adminOnly, async (req, res, next) => {
             const r = await query(
                 `DELETE FROM ielts_tests WHERE id = ANY($1::uuid[])`,
                 [ids]
+            );
+            affected = r.length || ids.length;
+        } else if (action === 'tag') {
+            // payload: { category?, topic?, level?, year?, tags?, tagsMode? }
+            // tagsMode: 'merge' (default) | 'replace' | 'remove'
+            const p = payload || {};
+            const sets = [];
+            const params = [];
+            for (const [k, col] of Object.entries({
+                category: 'category', topic: 'topic', level: 'level', year: 'year'
+            })) {
+                if (k in p) {
+                    params.push(p[k] === '' ? null : p[k]);
+                    sets.push(`${col} = $${params.length}`);
+                }
+            }
+            // Tags: support replace / merge / remove
+            if (Array.isArray(p.tags) && p.tags.length) {
+                const mode = p.tagsMode || 'merge';
+                params.push(JSON.stringify(p.tags));
+                if (mode === 'replace') {
+                    sets.push(`tags = $${params.length}::jsonb`);
+                } else if (mode === 'remove') {
+                    // Remove given tags from existing tags array
+                    sets.push(`tags = (SELECT COALESCE(jsonb_agg(t), '[]'::jsonb)
+                                          FROM jsonb_array_elements(tags) t
+                                         WHERE NOT (t::text = ANY(SELECT to_jsonb(x)::text FROM jsonb_array_elements_text($${params.length}::jsonb) x)))`);
+                } else {
+                    // merge (default): tags ∪ new
+                    sets.push(`tags = (SELECT COALESCE(jsonb_agg(DISTINCT t), '[]'::jsonb)
+                                          FROM jsonb_array_elements(tags || $${params.length}::jsonb) t)`);
+                }
+            }
+            if (!sets.length) return res.status(400).json({ error: 'No taxonomy fields supplied in payload' });
+
+            params.push(ids);
+            const r = await query(
+                `UPDATE ielts_tests SET ${sets.join(', ')}, updated_at = now()
+                  WHERE id = ANY($${params.length}::uuid[])`,
+                params
             );
             affected = r.length || ids.length;
         }

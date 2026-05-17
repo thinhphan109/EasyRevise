@@ -143,6 +143,37 @@
         }
         .empty h2 { margin: 0 0 0.5rem; font-family: 'Source Serif 4', Georgia, serif; }
 
+        /* Skeleton loaders — shown while initial fetch is in flight */
+        .card.skeleton {
+            cursor: default; pointer-events: none;
+        }
+        .skeleton-line {
+            background: linear-gradient(90deg,
+                var(--surface-2) 0%, var(--border) 50%, var(--surface-2) 100%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+            border-radius: 4px; height: 0.85rem;
+        }
+        .skeleton-line.lg { height: 1.1rem; width: 75%; }
+        .skeleton-line.sm { height: 0.7rem; width: 40%; }
+        @keyframes shimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Facet bar — collapsible on mobile */
+        #facetBar { position: relative; }
+        .facet-toggle {
+            display: none;
+            margin-bottom: 0.5rem;
+            padding: 0.45rem 0.85rem;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 7px; font: inherit; font-size: 0.85rem;
+            cursor: pointer; color: var(--text);
+        }
+        .facet-toggle::after { content: ' ▾'; opacity: 0.6; }
+        #facetBar.is-collapsed .facet-groups { display: none; }
+
         .pagination {
             margin-top: 1.5rem; display: flex; justify-content: center;
             gap: 0.5rem; align-items: center;
@@ -158,6 +189,18 @@
         .page-btn:hover { background: var(--surface-2); border-color: var(--border-strong); }
         .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .page-info { font-size: 0.85rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+        @media (max-width: 720px) {
+            .container { padding: 1rem 0.85rem 3rem; }
+            .grid { grid-template-columns: 1fr; gap: 0.65rem; }
+            .card { padding: 0.95rem 1.05rem; }
+            .hero h1 { font-size: 1.6rem; }
+            .facet-toggle { display: inline-flex; align-items: center; gap: 0.4rem; }
+            #facetBar.is-collapsed .facet-groups { display: none; }
+            #facetBar:not(.is-collapsed) .facet-groups {
+                display: flex; flex-direction: column; gap: 0.55rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -358,15 +401,26 @@
             ].filter(g => g.items && g.items.length);
             if (!groups.length) { bar.hidden = true; return; }
             bar.hidden = false;
-            bar.innerHTML = groups.map(g => `
-                <div style="display:flex;flex-wrap:wrap;gap:0.4rem;align-items:center;">
-                    <span style="font-size:0.7rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;min-width:64px;">${g.label}</span>
-                    <button class="chip ${facetState[g.key] === '' ? 'active' : ''}" data-fkey="${g.key}" data-fval="">Tất cả</button>
-                    ${g.items.map(it => `
-                        <button class="chip ${facetState[g.key] === it.key ? 'active' : ''}" data-fkey="${g.key}" data-fval="${escapeHtml(it.key)}">
-                            ${escapeHtml(it.key)} <span style="opacity:0.55;font-size:0.72rem;">(${it.count})</span>
-                        </button>`).join('')}
-                </div>`).join('');
+            const activeCount = Object.values(facetState).filter(Boolean).length;
+            const startCollapsed = window.matchMedia('(max-width:720px)').matches;
+            if (startCollapsed) bar.classList.add('is-collapsed');
+            else bar.classList.remove('is-collapsed');
+
+            bar.innerHTML = `
+                <button type="button" class="facet-toggle" id="facetToggle">
+                    Bộ lọc${activeCount ? ` (đang áp ${activeCount})` : ''}
+                </button>
+                <div class="facet-groups" style="display:flex;flex-direction:column;gap:0.55rem;">
+                    ${groups.map(g => `
+                        <div style="display:flex;flex-wrap:wrap;gap:0.4rem;align-items:center;">
+                            <span style="font-size:0.7rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;min-width:64px;">${g.label}</span>
+                            <button class="chip ${facetState[g.key] === '' ? 'active' : ''}" data-fkey="${g.key}" data-fval="">Tất cả</button>
+                            ${g.items.map(it => `
+                                <button class="chip ${facetState[g.key] === it.key ? 'active' : ''}" data-fkey="${g.key}" data-fval="${escapeHtml(it.key)}">
+                                    ${escapeHtml(it.key)} <span style="opacity:0.55;font-size:0.72rem;">(${it.count})</span>
+                                </button>`).join('')}
+                        </div>`).join('')}
+                </div>`;
             bar.querySelectorAll('button.chip').forEach(b => {
                 b.addEventListener('click', () => {
                     facetState[b.dataset.fkey] = b.dataset.fval;
@@ -374,6 +428,8 @@
                     loadTests();
                 });
             });
+            const tog = document.getElementById('facetToggle');
+            if (tog) tog.addEventListener('click', () => bar.classList.toggle('is-collapsed'));
         }
 
         async function loadFacets() {
@@ -407,7 +463,29 @@
         document.getElementById('prev').addEventListener('click', () => { page--; render(); window.scrollTo(0, 0); });
         document.getElementById('next').addEventListener('click', () => { page++; render(); window.scrollTo(0, 0); });
 
+        // Initial skeleton render so users see motion immediately
+        function renderSkeleton() {
+            const grid = document.getElementById('grid');
+            grid.setAttribute('aria-busy', 'true');
+            grid.innerHTML = Array.from({ length: 6 }).map(() => `
+                <div class="card skeleton" aria-hidden="true">
+                    <div class="skeleton-line sm" style="margin-bottom:0.5rem;"></div>
+                    <div class="skeleton-line lg" style="margin-bottom:0.4rem;"></div>
+                    <div class="skeleton-line lg" style="width:55%;margin-bottom:0.85rem;"></div>
+                    <div class="skeleton-line sm" style="margin-bottom:0.65rem;"></div>
+                    <div class="skeleton-line sm" style="width:25%;"></div>
+                </div>`).join('');
+        }
+
+        // Global Esc — close any open backdrop / popup
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'Escape') return;
+            document.querySelectorAll('.modal-backdrop.is-open, .is-open[role=dialog]')
+                .forEach(el => el.classList.remove('is-open'));
+        });
+
         renderFilters();
+        renderSkeleton();
         loadFacets();
         loadTests();
     </script>
