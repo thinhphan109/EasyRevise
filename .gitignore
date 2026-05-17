@@ -67,3 +67,11 @@ public/uploads/*
 
 # Local archive
 _archive/
+
+# IELTS local PDF sources — never committed, may contain copyrighted material.
+# The folder + README + .gitkeep are tracked; files inside are not.
+source-pdfs/**
+!source-pdfs/.gitkeep
+!source-pdfs/README.md
+!source-pdfs/ielts/
+!source-pdfs/ielts/README.md
