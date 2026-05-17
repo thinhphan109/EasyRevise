@@ -38,8 +38,7 @@
 
         .topbar {
             position: sticky; top: 0; z-index: 50;
-            background: color-mix(in srgb, var(--bg) 92%, transparent);
-            backdrop-filter: blur(12px);
+            background: var(--bg);
             border-bottom: 1px solid var(--border);
             padding: 0.7rem 1.5rem;
             display: flex; justify-content: space-between; align-items: center;
@@ -275,6 +274,7 @@
         <div style="display:flex;gap:0.6rem;align-items:center;">
             <span class="save-status" id="saveStatus"></span>
             <span id="timer">--:--</span>
+            <button class="btn" id="exitBtn" title="Thoát làm bài">✕ Thoát</button>
             <button class="btn btn-primary" id="submitBtn">Nộp bài</button>
         </div>
     </div>
@@ -462,6 +462,30 @@
         }
 
         document.getElementById('submitBtn').addEventListener('click', () => submitNow(false));
+        document.getElementById('exitBtn')?.addEventListener('click', async () => {
+            if (state.isComplete) { window.location.href = '/ielts/writing'; return; }
+            const choice = await (window.confirmPopup
+                ? window.confirmPopup({
+                    title: 'Thoát khi đang viết?',
+                    message: 'Bài viết đã được lưu nháp tự động. Bạn có thể quay lại viết tiếp hoặc huỷ phiên làm bài.',
+                    confirmText: 'Huỷ phiên (mất bài viết)',
+                    cancelText: 'Lưu nháp & Thoát',
+                    type: 'warning'
+                })
+                : Promise.resolve(window.confirm('Huỷ phiên làm bài này?')));
+            if (choice) {
+                try { await R.api('DELETE', '/writing/submissions/' + state.submissionId); } catch {}
+            } else {
+                try { await R.api('POST', '/writing/submissions/' + state.submissionId + '/save', { essay: document.getElementById('essay').value }); } catch {}
+            }
+            clearInterval(state.timerHandle);
+            state.isComplete = true;
+            window.location.href = '/ielts/writing';
+        });
+        window.addEventListener('beforeunload', (e) => {
+            if (state.isComplete) return;
+            e.preventDefault(); e.returnValue = '';
+        });
 
         bootstrap().catch(e => {
             document.getElementById('loading').textContent = 'Lỗi: ' + e.message;

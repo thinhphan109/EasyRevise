@@ -36,8 +36,7 @@
 
         .topbar {
             position: sticky; top: 0; z-index: 50;
-            background: color-mix(in srgb, var(--bg) 92%, transparent);
-            backdrop-filter: blur(12px);
+            background: var(--bg);
             border-bottom: 1px solid var(--border);
             padding: 0.7rem 1.5rem;
             display: flex; justify-content: space-between; align-items: center;
@@ -382,6 +381,7 @@
                     <textarea class="transcript-input" id="transcriptInput" placeholder="Transcript sẽ hiện ở đây..."></textarea>
                     <div class="actions-row">
                         <button class="btn" id="transcribeBtn" disabled>🔤 Chuyển thành chữ</button>
+                        <button class="btn" id="exitBtn" title="Thoát">✕ Thoát</button>
                         <button class="btn btn-primary" id="submitBtn">Chấm bài AI</button>
                     </div>
                 </div>
@@ -389,6 +389,22 @@
 
             document.getElementById('recordBtn').addEventListener('click', toggleRecord);
             document.getElementById('submitBtn').addEventListener('click', submitNow);
+            document.getElementById('exitBtn')?.addEventListener('click', async () => {
+                if (state.isComplete) { window.location.href = '/ielts/speaking'; return; }
+                const choice = await (window.confirmPopup
+                    ? window.confirmPopup({
+                        title: 'Thoát khỏi bài Speaking?',
+                        message: 'Bản ghi và transcript đang chưa nộp sẽ bị huỷ. Bạn có muốn huỷ phiên làm bài không?',
+                        confirmText: 'Huỷ phiên',
+                        cancelText: 'Ở lại',
+                        type: 'warning'
+                    })
+                    : Promise.resolve(window.confirm('Huỷ phiên Speaking này?')));
+                if (!choice) return;
+                try { await R.api('DELETE', '/speaking/submissions/' + state.submissionId); } catch {}
+                state.isComplete = true;
+                window.location.href = '/ielts/speaking';
+            });
             document.getElementById('transcribeBtn').addEventListener('click', autoTranscribe);
         }
 

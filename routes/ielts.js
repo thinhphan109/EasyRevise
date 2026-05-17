@@ -192,6 +192,41 @@ router.get('/my-results', authMiddleware, async (req, res, next) => {
     } catch (e) { next(e); }
 });
 
+// ── Auth: pending (in-progress) attempts ─────────────────────────────
+//   GET /api/ielts/pending  → list draft submissions across skills
+router.get('/pending', authMiddleware, async (req, res, next) => {
+    try {
+        const items = await repos.ielts.findPendingAttempts(req.user.id);
+        res.json({ items });
+    } catch (e) { next(e); }
+});
+
+// ── Auth: abandon (delete) an in-progress submission ─────────────────
+//   DELETE /api/ielts/submissions/:id            → reading/listening
+//   DELETE /api/ielts/writing/submissions/:id    → writing
+//   DELETE /api/ielts/speaking/submissions/:id   → speaking
+router.delete('/submissions/:id', authMiddleware, async (req, res, next) => {
+    try {
+        const row = await repos.ielts.abandonReadingSubmission(req.params.id, req.user.id);
+        if (!row) return res.status(404).json({ error: 'Not found or already submitted' });
+        res.json({ ok: true, id: row.id });
+    } catch (e) { next(e); }
+});
+router.delete('/writing/submissions/:id', authMiddleware, async (req, res, next) => {
+    try {
+        const row = await repos.ielts.abandonWritingSubmission(req.params.id, req.user.id);
+        if (!row) return res.status(404).json({ error: 'Not found or already submitted' });
+        res.json({ ok: true, id: row.id });
+    } catch (e) { next(e); }
+});
+router.delete('/speaking/submissions/:id', authMiddleware, async (req, res, next) => {
+    try {
+        const row = await repos.ielts.abandonSpeakingSubmission(req.params.id, req.user.id);
+        if (!row) return res.status(404).json({ error: 'Not found or already submitted' });
+        res.json({ ok: true, id: row.id });
+    } catch (e) { next(e); }
+});
+
 // ── Admin: tests CRUD ─────────────────────────────────────────────────
 router.get('/admin/tests', adminOnly, async (req, res, next) => {
     try {

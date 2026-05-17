@@ -1,6 +1,7 @@
 // scripts/youpass/import.mjs — map staging → production ielts_* tables
 import 'dotenv/config';
 import pg from 'pg';
+import he from 'he';
 
 const pool = new pg.Pool({
     connectionString: process.env.SUPABASE_DB_URL_TX || process.env.SUPABASE_DB_URL,
@@ -31,16 +32,42 @@ function mapQuestionType(yp) {
 }
 
 function stripHtml(s) {
-    return String(s || '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+    if (s == null) return '';
+    let str = String(s);
+    // Decode entities up to 3 times for double-encoded YouPass payloads
+    for (let i = 0; i < 3; i++) {
+        const next = he.decode(str);
+        if (next === str) break;
+        str = next;
+    }
+    return str.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+// Decode entities while preserving line breaks (for prompt body/passage).
+function decodeKeepBreaks(s) {
+    if (s == null) return '';
+    let str = String(s);
+    for (let i = 0; i < 3; i++) {
+        const next = he.decode(str);
+        if (next === str) break;
+        str = next;
+    }
+    return str
+        .replace(/<\s*br\s*\/?\s*>/gi, '\n')
+        .replace(/<\/p\s*>/gi, '\n\n')
+        .replace(/<[^>]+>/g, '')
+        .replace(/[ \t]+\n/g, '\n')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
 }
 
 function parseOptions(raw) {
     if (!raw) return null;
-    if (Array.isArray(raw)) return raw.map(stripHtml);
+    if (Array.isArray(raw)) return raw.map(stripHtml).filter(Boolean);
     if (typeof raw === 'string') {
         try {
             const j = JSON.parse(raw);
-            if (Array.isArray(j)) return j.map(stripHtml);
+            if (Array.isArray(j)) return j.map(stripHtml).filter(Boolean);
         } catch {}
     }
     return null;
@@ -98,7 +125,7 @@ async function importReading(quiz, parts, questionsByPart) {
     let passageOrder = 0;
     for (const part of passageParts) {
         passageOrder++;
-        const passageBody = stripHtml(part.raw.content || part.raw.passage);
+        const passageBody = decodeKeepBreaks(part.raw.content || part.raw.passage);
         const passageId = uuidFromInt('a1eaf', part.id);
         await pool.query(
             `INSERT INTO ielts_passages (id, test_id, "order", title, body)
@@ -115,10 +142,16 @@ async function importReading(quiz, parts, questionsByPart) {
 
         let order = 0;
         for (const q of qs) {
-            order++;
             const mappedType = mapQuestionType(q.raw.type);
-            const qId = uuidFromInt('a1eaq', q.id);
+            const promptText = stripHtml(q.raw.title) || stripHtml(q.raw.gap_fill_in_blank);
+            // Skip questions with no prompt text — these were causing
+            // “Question 5/6/7” placeholders in the UI.
+            if (!promptText) continue;
+            // Skip MC questions with too-few options
             const options = parseOptions(q.raw.options) || [];
+            if ((mappedType === 'mc_single' || mappedType === 'mc_multi') && options.length < 2) continue;
+            order++;
+            const qId = uuidFromInt('a1eaq', q.id);
             const correct = parseCorrect(q.raw.correct_answer ?? q.raw.correct_answers ?? q.raw.correct);
             try {
                 await pool.query(
@@ -129,7 +162,7 @@ async function importReading(quiz, parts, questionsByPart) {
                      SET "order" = EXCLUDED."order", prompt = EXCLUDED.prompt,
                          payload = EXCLUDED.payload, correct = EXCLUDED.correct, type = EXCLUDED.type`,
                     [qId, passageId, order, mappedType,
-                     stripHtml(q.raw.title) || stripHtml(q.raw.gap_fill_in_blank) || `Question ${order}`,
+                     promptText,
                      JSON.stringify({ options, originalType: q.raw.type, locate: q.raw.locate_info }),
                      JSON.stringify(correct)]
                 );
@@ -178,10 +211,13 @@ async function importListening(quiz, parts, questionsByPart) {
         await pool.query(`DELETE FROM ielts_questions WHERE passage_id = $1`, [passageId]);
         let qOrder = 0;
         for (const q of qs) {
-            qOrder++;
             const mappedType = mapQuestionType(q.raw.type);
-            const qId = uuidFromInt('11lsqq', q.id);
+            const promptText = stripHtml(q.raw.title) || stripHtml(q.raw.gap_fill_in_blank);
+            if (!promptText) continue;
             const options = parseOptions(q.raw.options) || [];
+            if ((mappedType === 'mc_single' || mappedType === 'mc_multi') && options.length < 2) continue;
+            qOrder++;
+            const qId = uuidFromInt('11lsqq', q.id);
             const correct = parseCorrect(q.raw.correct_answer ?? q.raw.correct_answers ?? q.raw.correct);
             try {
                 await pool.query(
@@ -192,7 +228,7 @@ async function importListening(quiz, parts, questionsByPart) {
                      SET "order" = EXCLUDED."order", prompt = EXCLUDED.prompt,
                          payload = EXCLUDED.payload, correct = EXCLUDED.correct, type = EXCLUDED.type`,
                     [qId, passageId, qOrder, mappedType,
-                     stripHtml(q.raw.title) || `Question ${qOrder}`,
+                     promptText,
                      JSON.stringify({ options, originalType: q.raw.type }),
                      JSON.stringify(correct)]
                 );
@@ -234,14 +270,14 @@ async function importWriting(quiz, writingQuestions) {
                      updated_at = now()`,
                 [promptId, testId, taskType,
                  stripHtml(q.raw.description || q.raw.instruction) || (taskType === 1 ? 'Write at least 150 words.' : 'Write at least 250 words.'),
-                 stripHtml(q.raw.title) || stripHtml(q.raw.content_writing) || 'Writing prompt',
+                 decodeKeepBreaks(q.raw.content_writing || q.raw.title) || 'Writing prompt',
                  imageUrl,
                  q.raw.writing_graph_type ? `type-${q.raw.writing_graph_type}` : null,
                  taskType === 1 ? 150 : 250,
                  q.raw.max_words || null,
                  (taskType === 1 ? 20 : 40) * 60,
-                 JSON.stringify(q.raw.sample_answers ? [q.raw.sample_answers] : []),
-                 JSON.stringify({ description: q.raw.writing_graph_description }),
+                 JSON.stringify(q.raw.sample_answers ? [decodeKeepBreaks(q.raw.sample_answers)] : []),
+                 JSON.stringify({ description: stripHtml(q.raw.writing_graph_description) }),
                  String(youpassId)]
             );
             stats.questions++;

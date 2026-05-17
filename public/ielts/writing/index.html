@@ -179,6 +179,7 @@
             <p id="page-desc">Đọc đoạn văn 700-900 từ và trả lời 13 câu trong khoảng 20 phút mỗi đề.</p>
         </header>
 
+        <div id="resumeBanner" hidden style="margin-bottom:1.25rem;"></div>
         <div class="filter-row" id="filters"></div>
         <div class="search-row">
             <input class="search-input" id="search" placeholder="Tìm theo tên đề thi..." />
@@ -216,6 +217,7 @@
         let currentFilter = '';
         let currentSearch = '';
         let page = 0;
+        let pendingByRefId = new Map();
 
         function escapeHtml(s) {
             return String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -238,7 +240,14 @@
 
         function applySearch() {
             const q = currentSearch.toLowerCase().trim();
-            filtered = q ? allTests.filter(t => (t.title || '').toLowerCase().includes(q)) : allTests;
+            // Hide tests that the back-end reports as empty (question_count=0).
+            // Reading/Listening only — Writing/Speaking lists ignore questionCount.
+            const skillNeedsCount = (SKILL === 'reading' || SKILL === 'listening');
+            let pool = skillNeedsCount
+                ? allTests.filter(t => (t.questionCount ?? t.question_count ?? 1) > 0)
+                : allTests;
+            if (q) pool = pool.filter(t => (t.title || '').toLowerCase().includes(q));
+            filtered = pool;
             page = 0;
             render();
         }
@@ -255,12 +264,21 @@
             const start = page * PAGE_SIZE;
             const slice = filtered.slice(start, start + PAGE_SIZE);
             grid.innerHTML = slice.map(t => {
-                const subTitle = t.task_type ? `Task ${t.task_type}` : t.part_number ? `Part ${t.part_number}` : (t.module === 'general_training' ? 'General Training' : 'Academic');
+                const subTitle = t.task_type ? `Task ${t.task_type}` :
+                                 t.part_number ? `Part ${t.part_number}` :
+                                 (t.module === 'general_training' ? 'General Training' : 'Academic');
+                const qCount = t.questionCount ?? t.question_count;
+                const meta = qCount != null
+                    ? `${qCount} câu · ${Math.round((t.duration_sec || t.durationSec || 1800) / 60)} phút`
+                    : `${Math.round((t.duration_sec || t.durationSec || 1800) / 60)} phút`;
+                const isResume = pendingByRefId.has(String(t.id));
                 return `<article class="card" data-id="${t.id}">
-                    <span class="card-eyebrow">${escapeHtml(subTitle)} · ${escapeHtml(C.title.replace('IELTS ', ''))}</span>
+                    <span class="card-eyebrow">${escapeHtml(subTitle)} · ${escapeHtml(C.title.replace('IELTS ', ''))}
+                        ${isResume ? '<span style="margin-left:0.4rem;padding:0.05rem 0.4rem;background:var(--accent-soft);color:var(--accent);border-radius:4px;font-size:0.62rem;">ĐANG LÀM DỞ</span>' : ''}
+                    </span>
                     <h2 class="card-title">${escapeHtml(t.title)}</h2>
-                    <div class="card-meta">${escapeHtml(t.source || 'youpass.vn')} · ${Math.round((t.duration_sec || t.durationSec || 1800) / 60)} phút</div>
-                    <span class="card-cta">Bắt đầu →</span>
+                    <div class="card-meta">${escapeHtml(t.source || 'youpass.vn')} · ${meta}</div>
+                    <span class="card-cta">${isResume ? 'Tiếp tục →' : 'Bắt đầu →'}</span>
                 </article>`;
             }).join('');
             grid.querySelectorAll('.card').forEach(c => {
@@ -275,10 +293,45 @@
             document.getElementById('next').disabled = start + PAGE_SIZE >= total;
         }
 
+        async function loadPending() {
+            // Logged-in only — silently noop otherwise
+            const tok = localStorage.getItem('easyrevise_token');
+            if (!tok) return;
+            try {
+                const r = await fetch('/api/ielts/pending', { headers: { Authorization: 'Bearer ' + tok } });
+                if (!r.ok) return;
+                const { items = [] } = await r.json();
+                pendingByRefId = new Map(items
+                    .filter(it => it.kind === SKILL || (SKILL === 'listening' && it.skill === 'listening') || (SKILL === 'reading' && it.skill === 'reading'))
+                    .map(it => [String(it.refId), it]));
+                renderResumeBanner(items);
+            } catch { /* best-effort */ }
+        }
+
+        function renderResumeBanner(items) {
+            const banner = document.getElementById('resumeBanner');
+            if (!banner || !items.length) return;
+            const mine = items.filter(it =>
+                (SKILL === 'reading' && it.skill === 'reading') ||
+                (SKILL === 'listening' && it.skill === 'listening') ||
+                (SKILL === 'writing' && it.skill === 'writing') ||
+                (SKILL === 'speaking' && it.skill === 'speaking'));
+            if (!mine.length) return;
+            banner.hidden = false;
+            banner.innerHTML = `
+                <div style="padding:0.8rem 1rem;background:var(--accent-soft);border:1px solid var(--accent);border-radius:10px;display:flex;justify-content:space-between;align-items:center;gap:0.85rem;flex-wrap:wrap;">
+                    <div>
+                        <strong style="color:var(--accent);">Bạn có ${mine.length} bài đang làm dở</strong>
+                        <div style="font-size:0.8rem;color:var(--text-2);margin-top:0.15rem;">Bấm vào thẻ “Đang làm dở” để tiếp tục, hoặc xem chi tiết ở trang Kết quả.</div>
+                    </div>
+                    <a href="/ielts/my-results.html" style="font-size:0.85rem;font-weight:600;color:var(--accent);text-decoration:none;">Xem tất cả →</a>
+                </div>`;
+        }
+
         async function loadTests() {
             const url = currentFilter ? `${C.api}${C.api.includes('?') ? '&' : '?'}${currentFilter}` : C.api;
             try {
-                const r = await fetch(url);
+                const [r] = await Promise.all([fetch(url), loadPending()]);
                 allTests = await r.json();
                 applySearch();
             } catch (e) {
