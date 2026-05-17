@@ -291,6 +291,42 @@
             </div>
             <div class="field"><label>Source</label><input id="f_source" type="text" placeholder="youpass.vn"></div>
             <div class="field"><label>Thời gian (giây)</label><input id="f_duration" type="number" value="3600"></div>
+
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:0.6rem;">
+                <div class="field"><label>Category</label>
+                    <input id="f_category" list="_categoryList" type="text" placeholder="VD: cambridge, actual-test">
+                    <datalist id="_categoryList">
+                        <option value="cambridge">Cambridge</option>
+                        <option value="actual-test">Actual test</option>
+                        <option value="online">Online</option>
+                        <option value="custom">Custom</option>
+                    </datalist>
+                </div>
+                <div class="field"><label>Topic</label>
+                    <input id="f_topic" list="_topicList" type="text" placeholder="VD: environment, technology">
+                    <datalist id="_topicList">
+                        <option value="environment">Environment</option>
+                        <option value="education">Education</option>
+                        <option value="technology">Technology</option>
+                        <option value="health">Health</option>
+                        <option value="society">Society</option>
+                        <option value="travel">Travel</option>
+                        <option value="work">Work</option>
+                    </datalist>
+                </div>
+                <div class="field"><label>Level</label>
+                    <select id="f_level">
+                        <option value="">—</option>
+                        <option value="foundation">Foundation</option>
+                        <option value="target_5_5">Target 5.5</option>
+                        <option value="target_6_5">Target 6.5</option>
+                        <option value="target_7_plus">Target 7+</option>
+                    </select>
+                </div>
+                <div class="field"><label>Year</label><input id="f_year" type="number" placeholder="2024"></div>
+            </div>
+            <div class="field"><label>Tags (phân cách dấu phẩy)</label><input id="f_tags" type="text" placeholder="vd: cambridge18, recent"></div>
+
             <div class="field"><label>Mô tả</label><textarea id="f_description"></textarea></div>
             <div class="field" style="display:flex;gap:0.5rem;align-items:center;">
                 <input id="f_published" type="checkbox" style="width:auto;margin:0;">
@@ -501,11 +537,18 @@
             document.getElementById('f_duration').value = test?.durationSec || 3600;
             document.getElementById('f_description').value = test?.description || '';
             document.getElementById('f_published').checked = !!test?.isPublished;
+            document.getElementById('f_category').value = test?.category || '';
+            document.getElementById('f_topic').value = test?.topic || '';
+            document.getElementById('f_level').value = test?.level || '';
+            document.getElementById('f_year').value = test?.year || '';
+            document.getElementById('f_tags').value = (test?.tags || []).join(', ');
             document.getElementById('editModal').classList.add('is-open');
         }
         function closeModal() { document.getElementById('editModal').classList.remove('is-open'); }
 
         async function saveTest() {
+            const tagsRaw = document.getElementById('f_tags').value || '';
+            const tags = tagsRaw.split(',').map(s => s.trim()).filter(Boolean);
             const payload = {
                 skill: document.getElementById('f_skill').value,
                 title: document.getElementById('f_title').value,
@@ -513,7 +556,12 @@
                 source: document.getElementById('f_source').value || null,
                 durationSec: Number(document.getElementById('f_duration').value),
                 description: document.getElementById('f_description').value || null,
-                isPublished: document.getElementById('f_published').checked
+                isPublished: document.getElementById('f_published').checked,
+                category: document.getElementById('f_category').value.trim() || null,
+                topic: document.getElementById('f_topic').value.trim() || null,
+                level: document.getElementById('f_level').value || null,
+                year: Number(document.getElementById('f_year').value) || null,
+                tags
             };
             if (!payload.title) return alert('Cần tên đề.');
             try {

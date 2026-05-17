@@ -180,6 +180,7 @@
         </header>
 
         <div id="resumeBanner" hidden style="margin-bottom:1.25rem;"></div>
+        <div id="facetBar" style="display:flex;flex-direction:column;gap:0.55rem;margin-bottom:1.25rem;" hidden></div>
         <div class="filter-row" id="filters"></div>
         <div class="search-row">
             <input class="search-input" id="search" placeholder="Tìm theo tên đề thi..." />
@@ -218,6 +219,8 @@
         let currentSearch = '';
         let page = 0;
         let pendingByRefId = new Map();
+        let facets = null;
+        const facetState = { category: '', topic: '', level: '', year: '' };
 
         function escapeHtml(s) {
             return String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -328,12 +331,70 @@
                 </div>`;
         }
 
+        function buildApiUrl() {
+            // C.api may already contain a skill query — reuse it as base.
+            const params = new URLSearchParams();
+            if (currentFilter) {
+                // Existing string-shape filter (e.g. taskType=1)
+                const m = currentFilter.match(/^([^=]+)=(.*)$/);
+                if (m) params.set(m[1], m[2]);
+            }
+            for (const [k, v] of Object.entries(facetState)) {
+                if (v) params.set(k, v);
+            }
+            const sep = C.api.includes('?') ? '&' : '?';
+            const qs = params.toString();
+            return qs ? `${C.api}${sep}${qs}` : C.api;
+        }
+
+        function renderFacets() {
+            if (!facets) return;
+            const bar = document.getElementById('facetBar');
+            const groups = [
+                { key: 'category', label: 'Category', items: facets.categories },
+                { key: 'topic',    label: 'Topic',    items: facets.topics },
+                { key: 'level',    label: 'Level',    items: facets.levels },
+                { key: 'year',     label: 'Year',     items: facets.years }
+            ].filter(g => g.items && g.items.length);
+            if (!groups.length) { bar.hidden = true; return; }
+            bar.hidden = false;
+            bar.innerHTML = groups.map(g => `
+                <div style="display:flex;flex-wrap:wrap;gap:0.4rem;align-items:center;">
+                    <span style="font-size:0.7rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;min-width:64px;">${g.label}</span>
+                    <button class="chip ${facetState[g.key] === '' ? 'active' : ''}" data-fkey="${g.key}" data-fval="">Tất cả</button>
+                    ${g.items.map(it => `
+                        <button class="chip ${facetState[g.key] === it.key ? 'active' : ''}" data-fkey="${g.key}" data-fval="${escapeHtml(it.key)}">
+                            ${escapeHtml(it.key)} <span style="opacity:0.55;font-size:0.72rem;">(${it.count})</span>
+                        </button>`).join('')}
+                </div>`).join('');
+            bar.querySelectorAll('button.chip').forEach(b => {
+                b.addEventListener('click', () => {
+                    facetState[b.dataset.fkey] = b.dataset.fval;
+                    page = 0;
+                    loadTests();
+                });
+            });
+        }
+
+        async function loadFacets() {
+            try {
+                // Skill-scoped facets only meaningful for reading/listening since
+                // writing/speaking use task/part filters.
+                if (SKILL !== 'reading' && SKILL !== 'listening') return;
+                const r = await fetch(`/api/ielts/facets?skill=${SKILL}`);
+                if (!r.ok) return;
+                facets = await r.json();
+                renderFacets();
+            } catch { /* best-effort */ }
+        }
+
         async function loadTests() {
-            const url = currentFilter ? `${C.api}${C.api.includes('?') ? '&' : '?'}${currentFilter}` : C.api;
+            const url = buildApiUrl();
             try {
                 const [r] = await Promise.all([fetch(url), loadPending()]);
                 allTests = await r.json();
                 applySearch();
+                renderFacets();
             } catch (e) {
                 document.getElementById('grid').innerHTML = `<div class="empty" style="grid-column:1/-1;"><h2>Lỗi tải</h2><p>${escapeHtml(e.message)}</p></div>`;
             }
@@ -347,6 +408,7 @@
         document.getElementById('next').addEventListener('click', () => { page++; render(); window.scrollTo(0, 0); });
 
         renderFilters();
+        loadFacets();
         loadTests();
     </script>
     <script src="/js/ielts-bootstrap.js"></script>

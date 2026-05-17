@@ -68,10 +68,27 @@ router.get('/tests', async (req, res, next) => {
         const tests = await repos.ielts.listTests({
             skill: req.query.skill || undefined,
             module: req.query.module || undefined,
+            category: req.query.category || undefined,
+            topic: req.query.topic || undefined,
+            level: req.query.level || undefined,
+            year: req.query.year || undefined,
+            tag: req.query.tag || undefined,
+            q: req.query.q || undefined,
             isPublished: true,
-            limit: 100
+            limit: 200
         });
         res.json(tests);
+    } catch (e) { next(e); }
+});
+
+// ── Public: catalog facets (filter chip counts) ────────────────────
+router.get('/facets', async (req, res, next) => {
+    try {
+        const facets = await repos.ielts.listTaxonomyFacets({
+            skill: req.query.skill || undefined,
+            isPublished: true
+        });
+        res.json(facets);
     } catch (e) { next(e); }
 });
 
