@@ -341,6 +341,20 @@ router.delete('/admin/speaking/submissions/:id', adminOnly, async (req, res, nex
     } catch (e) { next(e); }
 });
 
+// ── Admin: unified list of ALL IELTS submissions ─────────────────
+router.get('/admin/submissions', adminOnly, async (req, res, next) => {
+    try {
+        const rows = await repos.ielts.listAllSubmissionsForAdmin({
+            skill: req.query.skill || undefined,
+            testId: req.query.testId || undefined,
+            userId: req.query.userId || undefined,
+            status: req.query.status || 'all',
+            limit: Math.min(500, Number(req.query.limit) || 100)
+        });
+        res.json(rows);
+    } catch (e) { next(e); }
+});
+
 // ── Admin: tests CRUD ─────────────────────────────────────────────────
 router.get('/admin/tests', adminOnly, async (req, res, next) => {
     try {
