@@ -79,3 +79,8 @@ source-pdfs/**
 # Legacy snapshots (pre-Postgres migration data dumps)
 _legacy/
 
+
+# Local dev server stdout/stderr captures
+server.log
+server.err
+.server.pid
