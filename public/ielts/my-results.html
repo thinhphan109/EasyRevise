@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kết quả của tôi · IELTS · EasyRevise</title>
-    <meta name="description" content="Lịch sử mọi bài làm Reading, Listening, Writing, Speaking với band score chi tiết.">
+    <title>Kết quả của tôi · EasyRevise</title>
+    <meta name="description" content="Lịch sử bài làm TracNghiệm và IELTS với điểm số / band score chi tiết.">
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,6 +20,7 @@
             --listening: #16a34a; --listening-soft: #dcfce7;
             --writing: #d97706;  --writing-soft: #fef3c7;
             --speaking: #9333ea; --speaking-soft: #f3e8ff;
+            --quiz: #ec4899;     --quiz-soft: #fce7f3;
             --shadow-1: 0 1px 2px rgba(0,0,0,0.04);
             --shadow-2: 0 4px 16px rgba(0,0,0,0.08);
         }
@@ -29,6 +30,7 @@
             --border: #262626; --border-strong: #333;
             --reading-soft: #1a2942; --listening-soft: #14532d;
             --writing-soft: #422006; --speaking-soft: #3b0764;
+            --quiz-soft: #500724;
         }
         * { box-sizing: border-box; }
         html, body { margin: 0; padding: 0; }
@@ -62,7 +64,7 @@
         /* Stat cards */
         .stat-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 0.75rem;
             margin-bottom: 2rem;
         }
@@ -82,6 +84,7 @@
         .stat-card[data-skill="listening"] { --c: var(--listening); --c-soft: var(--listening-soft); }
         .stat-card[data-skill="writing"]   { --c: var(--writing);   --c-soft: var(--writing-soft); }
         .stat-card[data-skill="speaking"]  { --c: var(--speaking);  --c-soft: var(--speaking-soft); }
+        .stat-card[data-skill="quiz"]      { --c: var(--quiz);      --c-soft: var(--quiz-soft); }
         .stat-card .label {
             font-size: 0.72rem; font-weight: 600;
             color: var(--c, var(--text-muted));
@@ -149,6 +152,7 @@
         .result-row[data-skill="listening"] { --c: var(--listening); }
         .result-row[data-skill="writing"]   { --c: var(--writing); }
         .result-row[data-skill="speaking"]  { --c: var(--speaking); }
+        .result-row[data-skill="quiz"]      { --c: var(--quiz); }
 
         .result-icon {
             width: 40px; height: 40px;
@@ -162,6 +166,7 @@
         .result-row[data-skill="listening"] .result-icon { background: var(--listening-soft); }
         .result-row[data-skill="writing"]   .result-icon { background: var(--writing-soft); }
         .result-row[data-skill="speaking"]  .result-icon { background: var(--speaking-soft); }
+        .result-row[data-skill="quiz"]      .result-icon { background: var(--quiz-soft); }
 
         .result-info { min-width: 0; }
         .result-title { font-weight: 600; font-size: 0.95rem; line-height: 1.3; margin: 0 0 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -212,9 +217,9 @@
 
     <main class="container">
         <header class="page-header">
-            <div class="page-eyebrow">EasyRevise · IELTS</div>
+            <div class="page-eyebrow">EasyRevise · Kết quả</div>
             <h1>Kết quả của tôi</h1>
-            <p>Lịch sử bài làm trên cả 4 kỹ năng. Click vào từng bài để xem feedback chi tiết.</p>
+            <p>Lịch sử bài làm trên cả TracNghiệm và IELTS. Click từng bài để xem feedback chi tiết.</p>
         </header>
 
         <section class="stat-grid" id="statGrid">
@@ -238,6 +243,11 @@
                 <div class="big" id="stat-speaking-band">…</div>
                 <div class="foot" id="stat-speaking-foot">—</div>
             </div>
+            <div class="stat-card" data-skill="quiz">
+                <div class="label">Trắc nghiệm</div>
+                <div class="big" id="stat-quiz-band">…</div>
+                <div class="foot" id="stat-quiz-foot">—</div>
+            </div>
         </section>
 
         <div class="filter-row" id="filterRow">
@@ -246,6 +256,7 @@
             <button class="chip" data-filter="listening">Listening <span class="count" id="count-listening">0</span></button>
             <button class="chip" data-filter="writing">Writing <span class="count" id="count-writing">0</span></button>
             <button class="chip" data-filter="speaking">Speaking <span class="count" id="count-speaking">0</span></button>
+            <button class="chip" data-filter="quiz">Trắc nghiệm <span class="count" id="count-quiz">0</span></button>
         </div>
 
         <section class="result-list" id="resultList">
@@ -254,7 +265,8 @@
     </main>
 
     <script>
-        const ICONS = { reading: '📖', listening: '🎧', writing: '✍️', speaking: '🎤' };
+        const ICONS = { reading: '📖', listening: '🎧', writing: '✍️', speaking: '🎤', quiz: '📝' };
+        const SKILL_LABELS = { reading: 'Reading', listening: 'Listening', writing: 'Writing', speaking: 'Speaking', quiz: 'Trắc nghiệm' };
         let STATE = { all: [], filter: '' };
 
         function getToken() { return localStorage.getItem('easyrevise_token'); }
@@ -274,57 +286,61 @@
         }
 
         function resultUrl(r) {
-            if (r.skillKind === 'reading') return `/ielts/result.html?id=${r.submissionId}`;
-            if (r.skillKind === 'writing') return `/ielts/writing/result.html?id=${r.submissionId}`;
+            if (r.skillKind === 'reading')  return `/ielts/result.html?id=${r.submissionId}`;
+            if (r.skillKind === 'writing')  return `/ielts/writing/result.html?id=${r.submissionId}`;
             if (r.skillKind === 'speaking') return `/ielts/speaking/result.html?id=${r.submissionId}`;
+            if (r.skillKind === 'quiz' && r.quizExamId) {
+                // TracNghiem result page expects ?examId=&submissionId=
+                return `/result.html?examId=${encodeURIComponent(r.quizExamId)}&submissionId=${r.submissionId}`;
+            }
             return '#';
         }
 
         function renderStats(stats) {
-            const skills = ['reading', 'listening', 'writing', 'speaking'];
-            for (const s of skills) {
-                const data = stats?.[s === 'listening' ? 'reading' : s];
-                // Reading + Listening share one entry — separate by checking the list
-                if (s === 'listening') {
-                    const lis = STATE.all.filter(r => r.skill === 'listening');
-                    if (lis.length === 0) {
-                        document.getElementById(`stat-${s}-band`).innerHTML = '<span class="empty">—</span>';
-                        document.getElementById(`stat-${s}-foot`).textContent = 'Chưa làm bài';
-                        continue;
-                    }
-                    const max = Math.max(...lis.map(r => r.bandOverall || 0));
-                    const avg = lis.reduce((s, r) => s + (r.bandOverall || 0), 0) / lis.length;
-                    document.getElementById(`stat-${s}-band`).textContent = max.toFixed(1);
-                    document.getElementById(`stat-${s}-foot`).textContent = `${lis.length} bài · TB ${avg.toFixed(1)}`;
-                    continue;
+            // Reading + Listening share `ielts_submissions` table; backend returns
+            // a single 'reading' stats row but listings have skill='listening' or
+            // 'reading'. Compute both from the live list for accuracy.
+            const fillBand = (s) => {
+                const items = STATE.all.filter(r => r.skill === s);
+                if (items.length === 0) {
+                    document.getElementById(`stat-${s}-band`).innerHTML = '<span class="empty">—</span>';
+                    document.getElementById(`stat-${s}-foot`).textContent = 'Chưa làm bài';
+                    return;
                 }
-                if (s === 'reading') {
-                    const rd = STATE.all.filter(r => r.skill === 'reading');
-                    if (rd.length === 0) {
-                        document.getElementById(`stat-${s}-band`).innerHTML = '<span class="empty">—</span>';
-                        document.getElementById(`stat-${s}-foot`).textContent = 'Chưa làm bài';
-                        continue;
-                    }
-                    const max = Math.max(...rd.map(r => r.bandOverall || 0));
-                    const avg = rd.reduce((s, r) => s + (r.bandOverall || 0), 0) / rd.length;
-                    document.getElementById(`stat-${s}-band`).textContent = max.toFixed(1);
-                    document.getElementById(`stat-${s}-foot`).textContent = `${rd.length} bài · TB ${avg.toFixed(1)}`;
-                    continue;
-                }
+                const max = Math.max(...items.map(r => r.bandOverall || 0));
+                const avg = items.reduce((acc, r) => acc + (r.bandOverall || 0), 0) / items.length;
+                document.getElementById(`stat-${s}-band`).textContent = max.toFixed(1);
+                document.getElementById(`stat-${s}-foot`).textContent = `${items.length} bài · TB ${avg.toFixed(1)}`;
+            };
+
+            // IELTS bands (0–9)
+            ['reading', 'listening'].forEach(fillBand);
+            ['writing', 'speaking'].forEach(s => {
+                const data = stats?.[s];
                 if (!data || data.count === 0) {
                     document.getElementById(`stat-${s}-band`).innerHTML = '<span class="empty">—</span>';
                     document.getElementById(`stat-${s}-foot`).textContent = 'Chưa làm bài';
-                    continue;
+                    return;
                 }
                 document.getElementById(`stat-${s}-band`).textContent = (data.maxBand || 0).toFixed(1);
                 document.getElementById(`stat-${s}-foot`).textContent = `${data.count} bài · TB ${(data.avgBand || 0).toFixed(1)}`;
+            });
+
+            // Quiz score (0–10)
+            const q = stats?.quiz;
+            if (!q || q.count === 0) {
+                document.getElementById('stat-quiz-band').innerHTML = '<span class="empty">—</span>';
+                document.getElementById('stat-quiz-foot').textContent = 'Chưa làm bài';
+            } else {
+                document.getElementById('stat-quiz-band').textContent = (q.maxScore || 0).toFixed(1);
+                document.getElementById('stat-quiz-foot').textContent = `${q.count} bài · TB ${(q.avgScore || 0).toFixed(1)}`;
             }
         }
 
         function renderCounts() {
             const all = STATE.all;
             document.getElementById('count-all').textContent = all.length;
-            ['reading', 'listening', 'writing', 'speaking'].forEach(s => {
+            ['reading', 'listening', 'writing', 'speaking', 'quiz'].forEach(s => {
                 document.getElementById(`count-${s}`).textContent =
                     all.filter(r => r.skill === s).length;
             });
@@ -339,16 +355,21 @@
             if (filtered.length === 0) {
                 list.innerHTML = `
                     <div class="result-empty">
-                        <p>Chưa có bài làm nào${STATE.filter ? ' cho kỹ năng này' : ''}.</p>
-                        <p><a href="/ielts/">Bắt đầu luyện đề →</a></p>
+                        <p>Chưa có bài làm nào${STATE.filter ? ' cho mục này' : ''}.</p>
+                        <p><a href="/">Bắt đầu luyện đề →</a></p>
                     </div>`;
                 return;
             }
 
             list.innerHTML = filtered.map(r => {
-                const band = r.bandOverall != null ? r.bandOverall.toFixed(1) : '—';
+                let scoreText = '—';
+                if (r.skillKind === 'quiz') {
+                    scoreText = r.overallScore != null ? r.overallScore.toFixed(1) : '—';
+                } else if (r.bandOverall != null) {
+                    scoreText = r.bandOverall.toFixed(1);
+                }
                 const partLabel = r.partNumber ? ` · Part ${r.partNumber}` : '';
-                const skillLabel = { reading: 'Reading', listening: 'Listening', writing: 'Writing', speaking: 'Speaking' }[r.skill] || r.skill;
+                const skillLabel = SKILL_LABELS[r.skill] || r.skill;
                 return `
                     <a class="result-row" data-skill="${r.skill}" href="${resultUrl(r)}">
                         <div class="result-icon">${ICONS[r.skill] || '📄'}</div>
@@ -359,7 +380,7 @@
                                 <span>${fmtDate(r.submittedAt)}</span>
                             </div>
                         </div>
-                        <div class="result-band">${band}</div>
+                        <div class="result-band">${scoreText}</div>
                         <div class="result-arrow">→</div>
                     </a>`;
             }).join('');
