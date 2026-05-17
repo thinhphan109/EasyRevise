@@ -68,12 +68,14 @@ const { findUserByToken: _findUser } = require('./lib/auth');
 const log = require('./lib/logger');
 if (log.httpLogger) app.use(log.httpLogger());
 
-app.use('/uploads/submissions', (req, res, next) => {
-    // Admin bypass — admin có thể mở trực tiếp khi review
+app.use('/uploads/submissions', async (req, res, next) => {
+    // Admin bypass — admin can open files directly when reviewing
     const authHeader = req.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
-        const user = _findUser(authHeader.split(' ')[1]);
-        if (user && user.role === 'admin') return next();
+        try {
+            const user = await _findUser(authHeader.slice(7));
+            if (user && user.role === 'admin') return next();
+        } catch { /* fall through to signed-URL gate */ }
     }
     // Otherwise require signed URL
     const filename = req.path.replace(/^\//, '').split('/')[0];
@@ -96,15 +98,16 @@ app.use('/api/subjects', require('./routes/subjects'));
 
 // Exam CRUD + Export/Import
 app.use('/api/exams', require('./routes/exams'));
-// Note: export-all is at /api/export-all, handled by exams router as /export-all
-// We need a separate mount for /api/export-all
+// /api/export-all — admin export of every exam
 const { adminOnly } = require('./lib/auth');
-const { readData } = require('./lib/data');
-app.get('/api/export-all', adminOnly, (req, res) => {
-    const data = readData();
-    res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Content-Disposition', 'attachment; filename="easyrevise-backup.json"');
-    res.json({ _format: 'easyrevise-backup-v1', _exportedAt: new Date().toISOString(), exams: data.exams });
+const { readDataAsync } = require('./lib/data');
+app.get('/api/export-all', adminOnly, async (req, res, next) => {
+    try {
+        const data = await readDataAsync();
+        res.setHeader('Content-Type', 'application/json');
+        res.setHeader('Content-Disposition', 'attachment; filename="easyrevise-backup.json"');
+        res.json({ _format: 'easyrevise-backup-v1', _exportedAt: new Date().toISOString(), exams: data.exams });
+    } catch (e) { next(e); }
 });
 
 // Section + Question CRUD (nested under /api/exams)
@@ -169,6 +172,15 @@ app.use('/api/activation', activationRouter);          // /api/activation/verify
 // H12: Backup cron endpoint (Vercel cron schedules /api/admin/run-backup daily)
 app.use('/api/admin', require('./routes/backup-cron'));
 
+// IELTS Reading
+app.use('/api/ielts', require('./routes/ielts'));
+
+// Admin Drive monitor + re-auth
+app.use('/api/admin/drive', require('./routes/admin-drive'));
+app.use('/api/admin/settings', require('./routes/admin-settings'));
+app.use('/api/admin/ielts', require('./routes/admin-ielts'));
+require('./lib/drive-health').start();
+
 // ========================
 // SPA fallback
 // ========================
@@ -182,17 +194,9 @@ app.use((err, req, res, next) => {
 });
 
 // Start
-app.listen(PORT, async () => {
+app.listen(PORT, () => {
     console.log(`\n  🚀 EasyRevise Server running at http://localhost:${PORT}`);
     console.log(`  📝 Student:  http://localhost:${PORT}/`);
     console.log(`  ⚙️  Admin:    http://localhost:${PORT}/admin\n`);
     require('./lib/backup').startDailyBackup();
-
-    // Sprint 3: Initialize SQLite (async, non-blocking)
-    try {
-        const { initDb } = require('./lib/db');
-        await initDb();
-    } catch (e) {
-        console.error('[DB] SQLite init failed (falling back to JSON):', e.message);
-    }
 });

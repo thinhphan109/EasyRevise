@@ -1,59 +1,73 @@
 // routes/history.js — Exam history + Admin PIN verify
+'use strict';
 const express = require('express');
 const router = express.Router();
-const { readUsers, writeUsers, readSettings } = require('../lib/data');
+const repos = require('../lib/repos');
+const { query, queryOne } = require('../lib/repos/_pool');
 const { authMiddleware } = require('../lib/auth');
 
 // POST /api/history
-router.post('/history', authMiddleware, (req, res) => {
-    const usersData = readUsers();
-    const user = usersData.users.find(u => u.id === req.user.id);
-    if (!user) return res.status(404).json({ error: 'User not found' });
-    if (!user.history) user.history = [];
-    user.history.unshift(req.body);
-    if (user.history.length > 100) user.history = user.history.slice(0, 100);
-    writeUsers(usersData);
-    res.json({ success: true });
+router.post('/history', authMiddleware, async (req, res, next) => {
+    try {
+        await repos.users.appendHistory(req.user.id, req.body);
+        // Cap at 100 entries per user
+        await query(
+            `DELETE FROM user_history
+             WHERE id IN (
+               SELECT id FROM user_history
+               WHERE user_id = $1
+               ORDER BY created_at DESC
+               OFFSET 100
+             )`,
+            [req.user.id]
+        );
+        res.json({ success: true });
+    } catch (e) { next(e); }
 });
 
 // GET /api/history
-router.get('/history', authMiddleware, (req, res) => {
-    const usersData = readUsers();
-    const user = usersData.users.find(u => u.id === req.user.id);
-    if (!user) return res.json([]);
-    res.json(user.history || []);
+router.get('/history', authMiddleware, async (req, res, next) => {
+    try {
+        const rows = await query(
+            `SELECT payload, created_at FROM user_history
+             WHERE user_id = $1 ORDER BY created_at DESC LIMIT 100`,
+            [req.user.id]
+        );
+        res.json(rows.map(r => r.payload));
+    } catch (e) { next(e); }
 });
 
-// DELETE /api/history — clear ALL of current user's history
-router.delete('/history', authMiddleware, (req, res) => {
-    const usersData = readUsers();
-    const user = usersData.users.find(u => u.id === req.user.id);
-    if (!user) return res.status(404).json({ error: 'User not found' });
-    const removed = (user.history || []).length;
-    user.history = [];
-    writeUsers(usersData);
-    res.json({ success: true, removed });
+// DELETE /api/history — clear all
+router.delete('/history', authMiddleware, async (req, res, next) => {
+    try {
+        const before = await queryOne(
+            `SELECT count(*)::int n FROM user_history WHERE user_id = $1`,
+            [req.user.id]
+        );
+        await repos.users.clearHistory(req.user.id);
+        res.json({ success: true, removed: before?.n || 0 });
+    } catch (e) { next(e); }
 });
 
-// DELETE /api/history/:examId — remove all entries for one exam (optional ?completedAt=ISO for one specific entry)
-router.delete('/history/:examId', authMiddleware, (req, res) => {
-    const { examId } = req.params;
-    const { completedAt } = req.query;
-    const usersData = readUsers();
-    const user = usersData.users.find(u => u.id === req.user.id);
-    if (!user || !Array.isArray(user.history)) return res.json({ success: true, removed: 0 });
-    const before = user.history.length;
-    user.history = user.history.filter(h => {
-        if (String(h.examId) !== String(examId)) return true;
-        if (completedAt && h.completedAt !== completedAt) return true;
-        return false;
-    });
-    const removed = before - user.history.length;
-    writeUsers(usersData);
-    res.json({ success: true, removed });
+// DELETE /api/history/:examId  (optional ?completedAt=ISO)
+router.delete('/history/:examId', authMiddleware, async (req, res, next) => {
+    try {
+        const { examId } = req.params;
+        const { completedAt } = req.query;
+        const params = [req.user.id, String(examId)];
+        let sql = `DELETE FROM user_history
+                   WHERE user_id = $1
+                   AND payload->>'examId' = $2`;
+        if (completedAt) {
+            sql += ` AND payload->>'completedAt' = $3`;
+            params.push(completedAt);
+        }
+        const r = await query(sql, params);
+        res.json({ success: true, removed: r.length });
+    } catch (e) { next(e); }
 });
 
-// PIN rate limit — 5 attempts per 10 minutes per IP
+// ── Admin PIN ─────────────────────────────────────────────────────────
 const _pinAttempts = new Map();
 const PIN_MAX = 5;
 const PIN_WINDOW_MS = 10 * 60 * 1000;
@@ -69,25 +83,25 @@ function checkPinRateLimit(ip) {
     return rec.count <= PIN_MAX;
 }
 
-// Cleanup stale PIN entries every 5 minutes
 setInterval(() => {
     const now = Date.now();
     for (const [ip, rec] of _pinAttempts) { if (now > rec.resetAt) _pinAttempts.delete(ip); }
 }, 5 * 60 * 1000).unref();
 
-// POST /api/admin/verify-pin
-router.post('/admin/verify-pin', (req, res) => {
-    const ip = req.ip || req.connection?.remoteAddress || 'unknown';
-    if (!checkPinRateLimit(ip)) {
-        return res.status(429).json({ error: 'Nhập PIN sai quá nhiều lần. Vui lòng thử lại sau 10 phút.' });
-    }
-    const settings = readSettings();
-    const pin = req.body.pin;
-    if (pin === settings.adminPin) {
-        res.json({ success: true, sessionHours: settings.pinSessionHours });
-    } else {
-        res.status(403).json({ error: 'PIN không đúng' });
-    }
+router.post('/admin/verify-pin', async (req, res, next) => {
+    try {
+        const ip = req.ip || req.connection?.remoteAddress || 'unknown';
+        if (!checkPinRateLimit(ip)) {
+            return res.status(429).json({ error: 'Nhập PIN sai quá nhiều lần. Vui lòng thử lại sau 10 phút.' });
+        }
+        const settings = await repos.settings.getAll();
+        const pin = req.body.pin;
+        if (pin === settings.adminPin) {
+            res.json({ success: true, sessionHours: settings.pinSessionHours });
+        } else {
+            res.status(403).json({ error: 'PIN không đúng' });
+        }
+    } catch (e) { next(e); }
 });
 
 module.exports = router;

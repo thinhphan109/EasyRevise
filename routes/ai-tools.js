@@ -1,11 +1,13 @@
 // routes/ai-tools.js — OCR + Explain Wrong
+'use strict';
 const path = require('path');
 const fs = require('fs');
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const sharp = require('sharp');
-const { readData, writeData, readSettings } = require('../lib/data');
+const repos = require('../lib/repos');
+const { query, queryOne } = require('../lib/repos/_pool');
 const { adminOnly, sanitizeCode } = require('../lib/auth');
 const { chatCompletion, getConfig } = require('../lib/ai-client');
 
@@ -35,7 +37,7 @@ router.post('/ocr', adminOnly, ocrUpload.single('image'), async (req, res) => {
 
         const cfg = getConfig();
         if (!cfg.apiKey) return res.status(500).json({ error: 'API_KEY_FIXED chưa cấu hình' });
-        const settings = readSettings();
+        const settings = await repos.settings.getAll();
         const model = settings.ocrModel || cfg.defaultModel;
 
         const ocrPrompt = 'Trích xuất chính xác toàn bộ văn bản trong ảnh. Công thức toán viết dạng LaTeX: inline dùng $...$, block dùng $$...$$. Chỉ trả về nội dung thuần, không giải thích thêm.';
@@ -64,24 +66,34 @@ async function explainWrongHandler(req, res) {
     if (!code || !questionId) return res.status(400).json({ error: 'Thiếu thông tin' });
 
     const examId = req.params.examId;
-    const data = readData();
-    const exam = data.exams.find(e => e.id === examId);
+    const exam = await repos.exams.getById(examId);
     if (!exam) return res.status(404).json({ error: 'Exam not found' });
-    const codeObj = (exam?.accessCodes || []).find(c => c.code === sanitizeCode(code));
+
+    const codeStr = sanitizeCode(code);
+    const codeObj = (exam.accessCodes || []).find(c => c.code === codeStr);
     if (!codeObj) return res.status(403).json({ error: 'Mã không hợp lệ' });
 
-    const usage = [...codeObj.usedBy].reverse().find(u =>
-        u.completed && u.result &&
-        (userId ? u.userId === userId : true) &&
-        (completedAt ? u.completedAt === completedAt : true)
-    ) || [...codeObj.usedBy].reverse().find(u => u.completed && u.result);
+    // Find latest matching usage
+    const params = [codeStr];
+    let where = `code = $1 AND completed = true AND result IS NOT NULL`;
+    if (userId) { params.push(userId); where += ` AND user_id::text = $${params.length}`; }
+    if (completedAt) { params.push(completedAt); where += ` AND completed_at = $${params.length}`; }
+    const usage = await queryOne(
+        `SELECT id, user_id::text AS "userId", completed_at AS "completedAt",
+                metadata FROM code_usages
+         WHERE ${where}
+         ORDER BY completed_at DESC LIMIT 1`,
+        params
+    );
     if (!usage) return res.status(404).json({ error: 'Bài nộp không tìm thấy' });
 
-    // Check limit
+    // Counter sits in code_usages.metadata.aiExplainUsed
+    const meta = usage.metadata || {};
+    const used = meta.aiExplainUsed || 0;
+
     const examLimit = exam.aiExplainLimit ?? -1;
     const codeLimit = codeObj.aiExplainLimit ?? examLimit;
     const effectiveLimit = codeLimit;
-    const used = usage.aiExplainUsed || 0;
 
     if (effectiveLimit === 0) return res.status(429).json({ error: 'Tính năng AI giải thích đã bị tắt cho đề này', used, limit: 0 });
     if (effectiveLimit !== -1 && used >= effectiveLimit) {
@@ -90,8 +102,7 @@ async function explainWrongHandler(req, res) {
 
     const cfg = getConfig();
     if (!cfg.apiKey) return res.status(500).json({ error: 'API_KEY_FIXED chưa cấu hình' });
-
-    const settings = readSettings();
+    const settings = await repos.settings.getAll();
     const model = settings.gradeModel || cfg.defaultModel;
 
     const optLabels = ['A', 'B', 'C', 'D'];
@@ -105,16 +116,12 @@ async function explainWrongHandler(req, res) {
             model, maxTokens: 512,
             messages: [{ role: 'user', content: prompt }]
         });
-
-        // Save counter
-        const freshData = readData();
-        const freshExam = freshData.exams.find(e => e.id === examId);
-        const freshCode = (freshExam?.accessCodes || []).find(c => c.code === code.toUpperCase().trim());
-        const freshUsage = freshCode?.usedBy ? [...freshCode.usedBy].reverse().find(u => u.userId === usage.userId && u.completed && u.completedAt === usage.completedAt) : null;
-        if (freshUsage) {
-            freshUsage.aiExplainUsed = (freshUsage.aiExplainUsed || 0) + 1;
-            writeData(freshData);
-        }
+        // Bump counter
+        const newMeta = { ...meta, aiExplainUsed: used + 1 };
+        await query(
+            `UPDATE code_usages SET metadata = $1::jsonb WHERE id = $2`,
+            [JSON.stringify(newMeta), usage.id]
+        );
 
         const newUsed = used + 1;
         const remaining = effectiveLimit === -1 ? -1 : effectiveLimit - newUsed;

@@ -1,5 +1,5 @@
 // routes/ai-generate.js — AI exam generation + AI extract QB + cache recovery
-// ⚠️ Largest route file — includes streaming, retry logic, image crop, PDF processing
+'use strict';
 const path = require('path');
 const fs = require('fs');
 const express = require('express');
@@ -8,7 +8,8 @@ const multer = require('multer');
 const sharp = require('sharp');
 const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
-const { readSettings, readQuestionBank, writeQuestionBank, uuidv4 } = require('../lib/data');
+const repos = require('../lib/repos');
+const { uuidv4 } = require('../lib/data');
 const { adminOnly } = require('../lib/auth');
 const { chatCompletion, getConfig, getAvailableModels, imageContent } = require('../lib/ai-client');
 const { normalizeExam } = require('../lib/exam-normalizer');
@@ -229,7 +230,7 @@ SCHEMA:
         userContent.push({ type: 'text', text: textPrompt });
 
         const cfg = getConfig();
-        const settingsData = readSettings();
+        const settingsData = await repos.settings.getAll();
         const model = reqModel || settingsData.generateModel || cfg.defaultModel;
 
         if (!cfg.apiKey) {
@@ -430,7 +431,7 @@ Trả về JSON THUẦN TÚY (không markdown, không \`\`\`json):
         userContent.push({ type: 'text', text: 'Hãy tách tất cả câu hỏi trong đề thi trên thành JSON array.' });
 
         const cfg = getConfig();
-        const settingsData2 = readSettings();
+        const settingsData2 = await repos.settings.getAll();
         const extractModel = settingsData2.generateModel || cfg.defaultModel;
 
         // Convert to OpenAI image_url format
@@ -479,7 +480,7 @@ router.post('/ai-ocr', adminOnly, express.json({ limit: '10mb' }), async (req, r
         if (!imageBase64) return res.status(400).json({ error: 'Thiếu imageBase64' });
 
         const cfg = getConfig();
-        const settingsData = readSettings();
+        const settingsData = await repos.settings.getAll();
         const ocrModel = settingsData.generateModel || cfg.defaultModel;
 
         const ocrPrompt = `Hãy chuyển đổi toàn bộ nội dung trong hình ảnh này thành văn bản có cấu trúc.

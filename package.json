@@ -13,7 +13,7 @@
     "build:watch": "node build.js --watch",
     "build:prod": "node build.js --prod",
     "seed": "node seed.js",
-    "migrate:users": "node scripts/migrate-users-to-sqlite.js",
+    "migrate": "node scripts/ielts/run-migrations.mjs",
     "migrate:passwords": "node scripts/migrate-passwords.js"
   },
   "dependencies": {
@@ -37,7 +37,6 @@
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "sharp": "^0.34.5",
-    "sql.js": "^1.11.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
@@ -45,6 +44,7 @@
     "esbuild": "^0.28.0",
     "eslint": "^9.39.4",
     "jest": "^30.3.0",
+    "playwright": "^1.60.0",
     "supertest": "^7.2.2"
   }
 }

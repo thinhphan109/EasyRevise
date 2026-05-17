@@ -143,10 +143,29 @@
 
                     <div class="sidebar-divider"></div>
 
+                    <!-- IELTS -->
+                    <div class="sidebar-section-label">IELTS</div>
+                    <a class="sidebar-item" href="/admin/ielts.html" style="text-decoration:none;color:inherit;">
+                        <span class="sidebar-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18M3 12h18M3 19h12"/></svg></span>
+                        <span class="sidebar-item-label">Đề thi IELTS</span>
+                    </a>
+                    <a class="sidebar-item" href="/admin/quota.html" style="text-decoration:none;color:inherit;">
+                        <span class="sidebar-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+                        <span class="sidebar-item-label">Quota</span>
+                    </a>
+
+                    <div class="sidebar-divider"></div>
+
+                    <!-- Hệ thống -->
+                    <div class="sidebar-section-label">Hệ thống</div>
                     <div class="sidebar-item" data-tab="settings" data-label="Cài đặt" onclick="switchTab('settings')">
                         <span class="sidebar-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
                         <span class="sidebar-item-label">Cài đặt</span>
                     </div>
+                    <a class="sidebar-item" href="/admin/drive.html" style="text-decoration:none;color:inherit;">
+                        <span class="sidebar-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12c0 1.5-1.4 5-5 5h-1l-2-3M2 12c0-1.5 1.4-5 5-5h6l2 3M6 17l4-7 4 7H6z"/></svg></span>
+                        <span class="sidebar-item-label">Drive & Backup</span>
+                    </a>
                     <div class="sidebar-item" data-tab="help" data-label="Hướng dẫn" onclick="switchTab('help')">
                         <span class="sidebar-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
                         <span class="sidebar-item-label">Hướng dẫn</span>
@@ -548,7 +567,20 @@
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;flex-wrap:wrap;gap:0.75rem;">
                     <h2 style="font-size:1.4rem;font-weight:700;display:flex;align-items:center;gap:0.5rem;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.5"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg> Kho Media</h2>
                     <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
+                        <a href="/admin/drive.html" id="mediaDrivePill" title="Drive: đang kiểm tra…"
+                            aria-label="Trạng thái Drive"
+                            style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid var(--border);border-radius:8px;color:var(--text-muted);text-decoration:none;background:var(--surface);transition:all .15s;">
+                            <span id="mediaDriveIcon" style="display:inline-flex;align-items:center;justify-content:center;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 12c0 1.5-1.4 5-5 5h-1l-2-3M2 12c0-1.5 1.4-5 5-5h6l2 3M6 17l4-7 4 7H6z"/>
+                                </svg>
+                            </span>
+                        </a>
                         <div id="mediaQuotaBar"></div>
+                        <button class="btn btn-sm btn-ghost" id="mediaSyncBtn" onclick="syncMediaWithDrive()" title="Đồng bộ với Drive (kéo thay đổi từ Drive về DB)">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:0.25rem;"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                            Đồng bộ
+                        </button>
                         <button class="btn btn-sm btn-primary" onclick="createMediaFolder()">+ Thư mục</button>
                     </div>
                 </div>

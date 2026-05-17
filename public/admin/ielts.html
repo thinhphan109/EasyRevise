@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IELTS Admin · EasyRevise</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+    <script>(function(){var t=localStorage.getItem('easyrevise_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+    <style>
+        :root {
+            --bg: #fbfbfb; --surface: #ffffff; --surface-2: #f5f5f5;
+            --text: #1a1a1a; --text-2: #555; --text-muted: #999;
+            --border: #e5e5e5; --border-strong: #d4d4d4;
+            --accent: #0066ff; --accent-soft: #e6f0ff;
+            --success: #16a34a; --success-soft: #dcfce7;
+            --warning: #d97706; --warning-soft: #fef3c7;
+            --danger: #dc2626; --danger-soft: #fee2e2;
+            --shadow-1: 0 1px 2px rgba(0,0,0,0.04);
+        }
+        [data-theme="dark"] {
+            --bg: #0d0d0d; --surface: #161616; --surface-2: #202020;
+            --text: #f5f5f5; --text-2: #b0b0b0; --text-muted: #707070;
+            --border: #262626; --border-strong: #333;
+            --accent: #4d8eff; --accent-soft: #1a2942;
+            --success-soft: #14532d; --warning-soft: #422006; --danger-soft: #7f1d1d;
+        }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg); color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            font-feature-settings: 'cv11', 'ss01';
+            letter-spacing: -0.005em;
+        }
+        .topbar {
+            position: sticky; top: 0; z-index: 50;
+            background: color-mix(in srgb, var(--bg) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0.7rem 1.5rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .brand { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; text-decoration: none; color: var(--text); }
+        .brand-mark { width: 26px; height: 26px; background: var(--text); color: var(--bg); border-radius: 7px; display: grid; place-items: center; font-weight: 700; font-size: 0.7rem; }
+        .brand-divider { width: 1px; height: 18px; background: var(--border-strong); }
+        .brand-skill { font-size: 0.78rem; font-weight: 600; padding: 0.18rem 0.5rem; background: var(--surface-2); border-radius: 5px; color: var(--text-2); }
+        .container { max-width: 1300px; margin: 0 auto; padding: 1.75rem 1.5rem 4rem; }
+
+        .header-row {
+            display: flex; justify-content: space-between; align-items: baseline;
+            margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;
+        }
+        .header-row h1 {
+            font-family: 'Source Serif 4', Georgia, serif;
+            font-size: 1.85rem; font-weight: 600;
+            margin: 0; letter-spacing: -0.02em;
+        }
+        .stats {
+            font-size: 0.85rem; color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+        }
+        .stats strong { color: var(--text); font-weight: 600; }
+
+        .toolbar {
+            display: flex; gap: 0.5rem; flex-wrap: wrap;
+            margin-bottom: 1.25rem; align-items: center;
+        }
+        .skill-tabs { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+        .skill-tab {
+            padding: 0.4rem 0.95rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            font-size: 0.85rem; cursor: pointer;
+            color: var(--text-2);
+        }
+        .skill-tab:hover { border-color: var(--border-strong); }
+        .skill-tab.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+        .search-input {
+            flex: 1; min-width: 240px;
+            padding: 0.45rem 0.85rem;
+            font-family: inherit; font-size: 0.85rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 7px;
+        }
+        .search-input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
+
+        .btn {
+            padding: 0.45rem 0.95rem;
+            font-family: inherit; font-weight: 500; font-size: 0.85rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 7px; color: var(--text);
+            cursor: pointer; text-decoration: none;
+            transition: all .15s;
+        }
+        .btn:hover { background: var(--surface-2); border-color: var(--border-strong); }
+        .btn-primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+        .table-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-1);
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th, td {
+            padding: 0.7rem 0.95rem;
+            text-align: left;
+            font-size: 0.85rem;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--surface-2);
+            color: var(--text-muted);
+            font-weight: 600; font-size: 0.74rem;
+            letter-spacing: 0.04em; text-transform: uppercase;
+        }
+        tr:last-child td { border-bottom: 0; }
+        tr:hover td { background: var(--surface-2); }
+        .col-title { font-weight: 500; }
+        .col-meta { color: var(--text-muted); font-size: 0.8rem; }
+
+        .badge {
+            display: inline-block;
+            padding: 0.18rem 0.5rem;
+            font-size: 0.72rem; font-weight: 600;
+            border-radius: 5px;
+            letter-spacing: 0.02em;
+        }
+        .badge.published { background: var(--success-soft); color: var(--success); }
+        .badge.draft     { background: var(--warning-soft); color: var(--warning); }
+        .badge.skill     { background: var(--accent-soft); color: var(--accent); }
+
+        .row-actions {
+            display: flex; gap: 0.3rem; justify-content: flex-end;
+        }
+        .icon-btn {
+            background: transparent; border: 0;
+            padding: 0.3rem 0.5rem;
+            cursor: pointer; color: var(--text-2);
+            border-radius: 5px;
+            font-size: 0.85rem;
+        }
+        .icon-btn:hover { background: var(--surface-2); color: var(--text); }
+        .icon-btn.danger:hover { background: var(--danger-soft); color: var(--danger); }
+
+        .pagination {
+            display: flex; gap: 0.5rem; justify-content: center; align-items: center;
+            margin-top: 1.25rem;
+        }
+        .page-btn {
+            padding: 0.4rem 0.85rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px; color: var(--text);
+            font-family: inherit; font-size: 0.82rem; cursor: pointer;
+        }
+        .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .page-info { font-size: 0.82rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+
+        .empty { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+        .loading { text-align: center; padding: 2rem 1rem; color: var(--text-muted); }
+
+        .modal-backdrop {
+            position: fixed; inset: 0; z-index: 100;
+            background: rgba(0,0,0,0.4);
+            display: none; align-items: center; justify-content: center;
+            padding: 1rem;
+        }
+        .modal-backdrop.is-open { display: flex; }
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.75rem 2rem 1.5rem;
+            max-width: 540px; width: 100%;
+            max-height: 90vh; overflow-y: auto;
+        }
+        .modal h3 { margin: 0 0 1rem; font-size: 1.05rem; font-weight: 600; }
+        .field { margin-bottom: 0.85rem; }
+        .field label {
+            display: block; font-size: 0.78rem; font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.04em; text-transform: uppercase;
+            margin-bottom: 0.3rem;
+        }
+        .field input, .field select, .field textarea {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            font-family: inherit; font-size: 0.88rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            color: var(--text); outline: none;
+        }
+        .field textarea { min-height: 100px; resize: vertical; font-family: 'Source Serif 4', Georgia, serif; line-height: 1.6; }
+        .field input:focus, .field select:focus, .field textarea:focus {
+            border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft);
+        }
+        .modal .actions { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <a class="brand" href="/admin">
+            <div class="brand-mark">ER</div>
+            <span>EasyRevise Admin</span>
+            <span class="brand-divider"></span>
+            <span class="brand-skill">IELTS</span>
+        </a>
+        <div style="display:flex;gap:0.4rem;">
+            <a class="btn" href="/admin">← Admin chính</a>
+            <a class="btn" href="/ielts" target="_blank">Xem trang học sinh ↗</a>
+        </div>
+    </div>
+
+    <main class="container">
+        <div class="header-row">
+            <h1>Quản lý đề IELTS</h1>
+            <div class="stats" id="stats">…</div>
+        </div>
+
+        <div class="toolbar">
+            <div class="skill-tabs" id="skillTabs">
+                <button class="skill-tab active" data-skill="">Tất cả</button>
+                <button class="skill-tab" data-skill="reading">Reading</button>
+                <button class="skill-tab" data-skill="listening">Listening</button>
+                <button class="skill-tab" data-skill="writing">Writing</button>
+                <button class="skill-tab" data-skill="speaking">Speaking</button>
+            </div>
+            <input class="search-input" id="search" placeholder="Tìm theo tên đề...">
+            <button class="btn btn-primary" id="newBtn">+ Tạo đề mới</button>
+        </div>
+
+        <div id="bulkBar" style="display:none;background:var(--accent-soft);border:1px solid var(--accent);border-radius:7px;padding:0.5rem 0.85rem;margin-bottom:0.75rem;align-items:center;gap:0.5rem;font-size:0.85rem;">
+            <span id="bulkCount" style="font-weight:600;">0</span>
+            <span style="color:var(--text-2);">được chọn</span>
+            <span style="flex:1;"></span>
+            <button class="btn" id="bulkPublish">▶ Publish</button>
+            <button class="btn" id="bulkUnpublish">⏸ Unpublish</button>
+            <button class="btn" id="bulkDelete" style="color:var(--danger);border-color:var(--danger-soft);">✕ Xoá</button>
+            <button class="btn" id="bulkClear">Bỏ chọn</button>
+        </div>
+
+        <div class="table-wrap">
+            <table id="grid">
+                <thead>
+                    <tr>
+                        <th style="width:38px;"><input type="checkbox" id="selectAll" style="cursor:pointer;"></th>
+                        <th style="width:90px;">Skill</th>
+                        <th>Tên</th>
+                        <th style="width:160px;">Source</th>
+                        <th style="width:90px;">Thời gian</th>
+                        <th style="width:90px;">Trạng thái</th>
+                        <th style="width:160px; text-align:right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody">
+                    <tr><td colspan="7" class="loading">Đang tải…</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+    </main>
+
+    <!-- Edit modal -->
+    <div class="modal-backdrop" id="editModal">
+        <div class="modal">
+            <h3 id="editTitle">Chỉnh đề</h3>
+            <div class="field"><label>Skill</label>
+                <select id="f_skill">
+                    <option value="reading">Reading</option>
+                    <option value="listening">Listening</option>
+                    <option value="writing">Writing</option>
+                    <option value="speaking">Speaking</option>
+                </select>
+            </div>
+            <div class="field"><label>Tên đề</label><input id="f_title" type="text" placeholder="..."></div>
+            <div class="field"><label>Module</label>
+                <select id="f_module">
+                    <option value="academic">Academic</option>
+                    <option value="general_training">General Training</option>
+                </select>
+            </div>
+            <div class="field"><label>Source</label><input id="f_source" type="text" placeholder="youpass.vn"></div>
+            <div class="field"><label>Thời gian (giây)</label><input id="f_duration" type="number" value="3600"></div>
+            <div class="field"><label>Mô tả</label><textarea id="f_description"></textarea></div>
+            <div class="field" style="display:flex;gap:0.5rem;align-items:center;">
+                <input id="f_published" type="checkbox" style="width:auto;margin:0;">
+                <label for="f_published" style="margin:0; text-transform:none; letter-spacing:normal; font-size:0.88rem; color:var(--text);">Đã xuất bản (học sinh thấy được)</label>
+            </div>
+            <div class="actions">
+                <button class="btn" id="cancelBtn">Huỷ</button>
+                <button class="btn btn-primary" id="saveBtn">Lưu</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const PAGE_SIZE = 25;
+        const state = {
+            allTests: [], filtered: [], skill: '', search: '', page: 0,
+            editing: null,
+            selected: new Set()
+        };
+
+        function getToken() { return localStorage.getItem('easyrevise_token') || ''; }
+        async function api(method, path, body) {
+            const headers = { 'Content-Type': 'application/json' };
+            const tok = getToken();
+            if (tok) headers.Authorization = 'Bearer ' + tok;
+            const r = await fetch('/api/ielts' + path, {
+                method, headers,
+                body: body !== undefined ? JSON.stringify(body) : undefined
+            });
+            const text = await r.text();
+            let data; try { data = JSON.parse(text); } catch { data = text; }
+            if (!r.ok) throw new Error((data && data.error) || ('HTTP ' + r.status));
+            return data;
+        }
+
+        function escapeHtml(s) {
+            return String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+        }
+
+        async function load() {
+            try {
+                state.allTests = await api('GET', '/admin/tests');
+                applyFilter();
+            } catch (e) {
+                document.getElementById('tbody').innerHTML = `<tr><td colspan="6" class="empty">Lỗi: ${escapeHtml(e.message)}<br><small>Cần đăng nhập admin trước (qua /admin)</small></td></tr>`;
+            }
+        }
+
+        function applyFilter() {
+            let f = state.allTests;
+            if (state.skill) f = f.filter(t => t.skill === state.skill);
+            if (state.search) {
+                const q = state.search.toLowerCase();
+                f = f.filter(t => (t.title || '').toLowerCase().includes(q));
+            }
+            state.filtered = f;
+            state.page = 0;
+            render();
+        }
+
+        function render() {
+            const total = state.filtered.length;
+            document.getElementById('stats').innerHTML = `<strong>${total}</strong> / ${state.allTests.length} đề · <strong>${state.allTests.filter(t => t.isPublished).length}</strong> đã xuất bản`;
+
+            const start = state.page * PAGE_SIZE;
+            const slice = state.filtered.slice(start, start + PAGE_SIZE);
+            const tbody = document.getElementById('tbody');
+
+            if (!total) {
+                tbody.innerHTML = `<tr><td colspan="7" class="empty">Không có đề.</td></tr>`;
+                document.getElementById('pagination').innerHTML = '';
+                renderBulkBar();
+                return;
+            }
+            tbody.innerHTML = slice.map(t => `
+                <tr data-id="${t.id}">
+                    <td><input type="checkbox" class="row-check" data-id="${t.id}" ${state.selected.has(t.id) ? 'checked' : ''} style="cursor:pointer;"></td>
+                    <td><span class="badge skill">${escapeHtml((t.skill || '').toUpperCase())}</span></td>
+                    <td>
+                        <div class="col-title">${escapeHtml(t.title || '(không tên)')}</div>
+                        <div class="col-meta">${escapeHtml(t.module || '')}</div>
+                    </td>
+                    <td class="col-meta">${escapeHtml(t.source || '')}</td>
+                    <td class="col-meta">${Math.round((t.durationSec || 0) / 60)}p</td>
+                    <td>
+                        <span class="badge ${t.isPublished ? 'published' : 'draft'}">${t.isPublished ? '✓ Live' : '✎ Draft'}</span>
+                    </td>
+                    <td>
+                        <div class="row-actions">
+                            <button class="icon-btn" data-act="open" title="Xem">👁</button>
+                            <button class="icon-btn" data-act="edit" title="Sửa">✎</button>
+                            <button class="icon-btn" data-act="toggle" title="${t.isPublished ? 'Unpublish' : 'Publish'}">${t.isPublished ? '⏸' : '▶'}</button>
+                            <button class="icon-btn danger" data-act="delete" title="Xoá">✕</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            tbody.querySelectorAll('button.icon-btn').forEach(b => b.addEventListener('click', onAction));
+            tbody.querySelectorAll('input.row-check').forEach(cb => cb.addEventListener('change', onSelect));
+            updateSelectAllCheckbox();
+            renderBulkBar();
+
+            const pages = Math.ceil(total / PAGE_SIZE);
+            document.getElementById('pagination').innerHTML = pages > 1 ? `
+                <button class="page-btn" id="prev" ${state.page === 0 ? 'disabled' : ''}>←</button>
+                <span class="page-info">${start + 1}-${Math.min(start + PAGE_SIZE, total)} / ${total}</span>
+                <button class="page-btn" id="next" ${state.page >= pages - 1 ? 'disabled' : ''}>→</button>
+            ` : '';
+            document.getElementById('prev')?.addEventListener('click', () => { state.page--; render(); window.scrollTo(0, 0); });
+            document.getElementById('next')?.addEventListener('click', () => { state.page++; render(); window.scrollTo(0, 0); });
+        }
+
+        function onSelect(e) {
+            const id = e.target.dataset.id;
+            if (e.target.checked) state.selected.add(id);
+            else state.selected.delete(id);
+            renderBulkBar();
+            updateSelectAllCheckbox();
+        }
+        function updateSelectAllCheckbox() {
+            const start = state.page * PAGE_SIZE;
+            const slice = state.filtered.slice(start, start + PAGE_SIZE);
+            const cb = document.getElementById('selectAll');
+            if (!cb || !slice.length) return;
+            const all = slice.every(t => state.selected.has(t.id));
+            const some = slice.some(t => state.selected.has(t.id));
+            cb.checked = all;
+            cb.indeterminate = !all && some;
+        }
+        function renderBulkBar() {
+            const bar = document.getElementById('bulkBar');
+            const n = state.selected.size;
+            bar.style.display = n ? 'flex' : 'none';
+            document.getElementById('bulkCount').textContent = n;
+        }
+        async function onAction(e) {
+            const act = e.target.dataset.act;
+            const tr = e.target.closest('tr');
+            const id = tr.dataset.id;
+            const test = state.allTests.find(t => t.id === id);
+
+            if (act === 'open') {
+                const path = test.skill === 'writing' ? `/ielts/writing/test.html?id=${id}`
+                          : test.skill === 'speaking' ? `/ielts/speaking/test.html?id=${id}`
+                          : test.skill === 'listening' ? `/ielts/listening/test.html?id=${id}`
+                          : `/ielts/reading/test.html?id=${id}`;
+                window.open(path, '_blank');
+            } else if (act === 'edit') {
+                openEditModal(test);
+            } else if (act === 'toggle') {
+                try {
+                    await api('POST', `/admin/tests/${id}/${test.isPublished ? 'unpublish' : 'publish'}`);
+                    test.isPublished = !test.isPublished;
+                    render();
+                } catch (err) { alert(err.message); }
+            } else if (act === 'delete') {
+                if (!confirm(`Xoá đề "${test.title}"? Action không thể hoàn tác.`)) return;
+                try {
+                    await api('DELETE', `/admin/tests/${id}`);
+                    state.allTests = state.allTests.filter(t => t.id !== id);
+                    applyFilter();
+                } catch (err) { alert(err.message); }
+            }
+        }
+
+        function openEditModal(test) {
+            state.editing = test;
+            document.getElementById('editTitle').textContent = test ? 'Chỉnh đề' : 'Tạo đề mới';
+            document.getElementById('f_skill').value = test?.skill || 'reading';
+            document.getElementById('f_title').value = test?.title || '';
+            document.getElementById('f_module').value = test?.module || 'academic';
+            document.getElementById('f_source').value = test?.source || '';
+            document.getElementById('f_duration').value = test?.durationSec || 3600;
+            document.getElementById('f_description').value = test?.description || '';
+            document.getElementById('f_published').checked = !!test?.isPublished;
+            document.getElementById('editModal').classList.add('is-open');
+        }
+        function closeModal() { document.getElementById('editModal').classList.remove('is-open'); }
+
+        async function saveTest() {
+            const payload = {
+                skill: document.getElementById('f_skill').value,
+                title: document.getElementById('f_title').value,
+                module: document.getElementById('f_module').value,
+                source: document.getElementById('f_source').value || null,
+                durationSec: Number(document.getElementById('f_duration').value),
+                description: document.getElementById('f_description').value || null,
+                isPublished: document.getElementById('f_published').checked
+            };
+            if (!payload.title) return alert('Cần tên đề.');
+            try {
+                if (state.editing) {
+                    await api('PUT', `/admin/tests/${state.editing.id}`, payload);
+                    Object.assign(state.editing, payload);
+                } else {
+                    const created = await api('POST', '/admin/tests', payload);
+                    state.allTests.unshift(created);
+                }
+                closeModal();
+                applyFilter();
+            } catch (e) { alert(e.message); }
+        }
+
+        document.querySelectorAll('#skillTabs .skill-tab').forEach(b => {
+            b.addEventListener('click', () => {
+                document.querySelectorAll('#skillTabs .skill-tab').forEach(x => x.classList.remove('active'));
+                b.classList.add('active');
+                state.skill = b.dataset.skill;
+                applyFilter();
+            });
+        });
+        document.getElementById('search').addEventListener('input', e => {
+            state.search = e.target.value;
+            applyFilter();
+        });
+        document.getElementById('newBtn').addEventListener('click', () => openEditModal(null));
+        document.getElementById('cancelBtn').addEventListener('click', closeModal);
+        document.getElementById('saveBtn').addEventListener('click', saveTest);
+
+        // Bulk
+        document.getElementById('selectAll').addEventListener('change', e => {
+            const start = state.page * PAGE_SIZE;
+            const slice = state.filtered.slice(start, start + PAGE_SIZE);
+            if (e.target.checked) slice.forEach(t => state.selected.add(t.id));
+            else slice.forEach(t => state.selected.delete(t.id));
+            render();
+        });
+        document.getElementById('bulkPublish').addEventListener('click', () => bulkAct('publish', 'Publish'));
+        document.getElementById('bulkUnpublish').addEventListener('click', () => bulkAct('unpublish', 'Unpublish'));
+        document.getElementById('bulkDelete').addEventListener('click', () => bulkAct('delete', 'Xoá'));
+        document.getElementById('bulkClear').addEventListener('click', () => { state.selected.clear(); render(); });
+
+        async function bulkAct(action, label) {
+            const ids = Array.from(state.selected);
+            if (!ids.length) return;
+            if (!confirm(`${label} ${ids.length} đề?`)) return;
+            try {
+                const r = await fetch('/api/admin/ielts/tests/bulk', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + getToken() },
+                    body: JSON.stringify({ ids, action })
+                });
+                if (!r.ok) throw new Error(await r.text());
+                state.selected.clear();
+                await load();
+            } catch (err) { alert('Lỗi bulk: ' + err.message); }
+        }
+
+        load();
+    </script>
+</body>
+</html>

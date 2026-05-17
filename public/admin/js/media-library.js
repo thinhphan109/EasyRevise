@@ -188,6 +188,47 @@ async function loadDriveQuota() {
             <span style="font-size:0.7rem;color:${barColor};font-weight:600;">${pct}%</span>
         </div>`;
     } catch { /* silent */ }
+
+    // Drive auth status pill — icon-only, colour-coded
+    try {
+        const s = await api('/api/admin/drive/status');
+        const pill = document.getElementById('mediaDrivePill');
+        const icon = document.getElementById('mediaDriveIcon');
+        if (!pill || !icon) return;
+
+        if (s.live?.ok) {
+            const used = s.live.quotaUsed || 0;
+            const limit = s.live.quotaLimit || 0;
+            const pct = limit ? (used / limit) * 100 : 0;
+            const usedGB = (used / 1e9).toFixed(1);
+            const limitGB = (limit / 1e9).toFixed(0);
+            const accountLine = s.live.account ? `\n${s.live.account}` : '';
+            const stateLabel = pct > 90 ? 'Sắp đầy' : pct > 70 ? 'Khá đầy' : 'Ổn định';
+
+            pill.title = `Drive · ${stateLabel}${accountLine}\n${usedGB} / ${limitGB} GB (${pct.toFixed(1)}%)`;
+            const color = pct > 90 ? '#dc2626' : pct > 70 ? '#d97706' : '#16a34a';
+            const bg    = pct > 90 ? '#fee2e2' : pct > 70 ? '#fef3c7' : '#dcfce7';
+            pill.style.color = color;
+            pill.style.borderColor = color;
+            pill.style.background = bg;
+            // Add small status dot overlay on the cloud icon
+            icon.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 12c0 1.5-1.4 5-5 5h-1l-2-3M2 12c0-1.5 1.4-5 5-5h6l2 3M6 17l4-7 4 7H6z"/>
+                </svg>
+                <span style="position:absolute;bottom:-1px;right:-1px;width:8px;height:8px;border-radius:50%;background:${color};border:2px solid var(--surface);"></span>`;
+            icon.style.position = 'relative';
+        } else {
+            pill.title = `Drive · Lỗi auth\n${(s.live && s.live.error) || 'Cần re-authenticate'}`;
+            pill.style.color = '#dc2626';
+            pill.style.borderColor = '#fecaca';
+            pill.style.background = '#fef2f2';
+            icon.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>`;
+        }
+    } catch { /* silent */ }
 }
 
 function renderMediaLibrary() {
@@ -701,6 +742,29 @@ async function createMediaFolder() {
     if (res.success) { _mediaToast('Đã tạo thư mục', 'success'); await loadMedia(); }
     else _mediaToast(res.error || 'Lỗi', 'error');
 }
+
+async function syncMediaWithDrive() {
+    const btn = document.getElementById('mediaSyncBtn');
+    if (!btn) return;
+    const original = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:0.25rem;animation:spin 1s linear infinite;"><circle cx="12" cy="12" r="10" stroke-dasharray="50 50"/></svg> Đang đồng bộ…';
+    try {
+        const r = await api('/api/admin/media/sync', 'POST');
+        if (r.success) {
+            _mediaToast(`✓ Đồng bộ xong: ${r.summary}`, 'success');
+            await loadMedia();
+        } else {
+            _mediaToast('Lỗi: ' + (r.error || 'unknown'), 'error');
+        }
+    } catch (e) {
+        _mediaToast('Lỗi: ' + e.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = original;
+    }
+}
+window.syncMediaWithDrive = syncMediaWithDrive;
 
 // ========================
 // File rename / delete / move

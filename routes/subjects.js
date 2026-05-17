@@ -1,38 +1,51 @@
 // routes/subjects.js — Subject CRUD (Admin)
+'use strict';
 const express = require('express');
 const router = express.Router();
-const { readSubjects, writeSubjects, uuidv4 } = require('../lib/data');
+const repos = require('../lib/repos');
+const { uuidv4 } = require('../lib/data');
 const { adminOnly } = require('../lib/auth');
 
 // GET /api/subjects
-router.get('/', (req, res) => { res.json(readSubjects().subjects); });
+router.get('/', async (_req, res, next) => {
+    try { res.json(await repos.subjects.listAll()); }
+    catch (e) { next(e); }
+});
 
 // POST /api/subjects
-router.post('/', adminOnly, (req, res) => {
-    const data = readSubjects();
-    const subject = { id: uuidv4(), name: req.body.name || '', icon: req.body.icon || '📚' };
-    data.subjects.push(subject);
-    writeSubjects(data);
-    res.status(201).json(subject);
+router.post('/', adminOnly, async (req, res, next) => {
+    try {
+        const subject = await repos.subjects.upsert({
+            id: uuidv4(),
+            name: req.body.name || '',
+            icon: req.body.icon || '📚',
+            color: req.body.color || null
+        });
+        res.status(201).json(subject);
+    } catch (e) { next(e); }
 });
 
 // PUT /api/subjects/:id
-router.put('/:id', adminOnly, (req, res) => {
-    const data = readSubjects();
-    const s = data.subjects.find(s => s.id === req.params.id);
-    if (!s) return res.status(404).json({ error: 'Subject not found' });
-    if (req.body.name) s.name = req.body.name;
-    if (req.body.icon) s.icon = req.body.icon;
-    writeSubjects(data);
-    res.json(s);
+router.put('/:id', adminOnly, async (req, res, next) => {
+    try {
+        const cur = await repos.subjects.getById(req.params.id);
+        if (!cur) return res.status(404).json({ error: 'Subject not found' });
+        const updated = await repos.subjects.upsert({
+            id: cur.id,
+            name: req.body.name ?? cur.name,
+            icon: req.body.icon ?? cur.icon,
+            color: req.body.color ?? cur.color
+        });
+        res.json(updated);
+    } catch (e) { next(e); }
 });
 
 // DELETE /api/subjects/:id
-router.delete('/:id', adminOnly, (req, res) => {
-    const data = readSubjects();
-    data.subjects = data.subjects.filter(s => s.id !== req.params.id);
-    writeSubjects(data);
-    res.json({ success: true });
+router.delete('/:id', adminOnly, async (req, res, next) => {
+    try {
+        await repos.subjects.remove(req.params.id);
+        res.json({ success: true });
+    } catch (e) { next(e); }
 });
 
 module.exports = router;

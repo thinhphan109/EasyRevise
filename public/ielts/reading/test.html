@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light" data-demo-style="hybrid">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IELTS Reading · EasyRevise</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&display=swap" rel="stylesheet">
+    <script>
+        (function () { var t = localStorage.getItem('easyrevise_theme') || 'light'; document.documentElement.setAttribute('data-theme', t); })();
+    </script>
+    <style>
+        :root {
+            --bg: #fbfbfb; --surface: #ffffff; --surface-2: #f5f5f5;
+            --text: #1a1a1a; --text-2: #555; --text-muted: #999;
+            --border: #e5e5e5; --border-strong: #d4d4d4;
+            --accent: #0066ff; --accent-soft: #e6f0ff;
+            --success: #16a34a; --warning: #d97706; --danger: #dc2626;
+            --highlight: #fef3c7;
+            --shadow-3: 0 16px 40px rgba(0,0,0,0.10);
+        }
+        [data-theme="dark"] {
+            --bg: #0d0d0d; --surface: #161616; --surface-2: #202020;
+            --text: #f5f5f5; --text-2: #b0b0b0; --text-muted: #707070;
+            --border: #262626; --border-strong: #333;
+            --accent: #4d8eff; --accent-soft: #1a2942;
+            --highlight: #4a3a0e;
+            --shadow-3: 0 16px 40px rgba(0,0,0,0.5);
+        }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; }
+        html { height: 100%; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg); color: var(--text);
+            height: 100vh; height: 100dvh;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            display: flex; flex-direction: column;
+            font-feature-settings: 'cv11', 'ss01';
+            letter-spacing: -0.005em;
+        }
+
+        .topbar {
+            position: sticky; top: 0; z-index: 50;
+            background: color-mix(in srgb, var(--bg) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0.7rem 1.5rem;
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 1rem;
+        }
+        .brand {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-weight: 600; font-size: 0.95rem;
+            text-decoration: none; color: var(--text);
+        }
+        .brand-mark {
+            width: 26px; height: 26px;
+            background: var(--text); color: var(--bg);
+            border-radius: 7px;
+            display: grid; place-items: center;
+            font-weight: 700; font-size: 0.7rem;
+        }
+        .brand-divider { width: 1px; height: 18px; background: var(--border-strong); }
+        .brand-skill {
+            font-size: 0.78rem; font-weight: 600;
+            padding: 0.18rem 0.5rem;
+            background: var(--surface-2);
+            border-radius: 5px;
+            color: var(--text-2);
+            letter-spacing: 0.02em;
+        }
+
+        .timer-wrap { display: flex; align-items: center; gap: 0.5rem; font-variant-numeric: tabular-nums; }
+        .timer-label { font-size: 0.78rem; color: var(--text-muted); }
+        #timer {
+            font-size: 0.95rem; font-weight: 600;
+            padding: 0.35rem 0.75rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+        }
+        #timer.warn { background: #fef3c7; border-color: #fbbf24; color: #92400e; }
+        #timer.crit { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+
+        .save-status {
+            font-size: 0.75rem; color: var(--text-muted);
+            display: flex; align-items: center; gap: 0.3rem;
+        }
+        .save-status.saving { color: var(--accent); }
+        .save-status.saved { color: var(--success); }
+        .save-status.error { color: var(--danger); }
+
+        .btn {
+            padding: 0.45rem 0.95rem;
+            font-family: inherit; font-weight: 500; font-size: 0.85rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            color: var(--text);
+            cursor: pointer;
+            transition: all .15s;
+        }
+        .btn:hover { background: var(--surface-2); border-color: var(--border-strong); }
+        .btn-primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+        .btn-primary:hover { opacity: 0.85; }
+
+        .main {
+            flex: 1;
+            display: grid; grid-template-columns: 1.05fr 1fr; gap: 0;
+            min-height: 0;
+        }
+        .pane {
+            background: var(--surface);
+            overflow-y: auto; overflow-x: hidden;
+            padding: 2rem 2.5rem 4rem;
+            min-height: 0;
+            scroll-behavior: smooth;
+        }
+        .pane:first-child { border-right: 1px solid var(--border); }
+        .pane::-webkit-scrollbar { width: 6px; }
+        .pane::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 3px; }
+
+        .pane-header {
+            display: flex; justify-content: space-between; align-items: baseline;
+            margin: -0.5rem -0.5rem 1.5rem;
+            padding: 0.5rem;
+            position: sticky; top: -0.5rem;
+            background: var(--surface);
+            z-index: 5;
+        }
+        .pane-title {
+            font-size: 0.78rem; font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.06em; text-transform: uppercase;
+        }
+        .pane-meta {
+            font-size: 0.78rem; color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .passage h2 {
+            font-family: 'Source Serif 4', Georgia, serif;
+            font-size: 1.85rem; font-weight: 600;
+            margin: 0 0 0.5rem;
+            letter-spacing: -0.02em;
+            line-height: 1.15;
+        }
+        .passage .sub {
+            font-size: 0.85rem; color: var(--text-muted);
+            margin-bottom: 1.75rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .passage p {
+            font-family: 'Source Serif 4', Georgia, serif;
+            font-size: 1.08rem; line-height: 1.75;
+            color: var(--text);
+            margin: 0 0 1.2rem;
+        }
+        .passage strong {
+            color: var(--accent); font-weight: 600;
+            background: linear-gradient(180deg, transparent 65%, var(--accent-soft) 65%);
+            padding: 0 0.1em;
+        }
+        .passage::selection, .passage *::selection { background: var(--highlight); color: var(--text); }
+
+        .q-group { margin-bottom: 2.5rem; }
+        .q-group-head {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        .q-group-title { font-size: 1rem; font-weight: 600; }
+        .q-group-range { font-size: 0.8rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+        .q-group-instructions {
+            font-size: 0.88rem; color: var(--text-2);
+            line-height: 1.55;
+            padding: 0.7rem 0.95rem; margin-bottom: 1.1rem;
+            background: var(--surface-2); border-radius: 8px;
+            border-left: 3px solid var(--accent);
+        }
+        .q {
+            display: flex; gap: 0.85rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .q:last-child { border-bottom: 0; }
+        .q-num {
+            min-width: 1.8rem;
+            font-size: 0.92rem; font-weight: 600;
+            color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+            line-height: 1.5; padding-top: 0.05rem;
+        }
+        .q[data-answered="true"] .q-num { color: var(--accent); }
+        .q-body { flex: 1; }
+        .q-prompt { font-size: 0.94rem; line-height: 1.5; margin-bottom: 0.55rem; }
+
+        .choices { display: flex; flex-direction: column; gap: 0.3rem; }
+        .choice {
+            display: flex; align-items: center; gap: 0.6rem;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 7px; background: var(--surface);
+            cursor: pointer; transition: all .15s;
+        }
+        .choice:hover { border-color: var(--accent); background: var(--accent-soft); }
+        .choice input { display: none; }
+        .choice-mark {
+            width: 16px; height: 16px;
+            border: 1.5px solid var(--border-strong);
+            border-radius: 50%; position: relative; flex-shrink: 0;
+            transition: all .15s;
+        }
+        .choice input:checked ~ .choice-mark { border-color: var(--accent); background: var(--accent); }
+        .choice input:checked ~ .choice-mark::after {
+            content: ''; position: absolute; inset: 3px;
+            border-radius: 50%; background: white;
+        }
+        .choice:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+        .choice-label { font-size: 0.92rem; color: var(--text); }
+        .choice-label strong { display: inline-block; min-width: 1.4rem; font-weight: 600; color: var(--accent); }
+
+        .q-input {
+            font-family: inherit; font-size: 0.92rem;
+            padding: 0.5rem 0.75rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 7px; color: var(--text);
+            min-width: 14rem; outline: none; transition: all .15s;
+        }
+        .q-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+        .q-input:not(:placeholder-shown) { background: var(--accent-soft); border-color: var(--accent); }
+        .q-select {
+            font-family: inherit; font-size: 0.9rem;
+            padding: 0.45rem 1.8rem 0.45rem 0.7rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 7px; color: var(--text);
+            cursor: pointer;
+            -webkit-appearance: none; appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230066ff' stroke-width='2'><polyline points='6 9 12 15 18 9'/></svg>");
+            background-repeat: no-repeat; background-position: right 0.55rem center; background-size: 14px;
+        }
+
+        .q-flag {
+            background: none; border: 0; cursor: pointer;
+            color: var(--text-muted); font-size: 1rem;
+            padding: 0 0.25rem;
+            align-self: flex-start; line-height: 1.5;
+            transition: color .15s;
+        }
+        .q-flag:hover { color: var(--warning); }
+        .q-flag.is-flagged { color: var(--warning); }
+
+        .headings-card {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem 1.2rem; margin-bottom: 1rem;
+        }
+        .headings-card-title {
+            font-size: 0.78rem; font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.06em; text-transform: uppercase;
+            margin-bottom: 0.6rem;
+        }
+        .heading-row {
+            font-size: 0.9rem; line-height: 1.5;
+            padding: 0.2rem 0; color: var(--text-2);
+        }
+        .heading-row strong { display: inline-block; min-width: 1.8rem; font-weight: 600; color: var(--accent); }
+
+        .palette-bar {
+            position: sticky; bottom: 0; z-index: 40;
+            background: color-mix(in srgb, var(--bg) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid var(--border);
+            padding: 0.7rem 1.5rem;
+            display: flex; gap: 0.85rem; align-items: center;
+            overflow-x: auto;
+        }
+        .palette-meta { display: flex; flex-direction: column; gap: 0.1rem; }
+        .palette-meta-label {
+            font-size: 0.7rem; color: var(--text-muted);
+            letter-spacing: 0.04em; text-transform: uppercase; font-weight: 500;
+        }
+        .palette-meta-value { font-size: 0.9rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+        .palette-divider { width: 1px; height: 28px; background: var(--border); }
+        .palette-cells { display: flex; gap: 0.3rem; flex: 1; min-width: 0; }
+        .qpill {
+            min-width: 2.1rem; height: 2.1rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-2); border-radius: 6px;
+            font-family: inherit; font-size: 0.82rem; font-weight: 600;
+            cursor: pointer; position: relative;
+            font-variant-numeric: tabular-nums;
+            transition: all .15s; flex-shrink: 0;
+        }
+        .qpill:hover { border-color: var(--accent); color: var(--accent); }
+        .qpill.answered { background: var(--accent); color: white; border-color: var(--accent); }
+        .qpill.flagged::after {
+            content: '⚑'; position: absolute;
+            top: -7px; right: -3px;
+            font-size: 0.6rem; color: var(--warning); line-height: 1;
+        }
+
+        .modal-backdrop {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.4);
+            display: none; align-items: center; justify-content: center;
+            z-index: 100; padding: 1rem;
+            animation: fadeIn .2s ease-out;
+        }
+        .modal-backdrop.is-open { display: flex; }
+        @keyframes fadeIn { from { opacity: 0 } }
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 2rem 2.25rem 1.5rem;
+            max-width: 460px; width: 100%;
+            box-shadow: var(--shadow-3);
+            animation: slideUp .3s cubic-bezier(0.34, 1.45, 0.64, 1);
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(16px) } }
+        .modal-eyebrow {
+            font-size: 0.74rem; font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.08em; text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        .modal h3 { margin: 0 0 1.5rem; font-size: 1.15rem; font-weight: 600; }
+        .band-row { display: flex; align-items: baseline; gap: 0.6rem; margin-bottom: 1.5rem; }
+        .band-display {
+            font-family: 'Source Serif 4', Georgia, serif;
+            font-size: 4.5rem; font-weight: 600;
+            line-height: 1; letter-spacing: -0.04em;
+            font-variant-numeric: tabular-nums;
+        }
+        .band-suffix { font-size: 0.95rem; color: var(--text-muted); }
+        .raw-bar {
+            background: var(--surface-2);
+            border: 1px solid var(--border); border-radius: 8px;
+            padding: 0.75rem 0.95rem;
+            font-size: 0.88rem; color: var(--text-2);
+            margin-bottom: 1.25rem;
+        }
+        .raw-bar strong { color: var(--text); font-weight: 600; }
+        .modal .actions { display: flex; gap: 0.5rem; }
+
+        .loading {
+            position: fixed; inset: 0;
+            background: var(--bg);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            z-index: 200;
+        }
+
+        @media (max-width: 900px) {
+            .main { grid-template-columns: 1fr; }
+            .pane { padding: 1.25rem; }
+            .pane:first-child { border-right: 0; border-bottom: 1px solid var(--border); }
+            .pane.passage-pane { display: var(--passage-display, block); }
+            .pane.questions-pane { display: var(--questions-display, none); }
+            body[data-mobile-view="questions"] { --passage-display: none; --questions-display: block; }
+            .topbar { padding: 0.55rem 0.85rem; flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <a class="brand" href="/ielts/reading">
+            <div class="brand-mark">ER</div>
+            <span>EasyRevise</span>
+            <span class="brand-divider"></span>
+            <span class="brand-skill" id="skillLabel">IELTS Reading</span>
+        </a>
+        <div style="display:flex;gap:0.6rem;align-items:center;">
+            <span class="save-status" id="saveStatus" hidden>Đang lưu…</span>
+            <div class="timer-wrap">
+                <span class="timer-label">Time</span>
+                <span id="timer">--:--</span>
+            </div>
+            <button class="btn" id="toggleBtn">Switch view</button>
+            <button class="btn btn-primary" id="submitBtn">Submit</button>
+        </div>
+    </div>
+
+    <div class="main">
+        <section class="pane passage-pane">
+            <div class="pane-header">
+                <span class="pane-title" id="passageHead">Reading Passage</span>
+                <span class="pane-meta" id="passageMeta">—</span>
+            </div>
+            <article class="passage" id="passage"></article>
+        </section>
+
+        <section class="pane questions-pane">
+            <div class="pane-header">
+                <span class="pane-title">Questions</span>
+                <span class="pane-meta" id="answeredMeta">0 / 0 answered</span>
+            </div>
+            <div id="questions"></div>
+        </section>
+    </div>
+
+    <div class="palette-bar">
+        <div class="palette-meta">
+            <span class="palette-meta-label">Progress</span>
+            <span class="palette-meta-value" id="progressMeta">0 of 0</span>
+        </div>
+        <div class="palette-divider"></div>
+        <div class="palette-cells" id="palette"></div>
+    </div>
+
+    <div class="modal-backdrop" id="resultModal">
+        <div class="modal">
+            <div class="modal-eyebrow" id="resultEyebrow">Test complete</div>
+            <h3>Your estimated band</h3>
+            <div class="band-row">
+                <span class="band-display" id="bandDisplay">—</span>
+                <span class="band-suffix">/ 9.0</span>
+            </div>
+            <div class="raw-bar">Raw score: <strong id="rawDisplay">—</strong></div>
+            <div class="actions">
+                <button class="btn" id="reviewBtn" style="flex:1;">Review</button>
+                <a class="btn btn-primary" id="catalogBtn" href="/ielts/reading" style="flex:1; text-align:center; text-decoration:none;">Đề khác</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading" id="loading">Đang tải đề thi…</div>
+
+    <script src="/ielts/_shared/ielts-runtime.js"></script>
+    <script>
+        const R = window.IeltsRuntime;
+        const TEST_ID = R.getQuery('id');
+        if (!TEST_ID) { window.location.href = '/ielts'; throw new Error('no id'); }
+        if (!R.ensureLogin()) throw new Error('not logged in');
+
+        const state = {
+            test: null, flat: [], answers: {}, flags: {},
+            submissionId: null, durationLeft: 0, timerHandle: null,
+            isComplete: false
+        };
+
+        const saveStatus = document.getElementById('saveStatus');
+        function setSaveStatus(text, cls) {
+            saveStatus.hidden = !text;
+            saveStatus.textContent = text || '';
+            saveStatus.className = 'save-status' + (cls ? ' ' + cls : '');
+        }
+
+        const debouncedSave = R.debounce(async () => {
+            if (!state.submissionId || state.isComplete) return;
+            setSaveStatus('Đang lưu…', 'saving');
+            try {
+                await R.saveAnswers(state.submissionId, state.answers, state.flags);
+                setSaveStatus('Đã lưu', 'saved');
+                setTimeout(() => setSaveStatus('', ''), 1500);
+            } catch (e) {
+                setSaveStatus('Lưu lỗi', 'error');
+            }
+        }, 1500);
+
+        function setAnswer(qid, val) { state.answers[qid] = val; renderPalette(); debouncedSave(); }
+        function toggleFlag(qid)    { state.flags[qid] = !state.flags[qid]; renderPalette(); debouncedSave(); }
+
+        function renderPassage() {
+            const p = state.test.passages[0];
+            document.getElementById('passageHead').textContent = `Reading Passage ${p.order}`;
+            document.getElementById('passageMeta').textContent = `${state.test.module === 'general_training' ? 'General Training' : 'Academic'} · ${state.flat.length} câu`;
+            document.getElementById('passage').innerHTML = `
+                <h2>${escapeHtml(p.title || '')}</h2>
+                <div class="sub">You should spend about ${Math.round(state.test.durationSec / 60)} minutes on Questions 1–${state.flat.length}.</div>
+                ${renderBody(p.body)}
+            `;
+        }
+
+        function renderBody(md) {
+            return md.split(/\n\n+/).map(par =>
+                `<p>${escapeHtml(par).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')}</p>`
+            ).join('');
+        }
+
+        function escapeHtml(s) {
+            return String(s ?? '').replace(/[&<>"']/g, ch =>
+                ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+        }
+
+        function buildGroups() {
+            // Group consecutive questions of the same type
+            const groups = [];
+            let cur = null;
+            state.flat.forEach((q, i) => {
+                const groupType = ['matching_headings', 'matching_information', 'matching_features', 'sentence_endings'].includes(q.type)
+                    ? q.type : q.type;  // matching is its own group anyway
+                if (!cur || cur.type !== groupType) {
+                    cur = { type: groupType, items: [], firstN: i + 1 };
+                    groups.push(cur);
+                }
+                cur.items.push({ q, n: i + 1 });
+                cur.lastN = i + 1;
+            });
+            return groups;
+        }
+
+        const GROUP_TITLES = {
+            tfng:                'True / False / Not Given',
+            ynng:                'Yes / No / Not Given',
+            mc_single:           'Multiple Choice',
+            mc_multi:            'Multiple Choice (chọn nhiều)',
+            sentence_completion: 'Sentence Completion',
+            short_answer:        'Short Answer',
+            matching_headings:   'Matching Headings',
+            matching_information:'Matching Information',
+            matching_features:   'Matching Features',
+            sentence_endings:    'Sentence Endings',
+            summary_completion:  'Summary Completion',
+            note_completion:     'Note Completion',
+            diagram_labelling:   'Diagram Labelling'
+        };
+        const GROUP_INSTRUCTIONS = {
+            tfng:                'Decide whether each statement agrees with the information in the passage.',
+            ynng:                "Decide whether each statement agrees with the writer's claims.",
+            mc_single:           'Choose the correct letter A, B, C, or D.',
+            mc_multi:            'Choose the correct answers (multiple).',
+            sentence_completion: 'Fill the blanks with NO MORE THAN THREE WORDS AND/OR A NUMBER.',
+            short_answer:        'Answer the questions in NO MORE THAN THREE WORDS.',
+            matching_headings:   'Match each paragraph with the most appropriate heading from the list.',
+            matching_information:'Match each statement with the correct paragraph letter.',
+            matching_features:   'Match each statement with the correct option from the list.',
+            sentence_endings:    'Match the first half of each sentence with its second half.',
+            summary_completion:  'Complete the summary using words from the passage.',
+            note_completion:     'Complete the notes below.',
+            diagram_labelling:   'Label the diagram below.'
+        };
+
+        function renderQuestions() {
+            const groups = buildGroups();
+            const root = document.getElementById('questions');
+            root.innerHTML = groups.map(g => {
+                let body = '';
+                if (['matching_headings', 'matching_information', 'matching_features', 'sentence_endings'].includes(g.type)) {
+                    // Each item is one matching question with multiple sub-rows
+                    body = g.items.map(it => renderMatching(it.q, it.n)).join('');
+                } else {
+                    body = g.items.map(it => renderSingleQ(it.q, it.n)).join('');
+                }
+                return `<div class="q-group">
+                    <div class="q-group-head">
+                        <span class="q-group-title">${GROUP_TITLES[g.type] || g.type}</span>
+                        <span class="q-group-range">Q ${g.firstN}${g.firstN !== g.lastN ? '–' + g.lastN : ''}</span>
+                    </div>
+                    <div class="q-group-instructions">${GROUP_INSTRUCTIONS[g.type] || ''}</div>
+                    ${body}
+                </div>`;
+            }).join('');
+            attachListeners();
+        }
+
+        function renderSingleQ(q, n) {
+            let inner = '';
+            if (q.type === 'tfng' || q.type === 'ynng') {
+                const opts = q.type === 'tfng' ? ['true','false','not_given'] : ['yes','no','not_given'];
+                inner = `<div class="choices">${opts.map(v =>
+                    `<label class="choice"><input type="radio" name="${q.id}" value="${v}"><span class="choice-mark"></span><span class="choice-label">${v.replace('_',' ').toUpperCase()}</span></label>`
+                ).join('')}</div>`;
+            } else if (q.type === 'mc_single') {
+                inner = `<div class="choices">${(q.payload.options||[]).map((opt, i) =>
+                    `<label class="choice"><input type="radio" name="${q.id}" value="${i}"><span class="choice-mark"></span><span class="choice-label"><strong>${String.fromCharCode(65+i)}</strong>${escapeHtml(opt)}</span></label>`
+                ).join('')}</div>`;
+            } else if (q.type === 'mc_multi') {
+                inner = `<div class="choices">${(q.payload.options||[]).map((opt, i) =>
+                    `<label class="choice"><input type="checkbox" name="${q.id}" value="${i}"><span class="choice-mark"></span><span class="choice-label"><strong>${String.fromCharCode(65+i)}</strong>${escapeHtml(opt)}</span></label>`
+                ).join('')}</div>`;
+            } else { // sentence_completion, short_answer, note_completion fallback
+                inner = `<input type="text" class="q-input" data-qid="${q.id}" placeholder="Type answer">`;
+            }
+            return `<div class="q" id="qrow-${n}" data-qid="${q.id}">
+                <span class="q-num">${n}</span>
+                <div class="q-body">
+                    <div class="q-prompt">${escapeHtml(q.prompt)}</div>
+                    ${inner}
+                </div>
+                <button class="q-flag" data-qid="${q.id}">⚑</button>
+            </div>`;
+        }
+
+        function renderMatching(q, startN) {
+            const headings = q.payload.headings || q.payload.options || [];
+            const items = q.payload.paragraphs || q.payload.statements || [];
+            const opts = headings.map(h => `<option value="${h.key}">${h.key}. ${escapeHtml(h.text)}</option>`).join('');
+            const list = headings.length ? `<div class="headings-card">
+                <div class="headings-card-title">List of headings</div>
+                ${headings.map(h => `<div class="heading-row"><strong>${h.key}</strong>${escapeHtml(h.text)}</div>`).join('')}
+            </div>` : '';
+            const rows = items.map((p, i) => `
+                <div class="q" id="qrow-${startN+i}" data-qid="${q.id}:${p}">
+                    <span class="q-num">${startN+i}</span>
+                    <div class="q-body">
+                        <div class="q-prompt">Paragraph <strong>${escapeHtml(p)}</strong></div>
+                        <select class="q-select" data-qid="${q.id}" data-key="${escapeHtml(p)}">
+                            <option value="">Choose</option>${opts}
+                        </select>
+                    </div>
+                    <button class="q-flag" data-qid="${q.id}:${p}">⚑</button>
+                </div>`).join('');
+            return list + rows;
+        }
+
+        function attachListeners() {
+            document.querySelectorAll('input[type="radio"]').forEach(r =>
+                r.addEventListener('change', e => setAnswer(e.target.name, e.target.value)));
+            document.querySelectorAll('input[type="checkbox"]').forEach(c =>
+                c.addEventListener('change', e => {
+                    const name = e.target.name;
+                    const cur = Array.isArray(state.answers[name]) ? state.answers[name].slice() : [];
+                    const v = Number(e.target.value);
+                    if (e.target.checked) { if (!cur.includes(v)) cur.push(v); }
+                    else { const i = cur.indexOf(v); if (i >= 0) cur.splice(i, 1); }
+                    setAnswer(name, cur);
+                }));
+            document.querySelectorAll('input.q-input').forEach(i =>
+                i.addEventListener('input', e => setAnswer(e.target.dataset.qid, e.target.value)));
+            document.querySelectorAll('select.q-select').forEach(s =>
+                s.addEventListener('change', e => {
+                    const qid = e.target.dataset.qid;
+                    const cur = { ...(state.answers[qid] || {}) };
+                    cur[e.target.dataset.key] = e.target.value;
+                    setAnswer(qid, cur);
+                }));
+            document.querySelectorAll('.q-flag').forEach(b =>
+                b.addEventListener('click', e => {
+                    toggleFlag(e.currentTarget.dataset.qid);
+                    e.currentTarget.classList.toggle('is-flagged');
+                }));
+        }
+
+        function flatPaletteIds() {
+            const ids = [];
+            for (const q of state.flat) {
+                if (['matching_headings','matching_information','matching_features','sentence_endings'].includes(q.type)) {
+                    const items = q.payload.paragraphs || q.payload.statements || [];
+                    items.forEach(p => ids.push(`${q.id}:${p}`));
+                } else {
+                    ids.push(q.id);
+                }
+            }
+            return ids;
+        }
+
+        function isAnswered(qid) {
+            if (qid.includes(':')) {
+                const [pid, key] = qid.split(':');
+                return !!(state.answers[pid] && state.answers[pid][key]);
+            }
+            const v = state.answers[qid];
+            if (Array.isArray(v)) return v.length > 0;
+            return v !== undefined && v !== '' && v !== null;
+        }
+
+        function renderPalette() {
+            const ids = flatPaletteIds();
+            let answered = 0;
+            const cells = ids.map((qid, idx) => {
+                const ok = isAnswered(qid);
+                if (ok) answered++;
+                return `<button class="qpill ${ok ? 'answered' : ''} ${state.flags[qid] ? 'flagged' : ''}" data-n="${idx+1}">${idx+1}</button>`;
+            }).join('');
+            document.getElementById('palette').innerHTML = cells;
+            document.getElementById('progressMeta').textContent = `${answered} of ${ids.length}`;
+            document.getElementById('answeredMeta').textContent = `${answered} / ${ids.length} answered`;
+            document.querySelectorAll('.qpill').forEach(b =>
+                b.addEventListener('click', e => {
+                    const n = e.target.dataset.n;
+                    const row = document.getElementById('qrow-' + n);
+                    if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    document.body.dataset.mobileView = 'questions';
+                }));
+            document.querySelectorAll('.q').forEach(row => {
+                const qid = row.dataset.qid;
+                if (qid) row.dataset.answered = isAnswered(qid) ? 'true' : 'false';
+            });
+        }
+
+        function startTimer() {
+            const el = document.getElementById('timer');
+            function tick() {
+                el.textContent = R.formatTime(state.durationLeft);
+                el.classList.toggle('warn', state.durationLeft <= 600 && state.durationLeft > 60);
+                el.classList.toggle('crit', state.durationLeft <= 60);
+                if (state.durationLeft <= 0) {
+                    clearInterval(state.timerHandle);
+                    submitTest(true);
+                    return;
+                }
+                state.durationLeft--;
+            }
+            tick();
+            state.timerHandle = setInterval(tick, 1000);
+        }
+
+        async function submitTest(expired) {
+            if (state.isComplete) return;
+            if (!expired && !confirm('Nộp bài ngay?')) return;
+            state.isComplete = true;
+            clearInterval(state.timerHandle);
+            try {
+                const r = await R.submit(state.submissionId, state.answers, state.flags);
+                document.getElementById('bandDisplay').textContent = (r.band ?? 0).toFixed(1);
+                document.getElementById('rawDisplay').textContent = `${r.raw} / ${r.total}${expired ? ' (hết giờ)' : ''}`;
+                document.getElementById('resultEyebrow').textContent = expired ? 'Hết giờ' : 'Hoàn thành';
+                document.getElementById('resultModal').classList.add('is-open');
+                document.getElementById('reviewBtn').onclick = () => {
+                    window.location.href = '/ielts/reading/result.html?id=' + state.submissionId;
+                };
+            } catch (e) {
+                alert('Nộp bài lỗi: ' + e.message);
+                state.isComplete = false;
+            }
+        }
+
+        document.getElementById('submitBtn').addEventListener('click', () => submitTest(false));
+        document.getElementById('toggleBtn').addEventListener('click', () => {
+            const cur = document.body.dataset.mobileView;
+            document.body.dataset.mobileView = cur === 'questions' ? 'passage' : 'questions';
+        });
+
+        // ── Boot ───────────────────────────────────────────────────
+        (async () => {
+            try {
+                state.test = await R.getTest(TEST_ID);
+                state.flat = R.flattenQuestions(state.test);
+                state.durationLeft = state.test.durationSec || 3600;
+
+                const sub = await R.startSubmission(TEST_ID);
+                state.submissionId = sub.id;
+
+                document.getElementById('skillLabel').textContent = `IELTS ${state.test.skill[0].toUpperCase()}${state.test.skill.slice(1)}`;
+                document.title = state.test.title + ' · EasyRevise';
+
+                renderPassage();
+                renderQuestions();
+                renderPalette();
+                startTimer();
+                document.getElementById('loading').remove();
+            } catch (e) {
+                document.getElementById('loading').textContent = 'Lỗi tải đề: ' + e.message;
+            }
+        })();
+    </script>
+</body>
+</html>

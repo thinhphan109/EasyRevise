@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IELTS Quota · EasyRevise Admin</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png">
+    <script>(function(){var t=localStorage.getItem('easyrevise_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/pages/admin.css">
+    <style>
+        body { padding: 1.5rem 1.75rem 4rem; max-width: 1200px; margin: 0 auto; }
+        .back { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--text-muted); text-decoration: none; font-size: 0.85rem; margin-bottom: 1rem; }
+        .back:hover { color: var(--text); }
+        .quota-table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+        .quota-table th, .quota-table td { padding: 0.6rem 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+        .quota-table th { color: var(--text-muted); font-weight: 600; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.04em; }
+        .quota-input { width: 70px; padding: 0.25rem 0.4rem; font-size: 0.82rem; border: 1px solid var(--border); border-radius: 5px; background: var(--surface); color: var(--text); font-variant-numeric: tabular-nums; }
+        .quota-input:focus { outline: none; border-color: var(--accent); }
+        .quota-cell { display: flex; align-items: center; gap: 0.4rem; }
+        .quota-eff { font-size: 0.7rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+        .badge-role { display: inline-block; padding: 0.1rem 0.4rem; font-size: 0.65rem; font-weight: 600; border-radius: 4px; background: var(--surface-2); color: var(--text-muted); text-transform: uppercase; }
+        .badge-role.admin { background: var(--accent-soft); color: var(--accent); }
+        .search-box { display: flex; gap: 0.5rem; margin-bottom: 1rem; align-items: center; }
+        .search-box input { flex: 1; max-width: 320px; padding: 0.5rem 0.85rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font-size: 0.88rem; }
+        .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--text); color: var(--bg); padding: 0.65rem 1rem; border-radius: 8px; font-size: 0.85rem; box-shadow: 0 8px 24px rgba(0,0,0,.15); transform: translateY(120%); transition: transform .3s; z-index: 100; }
+        .toast.show { transform: translateY(0); }
+        .toast.error { background: var(--error); color: white; }
+    </style>
+</head>
+<body class="admin-page">
+    <a class="back" href="/admin"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg> Về Admin</a>
+
+    <div class="page-header">
+        <div class="page-header-info">
+            <h2>IELTS Quota Overrides</h2>
+            <p class="page-subtitle">Quota AI grading mặc định toàn cục. Đặt override per-user để cho phép limit cao hơn (hoặc <code>-1</code> = unlimited).</p>
+        </div>
+    </div>
+
+    <div class="glass-panel" style="padding: 1.25rem; margin-bottom: 1.25rem;">
+        <div class="search-box">
+            <input id="searchInput" placeholder="🔍 Tìm theo username / display name…" />
+            <span style="font-size: 0.78rem; color: var(--text-muted);">
+                Để trống = dùng global · Số = limit/ngày · -1 = unlimited
+            </span>
+        </div>
+        <div style="overflow-x: auto;">
+            <table class="quota-table">
+                <thead>
+                    <tr>
+                        <th style="width:200px;">User</th>
+                        <th style="width:80px;">Role</th>
+                        <th>Writing</th>
+                        <th>Speaking</th>
+                        <th>Whisper</th>
+                        <th style="width:120px;">Created</th>
+                    </tr>
+                </thead>
+                <tbody id="usersBody">
+                    <tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--text-muted);">Đang tải…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        function getToken() { return localStorage.getItem('easyrevise_token') || ''; }
+        async function api(method, path, body) {
+            const headers = { 'Content-Type': 'application/json' };
+            const tok = getToken(); if (tok) headers.Authorization = 'Bearer ' + tok;
+            const r = await fetch('/api/admin/ielts' + path, { method, headers, body: body !== undefined ? JSON.stringify(body) : undefined });
+            const text = await r.text(); let data; try { data = JSON.parse(text); } catch { data = text; }
+            if (!r.ok) throw new Error((data && data.error) || ('HTTP ' + r.status));
+            return data;
+        }
+        function escapeHtml(s) {
+            return String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+        }
+        function showToast(msg, isErr) {
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.className = 'toast show' + (isErr ? ' error' : '');
+            setTimeout(() => el.classList.remove('show'), 3500);
+        }
+        function fmtDate(s) {
+            if (!s) return '—';
+            return new Date(s).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: '2-digit' });
+        }
+        function fmtLimit(v) {
+            if (v === -1) return '∞';
+            return v;
+        }
+
+        async function load() {
+            const q = document.getElementById('searchInput').value.trim();
+            const data = await api('GET', '/users' + (q ? '?q=' + encodeURIComponent(q) : ''));
+            const body = document.getElementById('usersBody');
+            if (!data.users.length) {
+                body.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--text-muted);">Không có user</td></tr>`;
+                return;
+            }
+            body.innerHTML = data.users.map(u => {
+                const cell = (kind) => {
+                    const ov = u.overrides[kind];
+                    const used = u.usage[kind] || 0;
+                    const eff = u.effective[kind];
+                    return `<td><div class="quota-cell">
+                        <input type="number" class="quota-input" data-uid="${u.id}" data-kind="${kind}"
+                               value="${ov == null ? '' : ov}" placeholder="—">
+                        <span class="quota-eff">${used} / ${fmtLimit(eff)}</span>
+                    </div></td>`;
+                };
+                return `<tr>
+                    <td>
+                        <div style="font-weight:600;">${escapeHtml(u.displayName || u.username)}</div>
+                        <div style="font-size:0.72rem;color:var(--text-muted);">@${escapeHtml(u.username)}</div>
+                    </td>
+                    <td><span class="badge-role ${u.role}">${u.role}</span></td>
+                    ${cell('writing')}${cell('speaking')}${cell('transcription')}
+                    <td style="font-size:0.78rem;color:var(--text-muted);">${fmtDate(u.createdAt)}</td>
+                </tr>`;
+            }).join('');
+
+            body.querySelectorAll('input.quota-input').forEach(inp => {
+                inp.addEventListener('change', async e => {
+                    const uid = e.target.dataset.uid;
+                    const kind = e.target.dataset.kind;
+                    const v = e.target.value.trim();
+                    const payload = { [kind]: v === '' ? null : Number(v) };
+                    try {
+                        await api('PUT', `/users/${uid}/quota`, payload);
+                        showToast(`✓ ${kind}: ${v === '' ? 'cleared' : fmtLimit(Number(v))}`);
+                        await load();
+                    } catch (err) {
+                        showToast('Lỗi: ' + err.message, true);
+                    }
+                });
+            });
+        }
+
+        let searchT;
+        document.getElementById('searchInput').addEventListener('input', () => {
+            clearTimeout(searchT);
+            searchT = setTimeout(load, 250);
+        });
+
+        load().catch(e => {
+            document.getElementById('usersBody').innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:var(--error);">${escapeHtml(e.message)}</td></tr>`;
+        });
+    </script>
+</body>
+</html>

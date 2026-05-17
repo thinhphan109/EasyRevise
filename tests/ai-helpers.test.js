@@ -1,6 +1,13 @@
 // tests/ai-helpers.test.js — Test lib/ai-helpers.js
-jest.mock('../lib/data', () => ({
-    readSettings: () => ({ generateModel: 'claude-sonnet-test', gradeModel: 'claude-grade-test' })
+// ai-helpers reads settings from lib/repos.settings.getAll() with a 30s cache.
+// We mock the repos module so the cache resolves to a deterministic value.
+jest.mock('../lib/repos', () => ({
+    settings: {
+        getAll: jest.fn().mockResolvedValue({
+            generateModel: 'claude-sonnet-test',
+            gradeModel: 'claude-grade-test'
+        })
+    }
 }));
 
 describe('ai-helpers', () => {
@@ -37,10 +44,11 @@ describe('ai-helpers', () => {
         expect(config.model).toBe('my-custom-model');
     });
 
-    test('getAIConfig falls back to settings model', () => {
+    test('getAIConfig falls back to settings model', async () => {
         const { getAIConfig } = require('../lib/ai-helpers');
+        // Settings cache populates asynchronously on module load — wait one tick.
+        await new Promise(r => setImmediate(r));
         const config = getAIConfig();
-        // Should use settings.generateModel since no purposeModel
         expect(config.model).toBe('claude-sonnet-test');
     });
 

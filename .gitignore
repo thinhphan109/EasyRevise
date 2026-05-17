@@ -75,3 +75,7 @@ source-pdfs/**
 !source-pdfs/README.md
 !source-pdfs/ielts/
 !source-pdfs/ielts/README.md
+
+# Legacy snapshots (pre-Postgres migration data dumps)
+_legacy/
+

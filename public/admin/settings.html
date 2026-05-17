@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings · EasyRevise Admin</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+    <script>(function(){var t=localStorage.getItem('easyrevise_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+    <style>
+        :root {
+            --bg: #fbfbfb; --surface: #ffffff; --surface-2: #f5f5f5;
+            --text: #1a1a1a; --text-2: #555; --text-muted: #999;
+            --border: #e5e5e5; --border-strong: #d4d4d4;
+            --accent: #0066ff; --accent-soft: #e6f0ff;
+            --success: #16a34a; --success-soft: #dcfce7;
+            --warning: #d97706; --warning-soft: #fef3c7;
+            --danger: #dc2626;
+            --shadow-1: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-2: 0 8px 24px rgba(0,0,0,0.08);
+        }
+        [data-theme="dark"] {
+            --bg: #0d0d0d; --surface: #161616; --surface-2: #202020;
+            --text: #f5f5f5; --text-2: #b0b0b0; --text-muted: #707070;
+            --border: #262626; --border-strong: #333;
+            --accent: #4d8eff; --accent-soft: #1a2942;
+            --success-soft: #14532d; --warning-soft: #422006;
+        }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg); color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            font-feature-settings: 'cv11', 'ss01';
+            letter-spacing: -0.005em;
+        }
+        .topbar {
+            position: sticky; top: 0; z-index: 50;
+            background: color-mix(in srgb, var(--bg) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0.7rem 1.5rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .brand { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; text-decoration: none; color: var(--text); }
+        .brand-mark { width: 26px; height: 26px; background: var(--text); color: var(--bg); border-radius: 7px; display: grid; place-items: center; font-weight: 700; font-size: 0.7rem; }
+        .brand-divider { width: 1px; height: 18px; background: var(--border-strong); }
+        .brand-skill { font-size: 0.78rem; font-weight: 600; padding: 0.18rem 0.5rem; background: var(--accent-soft); color: var(--accent); border-radius: 5px; }
+        .container { max-width: 880px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+        h1 { font-family: 'Source Serif 4', Georgia, serif; font-size: 1.85rem; font-weight: 600; margin: 0 0 0.4rem; letter-spacing: -0.02em; }
+        .lead { color: var(--text-2); margin: 0 0 1.75rem; font-size: 0.95rem; }
+
+        .group {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem 1.75rem;
+            margin-bottom: 1.25rem;
+            box-shadow: var(--shadow-1);
+        }
+        .group-title {
+            font-family: 'Source Serif 4', Georgia, serif;
+            font-size: 1.05rem; font-weight: 600;
+            margin: 0 0 0.25rem;
+        }
+        .group-sub { font-size: 0.85rem; color: var(--text-muted); margin: 0 0 1.25rem; }
+
+        .field {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 1rem;
+            padding: 0.85rem 0;
+            border-top: 1px solid var(--border);
+            align-items: start;
+        }
+        .field:first-of-type { border-top: 0; padding-top: 0; }
+        .field-label-col label {
+            font-weight: 500; font-size: 0.92rem;
+            display: block;
+        }
+        .field-help {
+            font-size: 0.8rem; color: var(--text-muted);
+            margin-top: 0.2rem; line-height: 1.5;
+        }
+        .field-source {
+            font-size: 0.7rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+        .field-source.db { color: var(--accent); }
+        .field-source.env { color: var(--warning); }
+
+        .field-input-col input, .field-input-col textarea, .field-input-col select {
+            width: 100%;
+            padding: 0.5rem 0.8rem;
+            font-family: inherit; font-size: 0.88rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            color: var(--text);
+            outline: none;
+        }
+        .field-input-col input:focus, .field-input-col textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-soft);
+        }
+        .field-input-col code {
+            display: block;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 0.3rem;
+            word-break: break-all;
+        }
+        .field-input-col code.env-val {
+            font-family: ui-monospace, SF Mono, monospace;
+            background: var(--surface-2);
+            padding: 0.25rem 0.45rem;
+            border-radius: 4px;
+        }
+
+        .save-bar {
+            position: sticky; bottom: 1rem; z-index: 40;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.85rem 1.25rem;
+            box-shadow: var(--shadow-2);
+            margin-top: 1.5rem;
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 1rem;
+            opacity: 0; pointer-events: none;
+            transform: translateY(20px);
+            transition: all .2s;
+        }
+        .save-bar.dirty {
+            opacity: 1; pointer-events: auto;
+            transform: translateY(0);
+        }
+        .save-bar .summary { font-size: 0.88rem; color: var(--text-2); }
+        .save-bar .summary strong { color: var(--accent); font-weight: 600; }
+
+        .btn {
+            padding: 0.5rem 1.1rem;
+            font-family: inherit; font-weight: 500; font-size: 0.85rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            color: var(--text); cursor: pointer; text-decoration: none;
+            display: inline-flex; gap: 0.4rem; align-items: center;
+        }
+        .btn:hover { background: var(--surface-2); border-color: var(--border-strong); }
+        .btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .toast {
+            position: fixed; bottom: 1.5rem; right: 1.5rem;
+            background: var(--text); color: var(--bg);
+            padding: 0.75rem 1.1rem;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            box-shadow: var(--shadow-2);
+            transform: translateY(120%); transition: transform .3s;
+            z-index: 100;
+        }
+        .toast.show { transform: translateY(0); }
+        .toast.error { background: var(--danger); color: white; }
+
+        @media (max-width: 700px) {
+            .field { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <a class="brand" href="/admin">
+            <div class="brand-mark">ER</div>
+            <span>EasyRevise Admin</span>
+            <span class="brand-divider"></span>
+            <span class="brand-skill">Settings</span>
+        </a>
+        <div style="display:flex;gap:0.4rem;">
+            <a class="btn" href="/admin">← Admin chính</a>
+            <a class="btn" href="/admin/drive.html">Drive</a>
+            <a class="btn" href="/admin/ielts.html">IELTS</a>
+        </div>
+    </div>
+
+    <main class="container">
+        <h1>App Settings</h1>
+        <p class="lead">
+            Cấu hình ứng dụng. Lưu vào DB → có hiệu lực ngay (cache 30s).
+            Mỗi setting có 3 nguồn: <strong style="color:var(--accent);">DB</strong> (admin set) >
+            <strong style="color:var(--warning);">ENV</strong> (.env file) >
+            <strong>Default</strong> (hardcoded).
+        </p>
+
+        <div id="root">
+            <div class="group"><div style="text-align:center;color:var(--text-muted);padding:2rem;">Đang tải…</div></div>
+        </div>
+
+        <div class="save-bar" id="saveBar">
+            <div class="summary"><strong id="dirtyCount">0</strong> thay đổi chưa lưu</div>
+            <div style="display:flex;gap:0.5rem;">
+                <button class="btn" id="resetBtn">Hủy</button>
+                <button class="btn btn-primary" id="saveBtn">💾 Lưu</button>
+            </div>
+        </div>
+    </main>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Manually grouped for nicer UI
+        const GROUPS = [
+            {
+                title: 'Tích hợp',
+                sub: 'Webhook, base URL, Discord alert',
+                keys: ['publicBaseUrl', 'discordWebhookUrl', 'driveRootFolderId']
+            },
+            {
+                title: 'Drive monitor',
+                sub: 'Auto health check tần suất',
+                keys: ['driveHealthIntervalHours']
+            },
+            {
+                title: 'Speech-to-Text (Whisper)',
+                sub: 'Chuyển audio recording → text. Dùng cho IELTS Speaking auto-transcribe (học viên nói → ra văn bản → AI chấm). Provider đang dùng (api.loadip.com) chỉ chat, không hỗ trợ audio → cần provider riêng. Khuyến nghị: <a href="https://console.groq.com" target="_blank" rel="noopener" style="color:var(--accent);">Groq</a> (free).',
+                keys: ['whisperBaseUrl', 'whisperApiKey', 'whisperModel']
+            },
+            {
+                title: 'IELTS rate limits',
+                sub: 'Giới hạn AI grading mỗi user/ngày',
+                keys: ['ieltsLimitWriting', 'ieltsLimitSpeaking', 'ieltsLimitTranscription']
+            },
+            {
+                title: 'Branding & admin',
+                sub: 'Tên site, mô tả, session admin',
+                keys: ['siteName', 'siteDescription', 'pinSessionHours']
+            }
+        ];
+
+        const HELP = {
+            publicBaseUrl:        'URL gốc khi server chạy production (vd. https://easyrise.thinhme.tech). Dùng cho OAuth redirect. Bỏ trống → tự detect từ request.',
+            discordWebhookUrl:    'Discord webhook nhận alert khi Drive auth fail. Format: https://discord.com/api/webhooks/...',
+            driveRootFolderId:    'Folder ID gốc trên Drive để upload media. Mặc định lấy từ .env DRIVE_ROOT_FOLDER_ID.',
+            driveHealthIntervalHours: 'Tần suất health check (giờ). Khuyến nghị: 6h. Restart server để áp dụng.',
+            whisperBaseUrl:       'Base URL provider Whisper. Áp dụng OpenAI-compatible API. Khuyến nghị Groq (free, đã tối ưu tốc độ): https://api.groq.com/openai/v1. Hoặc OpenAI: https://api.openai.com/v1.',
+            whisperApiKey:        'API key. Groq: lấy tại console.groq.com (miễn phí). OpenAI: platform.openai.com. Để trống → fallback main AI provider (không work nếu provider đó không hỗ trợ Whisper).',
+            whisperModel:         'Mô hình STT. Groq: whisper-large-v3-turbo (nhanh nhất) hoặc whisper-large-v3 (chính xác hơn). OpenAI: whisper-1.',
+            ieltsLimitWriting:    'Số lượng essay AI grade mỗi user/ngày.',
+            ieltsLimitSpeaking:   'Số lượng transcript AI grade mỗi user/ngày.',
+            ieltsLimitTranscription: 'Số lượt Whisper auto-transcribe mỗi user/ngày. Mỗi lần học viên record đoạn speaking ó tính 1 lượt.',
+            siteName:             'Tên hiển thị của site.',
+            siteDescription:      'Mô tả meta của site.',
+            pinSessionHours:      'Thời gian session admin sau khi nhập PIN đúng.'
+        };
+
+        const state = { settings: [], dirty: {} };
+
+        function getToken() { return localStorage.getItem('easyrevise_token') || ''; }
+        async function api(method, path, body) {
+            const headers = { 'Content-Type': 'application/json' };
+            const tok = getToken();
+            if (tok) headers.Authorization = 'Bearer ' + tok;
+            const r = await fetch('/api/admin/settings' + path, {
+                method, headers,
+                body: body !== undefined ? JSON.stringify(body) : undefined
+            });
+            const text = await r.text();
+            let data; try { data = JSON.parse(text); } catch { data = text; }
+            if (!r.ok) throw new Error((data && data.error) || ('HTTP ' + r.status));
+            return data;
+        }
+        function escapeHtml(s) {
+            return String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+        }
+        function showToast(msg, isError) {
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.className = 'toast show' + (isError ? ' error' : '');
+            setTimeout(() => el.classList.remove('show'), 3500);
+        }
+
+        async function load() {
+            const data = await api('GET', '');
+            state.settings = data.settings;
+            state.dirty = {};
+            render();
+        }
+
+        function render() {
+            const byKey = Object.fromEntries(state.settings.map(s => [s.key, s]));
+            const root = document.getElementById('root');
+            root.innerHTML = GROUPS.map(g => `
+                <section class="group">
+                    <h2 class="group-title">${escapeHtml(g.title)}</h2>
+                    <div class="group-sub">${g.sub}</div>
+                    ${g.keys.map(k => byKey[k] ? renderField(byKey[k]) : '').join('')}
+                </section>
+            `).join('');
+
+            // Bind input handlers
+            root.querySelectorAll('input[data-key]').forEach(inp => {
+                inp.addEventListener('input', e => {
+                    const k = e.target.dataset.key;
+                    const def = state.settings.find(s => s.key === k);
+                    let val = e.target.value;
+                    if (def.type === 'int') val = val === '' ? null : Number(val);
+                    if (val === '' || val === def.envValue || (val == null && def.dbValue == null)) {
+                        delete state.dirty[k];
+                    } else if (val !== def.dbValue) {
+                        state.dirty[k] = val;
+                    } else {
+                        delete state.dirty[k];
+                    }
+                    updateSaveBar();
+                });
+            });
+            updateSaveBar();
+        }
+
+        function renderField(s) {
+            const help = HELP[s.key] || '';
+            const dbVal = s.dbValue == null ? '' : s.dbValue;
+            const sourceLabel = s.source === 'db' ? 'DB' : s.source === 'env' ? 'ENV (.env)' : 'DEFAULT';
+            const envHint = s.env && s.envValue
+                ? `<code class="env-val">$${s.env} = ${escapeHtml(String(s.envValue))}</code>`
+                : (s.env ? `<code>$${s.env} (chưa set trong .env)</code>` : '');
+            const inputType = s.type === 'int' ? 'number' : (s.key.toLowerCase().includes('url') ? 'url' : 'text');
+            return `
+                <div class="field">
+                    <div class="field-label-col">
+                        <label for="f_${s.key}">${escapeHtml(s.key)}</label>
+                        <div class="field-help">${escapeHtml(help)}</div>
+                        <div class="field-source ${s.source}">Source: ${sourceLabel} · Effective: ${escapeHtml(String(s.effective ?? ''))}</div>
+                    </div>
+                    <div class="field-input-col">
+                        <input id="f_${s.key}" type="${inputType}" data-key="${s.key}"
+                               value="${escapeHtml(dbVal)}"
+                               placeholder="${escapeHtml(s.envValue || String(s.default ?? ''))}">
+                        ${envHint}
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateSaveBar() {
+            const n = Object.keys(state.dirty).length;
+            document.getElementById('dirtyCount').textContent = n;
+            document.getElementById('saveBar').classList.toggle('dirty', n > 0);
+        }
+
+        document.getElementById('saveBtn').addEventListener('click', async () => {
+            try {
+                await api('PUT', '', state.dirty);
+                showToast(`✓ Đã lưu ${Object.keys(state.dirty).length} thay đổi.`);
+                await load();
+            } catch (e) {
+                showToast('Lỗi: ' + e.message, true);
+            }
+        });
+        document.getElementById('resetBtn').addEventListener('click', () => {
+            state.dirty = {};
+            render();
+        });
+
+        load().catch(e => {
+            document.getElementById('root').innerHTML = `<div class="group"><div style="text-align:center;color:var(--danger);padding:2rem;">Lỗi: ${escapeHtml(e.message)}</div></div>`;
+        });
+    </script>
+</body>
+</html>

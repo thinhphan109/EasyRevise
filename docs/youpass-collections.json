@@ -1,0 +1,567 @@
+{
+  "tests": {
+    "status": 403
+  },
+  "test": {
+    "status": 403
+  },
+  "lessons": {
+    "status": 403
+  },
+  "lesson": {
+    "status": 200,
+    "total": 939,
+    "filteredCount": 939,
+    "sampleKeys": [
+      "id",
+      "status",
+      "sort",
+      "user_created",
+      "date_created",
+      "user_updated",
+      "date_updated",
+      "title",
+      "content",
+      "thumbnail",
+      "description",
+      "video",
+      "title_link",
+      "video_type",
+      "vote_count",
+      "content_blocks",
+      "type",
+      "time",
+      "documents"
+    ]
+  },
+  "quizzes": {
+    "status": 403
+  },
+  "quiz": {
+    "status": 200,
+    "total": 9342,
+    "filteredCount": 9342,
+    "sampleKeys": [
+      "id",
+      "status",
+      "sort",
+      "user_created",
+      "date_created",
+      "user_updated",
+      "date_updated",
+      "type",
+      "content",
+      "title",
+      "order",
+      "time",
+      "listening",
+      "description",
+      "instruction",
+      "quiz_code",
+      "limit_submit",
+      "question",
+      "samples",
+      "thumbnail",
+      "vote_count",
+      "quiz_type",
+      "simplified_id",
+      "mode",
+      "is_test",
+      "mock_test_type",
+      "mock_test_id",
+      "total_submitted",
+      "practice_listing_priority",
+      "is_public",
+      "writing_task_type",
+      "short_description",
+      "meta",
+      "prompt_set_id",
+      "speaking_part_type",
+      "speaking_topic_id",
+      "instruction_audio_id",
+      "meta_seo_id",
+      "slug",
+      "legacy_quiz_id",
+      "has_guided_retry",
+      "questions",
+      "parts"
+    ]
+  },
+  "questions": {
+    "status": 403
+  },
+  "question": {
+    "status": 200,
+    "total": 43815,
+    "filteredCount": 43815,
+    "sampleKeys": [
+      "id",
+      "status",
+      "sort",
+      "user_created",
+      "date_created",
+      "user_updated",
+      "date_updated",
+      "title",
+      "content",
+      "type",
+      "single_choice_radio",
+      "selection",
+      "mutilple_choice",
+      "gap_fill_in_blank",
+      "quiz",
+      "selection_option",
+      "locate",
+      "order",
+      "explain",
+      "description",
+      "content_writing",
+      "part",
+      "time_to_think",
+      "listen_from",
+      "question_type",
+      "instruction",
+      "writing_graph_description",
+      "writing_graph_image",
+      "writing_graph_type",
+      "audio_url",
+      "time_limit",
+      "min_words",
+      "max_words",
+      "question_set_id",
+      "correct_answer",
+      "text",
+      "options",
+      "locate_info",
+      "matching_heading_paragraph",
+      "map_position",
+      "correct_answers",
+      "sample_answers",
+      "word_class",
+      "pronunciation_structure"
+    ]
+  },
+  "topics": {
+    "status": 403
+  },
+  "topic": {
+    "status": 403
+  },
+  "subjects": {
+    "status": 403
+  },
+  "subject": {
+    "status": 403
+  },
+  "courses": {
+    "status": 403
+  },
+  "course": {
+    "status": 200,
+    "total": 55,
+    "filteredCount": 55,
+    "sampleKeys": [
+      "id",
+      "status",
+      "sort",
+      "user_created",
+      "date_created",
+      "user_updated",
+      "date_updated",
+      "title",
+      "thumbnail",
+      "timestamp",
+      "deadline",
+      "center",
+      "vote_count",
+      "meta",
+      "level",
+      "sub_title",
+      "duration",
+      "workbook_templates",
+      "workbook_template",
+      "sections"
+    ]
+  },
+  "units": {
+    "status": 403
+  },
+  "unit": {
+    "status": 403
+  },
+  "exercises": {
+    "status": 403
+  },
+  "exercise": {
+    "status": 403
+  },
+  "media": {
+    "status": 403
+  },
+  "files": {
+    "status": 403
+  },
+  "audios": {
+    "status": 403
+  },
+  "audio": {
+    "status": 403
+  },
+  "ielts_tests": {
+    "status": 403
+  },
+  "ielts_test": {
+    "status": 403
+  },
+  "ielts_lessons": {
+    "status": 403
+  },
+  "ielts_lesson": {
+    "status": 403
+  },
+  "ielts_questions": {
+    "status": 403
+  },
+  "ielts_question": {
+    "status": 403
+  },
+  "ielts_quizzes": {
+    "status": 403
+  },
+  "ielts_quiz": {
+    "status": 403
+  },
+  "ielts_reading": {
+    "status": 403
+  },
+  "ielts_listening": {
+    "status": 403
+  },
+  "ielts_writing": {
+    "status": 403
+  },
+  "ielts_speaking": {
+    "status": 403
+  },
+  "reading_tests": {
+    "status": 403
+  },
+  "listening_tests": {
+    "status": 403
+  },
+  "writing_tests": {
+    "status": 403
+  },
+  "speaking_tests": {
+    "status": 403
+  },
+  "reading": {
+    "status": 403
+  },
+  "listening": {
+    "status": 403
+  },
+  "writing": {
+    "status": 403
+  },
+  "speaking": {
+    "status": 403
+  },
+  "reading_passages": {
+    "status": 403
+  },
+  "listening_audios": {
+    "status": 403
+  },
+  "listening_audio": {
+    "status": 403
+  },
+  "writing_tasks": {
+    "status": 403
+  },
+  "writing_task": {
+    "status": 403
+  },
+  "speaking_parts": {
+    "status": 403
+  },
+  "speaking_part": {
+    "status": 403
+  },
+  "speaking_topics": {
+    "status": 403
+  },
+  "writing_prompts": {
+    "status": 403
+  },
+  "passages": {
+    "status": 403
+  },
+  "passage": {
+    "status": 403
+  },
+  "questions_choices": {
+    "status": 403
+  },
+  "choices": {
+    "status": 403
+  },
+  "options": {
+    "status": 403
+  },
+  "answers": {
+    "status": 403
+  },
+  "answer": {
+    "status": 200,
+    "total": 0,
+    "filteredCount": 0,
+    "sampleKeys": []
+  },
+  "submissions": {
+    "status": 403
+  },
+  "submission": {
+    "status": 403
+  },
+  "attempts": {
+    "status": 403
+  },
+  "attempt": {
+    "status": 403
+  },
+  "results": {
+    "status": 403
+  },
+  "result": {
+    "status": 403
+  },
+  "transcripts": {
+    "status": 403
+  },
+  "transcript": {
+    "status": 200,
+    "total": 3211016,
+    "filteredCount": 3211016,
+    "sampleKeys": [
+      "id",
+      "status",
+      "sort",
+      "user_created",
+      "date_created",
+      "yousaid",
+      "correction",
+      "feedback",
+      "position",
+      "answer",
+      "tags"
+    ]
+  },
+  "sample_answers": {
+    "status": 403
+  },
+  "sample_answer": {
+    "status": 403
+  },
+  "tasks": {
+    "status": 403
+  },
+  "task": {
+    "status": 403
+  },
+  "parts": {
+    "status": 403
+  },
+  "part": {
+    "status": 200,
+    "total": 4906,
+    "filteredCount": 4906,
+    "sampleKeys": [
+      "id",
+      "sort",
+      "user_created",
+      "date_created",
+      "date_updated",
+      "title",
+      "order",
+      "content",
+      "quiz",
+      "time",
+      "passage",
+      "simplified_content",
+      "question_count",
+      "listen_from",
+      "listen_to",
+      "instruction",
+      "file_id",
+      "task_instruction",
+      "transcription",
+      "explanation",
+      "questions"
+    ]
+  },
+  "sections": {
+    "status": 403
+  },
+  "section": {
+    "status": 200,
+    "total": 716,
+    "filteredCount": 716,
+    "sampleKeys": [
+      "id",
+      "status",
+      "sort",
+      "user_created",
+      "date_created",
+      "user_updated",
+      "date_updated",
+      "title",
+      "order",
+      "content",
+      "course",
+      "thumbnail",
+      "parts"
+    ]
+  },
+  "practice_tests": {
+    "status": 403
+  },
+  "practice_test": {
+    "status": 403
+  },
+  "mock_tests": {
+    "status": 403
+  },
+  "mock_test": {
+    "status": 403
+  },
+  "flash_cards": {
+    "status": 403
+  },
+  "flashcards": {
+    "status": 403
+  },
+  "vocabulary": {
+    "status": 403
+  },
+  "vocab": {
+    "status": 403
+  },
+  "IeltsTests": {
+    "status": 403
+  },
+  "IeltsLessons": {
+    "status": 403
+  },
+  "students": {
+    "status": 403
+  },
+  "student": {
+    "status": 403
+  },
+  "classes": {
+    "status": 403
+  },
+  "class": {
+    "status": 200,
+    "total": 794,
+    "filteredCount": 794,
+    "sampleKeys": [
+      "id",
+      "status",
+      "sort",
+      "user_created",
+      "date_created",
+      "user_updated",
+      "date_updated",
+      "title",
+      "date_start",
+      "date_end",
+      "course",
+      "thumbnail",
+      "duration",
+      "is_published",
+      "is_test",
+      "fee_status",
+      "priority",
+      "price",
+      "original_price",
+      "description",
+      "note",
+      "is_allow_trial",
+      "is_entrance_test",
+      "in_class_end_date",
+      "doc_folder_id",
+      "shift_id",
+      "class_type",
+      "capacity",
+      "size",
+      "zalo_group_link",
+      "meta",
+      "seo",
+      "skill_schedule",
+      "pinned_content",
+      "policy",
+      "in_class_practice_links",
+      "google_meet_link",
+      "assistant",
+      "students",
+      "teachers"
+    ]
+  },
+  "enrollments": {
+    "status": 403
+  },
+  "progresses": {
+    "status": 403
+  },
+  "progress": {
+    "status": 403
+  },
+  "levels": {
+    "status": 403
+  },
+  "level": {
+    "status": 403
+  },
+  "achievements": {
+    "status": 403
+  },
+  "badges": {
+    "status": 403
+  },
+  "categories": {
+    "status": 403
+  },
+  "category": {
+    "status": 403
+  },
+  "tags": {
+    "status": 403
+  },
+  "tag": {
+    "status": 200,
+    "total": 4,
+    "filteredCount": 4,
+    "sampleKeys": [
+      "id",
+      "status",
+      "sort",
+      "user_created",
+      "date_created",
+      "title",
+      "color",
+      "description",
+      "code"
+    ]
+  },
+  "difficulties": {
+    "status": 403
+  },
+  "difficulty": {
+    "status": 403
+  },
+  "topic_tags": {
+    "status": 403
+  }
+}

@@ -1,0 +1,475 @@
+{
+  "courses": [
+    {
+      "id": 88,
+      "title": "01-ROOT (NEW)",
+      "sub_title": "Pre-IELTS",
+      "level": "ROOT",
+      "duration": "9 Tuần - 54h"
+    },
+    {
+      "id": 10,
+      "title": "02-TRUNK",
+      "sub_title": "IELTS Foundation",
+      "level": "TRUNK",
+      "duration": "9 Tuần - 54h"
+    },
+    {
+      "id": 90,
+      "title": "03 - BUD (New)",
+      "sub_title": "Đầu ra 6.0",
+      "level": "BUD",
+      "duration": "9 Tuần - 54h"
+    },
+    {
+      "id": 520,
+      "title": "E-Learning V2",
+      "sub_title": "Đầu ra 6.5-7++",
+      "level": null,
+      "duration": "24 Tuần - 360h"
+    },
+    {
+      "id": 1,
+      "title": "04-BLOOM",
+      "sub_title": "Đầu ra 6.5-7++",
+      "level": "BLOOM",
+      "duration": "10 Tuần - 60h"
+    },
+    {
+      "id": 114,
+      "title": "05 - ROOT",
+      "sub_title": "Pre-IELTS",
+      "level": "ROOT",
+      "duration": "9 Tuần - 54h"
+    },
+    {
+      "id": 115,
+      "title": "06 - TRUNK",
+      "sub_title": "IELTS Foundation",
+      "level": "TRUNK",
+      "duration": "9 Tuần - 54h"
+    },
+    {
+      "id": 116,
+      "title": "07 - BUD",
+      "sub_title": "Đầu ra 6.0",
+      "level": "BUD",
+      "duration": "9 Tuần - 54h"
+    },
+    {
+      "id": 112,
+      "title": "08 - BLOOM",
+      "sub_title": "Đầu ra 6.5-7++",
+      "level": "BLOOM",
+      "duration": "10 Tuần - 60h"
+    },
+    {
+      "id": 496,
+      "title": "09 - ROOT",
+      "sub_title": "Pre-IELTS",
+      "level": "ROOT",
+      "duration": "9 Tuần - 54h"
+    },
+    {
+      "id": 494,
+      "title": "11 - TRUNK",
+      "sub_title": "IELTS Foundation",
+      "level": "TRUNK",
+      "duration": "9 Tuần - 54h"
+    },
+    {
+      "id": 495,
+      "title": "10 - BUD",
+      "sub_title": "Đầu ra 6.0",
+      "level": "BUD",
+      "duration": "9 Tuần - 54h"
+    },
+    {
+      "id": 493,
+      "title": "12 - BLOOM",
+      "sub_title": "Đầu ra 6.5-7++",
+      "level": "BLOOM",
+      "duration": "10 Tuần - 60h"
+    },
+    {
+      "id": 515,
+      "title": "EXTRA - TRUNK",
+      "sub_title": "Đầu ra 6.5-7++",
+      "level": "TRUNK",
+      "duration": "10 Tuần - 60h"
+    },
+    {
+      "id": 504,
+      "title": "Khoá Test (Chương trình BLOOM)",
+      "sub_title": "Đầu ra 6.5-7++",
+      "level": "BLOOM",
+      "duration": "10 Tuần - 60h"
+    },
+    {
+      "id": 519,
+      "title": "EXTRA - BLOOM",
+      "sub_title": "Đầu ra 6.5-7++",
+      "level": "BLOOM",
+      "duration": "10 Tuần - 60h"
+    },
+    {
+      "id": 93,
+      "title": "[ROOT Training] Speaking",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 95,
+      "title": "[TRUNK Training] Reading",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 94,
+      "title": "[TRUNK Training] Writing",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 96,
+      "title": "[TRUNK Training] Speaking",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 100,
+      "title": "TA Training Course",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 91,
+      "title": "[ROOT Training] Writing",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 89,
+      "title": "Simplified Reading",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 109,
+      "title": "Youpass Listening Advanced",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 103,
+      "title": "TRUNK W0",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 68,
+      "title": "YouPass Writing Advanced Task 2",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 105,
+      "title": "BLOOM W0",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 107,
+      "title": "YouPass Reading Advanced",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 102,
+      "title": "ROOT W0",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 104,
+      "title": "BUD W0",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 101,
+      "title": "[OFF] IELTS 1984 ENTRANCE TEST",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 490,
+      "title": "IELTS 1984’s ENTRANCE TEST (ver 3)",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 489,
+      "title": "YouPass Speaking Advance",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 5,
+      "title": "YouPass Writing Advanced Task 1 ",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 13,
+      "title": "IELTS 1984’s ENTRANCE TEST - ROOT",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 492,
+      "title": "IELTS 1984’s ENTRANCE TEST (ver 4)",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 502,
+      "title": "Listening Builder Gap Filling",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 517,
+      "title": "YouPass Intensive Reading",
+      "sub_title": null,
+      "level": null,
+      "duration": "180"
+    },
+    {
+      "id": 15,
+      "title": "Writing Task 1 Advanced - Trial Course",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 518,
+      "title": "YouPass Intensive Listening",
+      "sub_title": null,
+      "level": null,
+      "duration": "180"
+    },
+    {
+      "id": 113,
+      "title": "IELTS 1984’s ENTRANCE TEST (new)",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 12,
+      "title": "IELTS 1984’s ENTRANCE TEST",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 85,
+      "title": "YouPass Writing Basic",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 81,
+      "title": "Demo Class",
+      "sub_title": null,
+      "level": "ROOT",
+      "duration": null
+    },
+    {
+      "id": 86,
+      "title": "Youpass Speaking Advanced",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 83,
+      "title": "Listening Free",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 14,
+      "title": "Listening - Teacher's Resources",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 87,
+      "title": "Reading Basic",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 80,
+      "title": "Writing GPT",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 84,
+      "title": "Bloom Extra",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 82,
+      "title": "Reading Free",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 99,
+      "title": "[BUD Training] Speaking",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 98,
+      "title": "[BUD Training] Reading",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 97,
+      "title": "[BUD Training] Writing",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 92,
+      "title": "[ROOT Training] Reading - Listening",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    }
+  ],
+  "ielts": [
+    {
+      "id": 88,
+      "title": "01-ROOT (NEW)",
+      "sub_title": "Pre-IELTS",
+      "level": "ROOT",
+      "duration": "9 Tuần - 54h"
+    },
+    {
+      "id": 10,
+      "title": "02-TRUNK",
+      "sub_title": "IELTS Foundation",
+      "level": "TRUNK",
+      "duration": "9 Tuần - 54h"
+    },
+    {
+      "id": 114,
+      "title": "05 - ROOT",
+      "sub_title": "Pre-IELTS",
+      "level": "ROOT",
+      "duration": "9 Tuần - 54h"
+    },
+    {
+      "id": 115,
+      "title": "06 - TRUNK",
+      "sub_title": "IELTS Foundation",
+      "level": "TRUNK",
+      "duration": "9 Tuần - 54h"
+    },
+    {
+      "id": 496,
+      "title": "09 - ROOT",
+      "sub_title": "Pre-IELTS",
+      "level": "ROOT",
+      "duration": "9 Tuần - 54h"
+    },
+    {
+      "id": 494,
+      "title": "11 - TRUNK",
+      "sub_title": "IELTS Foundation",
+      "level": "TRUNK",
+      "duration": "9 Tuần - 54h"
+    },
+    {
+      "id": 101,
+      "title": "[OFF] IELTS 1984 ENTRANCE TEST",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 490,
+      "title": "IELTS 1984’s ENTRANCE TEST (ver 3)",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 13,
+      "title": "IELTS 1984’s ENTRANCE TEST - ROOT",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 492,
+      "title": "IELTS 1984’s ENTRANCE TEST (ver 4)",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 113,
+      "title": "IELTS 1984’s ENTRANCE TEST (new)",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    },
+    {
+      "id": 12,
+      "title": "IELTS 1984’s ENTRANCE TEST",
+      "sub_title": null,
+      "level": null,
+      "duration": null
+    }
+  ]
+}

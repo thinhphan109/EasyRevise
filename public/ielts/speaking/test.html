@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IELTS Speaking · EasyRevise</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+    <script>(function(){var t=localStorage.getItem('easyrevise_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+    <style>
+        :root {
+            --bg: #fbfbfb; --surface: #ffffff; --surface-2: #f5f5f5;
+            --text: #1a1a1a; --text-2: #555; --text-muted: #999;
+            --border: #e5e5e5; --border-strong: #d4d4d4;
+            --accent: #9333ea; --accent-soft: #f3e8ff;
+            --success: #16a34a; --danger: #dc2626; --warning: #d97706;
+            --record: #dc2626;
+            --shadow-3: 0 16px 40px rgba(0,0,0,0.10);
+        }
+        [data-theme="dark"] {
+            --bg: #0d0d0d; --surface: #161616; --surface-2: #202020;
+            --text: #f5f5f5; --text-2: #b0b0b0; --text-muted: #707070;
+            --border: #262626; --border-strong: #333;
+            --accent-soft: #3b0764;
+        }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg); color: var(--text);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            font-feature-settings: 'cv11', 'ss01';
+            letter-spacing: -0.005em;
+        }
+
+        .topbar {
+            position: sticky; top: 0; z-index: 50;
+            background: color-mix(in srgb, var(--bg) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0.7rem 1.5rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .brand {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-weight: 600; font-size: 0.95rem;
+            text-decoration: none; color: var(--text);
+        }
+        .brand-mark {
+            width: 26px; height: 26px;
+            background: var(--text); color: var(--bg);
+            border-radius: 7px; display: grid; place-items: center;
+            font-weight: 700; font-size: 0.7rem;
+        }
+        .brand-divider { width: 1px; height: 18px; background: var(--border-strong); }
+        .brand-skill {
+            font-size: 0.78rem; font-weight: 600;
+            padding: 0.18rem 0.5rem;
+            background: var(--accent-soft); color: var(--accent);
+            border-radius: 5px;
+        }
+
+        .container { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+        .part-badge {
+            display: inline-block;
+            font-size: 0.74rem; font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.08em; text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        h1 {
+            font-family: 'Source Serif 4', Georgia, serif;
+            font-size: 1.85rem; font-weight: 600;
+            line-height: 1.25;
+            letter-spacing: -0.02em;
+            margin: 0 0 0.5rem;
+        }
+        .instruction {
+            color: var(--text-2); line-height: 1.6;
+            font-size: 0.92rem;
+            padding: 0.85rem 1rem;
+            background: var(--surface-2);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent);
+            margin-bottom: 1.5rem;
+        }
+
+        .cue-card {
+            background: linear-gradient(135deg, var(--accent-soft), color-mix(in srgb, var(--accent-soft) 60%, var(--surface-2)));
+            border: 1px solid var(--border-strong);
+            border-radius: 12px;
+            padding: 1.5rem 1.75rem;
+            margin-bottom: 1.5rem;
+        }
+        .cue-card-title {
+            font-family: 'Source Serif 4', Georgia, serif;
+            font-size: 1.15rem; font-weight: 600;
+            margin: 0 0 0.75rem;
+            color: var(--accent);
+        }
+        .cue-card p { margin: 0; line-height: 1.6; color: var(--text); }
+
+        .prompt-list {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .prompt-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 1rem; line-height: 1.55;
+            display: flex; gap: 0.85rem;
+        }
+        .prompt-item:last-child { border-bottom: 0; }
+        .prompt-num {
+            font-family: 'Source Serif 4', Georgia, serif;
+            font-weight: 600; color: var(--accent);
+            min-width: 1.5rem;
+        }
+
+        .recorder {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex; flex-direction: column; gap: 1rem;
+            align-items: center;
+        }
+        .record-btn {
+            width: 84px; height: 84px;
+            border: none;
+            background: var(--record);
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.6rem;
+            display: grid; place-items: center;
+            transition: all .15s;
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.3);
+        }
+        .record-btn.recording {
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+            50% { box-shadow: 0 0 0 16px rgba(220, 38, 38, 0); }
+        }
+        .record-btn:disabled { background: var(--text-muted); cursor: not-allowed; box-shadow: none; }
+        .record-btn.stop { background: var(--text); }
+        .record-time {
+            font-variant-numeric: tabular-nums;
+            font-size: 1.4rem; font-weight: 600;
+            color: var(--text);
+        }
+        .record-status {
+            font-size: 0.85rem; color: var(--text-muted);
+        }
+        audio { width: 100%; max-width: 500px; }
+
+        .btn {
+            padding: 0.55rem 1.1rem;
+            font-family: inherit; font-weight: 500; font-size: 0.88rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            color: var(--text); cursor: pointer; text-decoration: none;
+        }
+        .btn:hover { background: var(--surface-2); border-color: var(--border-strong); }
+        .btn-primary { background: var(--accent); color: white; border-color: var(--accent); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .transcript-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .transcript-section h3 {
+            margin: 0 0 0.5rem; font-size: 0.95rem;
+        }
+        .transcript-section p {
+            margin: 0 0 0.85rem; font-size: 0.85rem; color: var(--text-2); line-height: 1.55;
+        }
+        .transcript-input {
+            width: 100%; min-height: 140px;
+            font-family: 'Source Serif 4', Georgia, serif;
+            font-size: 1rem; line-height: 1.65;
+            padding: 0.85rem 1rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text); resize: vertical; outline: none;
+        }
+        .transcript-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+        .actions-row {
+            display: flex; gap: 0.5rem; justify-content: flex-end;
+            padding-top: 0.5rem;
+        }
+
+        .modal-backdrop {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: none; align-items: center; justify-content: center;
+            z-index: 100; padding: 1rem;
+        }
+        .modal-backdrop.is-open { display: flex; }
+        .modal {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 2rem 2.25rem 1.5rem;
+            max-width: 600px; width: 100%;
+            max-height: 85vh; overflow-y: auto;
+            box-shadow: var(--shadow-3);
+        }
+        .modal h3 { margin: 0.5rem 0 1.25rem; font-size: 1.2rem; }
+        .band-row { display: flex; align-items: baseline; gap: 0.6rem; margin-bottom: 1rem; }
+        .band-display {
+            font-family: 'Source Serif 4', Georgia, serif;
+            font-size: 4rem; font-weight: 600; line-height: 1;
+            letter-spacing: -0.04em;
+            font-variant-numeric: tabular-nums;
+        }
+        .band-suffix { font-size: 0.95rem; color: var(--text-muted); }
+        .criteria-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem; margin-bottom: 1.25rem;
+        }
+        .criterion {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.65rem 0.85rem; text-align: center;
+        }
+        .criterion-label {
+            font-size: 0.7rem; color: var(--text-muted);
+            font-weight: 600;
+            letter-spacing: 0.04em; text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+        .criterion-value {
+            font-family: 'Source Serif 4', Georgia, serif;
+            font-size: 1.4rem; font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+        .feedback-block { margin-bottom: 0.85rem; font-size: 0.88rem; line-height: 1.55; }
+        .feedback-block strong { display: block; margin-bottom: 0.2rem; color: var(--accent); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .feedback-block p { margin: 0; color: var(--text-2); }
+        .modal .actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+
+        .grading-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.6);
+            display: none; align-items: center; justify-content: center;
+            color: white; flex-direction: column; gap: 1rem;
+            z-index: 150;
+        }
+        .grading-overlay.is-open { display: flex; }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 3px solid rgba(255,255,255,0.2);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin .9s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg) } }
+        .loading { text-align: center; padding: 4rem 1rem; color: var(--text-muted); }
+
+        @media (max-width: 600px) {
+            .criteria-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <a class="brand" href="/ielts/speaking">
+            <div class="brand-mark">ER</div>
+            <span>EasyRevise</span>
+            <span class="brand-divider"></span>
+            <span class="brand-skill">IELTS Speaking</span>
+        </a>
+        <a class="btn" href="/ielts/speaking">← Đề khác</a>
+    </div>
+
+    <main class="container" id="main">
+        <div class="loading" id="loading">Đang tải đề…</div>
+    </main>
+
+    <div class="modal-backdrop" id="resultModal">
+        <div class="modal">
+            <div style="font-size:0.74rem;font-weight:600;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;">AI đã chấm xong</div>
+            <h3>Kết quả Speaking</h3>
+            <div class="band-row">
+                <span class="band-display" id="bandOverall">—</span>
+                <span class="band-suffix">Overall · / 9.0</span>
+            </div>
+            <div class="criteria-grid">
+                <div class="criterion"><div class="criterion-label">FC</div><div class="criterion-value" id="bandFc">—</div></div>
+                <div class="criterion"><div class="criterion-label">LR</div><div class="criterion-value" id="bandLr">—</div></div>
+                <div class="criterion"><div class="criterion-label">GRA</div><div class="criterion-value" id="bandGra">—</div></div>
+                <div class="criterion"><div class="criterion-label">Pron</div><div class="criterion-value" id="bandPron">—</div></div>
+            </div>
+            <div id="feedback"></div>
+            <div class="actions">
+                <a class="btn" href="/ielts/speaking" style="flex:1; text-align:center; text-decoration:none;">Đề khác</a>
+                <button class="btn btn-primary" id="reviewBtn" style="flex:1;">Xem chi tiết</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="grading-overlay" id="gradingOverlay">
+        <div class="spinner"></div>
+        <div>AI đang chấm bài… (~10-20s)</div>
+    </div>
+
+    <script src="/ielts/_shared/ielts-runtime.js"></script>
+    <script>
+        const R = window.IeltsRuntime;
+        const TEST_ID = R.getQuery('id');
+        if (!TEST_ID) { location.href = '/ielts/speaking'; throw new Error('no id'); }
+        if (!R.ensureLogin()) throw new Error('not logged in');
+
+        let state = {
+            test: null, part: null, submissionId: null,
+            recorder: null, chunks: [], audioBlob: null, audioUrl: null,
+            recording: false, recordStart: 0, recordTimer: null, isComplete: false
+        };
+
+        function escapeHtml(s) {
+            return String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+        }
+
+        async function bootstrap() {
+            const data = await R.api('GET', '/speaking/tests/' + TEST_ID);
+            state.test = data.test;
+            state.part = data.part;
+            const sub = await R.api('POST', '/speaking/tests/' + TEST_ID + '/start');
+            state.submissionId = sub.id;
+            render();
+        }
+
+        function render() {
+            const p = state.part;
+            const isPart2 = p.partNumber === 2;
+            const promptHtml = (p.prompts || []).map((pr, i) => `
+                <div class="prompt-item"><span class="prompt-num">${i+1}</span><span>${escapeHtml(typeof pr === 'string' ? pr : pr.text)}</span></div>
+            `).join('');
+
+            document.getElementById('main').innerHTML = `
+                <div class="part-badge">Part ${p.partNumber}</div>
+                <h1>${escapeHtml(state.test.title)}</h1>
+                ${p.instruction ? `<div class="instruction">${escapeHtml(p.instruction)}</div>` : ''}
+
+                ${isPart2 && p.cueCardText ? `
+                    <div class="cue-card">
+                        <h3 class="cue-card-title">📋 Cue Card · ${p.prepTimeSec}s prep · ${p.talkTimeSec}s talk</h3>
+                        <p>${escapeHtml(p.cueCardText)}</p>
+                    </div>
+                ` : ''}
+
+                ${(p.prompts || []).length ? `
+                    <div class="prompt-list">${promptHtml}</div>
+                ` : ''}
+
+                <div class="recorder">
+                    <button class="record-btn" id="recordBtn" title="Bấm để ghi âm">🎤</button>
+                    <div class="record-time" id="recordTime">00:00</div>
+                    <div class="record-status" id="recordStatus">Bấm nút để bắt đầu ghi âm</div>
+                    <audio id="audioPlayback" controls hidden></audio>
+                </div>
+
+                <div class="transcript-section">
+                    <h3>Transcript</h3>
+                    <p id="transcriptHint">Sau khi ghi âm, bấm "Chuyển thành chữ" để AI tự động transcribe (≡ 20 lượt/ngày), hoặc nhập tay vào ô dưới.</p>
+                    <textarea class="transcript-input" id="transcriptInput" placeholder="Transcript sẽ hiện ở đây..."></textarea>
+                    <div class="actions-row">
+                        <button class="btn" id="transcribeBtn" disabled>🔤 Chuyển thành chữ</button>
+                        <button class="btn btn-primary" id="submitBtn">Chấm bài AI</button>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('recordBtn').addEventListener('click', toggleRecord);
+            document.getElementById('submitBtn').addEventListener('click', submitNow);
+            document.getElementById('transcribeBtn').addEventListener('click', autoTranscribe);
+        }
+
+        async function toggleRecord() {
+            if (state.recording) {
+                state.recorder.stop();
+                state.recording = false;
+                clearInterval(state.recordTimer);
+                document.getElementById('recordBtn').classList.remove('recording', 'stop');
+                document.getElementById('recordBtn').innerHTML = '🎤';
+                document.getElementById('recordStatus').textContent = 'Đã dừng. Có thể nghe lại bên dưới.';
+                return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                state.recorder = new MediaRecorder(stream);
+                state.chunks = [];
+                state.recorder.ondataavailable = e => { if (e.data.size) state.chunks.push(e.data); };
+                state.recorder.onstop = () => {
+                    state.audioBlob = new Blob(state.chunks, { type: 'audio/webm' });
+                    state.audioUrl = URL.createObjectURL(state.audioBlob);
+                    const audio = document.getElementById('audioPlayback');
+                    audio.src = state.audioUrl; audio.hidden = false;
+                    document.getElementById('transcribeBtn').disabled = false;
+                    stream.getTracks().forEach(t => t.stop());
+                };
+                state.recorder.start();
+                state.recording = true;
+                state.recordStart = Date.now();
+                document.getElementById('recordBtn').classList.add('recording', 'stop');
+                document.getElementById('recordBtn').innerHTML = '⏹';
+                document.getElementById('recordStatus').textContent = 'Đang ghi âm…';
+                state.recordTimer = setInterval(() => {
+                    const sec = Math.floor((Date.now() - state.recordStart) / 1000);
+                    document.getElementById('recordTime').textContent = R.formatTime(sec);
+                }, 1000);
+            } catch (e) {
+                alert('Không thể truy cập microphone: ' + e.message);
+            }
+        }
+
+        async function autoTranscribe() {
+            if (!state.audioBlob) return alert('Hãy ghi âm trước.');
+            const btn = document.getElementById('transcribeBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Đang chuyển...';
+            const hint = document.getElementById('transcriptHint');
+            hint.textContent = 'AI đang transcribe (~10-20s)...';
+
+            try {
+                const tok = localStorage.getItem('easyrevise_token');
+                const form = new FormData();
+                form.append('audio', state.audioBlob, 'audio.webm');
+                const r = await fetch('/api/ielts/speaking/transcribe', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + tok },
+                    body: form
+                });
+                const j = await r.json();
+                if (!r.ok) throw new Error(j.error || 'Whisper failed');
+                document.getElementById('transcriptInput').value = j.text;
+                hint.textContent = `✓ Transcribed (${j.duration ? j.duration.toFixed(0) + 's' : ''}). Kiểm tra lại và bấm "Chấm bài AI".`;
+                btn.textContent = '🔄 Transcribe lại';
+                btn.disabled = false;
+            } catch (e) {
+                hint.textContent = 'Lỗi transcribe: ' + e.message;
+                btn.textContent = '🔤 Chuyển thành chữ';
+                btn.disabled = false;
+            }
+        }
+
+        async function submitNow() {
+            if (state.isComplete) return;
+            const transcript = document.getElementById('transcriptInput').value.trim();
+            if (transcript.length < 30) {
+                alert('Cần transcript dài ít nhất 30 ký tự để AI chấm.');
+                return;
+            }
+            if (!confirm('Nộp bài cho AI chấm?')) return;
+            state.isComplete = true;
+
+            document.getElementById('gradingOverlay').classList.add('is-open');
+            try {
+                const r = await R.api('POST', '/speaking/submissions/' + state.submissionId + '/submit', { transcript });
+                document.getElementById('gradingOverlay').classList.remove('is-open');
+                document.getElementById('bandOverall').textContent = r.band.overall.toFixed(1);
+                document.getElementById('bandFc').textContent = r.band.fc.toFixed(1);
+                document.getElementById('bandLr').textContent = r.band.lr.toFixed(1);
+                document.getElementById('bandGra').textContent = r.band.gra.toFixed(1);
+                document.getElementById('bandPron').textContent = r.band.pron.toFixed(1);
+                const fb = r.feedback || {};
+                document.getElementById('feedback').innerHTML = `
+                    ${fb.overall_comment ? `<div class="feedback-block"><strong>Tổng quan</strong><p>${escapeHtml(fb.overall_comment)}</p></div>` : ''}
+                    ${fb.fc ? `<div class="feedback-block"><strong>Fluency & Coherence</strong><p>${escapeHtml(fb.fc)}</p></div>` : ''}
+                    ${fb.lr ? `<div class="feedback-block"><strong>Lexical Resource</strong><p>${escapeHtml(fb.lr)}</p></div>` : ''}
+                    ${fb.gra ? `<div class="feedback-block"><strong>Grammar</strong><p>${escapeHtml(fb.gra)}</p></div>` : ''}
+                    ${fb.pron ? `<div class="feedback-block"><strong>Pronunciation</strong><p>${escapeHtml(fb.pron)}</p></div>` : ''}
+                    ${(fb.suggestions || []).length ? `<div class="feedback-block"><strong>Đề xuất</strong><ul style="margin:0;padding-left:1.2rem;color:var(--text-2);">${fb.suggestions.map(s => `<li>${escapeHtml(s)}</li>`).join('')}</ul></div>` : ''}
+                `;
+                document.getElementById('reviewBtn').onclick = () => location.href = '/ielts/speaking/result.html?id=' + state.submissionId;
+                document.getElementById('resultModal').classList.add('is-open');
+            } catch (e) {
+                document.getElementById('gradingOverlay').classList.remove('is-open');
+                alert('Chấm bài lỗi: ' + e.message);
+                state.isComplete = false;
+            }
+        }
+
+        bootstrap().catch(e => {
+            document.getElementById('loading').textContent = 'Lỗi: ' + e.message;
+        });
+    </script>
+</body>
+</html>

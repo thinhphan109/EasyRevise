@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drive · EasyRevise Admin</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/logo/apple-touch-icon.png">
+    <meta name="theme-color" content="#5b8def">
+    <script>(function(){var t=localStorage.getItem('easyrevise_theme')||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();</script>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/pages/admin.css">
+    <style>
+        body { padding: 1.5rem 1.75rem 4rem; max-width: 1180px; margin: 0 auto; }
+        .drive-back { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--text-muted); text-decoration: none; font-size: 0.85rem; margin-bottom: 1rem; transition: color .15s; }
+        .drive-back:hover { color: var(--text); }
+
+        /* Hero */
+        .drive-hero {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 1.5rem;
+            align-items: center;
+            padding: 1.75rem 2rem;
+            margin-bottom: 1.5rem;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .drive-hero::before {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(80% 100% at 100% 0%, color-mix(in srgb, var(--accent) 14%, transparent) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .drive-hero-icon {
+            position: relative; z-index: 1;
+            width: 72px; height: 72px; border-radius: 18px;
+            display: grid; place-items: center;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 14px color-mix(in srgb, var(--text) 6%, transparent);
+        }
+        .drive-hero-icon svg { width: 34px; height: 34px; }
+        .drive-hero-icon.ok { background: var(--success-soft); border-color: var(--success); color: var(--success); }
+        .drive-hero-icon.fail { background: var(--error-soft); border-color: var(--error); color: var(--error); }
+        .drive-hero-info { position: relative; z-index: 1; min-width: 0; }
+        .drive-hero-eyebrow {
+            font-size: 0.7rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+        .drive-hero-info h1 {
+            font-family: 'Source Serif 4', Georgia, serif;
+            margin: 0; font-size: 1.65rem; font-weight: 600;
+            letter-spacing: -0.015em; line-height: 1.15;
+        }
+        .drive-hero-info .sub {
+            margin-top: 0.4rem; color: var(--text-2); font-size: 0.92rem;
+        }
+        .drive-hero-info .meta {
+            margin-top: 0.6rem; font-size: 0.78rem; color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+            display: flex; flex-wrap: wrap; gap: 0.3rem 0.85rem;
+        }
+        .drive-hero-info .meta code {
+            background: var(--surface-2); padding: 0.05rem 0.35rem;
+            border-radius: 4px; font-size: 0.74rem;
+        }
+        .drive-hero-actions {
+            position: relative; z-index: 1;
+            display: flex; gap: 0.5rem; flex-wrap: wrap;
+        }
+
+        /* KPI grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        .kpi-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 1.1rem;
+            transition: transform .15s, border-color .15s;
+        }
+        .kpi-card:hover { border-color: var(--border-strong); }
+        .kpi-card .kpi-label {
+            font-size: 0.72rem; font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.06em;
+            margin-bottom: 0.35rem;
+        }
+        .kpi-card .kpi-value {
+            font-size: 1.55rem; font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            line-height: 1.1; letter-spacing: -0.02em;
+        }
+        .kpi-card .kpi-foot {
+            margin-top: 0.45rem; font-size: 0.78rem; color: var(--text-muted);
+            font-variant-numeric: tabular-nums;
+        }
+        .kpi-card .kpi-bar {
+            margin-top: 0.6rem; height: 6px;
+            background: var(--surface-2); border-radius: 3px; overflow: hidden;
+        }
+        .kpi-card .kpi-bar-fill {
+            height: 100%; background: linear-gradient(90deg, var(--success), var(--accent));
+            transition: width .3s;
+        }
+        .kpi-card .kpi-bar-fill.warn { background: linear-gradient(90deg, var(--accent), var(--warning)); }
+        .kpi-card .kpi-bar-fill.crit { background: var(--error); }
+        .kpi-card.warn { border-color: color-mix(in srgb, var(--warning) 35%, var(--border)); }
+        .kpi-card.crit { border-color: color-mix(in srgb, var(--error) 35%, var(--border)); }
+
+        /* Tabs */
+        .drive-tabs {
+            display: flex; gap: 0.25rem; margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+        }
+        .drive-tab {
+            padding: 0.7rem 1rem; cursor: pointer; background: none;
+            border: 0; border-bottom: 2px solid transparent;
+            font-family: inherit; font-size: 0.88rem; font-weight: 500;
+            color: var(--text-muted); white-space: nowrap;
+            transition: color .15s, border-color .15s;
+        }
+        .drive-tab:hover { color: var(--text-2); }
+        .drive-tab.active { color: var(--text); border-color: var(--text); }
+        .drive-tab .badge {
+            display: inline-block; margin-left: 0.35rem;
+            padding: 0.05rem 0.4rem; font-size: 0.7rem; font-weight: 700;
+            background: var(--surface-2); color: var(--text-muted);
+            border-radius: 999px;
+        }
+        .drive-tab.active .badge { background: var(--text); color: var(--bg); }
+        .drive-tab .badge.warn { background: var(--warning-soft); color: var(--warning); }
+
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        .section-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem 1.65rem;
+            margin-bottom: 1rem;
+        }
+        .section-title {
+            font-family: 'Source Serif 4', Georgia, serif;
+            font-size: 1rem; font-weight: 600;
+            margin: 0 0 0.25rem; letter-spacing: -0.01em;
+        }
+        .section-sub { font-size: 0.82rem; color: var(--text-muted); margin: 0 0 1rem; }
+
+        /* History table */
+        .drive-history-table { width: 100%; border-collapse: collapse; }
+        .drive-history-table th, .drive-history-table td {
+            padding: 0.65rem 0.85rem; text-align: left; font-size: 0.85rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .drive-history-table th {
+            color: var(--text-muted); font-weight: 600; font-size: 0.72rem;
+            letter-spacing: 0.04em; text-transform: uppercase;
+            background: var(--surface-2);
+        }
+        .drive-history-table tr:last-child td { border-bottom: 0; }
+        .drive-history-table tr:hover td { background: var(--surface-2); }
+        .drive-history-table td.tabular { font-variant-numeric: tabular-nums; color: var(--text-muted); }
+
+        .drive-badge { display: inline-block; padding: 0.18rem 0.5rem; font-size: 0.72rem; font-weight: 600; border-radius: 5px; letter-spacing: 0.02em; }
+        .drive-badge.ok { background: var(--success-soft); color: var(--success); }
+        .drive-badge.fail { background: var(--error-soft); color: var(--error); }
+        .drive-empty { text-align: center; padding: 2rem 1rem; color: var(--text-muted); font-size: 0.88rem; }
+
+        /* Readiness list */
+        .readiness-list { list-style: none; padding: 0; margin: 0; }
+        .readiness-item {
+            display: flex; align-items: flex-start; gap: 0.65rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .readiness-item:last-child { border-bottom: 0; padding-bottom: 0; }
+        .readiness-item:first-child { padding-top: 0; }
+        .readiness-check {
+            flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+            display: grid; place-items: center; font-size: 0.78rem;
+        }
+        .readiness-check.ok { background: var(--success-soft); color: var(--success); }
+        .readiness-check.warn { background: var(--warning-soft); color: var(--warning); }
+        .readiness-name { font-weight: 600; font-size: 0.88rem; }
+        .readiness-value { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.15rem; word-break: break-all; }
+        .readiness-advice { font-size: 0.76rem; color: var(--warning); margin-top: 0.25rem; }
+
+        /* Toast */
+        .drive-toast {
+            position: fixed; bottom: 1.5rem; right: 1.5rem;
+            background: var(--text); color: var(--bg);
+            padding: 0.75rem 1.1rem; border-radius: 8px;
+            font-size: 0.88rem;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            transform: translateY(120%); transition: transform .3s;
+            z-index: 100; max-width: 420px;
+        }
+        .drive-toast.show { transform: translateY(0); }
+        .drive-toast.error { background: var(--error); color: white; }
+
+        /* Buttons */
+        .btn { font-size: 0.86rem; padding: 0.5rem 1rem; }
+        .btn svg { flex-shrink: 0; }
+
+        @media (max-width: 720px) {
+            .drive-hero { grid-template-columns: auto 1fr; }
+            .drive-hero-actions { grid-column: 1 / -1; }
+        }
+    </style>
+</head>
+<body class="admin-page has-ambient-orbs">
+    <div class="ambient-orb-3" aria-hidden="true"></div>
+
+    <a class="drive-back" href="/admin">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Về Admin
+    </a>
+
+    <!-- HERO -->
+    <div class="drive-hero" id="hero">
+        <div class="drive-hero-icon" id="heroIcon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12c0 1.5-1.4 5-5 5h-1l-2-3M2 12c0-1.5 1.4-5 5-5h6l2 3M6 17l4-7 4 7H6z"/></svg>
+        </div>
+        <div class="drive-hero-info">
+            <div class="drive-hero-eyebrow">Google Drive</div>
+            <h1 id="heroTitle">Đang kiểm tra…</h1>
+            <div class="sub" id="heroSub">—</div>
+            <div class="meta" id="heroMeta"></div>
+        </div>
+        <div class="drive-hero-actions">
+            <button class="btn btn-primary" id="reauthBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Re-auth
+            </button>
+            <button class="btn btn-outline" id="checkNowBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                Kiểm tra
+            </button>
+        </div>
+    </div>
+
+    <!-- KPI -->
+    <div class="kpi-grid" id="kpiGrid">
+        <div class="kpi-card">
+            <div class="kpi-label">Storage</div>
+            <div class="kpi-value" id="kpiStorage">…</div>
+            <div class="kpi-foot" id="kpiStorageFoot">—</div>
+            <div class="kpi-bar"><div class="kpi-bar-fill" id="kpiStorageBar" style="width:0%"></div></div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Listening mirror</div>
+            <div class="kpi-value" id="kpiMirror">…</div>
+            <div class="kpi-foot" id="kpiMirrorFoot">—</div>
+            <div class="kpi-bar"><div class="kpi-bar-fill" id="kpiMirrorBar" style="width:0%"></div></div>
+        </div>
+        <div class="kpi-card" id="kpiReadinessCard">
+            <div class="kpi-label">Production readiness</div>
+            <div class="kpi-value" id="kpiReadiness">…</div>
+            <div class="kpi-foot" id="kpiReadinessFoot">—</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-label">Last health check</div>
+            <div class="kpi-value" id="kpiLastCheck" style="font-size:1rem;font-weight:600;">…</div>
+            <div class="kpi-foot" id="kpiLastCheckFoot">—</div>
+        </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="drive-tabs" role="tablist">
+        <button class="drive-tab active" data-tab="readiness" role="tab">
+            Production readiness <span class="badge" id="readinessBadge">…</span>
+        </button>
+        <button class="drive-tab" data-tab="mirror" role="tab">
+            Mirror audio
+        </button>
+        <button class="drive-tab" data-tab="history" role="tab">
+            Lịch sử check
+        </button>
+    </div>
+
+    <!-- READINESS PANEL -->
+    <div class="panel active" id="panel-readiness">
+        <div class="section-card">
+            <h3 class="section-title">Production readiness</h3>
+            <p class="section-sub">Checklist trước khi deploy production. Score càng cao càng tốt; mọi mục ⚠ đều có hướng dẫn fix.</p>
+            <ul class="readiness-list" id="readinessList">
+                <li class="drive-empty">Đang tải…</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- MIRROR PANEL -->
+    <div class="panel" id="panel-mirror">
+        <div class="section-card">
+            <h3 class="section-title">Mirror audio (IELTS Listening)</h3>
+            <p class="section-sub">Audio youpass.vn được mirror sang Drive folder <code>ielts-listening-audio</code>. Endpoint <code>/api/ielts/audio/:passageId</code> phục vụ từ Drive khi đã mirror, fallback về youpass khi chưa.</p>
+            <div id="mirrorBody" style="font-size:0.9rem;color:var(--text-muted);">Đang tải…</div>
+            <div style="margin-top:1rem;padding:0.85rem 1rem;background:var(--surface-2);border-radius:8px;font-size:0.78rem;color:var(--text-muted);font-family:ui-monospace,monospace;">
+                <strong style="color:var(--text);">CLI:</strong> node scripts/youpass/mirror-audio.mjs [--limit N] [--retry]
+            </div>
+        </div>
+    </div>
+
+    <!-- HISTORY PANEL -->
+    <div class="panel" id="panel-history">
+        <div class="section-card" style="padding: 0; overflow: hidden;">
+            <div style="padding: 1.25rem 1.65rem 0;">
+                <h3 class="section-title">Lịch sử health check</h3>
+                <p class="section-sub">Auto-check chạy mỗi 6 giờ. 30 entry gần nhất.</p>
+            </div>
+            <table class="drive-history-table">
+                <thead>
+                    <tr>
+                        <th style="padding-left:1.65rem;width:140px;">Thời gian</th>
+                        <th style="width:80px;">Status</th>
+                        <th>Account</th>
+                        <th>Storage</th>
+                        <th style="width:80px;">Latency</th>
+                        <th style="padding-right:1.65rem;">Error</th>
+                    </tr>
+                </thead>
+                <tbody id="historyBody">
+                    <tr><td colspan="6" class="drive-empty">Đang tải…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="drive-toast" id="toast"></div>
+
+    <script>
+        function getToken() { return localStorage.getItem('easyrevise_token') || ''; }
+        async function api(method, path, body) {
+            const headers = { 'Content-Type': 'application/json' };
+            const tok = getToken();
+            if (tok) headers.Authorization = 'Bearer ' + tok;
+            const r = await fetch('/api/admin/drive' + path, {
+                method, headers,
+                body: body !== undefined ? JSON.stringify(body) : undefined
+            });
+            const text = await r.text();
+            let data; try { data = JSON.parse(text); } catch { data = text; }
+            if (!r.ok) throw new Error((data && data.error) || ('HTTP ' + r.status));
+            return data;
+        }
+        function fmtDate(s) {
+            if (!s) return '—';
+            const d = new Date(s);
+            return d.toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+        }
+        function fmtRelative(s) {
+            if (!s) return '—';
+            const diff = (Date.now() - new Date(s).getTime()) / 1000;
+            if (diff < 60) return 'vừa xong';
+            if (diff < 3600) return Math.floor(diff / 60) + ' phút trước';
+            if (diff < 86400) return Math.floor(diff / 3600) + ' giờ trước';
+            return Math.floor(diff / 86400) + ' ngày trước';
+        }
+        function fmtBytes(n) {
+            if (!n) return '0 B';
+            if (n < 1e6) return (n / 1e3).toFixed(1) + ' KB';
+            if (n < 1e9) return (n / 1e6).toFixed(1) + ' MB';
+            if (n < 1e12) return (n / 1e9).toFixed(2) + ' GB';
+            return (n / 1e12).toFixed(2) + ' TB';
+        }
+        function showToast(msg, isError) {
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.className = 'drive-toast show' + (isError ? ' error' : '');
+            setTimeout(() => el.classList.remove('show'), 3500);
+        }
+        function escapeHtml(s) {
+            return String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+        }
+
+        // ── Hero + KPIs ──────────────────────────────────────────────────
+        async function renderHero() {
+            const data = await api('GET', '/status');
+            const live = data.live;
+            const ok = !!live?.ok;
+            const icon = document.getElementById('heroIcon');
+            icon.classList.toggle('ok', ok);
+            icon.classList.toggle('fail', !ok);
+            icon.innerHTML = ok
+                ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+                : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+
+            document.getElementById('heroTitle').textContent = ok ? 'Drive đang hoạt động' : 'Drive lỗi';
+            document.getElementById('heroSub').innerHTML = ok
+                ? `${escapeHtml(live.account)}${live.displayName ? ' · ' + escapeHtml(live.displayName) : ''}`
+                : (live?.error ? `<strong>Lỗi:</strong> ${escapeHtml(live.error)}` : 'Chưa cấu hình');
+
+            const meta = document.getElementById('heroMeta');
+            const items = [];
+            items.push(`Storage: <strong style="color:var(--text);">${escapeHtml(data.storageMode || 'disabled')}</strong>`);
+            if (data.rootFolderId) items.push(`Root: <code>${escapeHtml(data.rootFolderId.slice(0, 16))}…</code>`);
+            if (data.lastCheck) items.push(`Last check: ${fmtRelative(data.lastCheck.checked_at)}`);
+            meta.innerHTML = items.join('');
+
+            // KPI: Storage
+            if (live?.quotaLimit) {
+                const used = live.quotaUsed || 0;
+                const limit = live.quotaLimit;
+                const pct = (used / limit) * 100;
+                document.getElementById('kpiStorage').textContent = (used / 1e9).toFixed(1) + ' GB';
+                document.getElementById('kpiStorageFoot').textContent =
+                    `${pct.toFixed(1)}% của ${(limit / 1e9).toFixed(0)} GB`;
+                const bar = document.getElementById('kpiStorageBar');
+                bar.style.width = pct.toFixed(1) + '%';
+                bar.className = 'kpi-bar-fill' + (pct > 90 ? ' crit' : pct > 70 ? ' warn' : '');
+            } else {
+                document.getElementById('kpiStorage').textContent = '—';
+                document.getElementById('kpiStorageFoot').textContent = 'Drive chưa kết nối';
+            }
+
+            // KPI: Last check
+            if (data.lastCheck) {
+                document.getElementById('kpiLastCheck').textContent = fmtRelative(data.lastCheck.checked_at);
+                document.getElementById('kpiLastCheckFoot').textContent =
+                    `${data.lastCheck.duration_ms || 0} ms · ${data.lastCheck.ok ? 'OK' : 'FAIL'}`;
+            }
+        }
+
+        // ── Mirror ───────────────────────────────────────────────────────
+        async function renderMirror() {
+            try {
+                const s = await api('GET', '/mirror-stats');
+                const total = Number(s.total || 0);
+                const mirrored = Number(s.mirrored || 0);
+                const pct = total ? Math.round((mirrored / total) * 100) : 0;
+                const errored = Number(s.errored || 0);
+                const remaining = total - mirrored;
+
+                document.getElementById('kpiMirror').textContent = pct + '%';
+                document.getElementById('kpiMirrorFoot').textContent = `${mirrored} / ${total} passages${errored ? ` · ${errored} lỗi` : ''}`;
+                document.getElementById('kpiMirrorBar').style.width = pct + '%';
+
+                document.getElementById('mirrorBody').innerHTML = `
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;">
+                        <div><div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Total</div><div style="font-size:1.4rem;font-weight:700;font-variant-numeric:tabular-nums;">${total}</div></div>
+                        <div><div style="font-size:0.72rem;color:var(--success);text-transform:uppercase;letter-spacing:0.05em;">Mirrored</div><div style="font-size:1.4rem;font-weight:700;color:var(--success);font-variant-numeric:tabular-nums;">${mirrored}</div></div>
+                        <div><div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;">Còn lại</div><div style="font-size:1.4rem;font-weight:700;font-variant-numeric:tabular-nums;">${remaining}</div></div>
+                        <div><div style="font-size:0.72rem;color:${errored ? 'var(--error)' : 'var(--text-muted)'};text-transform:uppercase;letter-spacing:0.05em;">Lỗi</div><div style="font-size:1.4rem;font-weight:700;color:${errored ? 'var(--error)' : 'var(--text)'};font-variant-numeric:tabular-nums;">${errored}</div></div>
+                    </div>
+                    <div style="margin-top:1rem;height:8px;background:var(--surface-2);border-radius:4px;overflow:hidden;">
+                        <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,var(--success),var(--accent));transition:width .3s;"></div>
+                    </div>
+                `;
+            } catch {
+                document.getElementById('mirrorBody').innerHTML = '<span style="color:var(--text-muted);">Không lấy được dữ liệu mirror.</span>';
+            }
+        }
+
+        // ── Readiness ────────────────────────────────────────────────────
+        async function renderReadiness() {
+            try {
+                const r = await api('GET', '/readiness');
+                document.getElementById('kpiReadiness').textContent = r.score;
+                document.getElementById('kpiReadinessFoot').textContent = r.ready ? '✓ Sẵn sàng deploy' : 'Cần fix một vài mục';
+                document.getElementById('kpiReadinessCard').classList.toggle('warn', !r.ready);
+
+                const failed = r.checks.filter(c => !c.ok).length;
+                const badge = document.getElementById('readinessBadge');
+                if (failed === 0) {
+                    badge.textContent = '✓';
+                    badge.classList.remove('warn');
+                } else {
+                    badge.textContent = failed;
+                    badge.classList.add('warn');
+                }
+
+                const list = document.getElementById('readinessList');
+                list.innerHTML = r.checks.map(c => `
+                    <li class="readiness-item">
+                        <span class="readiness-check ${c.ok ? 'ok' : 'warn'}">${c.ok ? '✓' : '!'}</span>
+                        <div style="flex:1;min-width:0;">
+                            <div class="readiness-name">${escapeHtml(c.name)}</div>
+                            <div class="readiness-value">${escapeHtml(c.value)}</div>
+                            ${!c.ok ? `<div class="readiness-advice">→ ${escapeHtml(c.advice)}</div>` : ''}
+                        </div>
+                    </li>
+                `).join('');
+            } catch (e) {
+                document.getElementById('readinessList').innerHTML = `<li class="drive-empty" style="color:var(--error);">Lỗi: ${escapeHtml(e.message)}</li>`;
+            }
+        }
+
+        // ── History ──────────────────────────────────────────────────────
+        async function renderHistory() {
+            const data = await api('GET', '/history?limit=30');
+            const tbody = document.getElementById('historyBody');
+            if (!data.checks?.length) {
+                tbody.innerHTML = `<tr><td colspan="6" class="drive-empty">Chưa có check nào. Hệ thống tự động chạy mỗi 6 giờ.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = data.checks.map(c => {
+                const usedGB = c.quota_used ? (c.quota_used / 1e9).toFixed(1) : '—';
+                const limitGB = c.quota_limit ? (c.quota_limit / 1e9).toFixed(0) : '?';
+                return `<tr>
+                    <td class="tabular" style="padding-left:1.65rem;">${fmtDate(c.checked_at)}</td>
+                    <td><span class="drive-badge ${c.ok ? 'ok' : 'fail'}">${c.ok ? '✓ OK' : '✗ FAIL'}</span></td>
+                    <td>${escapeHtml(c.account || '—')}</td>
+                    <td class="tabular">${c.quota_limit ? `${usedGB} / ${limitGB} GB` : '—'}</td>
+                    <td class="tabular">${c.duration_ms || 0} ms</td>
+                    <td style="color:var(--error);font-size:0.8rem;padding-right:1.65rem;">${escapeHtml(c.error || '')}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        // ── Tabs ─────────────────────────────────────────────────────────
+        document.querySelectorAll('.drive-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.drive-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // ── Reload all ───────────────────────────────────────────────────
+        async function reload() {
+            try {
+                await Promise.all([renderHero(), renderHistory(), renderMirror(), renderReadiness()]);
+            } catch (e) {
+                showToast('Lỗi tải: ' + e.message, true);
+            }
+        }
+
+        // ── Actions ──────────────────────────────────────────────────────
+        document.getElementById('reauthBtn').addEventListener('click', async () => {
+            try {
+                const { authUrl } = await api('GET', '/auth-url');
+                const popup = window.open(authUrl, 'oauth', 'width=520,height=720');
+                if (!popup) {
+                    showToast('Popup bị chặn. Cho phép popup rồi thử lại.', true);
+                    return;
+                }
+                showToast('Đang chờ bạn login Google trong popup…');
+
+                const handler = (e) => {
+                    if (typeof e.data !== 'string') return;
+                    if (e.data === 'drive-auth-ok') {
+                        window.removeEventListener('message', handler);
+                        showToast('✓ Token mới đã được lưu. Đang reload…');
+                        setTimeout(reload, 800);
+                    } else if (e.data === 'drive-auth-fail') {
+                        window.removeEventListener('message', handler);
+                        showToast('Re-auth thất bại. Xem popup để biết chi tiết.', true);
+                    }
+                };
+                window.addEventListener('message', handler);
+
+                const watch = setInterval(() => {
+                    if (popup.closed) {
+                        clearInterval(watch);
+                        window.removeEventListener('message', handler);
+                        setTimeout(reload, 500);
+                    }
+                }, 600);
+            } catch (e) {
+                showToast('Lỗi: ' + e.message, true);
+            }
+        });
+
+        document.getElementById('checkNowBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('checkNowBtn');
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            try {
+                const r = await api('POST', '/check-now');
+                showToast(r.ok ? `✓ OK · ${r.duration_ms}ms` : `✗ Failed: ${r.error}`, !r.ok);
+                await reload();
+            } catch (e) {
+                showToast('Lỗi: ' + e.message, true);
+            }
+            btn.disabled = false;
+            btn.style.opacity = '';
+        });
+
+        reload();
+    </script>
+</body>
+</html>

@@ -1,12 +1,15 @@
 // routes/grading.js — Admin submissions list, review, AI grade essay
+'use strict';
 const path = require('path');
 const fs = require('fs');
 const express = require('express');
 const router = express.Router();
 const sharp = require('sharp');
-const { readData, writeData, readSettings } = require('../lib/data');
+const repos = require('../lib/repos');
+const { query, queryOne } = require('../lib/repos/_pool');
 const { adminOnly } = require('../lib/auth');
 const { chatCompletion, getConfig } = require('../lib/ai-client');
+
 function findQuestionContext(exam, result) {
     for (const section of (exam.sections || [])) {
         if (String(section.id) === String(result.id)) return { section, question: section };
@@ -16,194 +19,213 @@ function findQuestionContext(exam, result) {
     return { section: null, question: null };
 }
 
-function getGradeTarget(exam, code, userId, completedAt) {
-    if (code) {
-        const codeObj = (exam.accessCodes || []).find(c => String(c.code).toUpperCase() === String(code).toUpperCase());
-        const usage = codeObj?.usedBy?.find(u => u.userId === userId && u.completed && (!completedAt || u.completedAt === completedAt));
-        return usage ? { usage, source: 'code' } : null;
-    }
-    const usage = (exam.openSubmissions || []).find(u => u.userId === userId && (!completedAt || u.completedAt === completedAt));
-    return usage ? { usage, source: 'open' } : null;
+function enrichEssay(exam, r, gradeEntry, signSubmissionUrl) {
+    const ctx = findQuestionContext(exam, r);
+    const section = ctx.section;
+    const question = ctx.question;
+    return {
+        questionId: r.id,
+        gradingType: r.gradingType || (r.isFillBlank ? 'fill-in-blank' : (r.isFreeFormOrigin ? 'free-form' : 'writing-essay')),
+        sectionTitle: section ? section.title : r.id,
+        prompt: r.prompt || question?.question || question?.prompt || section?.prompt || null,
+        sampleAnswer: r.sampleAnswer || question?.sampleAnswer || question?.answer || question?.expectedAnswer || section?.sampleAnswer || null,
+        studentAnswer: typeof r.userAnswer === 'object' ? JSON.stringify(r.userAnswer, null, 2) : (r.userAnswer || ''),
+        attachments: (r.attachments || []).map(u => signSubmissionUrl(u)),
+        aiScore: gradeEntry ? gradeEntry.aiScore : null,
+        aiMaxScore: gradeEntry ? gradeEntry.aiMaxScore : 10,
+        aiFeedback: gradeEntry ? gradeEntry.aiFeedback : null,
+        aiBreakdown: gradeEntry ? gradeEntry.aiBreakdown : null,
+        aiError: gradeEntry ? gradeEntry.aiError : null,
+        status: gradeEntry
+            ? (gradeEntry.status || (gradeEntry.aiScore != null ? 'graded' : 'pending'))
+            : 'pending',
+        teacherScore: gradeEntry ? gradeEntry.teacherScore : null,
+        teacherFeedback: gradeEntry ? gradeEntry.teacherFeedback : null,
+        reviewedAt: gradeEntry ? gradeEntry.reviewedAt : null
+    };
 }
 
-router.get('/submissions', adminOnly, (req, res) => {
-    const { examId } = req.query;
-    const { signSubmissionUrl } = require('../lib/signed-url');
-    const data = readData();
-    const exams = examId ? data.exams.filter(e => e.id === examId) : data.exams;
-    const submissions = [];
+function isGradableResult(r) {
+    return r.isEssay || r.isFillBlank || r.isFreeFormOrigin
+        || ['free-form', 'writing-essay', 'fill-in-blank'].includes(r.gradingType);
+}
 
-    for (const exam of exams) {
-        for (const code of (exam.accessCodes || [])) {
-            for (const usage of (code.usedBy || [])) {
-                if (!usage.completed || !usage.result) continue;
-                const essayResults = (usage.result.results || []).filter(r => r.isEssay || r.isFillBlank || r.isFreeFormOrigin || ['free-form', 'writing-essay', 'fill-in-blank'].includes(r.gradingType));
-                if (essayResults.length === 0) continue;
+router.get('/submissions', adminOnly, async (req, res, next) => {
+    try {
+        const { signSubmissionUrl } = require('../lib/signed-url');
+        const { examId } = req.query;
+        const exams = examId
+            ? [await repos.exams.getById(examId)].filter(Boolean)
+            : await repos.exams.listAll();
 
-                const enrichedEssays = essayResults.map(r => {
-                    const ctx = findQuestionContext(exam, r);
-                    const section = ctx.section;
-                    const question = ctx.question;
-                    const gradeEntry = (usage.essayGrades || []).find(g => String(g.questionId) === String(r.id));
-                    return {
-                        questionId: r.id,
-                        gradingType: r.gradingType || (r.isFillBlank ? 'fill-in-blank' : (r.isFreeFormOrigin ? 'free-form' : 'writing-essay')),
-                        sectionTitle: section ? section.title : r.id,
-                        prompt: r.prompt || question?.question || question?.prompt || section?.prompt || null,
-                        sampleAnswer: r.sampleAnswer || question?.sampleAnswer || question?.answer || question?.expectedAnswer || section?.sampleAnswer || null,
-                        studentAnswer: typeof r.userAnswer === 'object' ? JSON.stringify(r.userAnswer, null, 2) : (r.userAnswer || ''),
-                        attachments: (r.attachments || []).map(u => signSubmissionUrl(u)), // C9: signed URL cho admin browser load <img>
-                        aiScore: gradeEntry ? gradeEntry.aiScore : null,
-                        aiMaxScore: gradeEntry ? gradeEntry.aiMaxScore : 10,
-                        aiFeedback: gradeEntry ? gradeEntry.aiFeedback : null,
-                        aiBreakdown: gradeEntry ? gradeEntry.aiBreakdown : null,
-                        aiError: gradeEntry ? gradeEntry.aiError : null,
-                        status: gradeEntry ? (gradeEntry.status || (gradeEntry.aiScore !== undefined && gradeEntry.aiScore !== null ? 'graded' : 'pending')) : 'pending',
-                        teacherScore: gradeEntry ? gradeEntry.teacherScore : null,
-                        teacherFeedback: gradeEntry ? gradeEntry.teacherFeedback : null,
-                        reviewedAt: gradeEntry ? gradeEntry.reviewedAt : null
-                    };
-                });
-
+        const submissions = [];
+        for (const exam of exams) {
+            // Code-locked usages
+            const codeUsages = await query(`
+                SELECT cu.code, cu.user_id::text AS "userId", cu.display_name AS "displayName",
+                       cu.completed_at AS "completedAt", cu.score, cu.result, cu.essay_grades AS "essayGrades"
+                FROM code_usages cu
+                JOIN access_codes ac ON ac.code = cu.code
+                WHERE ac.exam_id = $1 AND cu.completed = true AND cu.result IS NOT NULL
+            `, [exam.id]);
+            for (const u of codeUsages) {
+                const essayResults = (u.result?.results || []).filter(isGradableResult);
+                if (!essayResults.length) continue;
+                const grades = u.essayGrades || [];
                 submissions.push({
-                    examId: exam.id, examTitle: exam.title,
-                    code: code.code, userId: usage.userId,
-                    displayName: usage.displayName || usage.userId,
-                    completedAt: usage.completedAt,
-                    mcScore: usage.score, essays: enrichedEssays
+                    examId: exam.id,
+                    examTitle: exam.title,
+                    code: u.code,
+                    userId: u.userId,
+                    displayName: u.displayName || u.userId,
+                    completedAt: u.completedAt,
+                    mcScore: u.score == null ? null : Number(u.score),
+                    essays: essayResults.map(r =>
+                        enrichEssay(exam, r,
+                            grades.find(g => String(g.questionId) === String(r.id)),
+                            signSubmissionUrl))
+                });
+            }
+
+            // Open submissions
+            const opens = await query(`
+                SELECT id, user_id::text AS "userId", display_name AS "displayName",
+                       completed_at AS "completedAt", score, result, essay_grades AS "essayGrades"
+                FROM open_submissions
+                WHERE exam_id = $1 AND result IS NOT NULL
+            `, [exam.id]);
+            for (const u of opens) {
+                const essayResults = (u.result?.results || []).filter(isGradableResult);
+                if (!essayResults.length) continue;
+                const grades = u.essayGrades || [];
+                submissions.push({
+                    examId: exam.id,
+                    examTitle: exam.title,
+                    code: null,
+                    source: 'open',
+                    userId: u.userId,
+                    displayName: u.displayName || u.userId,
+                    completedAt: u.completedAt,
+                    mcScore: u.score == null ? null : Number(u.score),
+                    essays: essayResults.map(r =>
+                        enrichEssay(exam, r,
+                            grades.find(g => String(g.questionId) === String(r.id)),
+                            signSubmissionUrl))
                 });
             }
         }
-
-        // Also include open submissions (no-code exams)
-        for (const usage of (exam.openSubmissions || [])) {
-            if (!usage.completed && !usage.result) continue;
-            const res_usage = usage.result || {};
-            const essayResults = (res_usage.results || []).filter(r => r.isEssay || r.isFillBlank || r.isFreeFormOrigin || ['free-form', 'writing-essay', 'fill-in-blank'].includes(r.gradingType));
-            if (essayResults.length === 0) continue;
-
-            const enrichedEssays = essayResults.map(r => {
-                const ctx = findQuestionContext(exam, r);
-                const section = ctx.section;
-                const question = ctx.question;
-                const gradeEntry = (usage.essayGrades || []).find(g => String(g.questionId) === String(r.id));
-                return {
-                    questionId: r.id,
-                    gradingType: r.gradingType || (r.isFillBlank ? 'fill-in-blank' : (r.isFreeFormOrigin ? 'free-form' : 'writing-essay')),
-                    sectionTitle: section ? section.title : r.id,
-                    prompt: r.prompt || question?.question || question?.prompt || section?.prompt || null,
-                    sampleAnswer: r.sampleAnswer || question?.sampleAnswer || question?.answer || question?.expectedAnswer || section?.sampleAnswer || null,
-                    studentAnswer: typeof r.userAnswer === 'object' ? JSON.stringify(r.userAnswer, null, 2) : (r.userAnswer || ''),
-                    attachments: (r.attachments || []).map(u => signSubmissionUrl(u)), // C9: signed URL cho admin browser load <img>
-                    aiScore: gradeEntry ? gradeEntry.aiScore : null,
-                    aiMaxScore: gradeEntry ? gradeEntry.aiMaxScore : 10,
-                    aiFeedback: gradeEntry ? gradeEntry.aiFeedback : null,
-                    aiBreakdown: gradeEntry ? gradeEntry.aiBreakdown : null,
-                    aiError: gradeEntry ? gradeEntry.aiError : null,
-                    status: gradeEntry ? (gradeEntry.status || (gradeEntry.aiScore !== undefined && gradeEntry.aiScore !== null ? 'graded' : 'pending')) : 'pending',
-                    teacherScore: gradeEntry ? gradeEntry.teacherScore : null,
-                    teacherFeedback: gradeEntry ? gradeEntry.teacherFeedback : null,
-                    reviewedAt: gradeEntry ? gradeEntry.reviewedAt : null
-                };
-            });
-
-            submissions.push({
-                examId: exam.id, examTitle: exam.title,
-                code: null, source: 'open',
-                userId: usage.userId,
-                displayName: usage.displayName || usage.userId,
-                completedAt: usage.completedAt,
-                mcScore: usage.score, essays: enrichedEssays
-            });
-        }
-    }
-
-    submissions.sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
-    res.json(submissions);
+        submissions.sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
+        res.json(submissions);
+    } catch (e) { next(e); }
 });
+
+// ── Helpers to find a grade target (code usage row OR open submission row)
+async function findGradeTarget({ examId, code, userId, completedAt }) {
+    if (code) {
+        const codeStr = String(code).toUpperCase();
+        const params = [codeStr];
+        let where = `cu.code = $1 AND cu.completed = true`;
+        if (userId) { params.push(userId); where += ` AND cu.user_id::text = $${params.length}`; }
+        if (completedAt) { params.push(completedAt); where += ` AND cu.completed_at = $${params.length}`; }
+        const row = await queryOne(
+            `SELECT cu.id, cu.essay_grades AS "essayGrades"
+             FROM code_usages cu JOIN access_codes ac ON ac.code = cu.code
+             WHERE ac.exam_id = $${params.length + 1} AND ${where}
+             ORDER BY cu.completed_at DESC LIMIT 1`,
+            [...params, examId]
+        );
+        return row ? { source: 'code', id: row.id, table: 'code_usages', grades: row.essayGrades || [] } : null;
+    }
+    const params = [examId];
+    let where = `exam_id = $1`;
+    if (userId) { params.push(userId); where += ` AND user_id::text = $${params.length}`; }
+    if (completedAt) { params.push(completedAt); where += ` AND completed_at = $${params.length}`; }
+    const row = await queryOne(
+        `SELECT id, essay_grades AS "essayGrades" FROM open_submissions
+         WHERE ${where} ORDER BY completed_at DESC LIMIT 1`,
+        params
+    );
+    return row ? { source: 'open', id: row.id, table: 'open_submissions', grades: row.essayGrades || [] } : null;
+}
+
+async function saveGrades(target) {
+    await query(
+        `UPDATE ${target.table} SET essay_grades = $1::jsonb WHERE id = $2`,
+        [JSON.stringify(target.grades), target.id]
+    );
+}
 
 // POST /api/admin/submissions/review
-router.post('/submissions/review', adminOnly, (req, res) => {
-    const { examId, code, userId, questionId, teacherScore, teacherFeedback, completedAt } = req.body;
-    if (!examId || !userId || !questionId) {
-        return res.status(400).json({ error: 'Thiếu thông tin' });
-    }
-    const data = readData();
-    const exam = data.exams.find(e => e.id === examId);
-    if (!exam) return res.status(404).json({ error: 'Exam not found' });
-    const target = getGradeTarget(exam, code, userId, completedAt);
-    if (!target) return res.status(404).json({ error: 'Bài nộp không tìm thấy' });
-    const usage = target.usage;
-    if (!usage.essayGrades) usage.essayGrades = [];
-    let grade = usage.essayGrades.find(g => g.questionId === questionId);
-    if (!grade) {
-        grade = { questionId };
-        usage.essayGrades.push(grade);
-    }
-    if (teacherScore !== undefined && teacherScore !== null) grade.teacherScore = parseFloat(teacherScore);
-    if (teacherFeedback !== undefined) grade.teacherFeedback = teacherFeedback;
-    grade.reviewedAt = new Date().toISOString();
-    writeData(data);
-    res.json({ success: true, grade });
+router.post('/submissions/review', adminOnly, async (req, res, next) => {
+    try {
+        const { examId, code, userId, questionId, teacherScore, teacherFeedback, completedAt } = req.body;
+        if (!examId || !userId || !questionId) {
+            return res.status(400).json({ error: 'Thiếu thông tin' });
+        }
+        const target = await findGradeTarget({ examId, code, userId, completedAt });
+        if (!target) return res.status(404).json({ error: 'Bài nộp không tìm thấy' });
+
+        let grade = target.grades.find(g => g.questionId === questionId);
+        if (!grade) { grade = { questionId }; target.grades.push(grade); }
+        if (teacherScore !== undefined && teacherScore !== null) grade.teacherScore = parseFloat(teacherScore);
+        if (teacherFeedback !== undefined) grade.teacherFeedback = teacherFeedback;
+        grade.reviewedAt = new Date().toISOString();
+        await saveGrades(target);
+        res.json({ success: true, grade });
+    } catch (e) { next(e); }
 });
 
-// DELETE /api/admin/submissions — admin remove a submission (cascade clears user history too)
-// Body: { examId, userId, completedAt, code? } — code optional (open vs code-locked)
-router.delete('/submissions', adminOnly, (req, res) => {
-    const { examId, userId, completedAt, code } = req.body || {};
-    if (!examId || !userId || !completedAt) {
-        return res.status(400).json({ error: 'Thiếu examId / userId / completedAt' });
-    }
-    const data = readData();
-    const exam = data.exams.find(e => e.id === examId);
-    if (!exam) return res.status(404).json({ error: 'Exam not found' });
-
-    let removed = 0;
-    // Remove from accessCodes[].usedBy if code submitted
-    if (code) {
-        const codeObj = (exam.accessCodes || []).find(c => String(c.code).toUpperCase() === String(code).toUpperCase());
-        if (codeObj && Array.isArray(codeObj.usedBy)) {
-            const before = codeObj.usedBy.length;
-            codeObj.usedBy = codeObj.usedBy.filter(u => !(u.userId === userId && u.completedAt === completedAt));
-            removed += before - codeObj.usedBy.length;
+// DELETE /api/admin/submissions
+router.delete('/submissions', adminOnly, async (req, res, next) => {
+    try {
+        const { examId, userId, completedAt, code } = req.body || {};
+        if (!examId || !userId || !completedAt) {
+            return res.status(400).json({ error: 'Thiếu examId / userId / completedAt' });
         }
-    } else if (Array.isArray(exam.openSubmissions)) {
-        const before = exam.openSubmissions.length;
-        exam.openSubmissions = exam.openSubmissions.filter(u => !(u.userId === userId && u.completedAt === completedAt));
-        removed += before - exam.openSubmissions.length;
-    }
 
-    if (removed === 0) {
-        // Try fallback in either store (caller may have wrong source)
-        for (const c of (exam.accessCodes || [])) {
-            if (!Array.isArray(c.usedBy)) continue;
-            const before = c.usedBy.length;
-            c.usedBy = c.usedBy.filter(u => !(u.userId === userId && u.completedAt === completedAt));
-            removed += before - c.usedBy.length;
+        let removed = 0;
+        if (code) {
+            const r = await query(
+                `DELETE FROM code_usages
+                 WHERE code = $1 AND user_id::text = $2 AND completed_at = $3`,
+                [String(code).toUpperCase(), String(userId), completedAt]
+            );
+            removed += r.length;
+        } else {
+            const r = await query(
+                `DELETE FROM open_submissions
+                 WHERE exam_id = $1 AND user_id::text = $2 AND completed_at = $3`,
+                [examId, String(userId), completedAt]
+            );
+            removed += r.length;
         }
-        if (Array.isArray(exam.openSubmissions)) {
-            const before = exam.openSubmissions.length;
-            exam.openSubmissions = exam.openSubmissions.filter(u => !(u.userId === userId && u.completedAt === completedAt));
-            removed += before - exam.openSubmissions.length;
+
+        if (removed === 0) {
+            // Fallback: try the other source
+            const r1 = await query(
+                `DELETE FROM code_usages
+                 WHERE user_id::text = $1 AND completed_at = $2
+                 AND code IN (SELECT code FROM access_codes WHERE exam_id = $3)`,
+                [String(userId), completedAt, examId]
+            );
+            const r2 = await query(
+                `DELETE FROM open_submissions
+                 WHERE exam_id = $1 AND user_id::text = $2 AND completed_at = $3`,
+                [examId, String(userId), completedAt]
+            );
+            removed += r1.length + r2.length;
         }
-    }
 
-    if (removed === 0) return res.status(404).json({ error: 'Không tìm thấy bài nộp' });
-    writeData(data);
+        if (removed === 0) return res.status(404).json({ error: 'Không tìm thấy bài nộp' });
 
-    // Cascade: remove from target user's personal history
-    const { readUsers, writeUsers } = require('../lib/data');
-    const usersData = readUsers();
-    const targetUser = usersData.users.find(u => u.id === userId);
-    let userHistRemoved = 0;
-    if (targetUser && Array.isArray(targetUser.history)) {
-        const before = targetUser.history.length;
-        targetUser.history = targetUser.history.filter(h => !(String(h.examId) === String(examId) && h.completedAt === completedAt));
-        userHistRemoved = before - targetUser.history.length;
-        if (userHistRemoved > 0) writeUsers(usersData);
-    }
-
-    res.json({ success: true, removed, userHistoryRemoved: userHistRemoved });
+        // Cascade: remove from user history
+        const r = await query(
+            `DELETE FROM user_history
+             WHERE user_id::text = $1 AND payload->>'examId' = $2 AND payload->>'completedAt' = $3`,
+            [String(userId), String(examId), completedAt]
+        );
+        res.json({ success: true, removed, userHistoryRemoved: r.length });
+    } catch (e) { next(e); }
 });
 
 // POST /api/admin/ai-grade-essay
@@ -215,16 +237,14 @@ router.post('/ai-grade-essay', adminOnly, async (req, res) => {
         if (!cfg.apiKey) return res.status(500).json({ error: 'API_KEY_FIXED chưa cấu hình' });
 
         const sdkType = cfg.sdkType;
-        const settings = readSettings();
+        const settings = await repos.settings.getAll();
         const model = settings.gradeModel || cfg.defaultModel;
 
         const userContent = [];
-
-        // Attach images if any
         if (attachments && attachments.length > 0) {
             const { stripSignedQuery } = require('../lib/signed-url');
             for (const attUrlRaw of attachments) {
-                const attUrl = stripSignedQuery(attUrlRaw); // C9: strip signed query trước khi đọc disk
+                const attUrl = stripSignedQuery(attUrlRaw);
                 if (attUrl.match(/\.(jpg|jpeg|png|webp)$/i)) {
                     try {
                         const filePath = path.join(__dirname, '..', 'public', attUrl);
@@ -245,7 +265,6 @@ router.post('/ai-grade-essay', adminOnly, async (req, res) => {
             }
         }
 
-        // H8: Prompt injection guard
         const safeStudentAnswer = String(studentAnswer || '(Học sinh không viết gì)')
             .replace(/<\/student_answer>/gi, '<\\/student_answer>')
             .slice(0, 10000);
@@ -274,7 +293,6 @@ Hãy chấm điểm và trả về JSON với format sau (KHÔNG có text nào b
             messages: [{ role: 'user', content: userContent }]
         });
 
-        // Parse JSON
         let jsonStr = aiText;
         const jsonMatch = aiText.match(/```(?:json)?\s*([\s\S]*?)```/);
         if (jsonMatch) jsonStr = jsonMatch[1];
@@ -282,11 +300,9 @@ Hãy chấm điểm và trả về JSON với format sau (KHÔNG có text nào b
         if (jStart !== -1 && jEnd !== -1) jsonStr = jsonStr.substring(jStart, jEnd + 1);
 
         let gradeResult;
-        try { gradeResult = JSON.parse(jsonStr); } catch (e) {
-            return res.status(422).json({ error: 'AI trả về JSON không hợp lệ', raw: aiText.substring(0, 500) });
-        }
+        try { gradeResult = JSON.parse(jsonStr); }
+        catch { return res.status(422).json({ error: 'AI trả về JSON không hợp lệ', raw: aiText.substring(0, 500) }); }
 
-        // H8: clamp + validate AI output
         const _max = Number(gradeResult.maxScore) || 10;
         const _score = Number(gradeResult.score);
         gradeResult = {
@@ -296,28 +312,23 @@ Hãy chấm điểm và trả về JSON với format sau (KHÔNG có text nào b
             breakdown: String(gradeResult.breakdown || '').slice(0, 5000)
         };
 
-        // Save to usage if examId/userId/questionId provided (supports both code and open submissions)
         if (examId && userId && questionId) {
             try {
-                const data = readData();
-                const exam = data.exams.find(e => e.id === examId);
-                if (exam) {
-                    const target = getGradeTarget(exam, code, userId, completedAt);
-                    if (target) {
-                        const usage = target.usage;
-                        if (!usage.essayGrades) usage.essayGrades = [];
-                        let grade = usage.essayGrades.find(g => String(g.questionId) === String(questionId));
-                        if (!grade) { grade = { questionId }; usage.essayGrades.push(grade); }
-                        grade.aiScore = gradeResult.score;
-                        grade.aiMaxScore = gradeResult.maxScore || 10;
-                        grade.aiFeedback = gradeResult.feedback;
-                        grade.aiBreakdown = gradeResult.breakdown;
-                        grade.aiGradedAt = new Date().toISOString();
-                        grade.gradedByAi = true;
-                        grade.status = 'graded';
-                        grade.aiError = null;
-                        writeData(data);
-                    }
+                const target = await findGradeTarget({ examId, code, userId, completedAt });
+                if (target) {
+                    let grade = target.grades.find(g => String(g.questionId) === String(questionId));
+                    if (!grade) { grade = { questionId }; target.grades.push(grade); }
+                    Object.assign(grade, {
+                        aiScore: gradeResult.score,
+                        aiMaxScore: gradeResult.maxScore || 10,
+                        aiFeedback: gradeResult.feedback,
+                        aiBreakdown: gradeResult.breakdown,
+                        aiGradedAt: new Date().toISOString(),
+                        gradedByAi: true,
+                        status: 'graded',
+                        aiError: null
+                    });
+                    await saveGrades(target);
                 }
             } catch (saveErr) { console.error('Save AI grade error:', saveErr.message); }
         }

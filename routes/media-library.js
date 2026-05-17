@@ -1,38 +1,119 @@
 // routes/media-library.js — Media Library API (Google Drive storage)
+'use strict';
 const path = require('path');
 const fs = require('fs');
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
+const repos = require('../lib/repos');
+const { query, queryOne } = require('../lib/repos/_pool');
 const { adminOnly } = require('../lib/auth');
-const { readMedia, writeMedia, uuidv4 } = require('../lib/data');
+const { uuidv4 } = require('../lib/data');
 const {
     getDrive, uploadBufferToDrive, createDriveFolder,
-    deleteFromDrive, streamFileFromDrive, getFileBuffer,
+    deleteFromDrive, streamFileFromDrive,
     setVideoPublicNoDL, getDriveQuota
 } = require('../lib/drive');
 
-// Optional: sharp for image compression (graceful if not installed)
 let sharp;
 try { sharp = require('sharp'); } catch { sharp = null; }
 
-// Multer: memory storage, 500MB limit
 const mediaUpload = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: 500 * 1024 * 1024 }
 });
 
-// ========================
-// Admin routes (/api/admin/media/...)
-// ========================
+// ── Mappers — flatten metadata into the legacy fileRecord shape ────────
+function mapFolderRow(row) {
+    if (!row) return null;
+    return {
+        id: row.id,
+        name: row.name,
+        parentId: row.parent_id,
+        driveId: row.drive_folder_id,    // legacy alias
+        driveFolderId: row.drive_folder_id,
+        createdAt: row.created_at
+    };
+}
 
-// GET /api/admin/media — list all media
-router.get('/admin/media', adminOnly, (req, res) => {
-    res.json(readMedia());
+function deriveTypeFromMime(mime, name) {
+    const m = (mime || '').toLowerCase();
+    const n = (name || '').toLowerCase();
+    if (m.startsWith('image/')) return 'image';
+    if (m.startsWith('video/')) return 'video';
+    if (m.includes('pdf') || n.endsWith('.pdf')) return 'pdf';
+    if (m.includes('word') || n.endsWith('.docx') || n.endsWith('.doc')) return 'docx';
+    if (m.includes('presentation') || n.endsWith('.pptx') || n.endsWith('.ppt')) return 'pptx';
+    if (m.includes('spreadsheet') || n.endsWith('.xlsx') || n.endsWith('.xls')) return 'xlsx';
+    return 'other';
+}
+
+function mapFileRow(row) {
+    if (!row) return null;
+    const meta = row.metadata || {};
+    return {
+        id: row.id,
+        name: row.name,
+        folderId: row.folder_id,
+        driveFileId: row.drive_file_id,
+        size: row.size == null ? null : Number(row.size),
+        mimeType: row.mime_type,
+        tags: row.tags || [],
+        protection: row.is_protected ? 'view-only' : (meta.protection || 'downloadable'),
+        type: meta.type || deriveTypeFromMime(row.mime_type, row.name),
+        url: meta.url || (row.drive_file_id ? `/api/media/${row.drive_file_id}` : null),
+        status: meta.status || 'ready',
+        aspectRatio: meta.aspectRatio || null,
+        originalDriveId: meta.originalDriveId || null,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+    };
+}
+
+async function listMedia() {
+    const folders = (await query(`SELECT * FROM media_folders ORDER BY name`)).map(mapFolderRow);
+    const files = (await query(`SELECT * FROM media_files ORDER BY created_at DESC LIMIT 5000`)).map(mapFileRow);
+    return { folders, files };
+}
+
+// Helper: insert file row from a fileRecord-like object
+async function upsertFileRecord(rec) {
+    const { id, name, folderId, driveFileId, size, mimeType, tags = [],
+            type, url, status, aspectRatio, originalDriveId, protection } = rec;
+    const metadata = { type, url, status, aspectRatio, originalDriveId };
+    return queryOne(
+        `INSERT INTO media_files (id, name, folder_id, drive_file_id, mime_type,
+                                  size, tags, is_protected, metadata)
+         VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9::jsonb)
+         ON CONFLICT (id) DO UPDATE
+         SET name = EXCLUDED.name, folder_id = EXCLUDED.folder_id,
+             drive_file_id = EXCLUDED.drive_file_id, mime_type = EXCLUDED.mime_type,
+             size = EXCLUDED.size, tags = EXCLUDED.tags,
+             is_protected = EXCLUDED.is_protected, metadata = EXCLUDED.metadata
+         RETURNING *`,
+        [id, name, folderId || null, driveFileId || null, mimeType || null,
+         size || null, JSON.stringify(tags), protection === 'view-only',
+         JSON.stringify(metadata)]
+    ).then(mapFileRow);
+}
+
+async function patchFileMetadata(id, patch) {
+    const cur = await queryOne(`SELECT metadata FROM media_files WHERE id = $1`, [id]);
+    if (!cur) return null;
+    const merged = { ...(cur.metadata || {}), ...patch };
+    await query(`UPDATE media_files SET metadata = $1::jsonb WHERE id = $2`,
+        [JSON.stringify(merged), id]);
+    return merged;
+}
+
+// ── Admin routes ──────────────────────────────────────────────────────
+
+router.get('/admin/media', adminOnly, async (_req, res, next) => {
+    try { res.json(await listMedia()); }
+    catch (e) { next(e); }
 });
 
-// GET /api/admin/media/quota — Drive quota info
-router.get('/admin/media/quota', adminOnly, async (req, res) => {
+router.get('/admin/media/quota', adminOnly, async (_req, res) => {
     try {
         const quota = await getDriveQuota();
         if (!quota) return res.json({ error: 'Drive not connected', limit: 0, usage: 0 });
@@ -48,37 +129,211 @@ router.get('/admin/media/quota', adminOnly, async (req, res) => {
     }
 });
 
-// POST /api/admin/media/folders — create folder
+// ── POST /admin/media/sync ─────────────────────────────────────────────
+// Reconcile DB with current Drive state — picks up folders/files
+// created or deleted directly on Drive (outside the web UI).
+//
+// Strategy:
+//  1. Walk every folder reachable from DRIVE_ROOT_FOLDER_ID (BFS).
+//  2. For each folder discovered → upsert into media_folders.
+//  3. For each file inside known folders → upsert into media_files.
+//  4. Mark DB rows that point to drive ids no longer on Drive as orphan
+//     and delete them.
+router.post('/admin/media/sync', adminOnly, async (_req, res) => {
+    try {
+        const drive = getDrive();
+        if (!drive) return res.status(400).json({ error: 'Drive chưa kết nối' });
+        const ROOT = process.env.DRIVE_ROOT_FOLDER_ID;
+        if (!ROOT) return res.status(400).json({ error: 'DRIVE_ROOT_FOLDER_ID chưa cấu hình' });
+
+        const stats = {
+            foldersAdded: 0, foldersUpdated: 0, foldersRemoved: 0,
+            filesAdded: 0, filesUpdated: 0, filesRemoved: 0,
+            foldersSkipped: 0
+        };
+
+        // System folders managed by other scripts — don't surface in Kho Media UI
+        const SYSTEM_FOLDER_NAMES = new Set(['ielts-listening-audio', 'easyrevise-backups']);
+
+        // ── Walk Drive tree ───────────────────────────────────────────
+        const driveFolders = new Map(); // driveId → { id, name, parents }
+        const driveFiles   = new Map(); // driveId → { id, name, mimeType, size, parents }
+        const queue = [ROOT];
+        const visited = new Set();
+        const ROOT_PROTECTED = new Set([ROOT]); // never persist root itself as a folder row
+
+        while (queue.length) {
+            const parentId = queue.shift();
+            if (visited.has(parentId)) continue;
+            visited.add(parentId);
+
+            let pageToken;
+            do {
+                const r = await drive.files.list({
+                    q: `'${parentId}' in parents and trashed = false`,
+                    fields: 'nextPageToken, files(id, name, mimeType, size, parents)',
+                    pageSize: 200,
+                    pageToken
+                });
+                for (const f of r.data.files || []) {
+                    if (f.mimeType === 'application/vnd.google-apps.folder') {
+                        // Skip system folders entirely (don't walk into them)
+                        if (SYSTEM_FOLDER_NAMES.has(f.name) && parentId === ROOT) {
+                            stats.foldersSkipped++;
+                            continue;
+                        }
+                        if (!ROOT_PROTECTED.has(f.id)) {
+                            driveFolders.set(f.id, f);
+                        }
+                        queue.push(f.id);
+                    } else {
+                        driveFiles.set(f.id, f);
+                    }
+                }
+                pageToken = r.data.nextPageToken;
+            } while (pageToken);
+        }
+
+        // ── Reconcile folders ─────────────────────────────────────────
+        const dbFolders = await query(`SELECT id, name, parent_id, drive_folder_id FROM media_folders`);
+        const dbFolderByDriveId = new Map();
+        for (const row of dbFolders) {
+            if (row.drive_folder_id) dbFolderByDriveId.set(row.drive_folder_id, row);
+        }
+
+        // Pass 1: upsert known + newly discovered folders. We don't yet
+        // know parentId in DB-space for new folders, so save Drive parent
+        // for resolution in pass 2.
+        const newFolderIdMap = new Map(); // driveId → DB row id
+        for (const [driveId, df] of driveFolders) {
+            const existing = dbFolderByDriveId.get(driveId);
+            if (existing) {
+                if (existing.name !== df.name) {
+                    await query(`UPDATE media_folders SET name = $1 WHERE id = $2`, [df.name, existing.id]);
+                    stats.foldersUpdated++;
+                }
+                newFolderIdMap.set(driveId, existing.id);
+            } else {
+                const id = uuidv4();
+                await query(
+                    `INSERT INTO media_folders (id, name, parent_id, drive_folder_id, created_at)
+                     VALUES ($1, $2, NULL, $3, now())`,
+                    [id, df.name, driveId]
+                );
+                newFolderIdMap.set(driveId, id);
+                stats.foldersAdded++;
+            }
+        }
+
+        // Pass 2: fix parent links (Drive folders can be nested)
+        for (const [driveId, df] of driveFolders) {
+            const dbId = newFolderIdMap.get(driveId);
+            if (!dbId) continue;
+            const driveParentId = (df.parents && df.parents[0]) || null;
+            const newParentDbId = driveParentId === ROOT ? null : (newFolderIdMap.get(driveParentId) || null);
+            await query(`UPDATE media_folders SET parent_id = $1 WHERE id = $2`, [newParentDbId, dbId]);
+        }
+
+        // Remove DB folders that point to non-existent Drive folders.
+        // CAUTION: cascade-deletes media_files via FK.
+        for (const row of dbFolders) {
+            if (row.drive_folder_id && !driveFolders.has(row.drive_folder_id)) {
+                await query(`DELETE FROM media_files WHERE folder_id = $1`, [row.id]);
+                await query(`DELETE FROM media_folders WHERE id = $1`, [row.id]);
+                stats.foldersRemoved++;
+            }
+        }
+
+        // ── Reconcile files ───────────────────────────────────────────
+        const dbFiles = await query(`SELECT id, name, drive_file_id, folder_id, size FROM media_files`);
+        const dbFileByDriveId = new Map();
+        for (const row of dbFiles) {
+            if (row.drive_file_id) dbFileByDriveId.set(row.drive_file_id, row);
+        }
+
+        for (const [driveId, df] of driveFiles) {
+            const driveParent = (df.parents && df.parents[0]) || null;
+            // Files at root or in unknown parent → skip (root is reserved)
+            const folderDbId = driveParent === ROOT ? null : (newFolderIdMap.get(driveParent) || null);
+            const existing = dbFileByDriveId.get(driveId);
+
+            if (existing) {
+                const updates = [];
+                const params = [];
+                let i = 1;
+                if (existing.name !== df.name) { updates.push(`name = $${i++}`); params.push(df.name); }
+                if (existing.folder_id !== folderDbId) { updates.push(`folder_id = $${i++}`); params.push(folderDbId); }
+                if (df.size && Number(existing.size) !== Number(df.size)) {
+                    updates.push(`size = $${i++}`); params.push(Number(df.size));
+                }
+                if (updates.length) {
+                    params.push(existing.id);
+                    await query(`UPDATE media_files SET ${updates.join(', ')} WHERE id = $${i}`, params);
+                    stats.filesUpdated++;
+                }
+            } else {
+                // New file discovered on Drive — only persist if it lives
+                // inside one of our managed folders (skip orphans at root).
+                if (!folderDbId) continue;
+                const id = uuidv4();
+                await query(
+                    `INSERT INTO media_files (id, name, folder_id, drive_file_id, mime_type, size, tags, is_protected, metadata, created_at)
+                     VALUES ($1, $2, $3, $4, $5, $6, '[]'::jsonb, false, $7::jsonb, now())`,
+                    [id, df.name, folderDbId, driveId, df.mimeType,
+                     df.size ? Number(df.size) : null,
+                     JSON.stringify({ status: 'ready', url: `/api/media/${driveId}` })]
+                );
+                stats.filesAdded++;
+            }
+        }
+
+        // Remove DB files whose Drive id no longer exists
+        for (const row of dbFiles) {
+            if (row.drive_file_id && !driveFiles.has(row.drive_file_id)) {
+                await query(`DELETE FROM media_files WHERE id = $1`, [row.id]);
+                stats.filesRemoved++;
+            }
+        }
+
+        const summary = `${stats.foldersAdded}+ ${stats.foldersUpdated}~ ${stats.foldersRemoved}- folders, `
+                      + `${stats.filesAdded}+ ${stats.filesUpdated}~ ${stats.filesRemoved}- files`
+                      + (stats.foldersSkipped ? ` (skipped ${stats.foldersSkipped} system folder${stats.foldersSkipped > 1 ? 's' : ''})` : '');
+        console.log('[Media] Sync done:', summary);
+        res.json({ success: true, stats, summary });
+    } catch (err) {
+        console.error('[Media] Sync error:', err.message);
+        res.status(500).json({ error: 'Sync failed: ' + err.message });
+    }
+});
+
 router.post('/admin/media/folders', adminOnly, async (req, res) => {
     try {
         const { name } = req.body;
         if (!name) return res.status(400).json({ error: 'Thiếu tên thư mục' });
-        const media = readMedia();
         const driveId = await createDriveFolder(name);
-        const folder = { id: uuidv4(), name, driveId, createdAt: new Date().toISOString() };
-        media.folders.push(folder);
-        writeMedia(media);
-        res.json({ success: true, folder });
+        const id = uuidv4();
+        const folder = await repos.media.upsertFolder({ id, name, driveFolderId: driveId });
+        res.json({ success: true, folder: { ...folder, driveId: folder.driveFolderId } });
     } catch (err) {
         console.error('[Media] Create folder error:', err.message);
         res.status(500).json({ error: 'Lỗi tạo thư mục' });
     }
 });
 
-// PATCH /api/admin/media/folders/:id — rename folder
 router.patch('/admin/media/folders/:id', adminOnly, async (req, res) => {
     try {
         const { name } = req.body;
         if (!name) return res.status(400).json({ error: 'Thiếu tên mới' });
-        const media = readMedia();
-        const idx = media.folders.findIndex(f => f.id === req.params.id);
-        if (idx === -1) return res.status(404).json({ error: 'Không tìm thấy' });
-        if (media.folders[idx].driveId) {
+        const cur = mapFolderRow(await queryOne(`SELECT * FROM media_folders WHERE id = $1`, [req.params.id]));
+        if (!cur) return res.status(404).json({ error: 'Không tìm thấy' });
+
+        if (cur.driveFolderId) {
             const drive = getDrive();
-            if (drive) await drive.files.update({ fileId: media.folders[idx].driveId, requestBody: { name } });
+            if (drive) await drive.files.update({ fileId: cur.driveFolderId, requestBody: { name } });
         }
-        media.folders[idx].name = name;
-        writeMedia(media);
+        await repos.media.upsertFolder({
+            id: cur.id, name, parentId: cur.parentId, driveFolderId: cur.driveFolderId
+        });
         res.json({ success: true });
     } catch (err) {
         console.error('[Media] Rename folder error:', err.message);
@@ -86,22 +341,21 @@ router.patch('/admin/media/folders/:id', adminOnly, async (req, res) => {
     }
 });
 
-// DELETE /api/admin/media/folders/:id — delete folder + all files inside
 router.delete('/admin/media/folders/:id', adminOnly, async (req, res) => {
     try {
-        const media = readMedia();
-        const idx = media.folders.findIndex(f => f.id === req.params.id);
-        if (idx === -1) return res.status(404).json({ error: 'Không tìm thấy' });
-        // Delete Drive folder
-        if (media.folders[idx].driveId) await deleteFromDrive(media.folders[idx].driveId);
-        // Delete all files in this folder from Drive
-        const filesToDelete = media.files.filter(f => f.folderId === req.params.id);
+        const cur = mapFolderRow(await queryOne(`SELECT * FROM media_folders WHERE id = $1`, [req.params.id]));
+        if (!cur) return res.status(404).json({ error: 'Không tìm thấy' });
+        if (cur.driveFolderId) await deleteFromDrive(cur.driveFolderId);
+
+        const filesToDelete = (await query(
+            `SELECT id, drive_file_id FROM media_files WHERE folder_id = $1`,
+            [req.params.id]
+        ));
         for (const f of filesToDelete) {
-            if (f.driveFileId) await deleteFromDrive(f.driveFileId);
+            if (f.drive_file_id) await deleteFromDrive(f.drive_file_id);
         }
-        media.files = media.files.filter(f => f.folderId !== req.params.id);
-        media.folders.splice(idx, 1);
-        writeMedia(media);
+        await query(`DELETE FROM media_files WHERE folder_id = $1`, [req.params.id]);
+        await repos.media.removeFolder(req.params.id);
         res.json({ success: true });
     } catch (err) {
         console.error('[Media] Delete folder error:', err.message);
@@ -109,33 +363,31 @@ router.delete('/admin/media/folders/:id', adminOnly, async (req, res) => {
     }
 });
 
-// POST /api/admin/media/upload — upload file (image/video/pdf/docx)
 router.post('/admin/media/upload', adminOnly, (req, res, next) => {
-    req.setTimeout(15 * 60 * 1000); // 15 min timeout for large files
+    req.setTimeout(15 * 60 * 1000);
     next();
 }, mediaUpload.single('file'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ error: 'Không có file' });
 
-        // Fix UTF-8: multer parses filenames as latin1, decode to UTF-8
         let originalName = req.file.originalname || 'file';
-        try { originalName = Buffer.from(originalName, 'latin1').toString('utf-8'); } catch { /* keep original */ }
+        try { originalName = Buffer.from(originalName, 'latin1').toString('utf-8'); } catch {}
 
         const folderId = req.body.folderId || null;
-        const media = readMedia();
-        const folder = folderId ? media.folders.find(f => f.id === folderId) : null;
-        const driveFolderId = folder?.driveId || process.env.DRIVE_ROOT_FOLDER_ID;
+        const folder = folderId
+            ? mapFolderRow(await queryOne(`SELECT * FROM media_folders WHERE id = $1`, [folderId]))
+            : null;
+        const driveFolderId = folder?.driveFolderId || process.env.DRIVE_ROOT_FOLDER_ID;
 
-        // Dedup: skip if same name+size+mime was uploaded in last 10s
-        const recentDupe = media.files.find(f =>
-            f.name === originalName &&
-            f.size === req.file.size &&
-            f.mimeType === req.file.mimetype &&
-            (Date.now() - new Date(f.createdAt).getTime()) < 10000
-        );
-        if (recentDupe) {
-            return res.json({ success: true, file: recentDupe, deduplicated: true });
-        }
+        // Dedup: same name+size+mime in last 10s
+        const recentDupe = mapFileRow(await queryOne(
+            `SELECT * FROM media_files
+             WHERE name = $1 AND size = $2 AND mime_type = $3
+             AND created_at > now() - interval '10 seconds'
+             ORDER BY created_at DESC LIMIT 1`,
+            [originalName, req.file.size, req.file.mimetype]
+        ));
+        if (recentDupe) return res.json({ success: true, file: recentDupe, deduplicated: true });
 
         const origNameLower = originalName.toLowerCase();
         const fileType = req.file.mimetype.startsWith('image/') ? 'image'
@@ -146,25 +398,18 @@ router.post('/admin/media/upload', adminOnly, (req, res, next) => {
             : (req.file.mimetype.includes('spreadsheet') || origNameLower.endsWith('.xlsx') || origNameLower.endsWith('.xls')) ? 'xlsx'
             : 'other';
 
-        const fileRecord = {
-            id: uuidv4(),
-            name: originalName,
-            type: fileType,
-            folderId,
-            driveFileId: null,
-            url: null,
-            size: req.file.size,
-            mimeType: req.file.mimetype,
-            createdAt: new Date().toISOString(),
+        const id = uuidv4();
+        const baseRec = {
+            id, name: originalName, type: fileType,
+            folderId, driveFileId: null, url: null,
+            size: req.file.size, mimeType: req.file.mimetype,
             status: fileType === 'video' ? 'converting' : 'ready'
         };
-        media.files.push(fileRecord);
-        writeMedia(media);
+        let savedRec = await upsertFileRecord(baseRec);
 
         if (fileType === 'image') {
             let uploadBuffer = req.file.buffer;
             let uploadMime = req.file.mimetype;
-            // Compress with sharp if available
             if (sharp) {
                 try {
                     uploadBuffer = await sharp(req.file.buffer)
@@ -172,57 +417,45 @@ router.post('/admin/media/upload', adminOnly, (req, res, next) => {
                         .jpeg({ quality: 85 })
                         .toBuffer();
                     uploadMime = 'image/jpeg';
-                } catch { /* fallback to raw buffer */ }
+                } catch {}
             }
             const fname = `${Date.now()}_${originalName.replace(/\s+/g, '_')}`;
             const driveFileId = await uploadBufferToDrive(uploadBuffer, fname, uploadMime, driveFolderId);
-            const m2 = readMedia();
-            const idx = m2.files.findIndex(f => f.id === fileRecord.id);
-            if (idx !== -1) {
-                m2.files[idx].driveFileId = driveFileId;
-                m2.files[idx].url = `/api/media/${driveFileId}`;
-                m2.files[idx].status = 'ready';
-                writeMedia(m2);
-                return res.json({ success: true, file: m2.files[idx] });
-            }
-            return res.json({ success: true, file: fileRecord });
+            savedRec = await upsertFileRecord({
+                ...baseRec, driveFileId,
+                url: `/api/media/${driveFileId}`, status: 'ready'
+            });
+            return res.json({ success: true, file: savedRec });
         }
 
         if (['pdf', 'docx', 'pptx', 'xlsx', 'other'].includes(fileType)) {
             const fname = `${Date.now()}_${originalName.replace(/\s+/g, '_')}`;
             const driveFileId = await uploadBufferToDrive(req.file.buffer, fname, req.file.mimetype, driveFolderId);
-            const m2 = readMedia();
-            const idx = m2.files.findIndex(f => f.id === fileRecord.id);
-            if (idx !== -1) {
-                m2.files[idx].driveFileId = driveFileId;
-                m2.files[idx].url = `/api/media/${driveFileId}`;
-                m2.files[idx].status = 'ready';
-                writeMedia(m2);
-                return res.json({ success: true, file: m2.files[idx] });
-            }
-            return res.json({ success: true, file: fileRecord });
+            savedRec = await upsertFileRecord({
+                ...baseRec, driveFileId,
+                url: `/api/media/${driveFileId}`, status: 'ready'
+            });
+            return res.json({ success: true, file: savedRec });
         }
 
         if (fileType === 'video') {
-            // Return immediately, process video in background
-            res.json({ success: true, file: fileRecord, message: 'Video đang được xử lý...' });
-            setImmediate(() => convertAndUploadVideo(req.file.buffer, originalName, fileRecord.id, driveFolderId));
+            res.json({ success: true, file: savedRec, message: 'Video đang được xử lý...' });
+            setImmediate(() => convertAndUploadVideo(req.file.buffer, originalName, id, driveFolderId));
             return;
         }
-
-        res.json({ success: true, file: fileRecord });
+        res.json({ success: true, file: savedRec });
     } catch (err) {
         console.error('[Media] Upload error:', err.message);
         res.status(500).json({ error: 'Lỗi upload file: ' + err.message });
     }
 });
 
-// Quick upload — same as /api/upload but goes to Drive (backwards compat for question images)
+// Quick upload (backwards-compat)
 router.post('/media/upload', adminOnly, mediaUpload.single('file'), async (req, res) => {
     try {
         if (!req.file) return res.status(400).json({ error: 'Không có file' });
         let originalName = req.file.originalname || 'file';
-        try { originalName = Buffer.from(originalName, 'latin1').toString('utf-8'); } catch { /* keep */ }
+        try { originalName = Buffer.from(originalName, 'latin1').toString('utf-8'); } catch {}
         const driveFolderId = process.env.DRIVE_ROOT_FOLDER_ID;
 
         let uploadBuffer = req.file.buffer;
@@ -231,62 +464,48 @@ router.post('/media/upload', adminOnly, mediaUpload.single('file'), async (req, 
             try {
                 uploadBuffer = await sharp(req.file.buffer)
                     .resize({ width: 1400, fit: 'inside', withoutEnlargement: true })
-                    .jpeg({ quality: 85 })
-                    .toBuffer();
+                    .jpeg({ quality: 85 }).toBuffer();
                 uploadMime = 'image/jpeg';
-            } catch { /* fallback */ }
+            } catch {}
         }
 
         const fname = `${Date.now()}_${originalName.replace(/\s+/g, '_')}`;
         const driveFileId = await uploadBufferToDrive(uploadBuffer, fname, uploadMime, driveFolderId);
+        if (!driveFileId) return res.status(500).json({ error: 'Drive upload failed' });
 
-        if (!driveFileId) {
-            return res.status(500).json({ error: 'Drive upload failed' });
-        }
-
-        // Also track in media.json
-        const media = readMedia();
-        const fileRecord = {
-            id: uuidv4(),
-            name: originalName,
+        const saved = await upsertFileRecord({
+            id: uuidv4(), name: originalName,
             type: req.file.mimetype.startsWith('image/') ? 'image' : 'other',
-            folderId: null,
-            driveFileId,
-            url: `/api/media/${driveFileId}`,
-            size: req.file.size,
-            mimeType: uploadMime,
-            createdAt: new Date().toISOString(),
-            status: 'ready'
-        };
-        media.files.push(fileRecord);
-        writeMedia(media);
-
-        res.json({ success: true, file: fileRecord, url: `/api/media/${driveFileId}` });
+            folderId: null, driveFileId,
+            url: `/api/media/${driveFileId}`, size: req.file.size,
+            mimeType: uploadMime, status: 'ready'
+        });
+        res.json({ success: true, file: saved, url: `/api/media/${driveFileId}` });
     } catch (err) {
         console.error('[Media] Quick upload error:', err.message);
         res.status(500).json({ error: 'Upload failed: ' + err.message });
     }
 });
 
-// PATCH /api/admin/media/files/:id — rename file + update aspectRatio
+// PATCH file (rename + aspectRatio)
 router.patch('/admin/media/files/:id', adminOnly, async (req, res) => {
     try {
         const { name, aspectRatio } = req.body;
         if (!name && !aspectRatio) return res.status(400).json({ error: 'Thiếu dữ liệu cập nhật' });
-        const media = readMedia();
-        const idx = media.files.findIndex(f => f.id === req.params.id);
-        if (idx === -1) return res.status(404).json({ error: 'Không tìm thấy' });
+
+        const cur = await queryOne(`SELECT * FROM media_files WHERE id = $1`, [req.params.id]);
+        if (!cur) return res.status(404).json({ error: 'Không tìm thấy' });
+
         if (name) {
-            if (media.files[idx].driveFileId) {
+            if (cur.drive_file_id) {
                 const drive = getDrive();
-                if (drive) await drive.files.update({ fileId: media.files[idx].driveFileId, requestBody: { name } });
+                if (drive) await drive.files.update({ fileId: cur.drive_file_id, requestBody: { name } });
             }
-            media.files[idx].name = name;
+            await query(`UPDATE media_files SET name = $1 WHERE id = $2`, [name, req.params.id]);
         }
         if (aspectRatio && ['16:9', '9:16', '4:3', '1:1'].includes(aspectRatio)) {
-            media.files[idx].aspectRatio = aspectRatio;
+            await patchFileMetadata(req.params.id, { aspectRatio });
         }
-        writeMedia(media);
         res.json({ success: true });
     } catch (err) {
         console.error('[Media] Update file error:', err.message);
@@ -294,33 +513,33 @@ router.patch('/admin/media/files/:id', adminOnly, async (req, res) => {
     }
 });
 
-// PATCH /api/admin/media/files/:id/tags — update file tags (UX-17)
-router.patch('/admin/media/files/:id/tags', adminOnly, (req, res) => {
+router.patch('/admin/media/files/:id/tags', adminOnly, async (req, res) => {
     try {
         const { tags } = req.body;
         if (!Array.isArray(tags)) return res.status(400).json({ error: 'Tags phải là mảng' });
-        const media = readMedia();
-        const idx = media.files.findIndex(f => f.id === req.params.id);
-        if (idx === -1) return res.status(404).json({ error: 'Không tìm thấy' });
-        media.files[idx].tags = tags.slice(0, 10).map(t => String(t).trim()).filter(Boolean); // max 10 tags
-        writeMedia(media);
-        res.json({ success: true, tags: media.files[idx].tags });
+        const safeTags = tags.slice(0, 10).map(t => String(t).trim()).filter(Boolean);
+        const r = await query(
+            `UPDATE media_files SET tags = $1::jsonb WHERE id = $2`,
+            [JSON.stringify(safeTags), req.params.id]
+        );
+        res.json({ success: true, tags: safeTags });
     } catch (err) {
         console.error('[Media] Update tags error:', err.message);
         res.status(500).json({ error: 'Lỗi cập nhật tag' });
     }
 });
 
-// PATCH /api/admin/media/files/:id/protection — toggle file protection (UX-18)
-router.patch('/admin/media/files/:id/protection', adminOnly, (req, res) => {
+router.patch('/admin/media/files/:id/protection', adminOnly, async (req, res) => {
     try {
         const { protection } = req.body;
-        if (!['view-only', 'downloadable'].includes(protection)) return res.status(400).json({ error: 'Protection phải là view-only hoặc downloadable' });
-        const media = readMedia();
-        const idx = media.files.findIndex(f => f.id === req.params.id);
-        if (idx === -1) return res.status(404).json({ error: 'Không tìm thấy' });
-        media.files[idx].protection = protection;
-        writeMedia(media);
+        if (!['view-only', 'downloadable'].includes(protection)) {
+            return res.status(400).json({ error: 'Protection phải là view-only hoặc downloadable' });
+        }
+        await query(
+            `UPDATE media_files SET is_protected = $1 WHERE id = $2`,
+            [protection === 'view-only', req.params.id]
+        );
+        await patchFileMetadata(req.params.id, { protection });
         res.json({ success: true, protection });
     } catch (err) {
         console.error('[Media] Update protection error:', err.message);
@@ -328,15 +547,12 @@ router.patch('/admin/media/files/:id/protection', adminOnly, (req, res) => {
     }
 });
 
-// DELETE /api/admin/media/files/:id — delete file
 router.delete('/admin/media/files/:id', adminOnly, async (req, res) => {
     try {
-        const media = readMedia();
-        const idx = media.files.findIndex(f => f.id === req.params.id);
-        if (idx === -1) return res.status(404).json({ error: 'Không tìm thấy' });
-        if (media.files[idx].driveFileId) await deleteFromDrive(media.files[idx].driveFileId);
-        media.files.splice(idx, 1);
-        writeMedia(media);
+        const cur = await queryOne(`SELECT drive_file_id FROM media_files WHERE id = $1`, [req.params.id]);
+        if (!cur) return res.status(404).json({ error: 'Không tìm thấy' });
+        if (cur.drive_file_id) await deleteFromDrive(cur.drive_file_id);
+        await repos.media.removeFile(req.params.id);
         res.json({ success: true });
     } catch (err) {
         console.error('[Media] Delete file error:', err.message);
@@ -344,44 +560,38 @@ router.delete('/admin/media/files/:id', adminOnly, async (req, res) => {
     }
 });
 
-// GET /api/admin/media/status/:id — check video conversion status
-router.get('/admin/media/status/:id', adminOnly, (req, res) => {
-    const media = readMedia();
-    const file = media.files.find(f => f.id === req.params.id);
+router.get('/admin/media/status/:id', adminOnly, async (req, res) => {
+    const file = mapFileRow(await queryOne(`SELECT * FROM media_files WHERE id = $1`, [req.params.id]));
     if (!file) return res.status(404).json({ error: 'Không tìm thấy' });
     res.json({ status: file.status, url: file.url });
 });
 
-// PATCH /api/admin/media/files/:id/move — move file to another folder
 router.patch('/admin/media/files/:id/move', adminOnly, async (req, res) => {
     try {
-        const { folderId } = req.body; // null = root (uncategorized)
-        const media = readMedia();
-        const idx = media.files.findIndex(f => f.id === req.params.id);
-        if (idx === -1) return res.status(404).json({ error: 'Không tìm thấy' });
+        const { folderId } = req.body;
+        const file = await queryOne(`SELECT * FROM media_files WHERE id = $1`, [req.params.id]);
+        if (!file) return res.status(404).json({ error: 'Không tìm thấy' });
 
-        const file = media.files[idx];
-        const targetFolder = folderId ? media.folders.find(f => f.id === folderId) : null;
-        const targetDriveFolderId = targetFolder?.driveId || process.env.DRIVE_ROOT_FOLDER_ID;
+        const targetFolder = folderId
+            ? await queryOne(`SELECT drive_folder_id FROM media_folders WHERE id = $1`, [folderId])
+            : null;
+        const targetDriveFolderId = targetFolder?.drive_folder_id || process.env.DRIVE_ROOT_FOLDER_ID;
 
-        // Move on Drive if file has driveFileId
-        if (file.driveFileId) {
+        if (file.drive_file_id) {
             const drive = getDrive();
             if (drive) {
-                // Get current parents
-                const fileInfo = await drive.files.get({ fileId: file.driveFileId, fields: 'parents' });
+                const fileInfo = await drive.files.get({ fileId: file.drive_file_id, fields: 'parents' });
                 const previousParents = (fileInfo.data.parents || []).join(',');
                 await drive.files.update({
-                    fileId: file.driveFileId,
+                    fileId: file.drive_file_id,
                     addParents: targetDriveFolderId,
                     removeParents: previousParents,
                     fields: 'id, parents'
                 });
             }
         }
-
-        media.files[idx].folderId = folderId || null;
-        writeMedia(media);
+        await query(`UPDATE media_files SET folder_id = $1 WHERE id = $2`,
+            [folderId || null, req.params.id]);
         res.json({ success: true });
     } catch (err) {
         console.error('[Media] Move file error:', err.message);
@@ -389,7 +599,6 @@ router.patch('/admin/media/files/:id/move', adminOnly, async (req, res) => {
     }
 });
 
-// POST /api/admin/media/scan-pending — scan Drive pending folder for videos
 router.post('/admin/media/scan-pending', adminOnly, async (req, res) => {
     try {
         const drive = getDrive();
@@ -402,36 +611,38 @@ router.post('/admin/media/scan-pending', adminOnly, async (req, res) => {
             fields: 'files(id,name,mimeType,size)',
             pageSize: 20
         });
-
         const videoExts = ['.ts', '.m3u8', '.mp4', '.mkv', '.avi', '.mov', '.flv', '.wmv'];
         const videos = (data.files || []).filter(f => videoExts.some(e => f.name.toLowerCase().endsWith(e)));
 
         let queued = 0;
         for (const file of videos) {
-            const media = readMedia();
-            if (media.files.find(f => f.driveFileId === file.id || f.originalDriveId === file.id)) continue;
+            const dup = await queryOne(
+                `SELECT id FROM media_files
+                 WHERE drive_file_id = $1 OR metadata->>'originalDriveId' = $1`,
+                [file.id]
+            );
+            if (dup) continue;
 
             const dlRes = await drive.files.get({ fileId: file.id, alt: 'media' }, { responseType: 'arraybuffer' });
             const buffer = Buffer.from(dlRes.data);
 
             const targetFolderId = req.body.folderId || null;
-            const targetFolder = targetFolderId ? media.folders.find(f => f.id === targetFolderId) : null;
-            const driveFolderId = targetFolder?.driveId || process.env.DRIVE_ROOT_FOLDER_ID;
+            const targetFolder = targetFolderId
+                ? mapFolderRow(await queryOne(`SELECT * FROM media_folders WHERE id = $1`, [targetFolderId]))
+                : null;
+            const driveFolderId = targetFolder?.driveFolderId || process.env.DRIVE_ROOT_FOLDER_ID;
 
-            const fileRecord = {
-                id: uuidv4(), name: file.name, type: 'video', folderId: targetFolderId,
+            const id = uuidv4();
+            await upsertFileRecord({
+                id, name: file.name, type: 'video', folderId: targetFolderId,
                 driveFileId: null, originalDriveId: file.id, url: null,
                 size: parseInt(file.size), mimeType: file.mimeType,
-                createdAt: new Date().toISOString(), status: 'converting'
-            };
-            media.files.push(fileRecord);
-            writeMedia(media);
-
-            setImmediate(() => convertAndUploadVideo(buffer, file.name, fileRecord.id, driveFolderId));
+                status: 'converting'
+            });
+            setImmediate(() => convertAndUploadVideo(buffer, file.name, id, driveFolderId));
             await deleteFromDrive(file.id);
             queued++;
         }
-
         res.json({ success: true, queued, message: `Đã đưa ${queued} video vào hàng chờ xử lý` });
     } catch (err) {
         console.error('[Media] Scan pending error:', err.message);
@@ -439,9 +650,7 @@ router.post('/admin/media/scan-pending', adminOnly, async (req, res) => {
     }
 });
 
-// ========================
-// Public proxy: GET /api/media/:fileId — serve files from Drive
-// ========================
+// ── Public proxy ──────────────────────────────────────────────────────
 const mediaRamCache = new Map();
 
 router.get('/media/:fileId', async (req, res) => {
@@ -449,20 +658,19 @@ router.get('/media/:fileId', async (req, res) => {
         const { fileId } = req.params;
         if (!/^[a-zA-Z0-9_-]{10,}$/.test(fileId)) return res.status(400).end();
 
-        const media = readMedia();
-        const fileRecord = media.files.find(f => f.driveFileId === fileId);
+        const fileRecord = mapFileRow(await queryOne(
+            `SELECT * FROM media_files WHERE drive_file_id = $1`, [fileId]
+        ));
         const mimeType = fileRecord?.mimeType || 'application/octet-stream';
         const isViewOnly = fileRecord?.protection === 'view-only';
 
         res.setHeader('X-Content-Type-Options', 'nosniff');
-        // Video: stream directly (don't cache in RAM)
         if (mimeType.startsWith('video/')) {
             res.setHeader('Content-Type', mimeType);
             res.setHeader('Cache-Control', 'public, max-age=86400');
             return streamFileFromDrive(fileId, res);
         }
 
-        // UX-18: Set Content-Disposition based on protection
         if (isViewOnly) {
             res.setHeader('Content-Disposition', 'inline');
             res.setHeader('Cache-Control', 'no-store');
@@ -473,7 +681,6 @@ router.get('/media/:fileId', async (req, res) => {
             }
         }
 
-        // Image/PDF: cache in RAM for 1 hour
         if (mediaRamCache.has(fileId)) {
             const cached = mediaRamCache.get(fileId);
             res.setHeader('Content-Type', cached.mimeType);
@@ -485,7 +692,7 @@ router.get('/media/:fileId', async (req, res) => {
         const driveRes = await drive.files.get({ fileId, alt: 'media' }, { responseType: 'arraybuffer' });
         const buf = { buffer: Buffer.from(driveRes.data), mimeType: driveRes.headers['content-type'] || mimeType };
         mediaRamCache.set(fileId, buf);
-        setTimeout(() => mediaRamCache.delete(fileId), 60 * 60 * 1000); // clear after 1h
+        setTimeout(() => mediaRamCache.delete(fileId), 60 * 60 * 1000);
         let finalMime = buf.mimeType;
         if (fileRecord?.type === 'pdf') finalMime = 'application/pdf';
 
@@ -499,10 +706,7 @@ router.get('/media/:fileId', async (req, res) => {
     }
 });
 
-// ========================
-// Helper: Video conversion (background task)
-// M9: Use execFile (no shell) to prevent command injection — safer than exec.
-// ========================
+// ── Video conversion (background) ─────────────────────────────────────
 async function convertAndUploadVideo(buffer, originalName, fileRecordId, driveFolderId) {
     const os = require('os');
     const { execFile } = require('child_process');
@@ -512,7 +716,6 @@ async function convertAndUploadVideo(buffer, originalName, fileRecordId, driveFo
     try {
         fs.writeFileSync(tmpIn, buffer);
         await new Promise((resolve, reject) => {
-            // M9: array args, no shell interpretation
             const args = ext === '.m3u8'
                 ? ['-y', '-protocol_whitelist', 'file,http,https,tcp,tls,crypto', '-i', tmpIn, '-c', 'copy', tmpOut]
                 : ['-y', '-i', tmpIn, '-c:v', 'libx264', '-c:a', 'aac', '-movflags', '+faststart', tmpOut];
@@ -523,52 +726,41 @@ async function convertAndUploadVideo(buffer, originalName, fileRecordId, driveFo
         const mp4Buffer = fs.readFileSync(tmpOut);
         const newName = path.basename(originalName, ext) + '.mp4';
         const driveFileId = await uploadBufferToDrive(mp4Buffer, newName, 'video/mp4', driveFolderId);
-
-        // Set video public for iframe embed
         if (driveFileId) await setVideoPublicNoDL(driveFileId);
 
-        const media = readMedia();
-        const idx = media.files.findIndex(f => f.id === fileRecordId);
-        if (idx !== -1) {
-            media.files[idx].driveFileId = driveFileId;
-            // Video uses Drive iframe URL for streaming/seeking
-            media.files[idx].url = `https://drive.google.com/file/d/${driveFileId}/preview`;
-            media.files[idx].name = newName;
-            media.files[idx].mimeType = 'video/mp4';
-            media.files[idx].status = 'ready';
-            writeMedia(media);
+        const cur = await queryOne(`SELECT * FROM media_files WHERE id = $1`, [fileRecordId]);
+        if (cur) {
+            const meta = { ...(cur.metadata || {}),
+                url: `https://drive.google.com/file/d/${driveFileId}/preview`, status: 'ready' };
+            await query(
+                `UPDATE media_files
+                 SET drive_file_id = $1, name = $2, mime_type = $3, metadata = $4::jsonb
+                 WHERE id = $5`,
+                [driveFileId, newName, 'video/mp4', JSON.stringify(meta), fileRecordId]
+            );
         }
         console.log(`[Media] Video ready: ${newName}`);
     } catch (err) {
         console.error('[Media] Video convert error:', err.message);
-        const media = readMedia();
-        const idx = media.files.findIndex(f => f.id === fileRecordId);
-        if (idx !== -1) { media.files[idx].status = 'error'; writeMedia(media); }
+        await patchFileMetadata(fileRecordId, { status: 'error' });
     } finally {
         if (fs.existsSync(tmpIn)) fs.unlinkSync(tmpIn);
         if (fs.existsSync(tmpOut)) fs.unlinkSync(tmpOut);
     }
 }
 
-// ========================
-// Orphan cleanup on startup: mark stale "converting" files (no driveFileId, >1h old) as error
-// ========================
-(function cleanupOrphanFiles() {
+// ── Orphan cleanup on startup (best-effort) ───────────────────────────
+setTimeout(async () => {
     try {
-        const media = readMedia();
-        let cleaned = 0;
-        const oneHourAgo = Date.now() - 60 * 60 * 1000;
-        media.files.forEach(f => {
-            if (f.status === 'converting' && !f.driveFileId && new Date(f.createdAt).getTime() < oneHourAgo) {
-                f.status = 'error';
-                cleaned++;
-            }
-        });
-        if (cleaned) {
-            writeMedia(media);
-            console.log(`[Media] Cleaned ${cleaned} orphan file(s)`);
-        }
+        const r = await query(
+            `UPDATE media_files
+             SET metadata = jsonb_set(coalesce(metadata, '{}'::jsonb), '{status}', '"error"')
+             WHERE drive_file_id IS NULL
+             AND metadata->>'status' = 'converting'
+             AND created_at < now() - interval '1 hour'`
+        );
+        if (r.length) console.log(`[Media] Cleaned ${r.length} orphan file(s)`);
     } catch { /* silent */ }
-})();
+}, 5000).unref();
 
 module.exports = router;

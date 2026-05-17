@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">IELTS Reading · EasyRevise</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+    <script>(function(){var t=localStorage.getItem('easyrevise_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+    <style>
+        :root {
+            --bg: #fbfbfb; --surface: #ffffff; --surface-2: #f5f5f5;
+            --text: #1a1a1a; --text-2: #555; --text-muted: #999;
+            --border: #e5e5e5; --border-strong: #d4d4d4;
+            --accent: #0066ff; --accent-soft: #e6f0ff;
+            --shadow-1: 0 1px 2px rgba(0,0,0,0.04);
+            --radius: 12px;
+        }
+        [data-theme="dark"] {
+            --bg: #0d0d0d; --surface: #161616; --surface-2: #202020;
+            --text: #f5f5f5; --text-2: #b0b0b0; --text-muted: #707070;
+            --border: #262626; --border-strong: #333;
+            --accent: #4d8eff; --accent-soft: #1a2942;
+        }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg); color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            font-feature-settings: 'cv11', 'ss01';
+            letter-spacing: -0.005em;
+        }
+        .topbar {
+            position: sticky; top: 0; z-index: 50;
+            background: color-mix(in srgb, var(--bg) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0.7rem 1.5rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .brand {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-weight: 600; font-size: 0.95rem;
+            text-decoration: none; color: var(--text);
+        }
+        .brand-mark {
+            width: 26px; height: 26px;
+            background: var(--text); color: var(--bg);
+            border-radius: 7px; display: grid; place-items: center;
+            font-weight: 700; font-size: 0.7rem;
+        }
+        .brand-divider { width: 1px; height: 18px; background: var(--border-strong); }
+        .brand-skill {
+            font-size: 0.78rem; font-weight: 600;
+            padding: 0.18rem 0.5rem;
+            background: var(--surface-2); border-radius: 5px;
+            color: var(--text-2); letter-spacing: 0.02em;
+        }
+        .container { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+        .hero {
+            margin-bottom: 2rem; padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .hero h1 {
+            font-family: 'Source Serif 4', Georgia, serif;
+            font-size: 2.4rem; font-weight: 600;
+            margin: 0 0 0.4rem;
+            letter-spacing: -0.025em;
+        }
+        .hero p { margin: 0; color: var(--text-2); max-width: 600px; line-height: 1.55; }
+
+        .filter-row {
+            display: flex; gap: 0.5rem; flex-wrap: wrap;
+            margin-bottom: 1.25rem;
+        }
+        .chip {
+            padding: 0.35rem 0.85rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            font-size: 0.85rem; cursor: pointer;
+            transition: all .15s; color: var(--text-2);
+        }
+        .chip:hover { border-color: var(--border-strong); }
+        .chip.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+
+        .search-row {
+            display: flex; gap: 0.5rem; margin-bottom: 1.5rem;
+        }
+        .search-input {
+            flex: 1; padding: 0.6rem 0.95rem;
+            font-family: inherit; font-size: 0.9rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text);
+            outline: none; transition: all .15s;
+        }
+        .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 0.85rem;
+        }
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.1rem 1.25rem 1rem;
+            display: flex; flex-direction: column;
+            transition: all .15s;
+            cursor: pointer;
+            box-shadow: var(--shadow-1);
+        }
+        .card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+        .card-eyebrow {
+            font-size: 0.7rem; font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.06em; text-transform: uppercase;
+            margin-bottom: 0.4rem;
+        }
+        .card-title {
+            font-family: 'Source Serif 4', Georgia, serif;
+            font-size: 1.05rem; font-weight: 600;
+            line-height: 1.35; margin: 0 0 0.5rem;
+        }
+        .card-meta {
+            font-size: 0.8rem; color: var(--text-2);
+            margin-bottom: 0.75rem; flex: 1;
+        }
+        .card-cta {
+            font-size: 0.82rem; font-weight: 600; color: var(--accent);
+        }
+        .empty {
+            text-align: center; padding: 3rem 1rem;
+            color: var(--text-2);
+        }
+        .empty h2 { margin: 0 0 0.5rem; font-family: 'Source Serif 4', Georgia, serif; }
+
+        .pagination {
+            margin-top: 1.5rem; display: flex; justify-content: center;
+            gap: 0.5rem; align-items: center;
+        }
+        .page-btn {
+            padding: 0.4rem 0.9rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 7px; color: var(--text);
+            font-family: inherit; font-size: 0.85rem;
+            cursor: pointer; transition: all .15s;
+        }
+        .page-btn:hover { background: var(--surface-2); border-color: var(--border-strong); }
+        .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .page-info { font-size: 0.85rem; color: var(--text-muted); font-variant-numeric: tabular-nums; }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <a class="brand" href="/ielts">
+            <div class="brand-mark">ER</div>
+            <span>EasyRevise</span>
+            <span class="brand-divider"></span>
+            <span class="brand-skill" id="brand-skill">IELTS Reading</span>
+        </a>
+        <nav style="display:flex;gap:0.4rem;">
+            <a class="nav-link" href="/ielts" style="font-size:0.85rem;color:var(--text-2);text-decoration:none;padding:0.4rem 0.6rem;border-radius:6px;">← Tất cả kỹ năng</a>
+        </nav>
+    </div>
+
+    <main class="container">
+        <header class="hero">
+            <h1 id="page-h1">IELTS Reading</h1>
+            <p id="page-desc">Đọc đoạn văn 700-900 từ và trả lời 13 câu trong khoảng 20 phút mỗi đề.</p>
+        </header>
+
+        <div class="filter-row" id="filters"></div>
+        <div class="search-row">
+            <input class="search-input" id="search" placeholder="Tìm theo tên đề thi..." />
+        </div>
+
+        <div id="grid" class="grid" aria-busy="true"></div>
+        <div class="pagination" id="pagination" hidden>
+            <button class="page-btn" id="prev">←</button>
+            <span class="page-info" id="page-info">1</span>
+            <button class="page-btn" id="next">→</button>
+        </div>
+    </main>
+
+    <script>
+        const SKILL_CONFIG = {
+            reading:   { title: 'IELTS Reading',   desc: 'Đọc đoạn văn và trả lời câu hỏi trong 20-60 phút.', testPath: '/ielts/reading/test.html', api: '/api/ielts/tests?skill=reading', filters: [] },
+            listening: { title: 'IELTS Listening', desc: 'Nghe audio và trả lời câu hỏi. Mỗi audio chỉ phát một lần.', testPath: '/ielts/listening/test.html', api: '/api/ielts/tests?skill=listening', filters: [] },
+            writing:   { title: 'IELTS Writing',   desc: 'Task 1 (mô tả biểu đồ, ≥150 từ) và Task 2 (essay, ≥250 từ). AI chấm theo TR/CC/LR/GRA.', testPath: '/ielts/writing/test.html', api: '/api/ielts/writing/tests', filters: [{ key: '', label: 'Tất cả' }, { key: 'taskType=1', label: 'Task 1' }, { key: 'taskType=2', label: 'Task 2' }] },
+            speaking:  { title: 'IELTS Speaking',  desc: 'Part 1 (intro), Part 2 (cue card 2 phút), Part 3 (discussion). AI chấm FC/LR/GRA/Pron.', testPath: '/ielts/speaking/test.html', api: '/api/ielts/speaking/tests', filters: [{ key: '', label: 'Tất cả' }, { key: 'partNumber=1', label: 'Part 1' }, { key: 'partNumber=2', label: 'Part 2' }, { key: 'partNumber=3', label: 'Part 3' }] }
+        };
+
+        // Determine skill from path: /ielts/<skill>/
+        const SKILL = location.pathname.split('/').filter(Boolean)[1] || 'reading';
+        const C = SKILL_CONFIG[SKILL] || SKILL_CONFIG.reading;
+
+        document.title = C.title + ' · EasyRevise';
+        document.getElementById('page-title').textContent = C.title + ' · EasyRevise';
+        document.getElementById('page-h1').textContent = C.title;
+        document.getElementById('page-desc').textContent = C.desc;
+        document.getElementById('brand-skill').textContent = C.title;
+
+        const PAGE_SIZE = 30;
+        let allTests = [];
+        let filtered = [];
+        let currentFilter = '';
+        let currentSearch = '';
+        let page = 0;
+
+        function escapeHtml(s) {
+            return String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+        }
+
+        function renderFilters() {
+            if (!C.filters.length) return;
+            const root = document.getElementById('filters');
+            root.innerHTML = C.filters.map(f =>
+                `<button class="chip ${currentFilter === f.key ? 'active' : ''}" data-key="${f.key}">${escapeHtml(f.label)}</button>`
+            ).join('');
+            root.querySelectorAll('.chip').forEach(b => {
+                b.addEventListener('click', () => {
+                    currentFilter = b.dataset.key;
+                    page = 0;
+                    loadTests();
+                });
+            });
+        }
+
+        function applySearch() {
+            const q = currentSearch.toLowerCase().trim();
+            filtered = q ? allTests.filter(t => (t.title || '').toLowerCase().includes(q)) : allTests;
+            page = 0;
+            render();
+        }
+
+        function render() {
+            const grid = document.getElementById('grid');
+            grid.removeAttribute('aria-busy');
+            const total = filtered.length;
+            if (!total) {
+                grid.innerHTML = `<div class="empty" style="grid-column:1/-1;"><h2>Chưa có đề</h2><p>Thử bộ lọc khác.</p></div>`;
+                document.getElementById('pagination').hidden = true;
+                return;
+            }
+            const start = page * PAGE_SIZE;
+            const slice = filtered.slice(start, start + PAGE_SIZE);
+            grid.innerHTML = slice.map(t => {
+                const subTitle = t.task_type ? `Task ${t.task_type}` : t.part_number ? `Part ${t.part_number}` : (t.module === 'general_training' ? 'General Training' : 'Academic');
+                return `<article class="card" data-id="${t.id}">
+                    <span class="card-eyebrow">${escapeHtml(subTitle)} · ${escapeHtml(C.title.replace('IELTS ', ''))}</span>
+                    <h2 class="card-title">${escapeHtml(t.title)}</h2>
+                    <div class="card-meta">${escapeHtml(t.source || 'youpass.vn')} · ${Math.round((t.duration_sec || t.durationSec || 1800) / 60)} phút</div>
+                    <span class="card-cta">Bắt đầu →</span>
+                </article>`;
+            }).join('');
+            grid.querySelectorAll('.card').forEach(c => {
+                c.addEventListener('click', () => {
+                    location.href = C.testPath + '?id=' + c.dataset.id;
+                });
+            });
+
+            document.getElementById('pagination').hidden = total <= PAGE_SIZE;
+            document.getElementById('page-info').textContent = `${start + 1}-${Math.min(start + PAGE_SIZE, total)} / ${total}`;
+            document.getElementById('prev').disabled = page === 0;
+            document.getElementById('next').disabled = start + PAGE_SIZE >= total;
+        }
+
+        async function loadTests() {
+            const url = currentFilter ? `${C.api}${C.api.includes('?') ? '&' : '?'}${currentFilter}` : C.api;
+            try {
+                const r = await fetch(url);
+                allTests = await r.json();
+                applySearch();
+            } catch (e) {
+                document.getElementById('grid').innerHTML = `<div class="empty" style="grid-column:1/-1;"><h2>Lỗi tải</h2><p>${escapeHtml(e.message)}</p></div>`;
+            }
+        }
+
+        document.getElementById('search').addEventListener('input', e => {
+            currentSearch = e.target.value;
+            applySearch();
+        });
+        document.getElementById('prev').addEventListener('click', () => { page--; render(); window.scrollTo(0, 0); });
+        document.getElementById('next').addEventListener('click', () => { page++; render(); window.scrollTo(0, 0); });
+
+        renderFilters();
+        loadTests();
+    </script>
+</body>
+</html>

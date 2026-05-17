@@ -191,20 +191,10 @@ describe('Settings API', () => {
     });
 });
 
-// Cleanup: remove test user after all tests
+// Cleanup: remove test user from Postgres after all tests run.
 afterAll(async () => {
     try {
-        const { readUsers, writeUsers } = require('../lib/data');
-        const data = readUsers();
-        data.users = data.users.filter(u => u.username !== TEST_USER);
-        writeUsers(data);
-    } catch (e) { /* ignore */ }
-
-    // Also remove from SQLite
-    try {
-        const { getDb, saveDb } = require('../lib/db');
-        const db = getDb();
-        db.run(`DELETE FROM users WHERE username = '${TEST_USER}'`);
-        saveDb();
-    } catch (e) { /* ignore */ }
+        const { query } = require('../lib/repos/_pool');
+        await query(`DELETE FROM users WHERE username = $1`, [TEST_USER]);
+    } catch { /* ignore — best-effort cleanup */ }
 });

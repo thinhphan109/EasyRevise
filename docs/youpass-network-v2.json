@@ -1,0 +1,279 @@
+{
+  "total": 31,
+  "byType": {
+    "document": 5,
+    "script": 14,
+    "xhr": 6,
+    "image": 4,
+    "fetch": 2
+  },
+  "xhr": [
+    {
+      "page": "https://youpass.vn/",
+      "method": "POST",
+      "url": "https://youpass.vn/cdn-cgi/challenge-platform/h/b/flow/ov1/508044817:1778991730:nnAR7siF8V7LJ896-7JHGwZB762H7MA8LNvbXHQXZZ0/9fd02dacaa9d90d1/xYnszf1Hj5SdWeux0k.5W7YdJ19taxepwY.jFBOc3e0-1778995283-1.2.1.1-PSsHvFKXGzErZKw24U9edLo58xCUn4ypVW.0JEp9G5Dwqx5hOghjHdZVzZLD62Sf",
+      "type": "xhr",
+      "status": 200
+    },
+    {
+      "page": "https://youpass.vn/",
+      "method": "POST",
+      "url": "https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/flow/ov1/1926002053:1778991732:kEJgROTuz0uGzd63pPSFwt6EQSUHx552gDP3JoZj2U0/9fd02db0b8183dea/NS3P7Hdy.kobw5wgSNNJ1GmATqakjWllS3I0HmJaSno-1778995284-1.2.1.1-o5mVHPym8K1bbcwX3KWEq8XEpyPKorCsOYL_I7s5jckZkLBb.bK.GAf9dKGKIJCe",
+      "type": "xhr",
+      "status": 200
+    },
+    {
+      "page": "https://youpass.vn/",
+      "method": "GET",
+      "url": "https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/pat/9fd02db0b8183dea/1778995285112/7f07df4757d8aea7c72aadfbc906230300bb228378798efb6504c7c76c3de461/eD6HgGeK4ZIyyBL",
+      "type": "fetch",
+      "status": 401
+    },
+    {
+      "page": "https://youpass.vn/",
+      "method": "POST",
+      "url": "https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/flow/ov1/1926002053:1778991732:kEJgROTuz0uGzd63pPSFwt6EQSUHx552gDP3JoZj2U0/9fd02db0b8183dea/NS3P7Hdy.kobw5wgSNNJ1GmATqakjWllS3I0HmJaSno-1778995284-1.2.1.1-o5mVHPym8K1bbcwX3KWEq8XEpyPKorCsOYL_I7s5jckZkLBb.bK.GAf9dKGKIJCe",
+      "type": "xhr"
+    },
+    {
+      "page": "https://youpass.vn/luyen-thi/ielts/writing/task-1?quiz_type=quiz&status=unfinished",
+      "method": "POST",
+      "url": "https://youpass.vn/cdn-cgi/challenge-platform/h/b/flow/ov1/508044817:1778991730:nnAR7siF8V7LJ896-7JHGwZB762H7MA8LNvbXHQXZZ0/9fd02dd99aa790d1/GQV1ZexQw6KlWwGY.MwVFL0F3NZiqb544UahaFlpjss-1778995291-1.2.1.1-vBL5zBnqHdYK7MRpQWxerx7uPRNYWH0afzAp5ljjxGBMmHgiJThLcuPoaaqt_7v5",
+      "type": "xhr",
+      "status": 200
+    },
+    {
+      "page": "https://youpass.vn/luyen-thi/ielts/writing/task-1?quiz_type=quiz&status=unfinished",
+      "method": "POST",
+      "url": "https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/flow/ov1/1926002053:1778991732:kEJgROTuz0uGzd63pPSFwt6EQSUHx552gDP3JoZj2U0/9fd02dde0e0b3dea/rv3kYpmV_Xl552WljUkdS39rPQj2MjN1IWzJ5k8thyo-1778995291-1.2.1.1-GjYyilrnts1jagLgmXc95lpyntgcr.EE63lwOReRl5suL7XlEfXGcLQOM__un2IR",
+      "type": "xhr",
+      "status": 200
+    },
+    {
+      "page": "https://youpass.vn/luyen-thi/ielts/writing/task-1?quiz_type=quiz&status=unfinished",
+      "method": "GET",
+      "url": "https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/pat/9fd02dde0e0b3dea/1778995294179/fdd8587008b61424199708f4b473eb383b42c86b59d2403632d14e8cc9a256f4/CPWqw2BArHUYtSf",
+      "type": "fetch",
+      "status": 401
+    },
+    {
+      "page": "https://youpass.vn/luyen-thi/ielts/writing/task-1?quiz_type=quiz&status=unfinished",
+      "method": "POST",
+      "url": "https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/flow/ov1/1926002053:1778991732:kEJgROTuz0uGzd63pPSFwt6EQSUHx552gDP3JoZj2U0/9fd02dde0e0b3dea/rv3kYpmV_Xl552WljUkdS39rPQj2MjN1IWzJ5k8thyo-1778995291-1.2.1.1-GjYyilrnts1jagLgmXc95lpyntgcr.EE63lwOReRl5suL7XlEfXGcLQOM__un2IR",
+      "type": "xhr"
+    }
+  ],
+  "all": [
+    {
+      "page": "about:blank",
+      "method": "GET",
+      "url": "https://youpass.vn/",
+      "type": "document",
+      "status": 307
+    },
+    {
+      "page": "about:blank",
+      "method": "GET",
+      "url": "https://youpass.vn/",
+      "type": "document",
+      "status": 403
+    },
+    {
+      "page": "https://youpass.vn/?__cf_chl_rt_tk=WD5MOAOxcRFUQHh4YF3K9fIxct8YarPlHSNQ5TIOHIk-1778995283-1.0.1.1-ZqDs0af9p.ILujxxDYr.aoxs2TMzg7_C8.7l2MZHLTE",
+      "method": "GET",
+      "url": "https://youpass.vn/cdn-cgi/challenge-platform/h/b/orchestrate/chl_page/v1?ray=9fd02dacaa9d90d1",
+      "type": "script",
+      "status": 200
+    },
+    {
+      "page": "https://youpass.vn/",
+      "method": "GET",
+      "url": "blob:https://youpass.vn/b79f55fc-0b65-4aca-8963-70a9140c08f6",
+      "type": "script"
+    },
+    {
+      "page": "https://youpass.vn/",
+      "method": "GET",
+      "url": "https://challenges.cloudflare.com/turnstile/v0/b/883a1f27d85f/api.js?onload=rLIi5&render=explicit",
+      "type": "script",
+      "status": 200
+    },
+    {
+      "page": "https://youpass.vn/",
+      "method": "POST",
+      "url": "https://youpass.vn/cdn-cgi/challenge-platform/h/b/flow/ov1/508044817:1778991730:nnAR7siF8V7LJ896-7JHGwZB762H7MA8LNvbXHQXZZ0/9fd02dacaa9d90d1/xYnszf1Hj5SdWeux0k.5W7YdJ19taxepwY.jFBOc3e0-1778995283-1.2.1.1-PSsHvFKXGzErZKw24U9edLo58xCUn4ypVW.0JEp9G5Dwqx5hOghjHdZVzZLD62Sf",
+      "type": "xhr",
+      "status": 200
+    },
+    {
+      "page": "https://youpass.vn/",
+      "method": "GET",
+      "url": "blob:https://youpass.vn/caca1565-2903-44e6-ada6-ee9b61602ab4",
+      "type": "script",
+      "status": 200
+    },
+    {
+      "page": "https://youpass.vn/",
+      "method": "GET",
+      "url": "https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/turnstile/f/ov2/av0/rch/cttdj/0x4AAAAAAADnPIDROrmt1Wwj/light/fbE/new/normal?lang=auto",
+      "type": "document",
+      "status": 200
+    },
+    {
+      "page": "https://youpass.vn/",
+      "method": "GET",
+      "url": "https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/cmg/1",
+      "type": "image",
+      "status": 200
+    },
+    {
+      "page": "https://youpass.vn/",
+      "method": "GET",
+      "url": "blob:https://challenges.cloudflare.com/7a549536-c98d-4825-a077-bb91b7b48e19",
+      "type": "script"
+    },
+    {
+      "page": "https://youpass.vn/",
+      "method": "POST",
+      "url": "https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/flow/ov1/1926002053:1778991732:kEJgROTuz0uGzd63pPSFwt6EQSUHx552gDP3JoZj2U0/9fd02db0b8183dea/NS3P7Hdy.kobw5wgSNNJ1GmATqakjWllS3I0HmJaSno-1778995284-1.2.1.1-o5mVHPym8K1bbcwX3KWEq8XEpyPKorCsOYL_I7s5jckZkLBb.bK.GAf9dKGKIJCe",
+      "type": "xhr",
+      "status": 200
+    },
+    {
+      "page": "https://youpass.vn/",
+      "method": "GET",
+      "url": "blob:https://challenges.cloudflare.com/a31077b3-b1b5-4826-9314-a2a9e4f2c411",
+      "type": "script",
+      "status": 200
+    },
+    {
+      "page": "https://youpass.vn/",
+      "method": "GET",
+      "url": "blob:https://challenges.cloudflare.com/a31077b3-b1b5-4826-9314-a2a9e4f2c411",
+      "type": "script",
+      "status": 200
+    },
+    {
+      "page": "https://youpass.vn/",
+      "method": "GET",
+      "url": "https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/pat/9fd02db0b8183dea/1778995285112/7f07df4757d8aea7c72aadfbc906230300bb228378798efb6504c7c76c3de461/eD6HgGeK4ZIyyBL",
+      "type": "fetch",
+      "status": 401
+    },
+    {
+      "page": "https://youpass.vn/",
+      "method": "GET",
+      "url": "https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/d/9fd02db0b8183dea/1778995285113/McI7i4oY11o1_RS",
+      "type": "image",
+      "status": 200
+    },
+    {
+      "page": "https://youpass.vn/",
+      "method": "POST",
+      "url": "https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/flow/ov1/1926002053:1778991732:kEJgROTuz0uGzd63pPSFwt6EQSUHx552gDP3JoZj2U0/9fd02db0b8183dea/NS3P7Hdy.kobw5wgSNNJ1GmATqakjWllS3I0HmJaSno-1778995284-1.2.1.1-o5mVHPym8K1bbcwX3KWEq8XEpyPKorCsOYL_I7s5jckZkLBb.bK.GAf9dKGKIJCe",
+      "type": "xhr"
+    },
+    {
+      "page": "https://youpass.vn/",
+      "method": "GET",
+      "url": "https://youpass.vn/luyen-thi/ielts/writing/task-1?quiz_type=quiz&status=unfinished",
+      "type": "document",
+      "status": 403
+    },
+    {
+      "page": "https://youpass.vn/luyen-thi/ielts/writing/task-1?quiz_type=quiz&status=unfinished&__cf_chl_rt_tk=hdJxGvjZmQ6BRo6jefi6t74BRO7fP_b4iuwHPogMbEI-1778995291-1.0.1.1-_01Rg2H7OukQl1ZUTJNgoiDayzVQ29GuKA7Yj03ZMlM",
+      "method": "GET",
+      "url": "https://youpass.vn/cdn-cgi/challenge-platform/h/b/orchestrate/chl_page/v1?ray=9fd02dd99aa790d1",
+      "type": "script",
+      "status": 200
+    },
+    {
+      "page": "https://youpass.vn/luyen-thi/ielts/writing/task-1?quiz_type=quiz&status=unfinished",
+      "method": "GET",
+      "url": "blob:https://youpass.vn/7093416b-2e2c-4d67-984f-48fc6d56b587",
+      "type": "script"
+    },
+    {
+      "page": "https://youpass.vn/luyen-thi/ielts/writing/task-1?quiz_type=quiz&status=unfinished",
+      "method": "GET",
+      "url": "https://challenges.cloudflare.com/turnstile/v0/b/883a1f27d85f/api.js?onload=rLIi5&render=explicit",
+      "type": "script",
+      "status": 200
+    },
+    {
+      "page": "https://youpass.vn/luyen-thi/ielts/writing/task-1?quiz_type=quiz&status=unfinished",
+      "method": "POST",
+      "url": "https://youpass.vn/cdn-cgi/challenge-platform/h/b/flow/ov1/508044817:1778991730:nnAR7siF8V7LJ896-7JHGwZB762H7MA8LNvbXHQXZZ0/9fd02dd99aa790d1/GQV1ZexQw6KlWwGY.MwVFL0F3NZiqb544UahaFlpjss-1778995291-1.2.1.1-vBL5zBnqHdYK7MRpQWxerx7uPRNYWH0afzAp5ljjxGBMmHgiJThLcuPoaaqt_7v5",
+      "type": "xhr",
+      "status": 200
+    },
+    {
+      "page": "https://youpass.vn/luyen-thi/ielts/writing/task-1?quiz_type=quiz&status=unfinished",
+      "method": "GET",
+      "url": "blob:https://youpass.vn/20c1cd6c-69a6-43bb-9f3f-4593ab22eb51",
+      "type": "script",
+      "status": 200
+    },
+    {
+      "page": "https://youpass.vn/luyen-thi/ielts/writing/task-1?quiz_type=quiz&status=unfinished",
+      "method": "GET",
+      "url": "https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/turnstile/f/ov2/av0/rch/yy005/0x4AAAAAAADnPIDROrmt1Wwj/light/fbE/new/normal?lang=auto",
+      "type": "document",
+      "status": 200
+    },
+    {
+      "page": "https://youpass.vn/luyen-thi/ielts/writing/task-1?quiz_type=quiz&status=unfinished",
+      "method": "GET",
+      "url": "https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/cmg/1",
+      "type": "image",
+      "status": 200
+    },
+    {
+      "page": "https://youpass.vn/luyen-thi/ielts/writing/task-1?quiz_type=quiz&status=unfinished",
+      "method": "GET",
+      "url": "blob:https://challenges.cloudflare.com/73369685-4503-4b06-8851-312aa461436a",
+      "type": "script"
+    },
+    {
+      "page": "https://youpass.vn/luyen-thi/ielts/writing/task-1?quiz_type=quiz&status=unfinished",
+      "method": "POST",
+      "url": "https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/flow/ov1/1926002053:1778991732:kEJgROTuz0uGzd63pPSFwt6EQSUHx552gDP3JoZj2U0/9fd02dde0e0b3dea/rv3kYpmV_Xl552WljUkdS39rPQj2MjN1IWzJ5k8thyo-1778995291-1.2.1.1-GjYyilrnts1jagLgmXc95lpyntgcr.EE63lwOReRl5suL7XlEfXGcLQOM__un2IR",
+      "type": "xhr",
+      "status": 200
+    },
+    {
+      "page": "https://youpass.vn/luyen-thi/ielts/writing/task-1?quiz_type=quiz&status=unfinished",
+      "method": "GET",
+      "url": "blob:https://challenges.cloudflare.com/1a01fb34-5fa5-4c4c-88e4-a24deeba97a3",
+      "type": "script",
+      "status": 200
+    },
+    {
+      "page": "https://youpass.vn/luyen-thi/ielts/writing/task-1?quiz_type=quiz&status=unfinished",
+      "method": "GET",
+      "url": "https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/pat/9fd02dde0e0b3dea/1778995294179/fdd8587008b61424199708f4b473eb383b42c86b59d2403632d14e8cc9a256f4/CPWqw2BArHUYtSf",
+      "type": "fetch",
+      "status": 401
+    },
+    {
+      "page": "https://youpass.vn/luyen-thi/ielts/writing/task-1?quiz_type=quiz&status=unfinished",
+      "method": "GET",
+      "url": "blob:https://challenges.cloudflare.com/1a01fb34-5fa5-4c4c-88e4-a24deeba97a3",
+      "type": "script",
+      "status": 200
+    },
+    {
+      "page": "https://youpass.vn/luyen-thi/ielts/writing/task-1?quiz_type=quiz&status=unfinished",
+      "method": "GET",
+      "url": "https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/d/9fd02dde0e0b3dea/1778995294181/vrBHAJM5UIFt6Tw",
+      "type": "image",
+      "status": 200
+    },
+    {
+      "page": "https://youpass.vn/luyen-thi/ielts/writing/task-1?quiz_type=quiz&status=unfinished",
+      "method": "POST",
+      "url": "https://challenges.cloudflare.com/cdn-cgi/challenge-platform/h/b/flow/ov1/1926002053:1778991732:kEJgROTuz0uGzd63pPSFwt6EQSUHx552gDP3JoZj2U0/9fd02dde0e0b3dea/rv3kYpmV_Xl552WljUkdS39rPQj2MjN1IWzJ5k8thyo-1778995291-1.2.1.1-GjYyilrnts1jagLgmXc95lpyntgcr.EE63lwOReRl5suL7XlEfXGcLQOM__un2IR",
+      "type": "xhr"
+    }
+  ]
+}
