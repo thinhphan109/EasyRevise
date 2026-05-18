@@ -383,8 +383,7 @@
                 }
                 const partLabel = r.partNumber ? ` · Part ${r.partNumber}` : '';
                 const skillLabel = SKILL_LABELS[r.skill] || r.skill;
-                // Quiz rows are owned by TracNghiem core — hide button only for IELTS.
-                const canHide = r.skillKind !== 'quiz';
+                // All skill kinds support hide (quiz uses open_submissions table).
                 return `
                     <div class="result-row" data-skill="${r.skill}" data-id="${r.submissionId}" data-kind="${r.skillKind}">
                         <a class="result-icon" href="${resultUrl(r)}" style="text-decoration:none;">${ICONS[r.skill] || '📄'}</a>
@@ -396,9 +395,7 @@
                             </div>
                         </a>
                         <a class="result-band" href="${resultUrl(r)}" style="text-decoration:none;">${scoreText}</a>
-                        ${canHide
-                            ? `<button class="result-hide" data-act="hide" title="Xoá khỏi lịch sử của tôi (admin vẫn giữ bản lưu)">✕</button>`
-                            : `<span class="result-arrow">→</span>`}
+                        ${`<button class="result-hide" data-act="hide" title="Xoá khỏi lịch sử của tôi (admin vẫn giữ bản lưu)">✕</button>`}
                     </div>`;
             }).join('');
         }
@@ -448,6 +445,7 @@
             const path = kind === 'reading'  ? `/api/ielts/submissions/${id}/hide`
                        : kind === 'writing'  ? `/api/ielts/writing/submissions/${id}/hide`
                        : kind === 'speaking' ? `/api/ielts/speaking/submissions/${id}/hide`
+                       : kind === 'quiz'     ? `/api/exams/quiz-submissions/${id}/hide`
                        : null;
             if (!path) return;
             btn.disabled = true; btn.textContent = '…';

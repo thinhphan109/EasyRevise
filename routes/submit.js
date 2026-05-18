@@ -578,4 +578,37 @@ router.post('/review-by-code', async (req, res, next) => {
     } catch (e) { next(e); }
 });
 
+// ── Auth: user soft-hide a quiz submission from their own history ─────
+//   POST /api/exams/quiz-submissions/:id/hide
+// Admin still sees it. Hidden rows are excluded from listMyResults.
+const { authMiddleware: _quizAuth, adminOnly: _quizAdmin } = require('../lib/auth');
+
+router.post('/quiz-submissions/:id/hide', _quizAuth, async (req, res, next) => {
+    try {
+        const row = await queryOne(
+            `UPDATE open_submissions
+                SET hidden_by_user_at = now()
+              WHERE id = $1 AND user_id = $2
+                    AND completed_at IS NOT NULL
+                    AND hidden_by_user_at IS NULL
+          RETURNING id`,
+            [req.params.id, req.user.id]
+        );
+        if (!row) return res.status(404).json({ error: 'Not found, not yours, or not completed' });
+        res.json({ ok: true, id: row.id });
+    } catch (e) { next(e); }
+});
+
+// ── Admin: hard-delete a quiz submission (cascades user history) ──────
+router.delete('/admin/quiz-submissions/:id', _quizAdmin, async (req, res, next) => {
+    try {
+        const row = await queryOne(
+            `DELETE FROM open_submissions WHERE id = $1 RETURNING id`,
+            [req.params.id]
+        );
+        if (!row) return res.status(404).json({ error: 'Submission not found' });
+        res.json({ ok: true, id: row.id });
+    } catch (e) { next(e); }
+});
+
 module.exports = router;
