@@ -18,16 +18,30 @@ await c.connect();
 
 await c.query(`UPDATE ielts_tests SET is_published = true`);
 
+// A "playable" question:
+//   - prompt is not numeric placeholder ("1", "2", ...) and ≥ 1 char
+//   - has a non-null correct answer
+//   - has ≥ 2 options OR is fill-in-blank/tfng (which don't need options)
 const a = await c.query(`
     UPDATE ielts_tests t SET is_published = false
      WHERE t.skill IN ('reading','listening')
        AND t.id IN (
-         SELECT t.id FROM ielts_tests t
-         LEFT JOIN ielts_passages p ON p.test_id = t.id
-         LEFT JOIN ielts_questions q ON q.passage_id = p.id
-         WHERE t.skill IN ('reading','listening')
-         GROUP BY t.id
-         HAVING COUNT(q.id) = 0 OR AVG(LENGTH(p.body)) < 100
+         SELECT t.id
+           FROM ielts_tests t
+           LEFT JOIN ielts_passages p ON p.test_id = t.id
+           LEFT JOIN ielts_questions q ON q.passage_id = p.id
+          WHERE t.skill IN ('reading','listening')
+          GROUP BY t.id
+          HAVING COUNT(q.id) = 0
+              OR AVG(LENGTH(p.body)) < 100
+              OR COUNT(q.id) FILTER (
+                   WHERE q.prompt !~ '^\\d{1,3}\\.?$'
+                     AND LENGTH(q.prompt) >= 1
+                     AND q.correct IS NOT NULL
+                     AND q.correct::text <> 'null'
+                     AND (jsonb_array_length(COALESCE(q.payload->'options','[]'::jsonb)) >= 2
+                          OR q.type::text IN ('sentence_completion','tfng'))
+                 )::float / NULLIF(COUNT(q.id), 0) < 0.5
        )`);
 console.log(`Reading/Listening unpublished: ${a.rowCount}`);
 
