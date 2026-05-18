@@ -88,11 +88,26 @@ export async function chat(messages, {
 // Helper: ask for JSON, retry once if not parseable
 export async function chatJson(messages, opts = {}) {
     const out = await chat(messages, { json: true, ...opts });
-    try {
-        // strip code fences if any
-        const cleaned = out.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim();
-        return JSON.parse(cleaned);
-    } catch (e) {
-        throw new Error(`Bad JSON from AI: ${out.slice(0, 200)}`);
+    // Try a few cleanup strategies
+    const candidates = [
+        out,
+        // Strip code fences
+        out.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim(),
+        // Extract first balanced {...}
+        (() => {
+            const start = out.indexOf('{');
+            if (start < 0) return null;
+            let depth = 0, end = -1;
+            for (let i = start; i < out.length; i++) {
+                if (out[i] === '{') depth++;
+                else if (out[i] === '}' && --depth === 0) { end = i; break; }
+            }
+            return end > start ? out.slice(start, end + 1) : null;
+        })()
+    ].filter(Boolean);
+
+    for (const c of candidates) {
+        try { return JSON.parse(c); } catch { /* try next */ }
     }
+    throw new Error(`Bad JSON from AI: ${out.slice(0, 200)}`);
 }
