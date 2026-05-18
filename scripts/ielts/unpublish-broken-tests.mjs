@@ -1,9 +1,12 @@
 // scripts/ielts/unpublish-broken-tests.mjs
-// Hide tests that genuinely have no playable content. Each skill is
-// validated against the right tables:
-//   • reading/listening → must have passages with questions
-//   • writing           → must have ielts_writing_prompts with prompt_text
-//   • speaking          → must have ielts_speaking_parts with cue_card_text
+// Conservative gates — unpublish only when content is structurally empty:
+//   • reading/listening: zero questions OR avg passage body < 100 chars
+//   • writing: zero prompts OR longest prompt < 30 chars
+//   • speaking: zero parts OR no playable prompt/cue
+//
+// Stricter gates (correct-answer / option-completeness) belong in a
+// separate review pass since some legacy crawler data has answers in
+// payload fields rather than the dedicated 'correct' column.
 import 'dotenv/config';
 import pg from 'pg';
 
@@ -13,10 +16,8 @@ const c = new pg.Client({
 });
 await c.connect();
 
-// Reset everything to published first
 await c.query(`UPDATE ielts_tests SET is_published = true`);
 
-// 1. Reading/Listening
 const a = await c.query(`
     UPDATE ielts_tests t SET is_published = false
      WHERE t.skill IN ('reading','listening')
@@ -26,12 +27,10 @@ const a = await c.query(`
          LEFT JOIN ielts_questions q ON q.passage_id = p.id
          WHERE t.skill IN ('reading','listening')
          GROUP BY t.id
-         HAVING COUNT(q.id) = 0
-             OR AVG(LENGTH(p.body)) < 100
+         HAVING COUNT(q.id) = 0 OR AVG(LENGTH(p.body)) < 100
        )`);
 console.log(`Reading/Listening unpublished: ${a.rowCount}`);
 
-// 2. Writing
 const b = await c.query(`
     UPDATE ielts_tests t SET is_published = false
      WHERE t.skill = 'writing'
@@ -40,12 +39,10 @@ const b = await c.query(`
          LEFT JOIN ielts_writing_prompts wp ON wp.test_id = t.id
          WHERE t.skill = 'writing'
          GROUP BY t.id
-         HAVING COUNT(wp.id) = 0
-             OR MAX(LENGTH(wp.prompt_text)) < 30
+         HAVING COUNT(wp.id) = 0 OR MAX(LENGTH(wp.prompt_text)) < 30
        )`);
 console.log(`Writing unpublished: ${b.rowCount}`);
 
-// 3. Speaking
 const c3 = await c.query(`
     UPDATE ielts_tests t SET is_published = false
      WHERE t.skill = 'speaking'
@@ -55,7 +52,11 @@ const c3 = await c.query(`
          WHERE t.skill = 'speaking'
          GROUP BY t.id
          HAVING COUNT(sp.id) = 0
-             OR MAX(LENGTH(sp.cue_card_text)) < 20
+             OR COUNT(sp.id) FILTER (
+                  WHERE COALESCE(LENGTH(sp.cue_card_text), 0) >= 20
+                     OR (sp.prompts IS NOT NULL
+                         AND jsonb_array_length(sp.prompts) > 0)
+                ) = 0
        )`);
 console.log(`Speaking unpublished: ${c3.rowCount}`);
 
