@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IELTS Demos — EasyRevise</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png">
+    <script>
+        (function () { var t = localStorage.getItem('easyrevise_theme') || 'light'; document.documentElement.setAttribute('data-theme', t); })();
+    </script>
+    <style>
+        :root {
+            --bg: #fbfbfb; --surface: #ffffff; --text: #1a1a1a; --text-2: #555;
+            --text-muted: #999; --border: #e5e5e5; --accent: #0066ff;
+        }
+        [data-theme="dark"] {
+            --bg: #0d0d0d; --surface: #161616; --text: #f5f5f5; --text-2: #b0b0b0;
+            --text-muted: #707070; --border: #262626;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg); color: var(--text);
+            min-height: 100vh; padding: 4rem 1.5rem;
+            -webkit-font-smoothing: antialiased;
+        }
+        .wrap { max-width: 720px; margin: 0 auto; }
+        .pill {
+            display: inline-block; padding: 0.3rem 0.75rem;
+            background: color-mix(in srgb, var(--accent) 12%, transparent);
+            color: var(--accent); border-radius: 999px;
+            font-size: 0.74rem; font-weight: 600;
+            letter-spacing: 0.04em; text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+        h1 {
+            font-size: 2rem; font-weight: 700; letter-spacing: -0.02em;
+            margin: 0 0 0.5rem; line-height: 1.15;
+        }
+        .lede { color: var(--text-2); margin: 0 0 2.5rem; line-height: 1.6; }
+        .demo-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 14px; padding: 1.5rem; margin-bottom: 1rem;
+            transition: border-color .15s, transform .15s;
+        }
+        .demo-card:hover { border-color: var(--accent); }
+        .demo-card h3 { margin: 0 0 0.4rem; font-size: 1.05rem; }
+        .demo-card p { margin: 0 0 1rem; color: var(--text-2); font-size: 0.9rem; line-height: 1.55; }
+        .demo-card .links { display: grid; gap: 0.4rem; }
+        .demo-card a {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.55rem 0.85rem;
+            background: color-mix(in srgb, var(--text) 4%, transparent);
+            border-radius: 8px; text-decoration: none; color: var(--text);
+            font-size: 0.9rem; font-weight: 500;
+        }
+        .demo-card a:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); }
+        .demo-card a small { color: var(--text-muted); font-weight: 500; }
+        .note {
+            background: color-mix(in srgb, var(--accent) 8%, transparent);
+            border: 1px solid color-mix(in srgb, var(--accent) 24%, transparent);
+            padding: 0.85rem 1rem; border-radius: 10px;
+            color: var(--text-2); font-size: 0.88rem; line-height: 1.55;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <span class="pill">Phase 0 · Hybrid (selected)</span>
+        <h1>IELTS Reading — demo</h1>
+        <p class="lede">Style chính thức cho IELTS module: <strong>Hybrid</strong>. Pane bên trái (passage) cố định khi cuộn câu hỏi bên phải.</p>
+
+        <div class="note">
+            ✓ Layout fix: hai pane scroll độc lập. Body không có scroll riêng.
+            <br>✓ Q5 + Q6 locked: Academic + General Training; brand pill "ER · IELTS".
+        </div>
+
+        <div class="demo-card">
+            <h3>Full reading test</h3>
+            <p>13 câu hỏi · 5 dạng · timer 60 phút · palette · flag · localStorage persist · band score modal.</p>
+            <div class="links">
+                <a href="hybrid/full-test.html">Mở bài thi <small>→</small></a>
+            </div>
+        </div>
+
+        <div class="demo-card">
+            <h3>Single question-type previews <small style="font-weight:500;color:var(--text-muted);">(coming next)</small></h3>
+            <p>Một dạng câu hỏi mỗi trang — dùng cho admin preview / docs.</p>
+            <div class="links">
+                <a style="opacity:0.5;pointer-events:none;">tfng.html <small>pending</small></a>
+                <a style="opacity:0.5;pointer-events:none;">mc.html <small>pending</small></a>
+                <a style="opacity:0.5;pointer-events:none;">completion.html <small>pending</small></a>
+                <a style="opacity:0.5;pointer-events:none;">matching-headings.html <small>pending</small></a>
+                <a style="opacity:0.5;pointer-events:none;">summary.html <small>pending</small></a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IELTS · EasyRevise</title>
+    <meta name="description" content="Luyện 4 kỹ năng IELTS Reading, Listening, Writing, Speaking với chấm tự động và đánh giá band score chính xác.">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+    <script>(function(){var t=localStorage.getItem('easyrevise_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+    <style>
+        :root {
+            --bg: #fbfbfb; --surface: #ffffff; --surface-2: #f5f5f5;
+            --text: #1a1a1a; --text-2: #555; --text-muted: #999;
+            --border: #e5e5e5; --border-strong: #d4d4d4;
+            --accent: #0066ff; --accent-soft: #e6f0ff;
+            --reading: #0066ff;  --reading-soft: #e6f0ff;
+            --listening: #16a34a; --listening-soft: #dcfce7;
+            --writing: #d97706;  --writing-soft: #fef3c7;
+            --speaking: #9333ea; --speaking-soft: #f3e8ff;
+            --shadow-1: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-2: 0 4px 16px rgba(0,0,0,0.08);
+            --radius: 14px;
+        }
+        [data-theme="dark"] {
+            --bg: #0d0d0d; --surface: #161616; --surface-2: #202020;
+            --text: #f5f5f5; --text-2: #b0b0b0; --text-muted: #707070;
+            --border: #262626; --border-strong: #333;
+            --accent: #4d8eff; --accent-soft: #1a2942;
+            --reading-soft: #1a2942; --listening-soft: #14532d;
+            --writing-soft: #422006; --speaking-soft: #3b0764;
+        }
+        * { box-sizing: border-box; }
+        html, body { margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg); color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            font-feature-settings: 'cv11', 'ss01';
+            letter-spacing: -0.005em;
+        }
+        .topbar {
+            position: sticky; top: 0; z-index: 50;
+            background: color-mix(in srgb, var(--bg) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0.7rem 1.5rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .brand {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-weight: 600; font-size: 0.95rem;
+            text-decoration: none; color: var(--text);
+        }
+        .brand-mark {
+            width: 26px; height: 26px;
+            background: var(--text); color: var(--bg);
+            border-radius: 7px; display: grid; place-items: center;
+            font-weight: 700; font-size: 0.7rem;
+        }
+        .nav-link {
+            font-size: 0.85rem; color: var(--text-2);
+            text-decoration: none; padding: 0.4rem 0.8rem;
+            border-radius: 7px;
+        }
+        .nav-link:hover { background: var(--surface-2); color: var(--text); }
+        .container { max-width: 1100px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+        .hero {
+            text-align: center; margin-bottom: 3.5rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .hero-eyebrow {
+            font-size: 0.75rem; font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.1em; text-transform: uppercase;
+            margin-bottom: 0.6rem;
+        }
+        .hero h1 {
+            font-family: 'Source Serif 4', Georgia, serif;
+            font-size: 3rem; font-weight: 600;
+            margin: 0 0 0.6rem;
+            letter-spacing: -0.03em;
+        }
+        .hero p { margin: 0 auto; max-width: 540px; color: var(--text-2); line-height: 1.55; }
+
+        .skills {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.25rem;
+        }
+        .skill-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.75rem 2rem;
+            display: flex; flex-direction: column; gap: 1rem;
+            text-decoration: none; color: var(--text);
+            transition: all .2s;
+            box-shadow: var(--shadow-1);
+            position: relative; overflow: hidden;
+        }
+        .skill-card::before {
+            content: ''; position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--c-soft), transparent 60%);
+            opacity: 0.5; pointer-events: none;
+        }
+        .skill-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--c);
+            box-shadow: var(--shadow-2);
+        }
+        .skill-icon {
+            width: 44px; height: 44px;
+            display: grid; place-items: center;
+            background: var(--c-soft); color: var(--c);
+            border-radius: 11px;
+            font-size: 1.4rem;
+            position: relative;
+        }
+        .skill-title {
+            font-family: 'Source Serif 4', Georgia, serif;
+            font-size: 1.7rem; font-weight: 600;
+            letter-spacing: -0.02em;
+            margin: 0; position: relative;
+        }
+        .skill-desc {
+            color: var(--text-2); line-height: 1.55; font-size: 0.92rem;
+            margin: 0; position: relative;
+        }
+        .skill-meta {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: auto; position: relative;
+        }
+        .skill-count {
+            font-variant-numeric: tabular-nums;
+            font-size: 0.85rem; color: var(--text-muted);
+        }
+        .skill-count strong { color: var(--text); font-weight: 600; }
+        .skill-cta {
+            font-size: 0.85rem; font-weight: 600;
+            color: var(--c);
+        }
+
+        .skill-card[data-skill="reading"]   { --c: var(--reading);   --c-soft: var(--reading-soft); }
+        .skill-card[data-skill="listening"] { --c: var(--listening); --c-soft: var(--listening-soft); }
+        .skill-card[data-skill="writing"]   { --c: var(--writing);   --c-soft: var(--writing-soft); }
+        .skill-card[data-skill="speaking"]  { --c: var(--speaking);  --c-soft: var(--speaking-soft); }
+
+        @media (max-width: 720px) {
+            .skills { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 2.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <a class="brand" href="/">
+            <div class="brand-mark">ER</div>
+            <span>EasyRevise</span>
+        </a>
+        <nav style="display:flex;gap:0.4rem;">
+            <a class="nav-link" href="/">Trang chủ</a>
+            <a class="nav-link" href="/ielts/my-results.html">Kết quả của tôi</a>
+            <a class="nav-link" href="/dashboard.html">Dashboard</a>
+        </nav>
+    </div>
+
+    <main class="container">
+        <header class="hero">
+            <div class="hero-eyebrow">EasyRevise · IELTS</div>
+            <h1>Luyện 4 kỹ năng IELTS</h1>
+            <p>Đề thật từ kho học liệu, chấm tự động theo rubric chính thức. Reading + Listening tính band ngay, Writing + Speaking được AI đánh giá theo TR/CC/LR/GRA.</p>
+        </header>
+
+        <section class="skills">
+            <a class="skill-card" data-skill="reading" href="/ielts/reading/">
+                <div class="skill-icon">📖</div>
+                <h2 class="skill-title">Reading</h2>
+                <p class="skill-desc">Đọc đoạn văn và trả lời 40 câu trong 60 phút. Multiple choice, matching, sentence completion, true/false/not given.</p>
+                <div class="skill-meta">
+                    <span class="skill-count"><strong id="cnt-reading">…</strong> đề</span>
+                    <span class="skill-cta">Bắt đầu →</span>
+                </div>
+            </a>
+            <a class="skill-card" data-skill="listening" href="/ielts/listening/">
+                <div class="skill-icon">🎧</div>
+                <h2 class="skill-title">Listening</h2>
+                <p class="skill-desc">Nghe audio rồi trả lời. 4 sections, 40 câu trong 30 phút. Form / note completion, MCQ, map labelling, matching.</p>
+                <div class="skill-meta">
+                    <span class="skill-count"><strong id="cnt-listening">…</strong> đề</span>
+                    <span class="skill-cta">Bắt đầu →</span>
+                </div>
+            </a>
+            <a class="skill-card" data-skill="writing" href="/ielts/writing/">
+                <div class="skill-icon">✍️</div>
+                <h2 class="skill-title">Writing</h2>
+                <p class="skill-desc">Task 1 (mô tả biểu đồ, 150 từ) và Task 2 (essay, 250 từ). AI chấm theo TR · CC · LR · GRA và đề xuất cải thiện.</p>
+                <div class="skill-meta">
+                    <span class="skill-count"><strong id="cnt-writing">…</strong> đề</span>
+                    <span class="skill-cta">Bắt đầu →</span>
+                </div>
+            </a>
+            <a class="skill-card" data-skill="speaking" href="/ielts/speaking/">
+                <div class="skill-icon">🎤</div>
+                <h2 class="skill-title">Speaking</h2>
+                <p class="skill-desc">Part 1, 2 (cue card), 3. Ghi âm trực tiếp trên trình duyệt, AI chấm theo FC · LR · GRA · Pronunciation.</p>
+                <div class="skill-meta">
+                    <span class="skill-count"><strong id="cnt-speaking">…</strong> đề</span>
+                    <span class="skill-cta">Bắt đầu →</span>
+                </div>
+            </a>
+        </section>
+    </main>
+
+    <script>
+        async function loadCounts() {
+            const skills = ['reading', 'listening', 'writing', 'speaking'];
+            await Promise.all(skills.map(async s => {
+                try {
+                    const url = s === 'writing' ? '/api/ielts/writing/tests'
+                              : s === 'speaking' ? '/api/ielts/speaking/tests'
+                              : `/api/ielts/tests?skill=${s}`;
+                    const r = await fetch(url);
+                    if (!r.ok) throw new Error();
+                    const j = await r.json();
+                    document.getElementById(`cnt-${s}`).textContent = j.length || 0;
+                } catch {
+                    document.getElementById(`cnt-${s}`).textContent = '?';
+                }
+            }));
+        }
+        loadCounts();
+    </script>
+    <script src="/js/ielts-bootstrap.js"></script>
+
+</body>
+</html>
