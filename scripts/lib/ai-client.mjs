@@ -17,7 +17,7 @@ export async function chat(messages, {
     temperature = 0.2,
     maxTokens = 1024,
     json = false,
-    retries = 2,
+    retries = 4,
     timeoutMs = 60_000
 } = {}) {
     const body = {
@@ -48,6 +48,13 @@ export async function chat(messages, {
 
             if (!r.ok) {
                 const txt = await r.text();
+                // Honour 429: hold and retry. Server gives no Retry-After
+                // for kiro proxy; use exponential backoff.
+                if (r.status === 429 && i < retries) {
+                    const wait = 30_000 * Math.pow(2, i); // 30s, 60s, 120s
+                    await new Promise(res => setTimeout(res, wait));
+                    continue;
+                }
                 throw new Error(`HTTP ${r.status}: ${txt.slice(0, 200)}`);
             }
 
