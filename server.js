@@ -170,6 +170,17 @@ app.use('/api/activation', activationRouter);          // /api/activation/verify
 app.use('/api/admin', require('./routes/backup-cron'));
 
 // ========================
+// IELTS Platform (Reading / Listening / Writing / Speaking)
+// ========================
+// IELTS main routes (tests, submissions, my-results)
+app.use('/api/ielts', require('./routes/ielts'));
+// IELTS Activation Codes (per-test) — mounted at /api/ielts/tests so paths
+// look like /api/ielts/tests/:testId/codes (mirrors /api/exams/:id/codes).
+app.use('/api/ielts/tests', require('./routes/ielts-codes'));
+// IELTS Admin (cross-skill submissions list, etc.)
+app.use('/api/admin/ielts', require('./routes/admin-ielts'));
+
+// ========================
 // SPA fallback
 // ========================
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'index.html')));

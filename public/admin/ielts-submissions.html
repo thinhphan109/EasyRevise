@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="vi" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin · IELTS Submissions</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo/favicon-32.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script>(function(){var t=localStorage.getItem('easyrevise_theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+    <style>
+        :root {
+            --bg: #fbfbfb; --surface: #ffffff; --surface-2: #f5f5f5;
+            --text: #1a1a1a; --text-2: #555; --text-muted: #999;
+            --border: #e5e5e5; --border-strong: #d4d4d4;
+            --accent: #0066ff; --accent-soft: #e6f0ff;
+            --success: #16a34a; --danger: #dc2626; --danger-soft: #fee2e2;
+            --warning: #d97706;
+        }
+        [data-theme="dark"] {
+            --bg: #0d0d0d; --surface: #161616; --surface-2: #202020;
+            --text: #f5f5f5; --text-2: #b0b0b0; --text-muted: #707070;
+            --border: #262626; --border-strong: #333;
+            --accent-soft: #1a2942; --danger-soft: #450a0a;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; font-family: 'Inter', sans-serif;
+            background: var(--bg); color: var(--text);
+            -webkit-font-smoothing: antialiased; letter-spacing: -0.005em;
+        }
+        .topbar {
+            position: sticky; top: 0; z-index: 50;
+            background: color-mix(in srgb, var(--bg) 92%, transparent);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 0.7rem 1.5rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .brand { display:flex; gap:0.5rem; align-items:center; font-weight:600; text-decoration:none; color:var(--text); }
+        .brand-mark { width:26px; height:26px; background:var(--text); color:var(--bg); border-radius:7px; display:grid; place-items:center; font-weight:700; font-size:0.7rem; }
+        .nav-link { font-size:0.85rem; color:var(--text-2); text-decoration:none; padding:0.4rem 0.8rem; border-radius:7px; }
+        .nav-link:hover, .nav-link.active { background:var(--surface-2); color:var(--text); }
+        .container { max-width: 1280px; margin: 0 auto; padding: 1.5rem; }
+        h1 { margin: 0 0 0.4rem; font-size: 1.6rem; font-weight: 600; }
+        h1 + p { margin: 0 0 1.5rem; color: var(--text-2); font-size: 0.9rem; }
+
+        .filter-row {
+            display: flex; flex-wrap: wrap; gap: 0.5rem;
+            align-items: center; margin-bottom: 1rem;
+        }
+        .chip {
+            font: inherit; font-size: 0.82rem; font-weight: 500;
+            padding: 0.4rem 0.9rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 999px; color: var(--text-2); cursor: pointer;
+            transition: all .15s;
+        }
+        .chip:hover { border-color: var(--border-strong); }
+        .chip.active { background: var(--text); color: var(--bg); border-color: var(--text); }
+        .filter-row select, .filter-row input {
+            font: inherit; font-size: 0.85rem;
+            padding: 0.4rem 0.7rem;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 7px; color: var(--text);
+        }
+
+        table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+        th, td { text-align: left; padding: 0.7rem 0.85rem; font-size: 0.85rem; border-bottom: 1px solid var(--border); }
+        th { background: var(--surface-2); font-weight: 600; color: var(--text-2); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.06em; }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover { background: var(--surface-2); }
+
+        .pill { display: inline-block; font-size: 0.7rem; font-weight: 600; padding: 0.15rem 0.55rem; border-radius: 999px; background: var(--surface-2); color: var(--text-2); }
+        .pill.reading   { background: #e6f0ff; color: #0066ff; }
+        .pill.listening { background: #dcfce7; color: #16a34a; }
+        .pill.writing   { background: #fef3c7; color: #d97706; }
+        .pill.speaking  { background: #f3e8ff; color: #9333ea; }
+        .pill.draft     { background: var(--surface-2); color: var(--text-muted); }
+        .pill.hidden    { background: var(--danger-soft); color: var(--danger); }
+        .band { font-family: 'JetBrains Mono', monospace; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+        .icon-btn {
+            background: none; border: 1px solid transparent;
+            padding: 0.3rem 0.55rem; border-radius: 7px;
+            font: inherit; cursor: pointer; color: var(--text-2);
+            font-size: 0.95rem; line-height: 1;
+        }
+        .icon-btn:hover { background: var(--surface-2); border-color: var(--border); }
+        .icon-btn.danger:hover { color: var(--danger); border-color: var(--danger-soft); background: var(--danger-soft); }
+
+        .empty, .loading { padding: 3rem; text-align: center; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <a class="brand" href="/admin/">
+            <div class="brand-mark">ER</div>
+            <span>EasyRevise · Admin</span>
+        </a>
+        <nav style="display:flex;gap:0.4rem;">
+            <a class="nav-link" href="/admin/">Quizzes</a>
+            <a class="nav-link" href="/admin/ielts.html">IELTS Tests</a>
+            <a class="nav-link active" href="/admin/ielts-submissions.html">Submissions</a>
+            <a class="nav-link" href="/admin/quota.html">Quotas</a>
+        </nav>
+    </div>
+
+    <main class="container">
+        <h1>IELTS · Submissions</h1>
+        <p>
+            Tất cả lượt nộp 3 kỹ năng. Xoá ở đây là <strong>vĩnh viễn</strong> —
+            user mất luôn khỏi lịch sử. Nếu chỉ muốn ẩn cho user, hướng dẫn họ
+            tự bấm ✕ trên trang Kết quả của tôi.
+        </p>
+
+        <div class="filter-row">
+            <span style="font-size:0.7rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Skill</span>
+            <button class="chip active" data-fkey="skill" data-fval="">Tất cả</button>
+            <button class="chip" data-fkey="skill" data-fval="reading">Reading</button>
+            <button class="chip" data-fkey="skill" data-fval="listening">Listening</button>
+            <button class="chip" data-fkey="skill" data-fval="writing">Writing</button>
+            <button class="chip" data-fkey="skill" data-fval="speaking">Speaking</button>
+
+            <span style="margin-left:0.85rem;font-size:0.7rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Status</span>
+            <button class="chip active" data-fkey="status" data-fval="all">Tất cả</button>
+            <button class="chip" data-fkey="status" data-fval="completed">Đã nộp</button>
+            <button class="chip" data-fkey="status" data-fval="draft">Đang làm</button>
+
+            <span style="flex:1;"></span>
+            <input id="search" placeholder="Tìm theo username / test title…" style="min-width:220px;">
+        </div>
+
+        <div id="tableWrap"><div class="loading">Đang tải…</div></div>
+    </main>
+
+    <script>
+        const filters = { skill: '', status: 'all' };
+        let allRows = [];
+        let searchText = '';
+        const ICONS = { reading: '📖', listening: '🎧', writing: '✍️', speaking: '🎤' };
+
+        function getToken() { return localStorage.getItem('easyrevise_token'); }
+        function escapeHtml(s) { return String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+
+        async function api(method, path, body) {
+            const r = await fetch(path, {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: 'Bearer ' + getToken()
+                },
+                body: body ? JSON.stringify(body) : undefined
+            });
+            if (!r.ok) throw new Error(await r.text() || ('HTTP ' + r.status));
+            return r.json();
+        }
+
+        async function load() {
+            const wrap = document.getElementById('tableWrap');
+            wrap.innerHTML = '<div class="loading">Đang tải…</div>';
+            try {
+                const params = new URLSearchParams();
+                if (filters.skill)   params.set('skill', filters.skill);
+                if (filters.status)  params.set('status', filters.status);
+                params.set('limit', '300');
+                allRows = await api('GET', '/api/ielts/admin/submissions?' + params.toString());
+                render();
+            } catch (e) {
+                wrap.innerHTML = `<div class="empty">Lỗi: ${escapeHtml(e.message)}</div>`;
+            }
+        }
+
+        function render() {
+            const wrap = document.getElementById('tableWrap');
+            const q = searchText.trim().toLowerCase();
+            const rows = q
+                ? allRows.filter(r =>
+                    (r.username || '').toLowerCase().includes(q) ||
+                    (r.displayName || '').toLowerCase().includes(q) ||
+                    (r.title || '').toLowerCase().includes(q))
+                : allRows;
+            if (!rows.length) {
+                wrap.innerHTML = '<div class="empty">Không có bài nộp nào.</div>';
+                return;
+            }
+            wrap.innerHTML = `<table>
+                <thead><tr>
+                    <th style="width:120px;">Skill</th>
+                    <th>Test</th>
+                    <th style="width:170px;">User</th>
+                    <th style="width:90px;">Status</th>
+                    <th style="width:80px;">Band/Score</th>
+                    <th style="width:140px;">Submitted</th>
+                    <th style="width:60px;text-align:right;"></th>
+                </tr></thead>
+                <tbody>${rows.map(r => {
+                    const skill = r.testSkill || r.skillKind;
+                    const stat = !r.isComplete ? '<span class="pill draft">Đang làm</span>'
+                              : r.hiddenByUserAt ? '<span class="pill hidden">User ẩn</span>'
+                              : '<span class="pill">Đã nộp</span>';
+                    const score = r.band != null ? Number(r.band).toFixed(1)
+                                : r.score != null ? Number(r.score).toFixed(1)
+                                : '—';
+                    return `<tr data-id="${r.submissionId}" data-kind="${r.skillKind}">
+                        <td><span class="pill ${skill}">${ICONS[skill] || ''} ${skill}</span></td>
+                        <td>${escapeHtml(r.title || '—')}</td>
+                        <td>${escapeHtml(r.displayName || r.username || '—')}<br>
+                            <span style="font-size:0.72rem;color:var(--text-muted);">@${escapeHtml(r.username || '?')}</span></td>
+                        <td>${stat}</td>
+                        <td class="band">${score}</td>
+                        <td style="color:var(--text-2);font-size:0.78rem;">${r.submittedAt ? new Date(r.submittedAt).toLocaleString('vi-VN') : '—'}</td>
+                        <td style="text-align:right;">
+                            <button class="icon-btn danger" data-act="delete" title="Xoá vĩnh viễn (cả user lẫn admin mất)">✕</button>
+                        </td>
+                    </tr>`;
+                }).join('')}</tbody>
+            </table>`;
+            wrap.querySelectorAll('button[data-act=delete]').forEach(b =>
+                b.addEventListener('click', onDelete));
+        }
+
+        async function onDelete(e) {
+            const tr = e.target.closest('tr');
+            const id = tr.dataset.id;
+            const kind = tr.dataset.kind;
+            if (!confirm('Xoá VĨNH VIỄN bài nộp này?\nUser cũng sẽ mất khỏi lịch sử. Không thể hoàn tác.')) return;
+            const path = kind === 'reading'  ? `/api/ielts/admin/submissions/${id}`
+                       : kind === 'writing'  ? `/api/ielts/admin/writing/submissions/${id}`
+                       : kind === 'speaking' ? `/api/ielts/admin/speaking/submissions/${id}`
+                       : null;
+            if (!path) return;
+            try {
+                await api('DELETE', path);
+                allRows = allRows.filter(r => r.submissionId !== id);
+                render();
+            } catch (err) { alert('Lỗi: ' + err.message); }
+        }
+
+        // Filter chips
+        document.querySelectorAll('button.chip').forEach(b => {
+            b.addEventListener('click', () => {
+                const k = b.dataset.fkey, v = b.dataset.fval;
+                filters[k] = v;
+                document.querySelectorAll(`button.chip[data-fkey="${k}"]`).forEach(x => x.classList.remove('active'));
+                b.classList.add('active');
+                load();
+            });
+        });
+        document.getElementById('search').addEventListener('input', e => {
+            searchText = e.target.value; render();
+        });
+
+        load();
+    </script>
+</body>
+</html>
