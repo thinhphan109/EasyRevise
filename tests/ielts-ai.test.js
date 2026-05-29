@@ -27,11 +27,16 @@ function createApp() {
 const request = require('supertest');
 const app = createApp();
 
+const HAS_DB = !!(process.env.SUPABASE_DB_URL_TX || process.env.SUPABASE_DB_URL);
+const describeDb = HAS_DB ? describe : describe.skip;
+
+
 const TEST_USER = `ielts_ai_user_${Date.now()}`;
 let token = null;
 let userId = null;
 
 beforeAll(async () => {
+    if (!HAS_DB) return;
     const res = await request(app)
         .post('/api/auth/register')
         .send({ username: TEST_USER, password: 'testpass123', displayName: 'IELTS AI Tester' });
@@ -41,6 +46,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+    if (!HAS_DB) return;
     try {
         const { query } = require('../lib/repos/_pool');
         await query(`DELETE FROM users WHERE username = $1`, [TEST_USER]);
@@ -48,7 +54,7 @@ afterAll(async () => {
     } catch { /* ignore */ }
 });
 
-describe('IELTS Writing flow', () => {
+describeDb('IELTS Writing flow', () => {
     let testId, submissionId;
 
     test('GET /api/ielts/writing/tests returns list', async () => {
@@ -91,7 +97,7 @@ describe('IELTS Writing flow', () => {
     }, 60_000);
 });
 
-describe('IELTS Speaking flow', () => {
+describeDb('IELTS Speaking flow', () => {
     let testId, submissionId;
 
     test('GET /api/ielts/speaking/tests returns list', async () => {
@@ -119,7 +125,7 @@ describe('IELTS Speaking flow', () => {
     }, 60_000);
 });
 
-describe('Rate limiting', () => {
+describeDb('Rate limiting', () => {
     test('GET /api/ielts/usage returns daily counts', async () => {
         const r = await request(app)
             .get('/api/ielts/usage')
