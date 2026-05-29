@@ -28,6 +28,10 @@ function createApp() {
 const request = require('supertest');
 const app = createApp();
 
+const HAS_DB = !!(process.env.SUPABASE_DB_URL_TX || process.env.SUPABASE_DB_URL);
+const describeDb = HAS_DB ? describe : describe.skip;
+
+
 const TEST_ID = '11111111-1111-1111-1111-111111111101';
 const QID = {
     q1: '11111111-1111-1111-1111-111111111201',
@@ -58,6 +62,7 @@ let token = null;
 let userId = null;
 
 beforeAll(async () => {
+    if (!HAS_DB) return;
     const res = await request(app)
         .post('/api/auth/register')
         .send({ username: TEST_USER, password: 'testpass123', displayName: 'IELTS Tester' });
@@ -67,13 +72,14 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+    if (!HAS_DB) return;
     try {
         const { query } = require('../lib/repos/_pool');
         await query(`DELETE FROM users WHERE username = $1`, [TEST_USER]);
     } catch { /* ignore */ }
 });
 
-describe('IELTS catalog', () => {
+describeDb('IELTS catalog', () => {
     test('GET /api/ielts/tests/:id returns the seeded test', async () => {
         const res = await request(app).get(`/api/ielts/tests/${TEST_ID}`);
         expect(res.status).toBe(200);
@@ -94,7 +100,7 @@ describe('IELTS catalog', () => {
     });
 });
 
-describe('IELTS submission flow', () => {
+describeDb('IELTS submission flow', () => {
     test('POST /tests/:id/start requires auth', async () => {
         const res = await request(app).post(`/api/ielts/tests/${TEST_ID}/start`);
         expect(res.status).toBe(401);
