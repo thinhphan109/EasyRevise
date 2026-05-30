@@ -184,7 +184,9 @@ app.use('/api/admin/ielts', require('./routes/admin-ielts'));
 // SPA fallback
 // ========================
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'index.html')));
-app.get('/admin/*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'index.html')));
+// Express 5 / path-to-regexp v8: bare '*' is no longer valid — must be a
+// named wildcard ('*splat').
+app.get('/admin/*splat', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin', 'index.html')));
 
 // Global error handler
 app.use((err, req, res, next) => {
